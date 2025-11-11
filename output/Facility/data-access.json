@@ -1,0 +1,724 @@
+{
+  "entity": "Facility",
+  "namespace": "Onshore.BusinessLogic",
+  "listClass": "FacilityLocationSearch",
+  "businessObjectClass": "FacilityLocation",
+  "storedProcedures": {
+    "search": {
+      "name": "sp_FacilityLocationSearch",
+      "description": "Searches facilities with filtering and pagination support",
+      "parameters": [
+        {
+          "name": "@Name",
+          "type": "nvarchar(100)",
+          "description": "Facility name filter (partial match)",
+          "nullable": true,
+          "sourceControl": "txtName",
+          "addFetchParameterPattern": "AddFetchParameter(\"Name\", Me.Name)"
+        },
+        {
+          "name": "@ShortName",
+          "type": "nvarchar(50)",
+          "description": "Short name filter (partial match)",
+          "nullable": true,
+          "sourceControl": "txtShortName",
+          "addFetchParameterPattern": "AddFetchParameter(\"ShortName\", Me.ShortName)"
+        },
+        {
+          "name": "@BargeExCode",
+          "type": "nvarchar(20)",
+          "description": "BargeEx code filter (exact match)",
+          "nullable": true,
+          "sourceControl": "txtBargeExCode",
+          "addFetchParameterPattern": "AddFetchParameter(\"BargeExCode\", Me.BargeExCode)"
+        },
+        {
+          "name": "@RiverID",
+          "type": "int",
+          "description": "River ID filter",
+          "nullable": true,
+          "sourceControl": "cboRiver",
+          "addFetchParameterPattern": "AddFetchParameter(\"RiverID\", Me.RiverID)"
+        },
+        {
+          "name": "@FacilityTypeID",
+          "type": "int",
+          "description": "Facility type filter (BargeExLocationType)",
+          "nullable": true,
+          "sourceControl": "cboFacilityType",
+          "addFetchParameterPattern": "AddFetchParameter(\"FacilityTypeID\", Me.FacilityTypeID)"
+        },
+        {
+          "name": "@StartMile",
+          "type": "decimal(10,2)",
+          "description": "Mile range start filter",
+          "nullable": true,
+          "sourceControl": "txtStartMile",
+          "addFetchParameterPattern": "AddFetchParameter(\"StartMile\", Me.StartMile)"
+        },
+        {
+          "name": "@EndMile",
+          "type": "decimal(10,2)",
+          "description": "Mile range end filter",
+          "nullable": true,
+          "sourceControl": "txtEndMile",
+          "addFetchParameterPattern": "AddFetchParameter(\"EndMile\", Me.EndMile)"
+        },
+        {
+          "name": "@ActiveOnly",
+          "type": "bit",
+          "description": "Filter for active facilities only",
+          "nullable": false,
+          "defaultValue": true,
+          "sourceControl": "chkActiveOnly",
+          "addFetchParameterPattern": "AddFetchParameter(\"ActiveOnly\", Me.ActiveOnly)"
+        }
+      ],
+      "resultColumns": [
+        {
+          "name": "LocationID",
+          "type": "int",
+          "description": "Primary key",
+          "readRowPattern": "Me.LocationID = CInt(dr(\"LocationID\"))",
+          "gridColumn": "LocationID",
+          "gridVisible": false,
+          "isPrimaryKey": true
+        },
+        {
+          "name": "Name",
+          "type": "nvarchar(100)",
+          "description": "Facility name",
+          "readRowPattern": "Me.Name = dr(\"Name\").ToString()",
+          "gridColumn": "Name",
+          "gridVisible": true,
+          "gridWidth": "200px",
+          "gridSortable": true
+        },
+        {
+          "name": "ShortName",
+          "type": "nvarchar(50)",
+          "description": "Short name",
+          "readRowPattern": "Me.ShortName = dr(\"ShortName\").ToString()",
+          "gridColumn": "ShortName",
+          "gridVisible": true,
+          "gridWidth": "120px",
+          "gridSortable": true
+        },
+        {
+          "name": "RiverName",
+          "type": "nvarchar(100)",
+          "description": "River name (from lookup)",
+          "readRowPattern": "Me.RiverName = dr(\"RiverName\").ToString()",
+          "gridColumn": "River",
+          "gridVisible": true,
+          "gridWidth": "100px",
+          "gridSortable": true
+        },
+        {
+          "name": "Mile",
+          "type": "decimal(10,2)",
+          "description": "River mile location",
+          "readRowPattern": "Me.Mile = CDec(dr(\"Mile\"))",
+          "gridColumn": "Mile",
+          "gridVisible": true,
+          "gridWidth": "80px",
+          "gridSortable": true,
+          "gridAlign": "right",
+          "formatting": {
+            "type": "decimal",
+            "decimalPlaces": 2
+          }
+        },
+        {
+          "name": "Bank",
+          "type": "nvarchar(20)",
+          "description": "River bank (Left/Right)",
+          "readRowPattern": "Me.Bank = dr(\"Bank\").ToString()",
+          "gridColumn": "Bank",
+          "gridVisible": true,
+          "gridWidth": "80px",
+          "gridSortable": true
+        },
+        {
+          "name": "FacilityTypeName",
+          "type": "nvarchar(100)",
+          "description": "Facility type (from lookup)",
+          "readRowPattern": "Me.FacilityTypeName = dr(\"FacilityTypeName\").ToString()",
+          "gridColumn": "Facility Type",
+          "gridVisible": true,
+          "gridWidth": "150px",
+          "gridSortable": true
+        },
+        {
+          "name": "BargeExCode",
+          "type": "nvarchar(20)",
+          "description": "BargeEx code",
+          "readRowPattern": "Me.BargeExCode = dr(\"BargeExCode\").ToString()",
+          "gridColumn": "BargeEx Code",
+          "gridVisible": true,
+          "gridWidth": "120px",
+          "gridSortable": true
+        },
+        {
+          "name": "IsActive",
+          "type": "bit",
+          "description": "Active status",
+          "readRowPattern": "Me.IsActive = CBool(dr(\"IsActive\"))",
+          "gridColumn": "IsActive",
+          "gridVisible": true,
+          "gridWidth": "80px",
+          "gridSortable": true,
+          "formatting": {
+            "type": "boolean",
+            "displayAs": "checkbox"
+          }
+        }
+      ],
+      "sorting": {
+        "defaultColumn": "Name",
+        "defaultDirection": "ASC",
+        "supportedColumns": ["Name", "ShortName", "RiverName", "Mile", "FacilityTypeName"]
+      }
+    },
+    "getById": {
+      "name": "sp_FacilityLocation_GetByID",
+      "description": "Retrieves complete facility details by LocationID",
+      "parameters": [
+        {
+          "name": "@LocationID",
+          "type": "int",
+          "description": "Primary key",
+          "nullable": false
+        }
+      ],
+      "resultColumns": [
+        {
+          "name": "LocationID",
+          "type": "int",
+          "description": "Primary key",
+          "readRowPattern": "Me.LocationID = CInt(dr(\"LocationID\"))"
+        },
+        {
+          "name": "Name",
+          "type": "nvarchar(100)",
+          "description": "Facility name",
+          "readRowPattern": "Me.Name = dr(\"Name\").ToString()"
+        },
+        {
+          "name": "ShortName",
+          "type": "nvarchar(50)",
+          "description": "Short name",
+          "readRowPattern": "Me.ShortName = dr(\"ShortName\").ToString()"
+        },
+        {
+          "name": "RiverID",
+          "type": "int",
+          "description": "River reference",
+          "readRowPattern": "Me.RiverID = CInt(dr(\"RiverID\"))",
+          "nullable": true
+        },
+        {
+          "name": "Mile",
+          "type": "decimal(10,2)",
+          "description": "River mile",
+          "readRowPattern": "If Not IsDBNull(dr(\"Mile\")) Then Me.Mile = CDec(dr(\"Mile\"))",
+          "nullable": true
+        },
+        {
+          "name": "Bank",
+          "type": "nvarchar(20)",
+          "description": "River bank",
+          "readRowPattern": "Me.Bank = dr(\"Bank\").ToString()",
+          "nullable": true
+        },
+        {
+          "name": "BargeExLocationTypeID",
+          "type": "int",
+          "description": "Facility type",
+          "readRowPattern": "Me.BargeExLocationTypeID = CInt(dr(\"BargeExLocationTypeID\"))",
+          "nullable": true
+        },
+        {
+          "name": "BargeExCode",
+          "type": "nvarchar(20)",
+          "description": "BargeEx code",
+          "readRowPattern": "Me.BargeExCode = dr(\"BargeExCode\").ToString()",
+          "nullable": true
+        },
+        {
+          "name": "LockName",
+          "type": "nvarchar(100)",
+          "description": "Lock name (if type is Lock)",
+          "readRowPattern": "Me.LockName = dr(\"LockName\").ToString()",
+          "nullable": true,
+          "conditionalOn": "BargeExLocationTypeID = LockType"
+        },
+        {
+          "name": "GaugeName",
+          "type": "nvarchar(100)",
+          "description": "Gauge name (if type is Gauge)",
+          "readRowPattern": "Me.GaugeName = dr(\"GaugeName\").ToString()",
+          "nullable": true,
+          "conditionalOn": "BargeExLocationTypeID = GaugeType"
+        },
+        {
+          "name": "NdcName",
+          "type": "nvarchar(100)",
+          "description": "NDC name",
+          "readRowPattern": "Me.NdcName = dr(\"NdcName\").ToString()",
+          "nullable": true
+        },
+        {
+          "name": "NdcAddress",
+          "type": "nvarchar(200)",
+          "description": "NDC address",
+          "readRowPattern": "Me.NdcAddress = dr(\"NdcAddress\").ToString()",
+          "nullable": true
+        },
+        {
+          "name": "NdcCity",
+          "type": "nvarchar(100)",
+          "description": "NDC city",
+          "readRowPattern": "Me.NdcCity = dr(\"NdcCity\").ToString()",
+          "nullable": true
+        },
+        {
+          "name": "NdcState",
+          "type": "nvarchar(2)",
+          "description": "NDC state",
+          "readRowPattern": "Me.NdcState = dr(\"NdcState\").ToString()",
+          "nullable": true
+        },
+        {
+          "name": "NdcZip",
+          "type": "nvarchar(10)",
+          "description": "NDC zip code",
+          "readRowPattern": "Me.NdcZip = dr(\"NdcZip\").ToString()",
+          "nullable": true
+        },
+        {
+          "name": "IsActive",
+          "type": "bit",
+          "description": "Active status",
+          "readRowPattern": "Me.IsActive = CBool(dr(\"IsActive\"))"
+        },
+        {
+          "name": "CreatedBy",
+          "type": "nvarchar(50)",
+          "description": "Created by user",
+          "readRowPattern": "Me.CreatedBy = dr(\"CreatedBy\").ToString()"
+        },
+        {
+          "name": "CreatedDate",
+          "type": "datetime",
+          "description": "Created date",
+          "readRowPattern": "Me.CreatedDate = CDate(dr(\"CreatedDate\"))"
+        },
+        {
+          "name": "ModifiedBy",
+          "type": "nvarchar(50)",
+          "description": "Last modified by user",
+          "readRowPattern": "Me.ModifiedBy = dr(\"ModifiedBy\").ToString()",
+          "nullable": true
+        },
+        {
+          "name": "ModifiedDate",
+          "type": "datetime",
+          "description": "Last modified date",
+          "readRowPattern": "If Not IsDBNull(dr(\"ModifiedDate\")) Then Me.ModifiedDate = CDate(dr(\"ModifiedDate\"))",
+          "nullable": true
+        }
+      ]
+    },
+    "insert": {
+      "name": "sp_FacilityLocation_Insert",
+      "description": "Inserts a new facility record",
+      "parameters": [
+        {
+          "name": "@Name",
+          "type": "nvarchar(100)",
+          "description": "Facility name",
+          "nullable": false,
+          "required": true
+        },
+        {
+          "name": "@ShortName",
+          "type": "nvarchar(50)",
+          "description": "Short name",
+          "nullable": true
+        },
+        {
+          "name": "@RiverID",
+          "type": "int",
+          "description": "River reference",
+          "nullable": true
+        },
+        {
+          "name": "@Mile",
+          "type": "decimal(10,2)",
+          "description": "River mile",
+          "nullable": true
+        },
+        {
+          "name": "@Bank",
+          "type": "nvarchar(20)",
+          "description": "River bank",
+          "nullable": true
+        },
+        {
+          "name": "@BargeExLocationTypeID",
+          "type": "int",
+          "description": "Facility type",
+          "nullable": true
+        },
+        {
+          "name": "@BargeExCode",
+          "type": "nvarchar(20)",
+          "description": "BargeEx code",
+          "nullable": true
+        },
+        {
+          "name": "@LockName",
+          "type": "nvarchar(100)",
+          "description": "Lock name (conditional)",
+          "nullable": true,
+          "conditionalOn": "BargeExLocationTypeID = LockType"
+        },
+        {
+          "name": "@GaugeName",
+          "type": "nvarchar(100)",
+          "description": "Gauge name (conditional)",
+          "nullable": true,
+          "conditionalOn": "BargeExLocationTypeID = GaugeType"
+        },
+        {
+          "name": "@NdcName",
+          "type": "nvarchar(100)",
+          "description": "NDC name",
+          "nullable": true
+        },
+        {
+          "name": "@NdcAddress",
+          "type": "nvarchar(200)",
+          "description": "NDC address",
+          "nullable": true
+        },
+        {
+          "name": "@NdcCity",
+          "type": "nvarchar(100)",
+          "description": "NDC city",
+          "nullable": true
+        },
+        {
+          "name": "@NdcState",
+          "type": "nvarchar(2)",
+          "description": "NDC state",
+          "nullable": true
+        },
+        {
+          "name": "@NdcZip",
+          "type": "nvarchar(10)",
+          "description": "NDC zip",
+          "nullable": true
+        },
+        {
+          "name": "@IsActive",
+          "type": "bit",
+          "description": "Active status",
+          "nullable": false,
+          "defaultValue": true
+        },
+        {
+          "name": "@CreatedBy",
+          "type": "nvarchar(50)",
+          "description": "Created by user",
+          "nullable": false,
+          "required": true
+        }
+      ],
+      "returnValue": {
+        "name": "@LocationID",
+        "type": "int",
+        "description": "New LocationID (identity)"
+      }
+    },
+    "update": {
+      "name": "sp_FacilityLocation_Update",
+      "description": "Updates an existing facility record",
+      "parameters": [
+        {
+          "name": "@LocationID",
+          "type": "int",
+          "description": "Primary key",
+          "nullable": false,
+          "required": true
+        },
+        {
+          "name": "@Name",
+          "type": "nvarchar(100)",
+          "description": "Facility name",
+          "nullable": false,
+          "required": true
+        },
+        {
+          "name": "@ShortName",
+          "type": "nvarchar(50)",
+          "description": "Short name",
+          "nullable": true
+        },
+        {
+          "name": "@RiverID",
+          "type": "int",
+          "description": "River reference",
+          "nullable": true
+        },
+        {
+          "name": "@Mile",
+          "type": "decimal(10,2)",
+          "description": "River mile",
+          "nullable": true
+        },
+        {
+          "name": "@Bank",
+          "type": "nvarchar(20)",
+          "description": "River bank",
+          "nullable": true
+        },
+        {
+          "name": "@BargeExLocationTypeID",
+          "type": "int",
+          "description": "Facility type",
+          "nullable": true
+        },
+        {
+          "name": "@BargeExCode",
+          "type": "nvarchar(20)",
+          "description": "BargeEx code",
+          "nullable": true
+        },
+        {
+          "name": "@LockName",
+          "type": "nvarchar(100)",
+          "description": "Lock name (conditional)",
+          "nullable": true,
+          "conditionalOn": "BargeExLocationTypeID = LockType"
+        },
+        {
+          "name": "@GaugeName",
+          "type": "nvarchar(100)",
+          "description": "Gauge name (conditional)",
+          "nullable": true,
+          "conditionalOn": "BargeExLocationTypeID = GaugeType"
+        },
+        {
+          "name": "@NdcName",
+          "type": "nvarchar(100)",
+          "description": "NDC name",
+          "nullable": true
+        },
+        {
+          "name": "@NdcAddress",
+          "type": "nvarchar(200)",
+          "description": "NDC address",
+          "nullable": true
+        },
+        {
+          "name": "@NdcCity",
+          "type": "nvarchar(100)",
+          "description": "NDC city",
+          "nullable": true
+        },
+        {
+          "name": "@NdcState",
+          "type": "nvarchar(2)",
+          "description": "NDC state",
+          "nullable": true
+        },
+        {
+          "name": "@NdcZip",
+          "type": "nvarchar(10)",
+          "description": "NDC zip",
+          "nullable": true
+        },
+        {
+          "name": "@IsActive",
+          "type": "bit",
+          "description": "Active status",
+          "nullable": false
+        },
+        {
+          "name": "@ModifiedBy",
+          "type": "nvarchar(50)",
+          "description": "Modified by user",
+          "nullable": false,
+          "required": true
+        }
+      ],
+      "returnValue": {
+        "type": "int",
+        "description": "Rows affected (should be 1)"
+      }
+    },
+    "delete": {
+      "name": "sp_FacilityLocation_Delete",
+      "description": "Soft deletes a facility (sets IsActive = 0)",
+      "parameters": [
+        {
+          "name": "@LocationID",
+          "type": "int",
+          "description": "Primary key",
+          "nullable": false,
+          "required": true
+        },
+        {
+          "name": "@ModifiedBy",
+          "type": "nvarchar(50)",
+          "description": "Modified by user",
+          "nullable": false,
+          "required": true
+        }
+      ],
+      "returnValue": {
+        "type": "int",
+        "description": "Rows affected (should be 1)"
+      },
+      "notes": "Soft delete - sets IsActive = 0 instead of physical delete"
+    }
+  },
+  "relatedStoredProcedures": {
+    "facilityStatus": {
+      "getByFacilityId": {
+        "name": "sp_FacilityStatus_GetByFacilityID",
+        "description": "Retrieves status records for a facility",
+        "parameters": [
+          {
+            "name": "@LocationID",
+            "type": "int",
+            "description": "Parent facility ID",
+            "nullable": false
+          }
+        ]
+      },
+      "insert": {
+        "name": "sp_FacilityStatus_Insert",
+        "description": "Adds a status record to a facility"
+      },
+      "update": {
+        "name": "sp_FacilityStatus_Update",
+        "description": "Updates a facility status record"
+      },
+      "delete": {
+        "name": "sp_FacilityStatus_Delete",
+        "description": "Deletes a facility status record"
+      }
+    },
+    "facilityBerth": {
+      "getByFacilityId": {
+        "name": "sp_FacilityBerth_GetByFacilityID",
+        "description": "Retrieves berth records for a facility",
+        "parameters": [
+          {
+            "name": "@LocationID",
+            "type": "int",
+            "description": "Parent facility ID",
+            "nullable": false
+          }
+        ]
+      },
+      "insert": {
+        "name": "sp_FacilityBerth_Insert",
+        "description": "Adds a berth record to a facility"
+      },
+      "update": {
+        "name": "sp_FacilityBerth_Update",
+        "description": "Updates a facility berth record"
+      },
+      "delete": {
+        "name": "sp_FacilityBerth_Delete",
+        "description": "Deletes a facility berth record"
+      }
+    },
+    "lookups": {
+      "getRivers": {
+        "name": "sp_River_GetAll",
+        "description": "Retrieves all rivers for dropdown"
+      },
+      "getFacilityTypes": {
+        "name": "sp_BargeExLocationType_GetAll",
+        "description": "Retrieves all facility types for dropdown"
+      }
+    }
+  },
+  "dataFormatting": {
+    "mile": {
+      "pattern": "String.Format(\"{0:N2}\", Mile)",
+      "description": "Formats mile as decimal with 2 places",
+      "example": "123.45"
+    },
+    "isActive": {
+      "pattern": "If(IsActive, \"Yes\", \"No\")",
+      "description": "Converts boolean to Yes/No display",
+      "example": "Yes"
+    },
+    "dates": {
+      "pattern": "String.Format(\"{0:MM/dd/yyyy}\", CreatedDate)",
+      "description": "Formats dates as MM/DD/YYYY",
+      "example": "01/15/2024"
+    }
+  },
+  "businessRules": {
+    "conditionalFields": [
+      {
+        "field": "LockName",
+        "condition": "BargeExLocationTypeID must equal Lock type ID",
+        "validation": "Must be blank if not a Lock type facility"
+      },
+      {
+        "field": "GaugeName",
+        "condition": "BargeExLocationTypeID must equal Gauge type ID",
+        "validation": "Must be blank if not a Gauge Location type facility"
+      }
+    ],
+    "requiredFields": [
+      {
+        "field": "Name",
+        "description": "Facility name is always required"
+      }
+    ],
+    "validationRules": [
+      {
+        "rule": "EndMile >= StartMile",
+        "description": "End mile must be greater than or equal to start mile in search"
+      },
+      {
+        "rule": "If Mile specified, RiverID required",
+        "description": "River must be selected if mile is specified"
+      }
+    ]
+  },
+  "migrationNotes": {
+    "dapperMapping": {
+      "description": "Use Dapper for all data access",
+      "recommendations": [
+        "Create FacilityRepository with async methods",
+        "Use DynamicParameters for stored procedure parameters",
+        "Map result sets to DTOs using column names",
+        "Handle nullable fields with proper C# nullable types"
+      ]
+    },
+    "parameterMapping": {
+      "vbPattern": "AddFetchParameter(\"Name\", Me.Name)",
+      "csharpPattern": "parameters.Add(\"@Name\", searchCriteria.Name, DbType.String)"
+    },
+    "resultMapping": {
+      "vbPattern": "Me.LocationID = CInt(dr(\"LocationID\"))",
+      "csharpPattern": "LocationID = reader.GetInt32(reader.GetOrdinal(\"LocationID\"))",
+      "dapperPattern": "Auto-mapped via Dapper to DTO properties"
+    },
+    "nullHandling": {
+      "vbPattern": "If Not IsDBNull(dr(\"Mile\")) Then Me.Mile = CDec(dr(\"Mile\"))",
+      "csharpPattern": "Mile = reader.IsDBNull(reader.GetOrdinal(\"Mile\")) ? null : reader.GetDecimal(reader.GetOrdinal(\"Mile\"))",
+      "dapperPattern": "Use nullable types in DTO (decimal? Mile)"
+    }
+  }
+}

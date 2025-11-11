@@ -1,0 +1,998 @@
+{
+  "entity": "Facility",
+  "module": "FacilityLocation",
+  "description": "UI component mapping from legacy Infragistics controls to modern Bootstrap/DataTables/Select2",
+  "legacyForms": ["frmFacilitySearch", "frmFacilityDetail"],
+  "targetFramework": {
+    "api": "BargeOps.Admin.API",
+    "ui": "BargeOps.Admin.UI",
+    "referencePattern": "BargeOps.Crewing.UI"
+  },
+  "controlMappings": {
+    "grids": {
+      "legacy": "UltraGrid",
+      "modern": "DataTables",
+      "instances": [
+        {
+          "legacyControl": "grdResults",
+          "form": "frmFacilitySearch",
+          "modernImplementation": {
+            "technology": "DataTables with server-side processing",
+            "features": [
+              "Server-side pagination",
+              "Server-side sorting",
+              "Server-side filtering",
+              "Responsive design",
+              "Column visibility toggle",
+              "Export to Excel (optional)"
+            ],
+            "endpoint": {
+              "controller": "FacilitySearchController",
+              "action": "FacilityTable",
+              "method": "POST",
+              "route": "/FacilitySearch/FacilityTable",
+              "requestType": "DataTableRequest + FacilitySearchViewModel",
+              "responseType": "DataTableResponse<FacilityListDto>"
+            },
+            "columns": [
+              {
+                "legacyColumn": "LocationID",
+                "data": "locationId",
+                "title": "Location ID",
+                "visible": false,
+                "orderable": false,
+                "primaryKey": true
+              },
+              {
+                "legacyColumn": "Name",
+                "data": "name",
+                "title": "Name",
+                "width": "200px",
+                "orderable": true,
+                "className": "text-start"
+              },
+              {
+                "legacyColumn": "ShortName",
+                "data": "shortName",
+                "title": "Short Name",
+                "width": "120px",
+                "orderable": true,
+                "className": "text-start"
+              },
+              {
+                "legacyColumn": "RiverName",
+                "data": "riverName",
+                "title": "River",
+                "width": "100px",
+                "orderable": true,
+                "className": "text-start"
+              },
+              {
+                "legacyColumn": "Mile",
+                "data": "mile",
+                "title": "Mile",
+                "width": "80px",
+                "orderable": true,
+                "className": "text-end",
+                "render": "function(data) { return data ? parseFloat(data).toFixed(2) : ''; }"
+              },
+              {
+                "legacyColumn": "Bank",
+                "data": "bank",
+                "title": "Bank",
+                "width": "80px",
+                "orderable": true,
+                "className": "text-center"
+              },
+              {
+                "legacyColumn": "FacilityType",
+                "data": "facilityType",
+                "title": "Facility Type",
+                "width": "150px",
+                "orderable": true,
+                "className": "text-start"
+              },
+              {
+                "legacyColumn": "BargeExCode",
+                "data": "bargeExCode",
+                "title": "BargeEx Code",
+                "width": "120px",
+                "orderable": true,
+                "className": "text-start"
+              },
+              {
+                "legacyColumn": "IsActive",
+                "data": "isActive",
+                "title": "Active",
+                "width": "80px",
+                "orderable": true,
+                "className": "text-center",
+                "render": "function(data) { return data ? '<i class=\"bi bi-check-circle-fill text-success\"></i>' : '<i class=\"bi bi-x-circle-fill text-danger\"></i>'; }"
+              },
+              {
+                "data": null,
+                "title": "Actions",
+                "width": "120px",
+                "orderable": false,
+                "className": "text-center",
+                "render": "function(data, type, row) { return '<button class=\"btn btn-sm btn-primary me-1\" onclick=\"editFacility(' + row.locationId + ')\"><i class=\"bi bi-pencil\"></i></button><button class=\"btn btn-sm btn-danger\" onclick=\"deleteFacility(' + row.locationId + ')\"><i class=\"bi bi-trash\"></i></button>'; }"
+              }
+            ],
+            "initializationOptions": {
+              "processing": true,
+              "serverSide": true,
+              "ajax": {
+                "url": "/FacilitySearch/FacilityTable",
+                "type": "POST",
+                "dataType": "json"
+              },
+              "pageLength": 25,
+              "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+              "order": [[1, "asc"]],
+              "responsive": true,
+              "dom": "Bfrtip",
+              "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+            },
+            "jsFile": "wwwroot/js/facilitySearch.js",
+            "dependsOn": ["jQuery", "DataTables", "DataTables.Bootstrap5"]
+          }
+        },
+        {
+          "legacyControl": "grdStatus",
+          "form": "frmFacilityDetail",
+          "tab": "Status",
+          "modernImplementation": {
+            "technology": "DataTables with inline editing",
+            "features": [
+              "Client-side operations (small dataset)",
+              "Inline row editing",
+              "Add/Edit/Delete buttons",
+              "Date picker integration",
+              "Dropdown editor for StatusType"
+            ],
+            "endpoint": null,
+            "dataBinding": "Loaded with parent entity via FacilityLocation.FacilityStatuses",
+            "columns": [
+              {
+                "legacyColumn": "FacilityStatusID",
+                "data": "facilityStatusId",
+                "title": "Status ID",
+                "visible": false,
+                "primaryKey": true
+              },
+              {
+                "legacyColumn": "StatusDate",
+                "data": "statusDate",
+                "title": "Status Date",
+                "width": "120px",
+                "className": "text-center",
+                "render": "function(data) { return moment(data).format('MM/DD/YYYY'); }",
+                "editor": "datepicker"
+              },
+              {
+                "legacyColumn": "StatusType",
+                "data": "statusType",
+                "title": "Status Type",
+                "width": "150px",
+                "editor": "select2"
+              },
+              {
+                "legacyColumn": "StatusDescription",
+                "data": "statusDescription",
+                "title": "Description",
+                "width": "300px",
+                "editor": "text"
+              },
+              {
+                "legacyColumn": "CreatedBy",
+                "data": "createdBy",
+                "title": "Created By",
+                "width": "100px",
+                "readOnly": true
+              },
+              {
+                "legacyColumn": "CreatedDate",
+                "data": "createdDate",
+                "title": "Created Date",
+                "width": "120px",
+                "className": "text-center",
+                "render": "function(data) { return moment(data).format('MM/DD/YYYY'); }",
+                "readOnly": true
+              }
+            ],
+            "toolbar": {
+              "buttons": [
+                {
+                  "text": "Add Status",
+                  "className": "btn btn-success btn-sm",
+                  "icon": "bi bi-plus-circle",
+                  "action": "openStatusModal(null)"
+                },
+                {
+                  "text": "Edit Status",
+                  "className": "btn btn-primary btn-sm",
+                  "icon": "bi bi-pencil",
+                  "action": "openStatusModal(selectedRow)",
+                  "requiresSelection": true
+                },
+                {
+                  "text": "Delete Status",
+                  "className": "btn btn-danger btn-sm",
+                  "icon": "bi bi-trash",
+                  "action": "deleteStatus(selectedRow)",
+                  "requiresSelection": true,
+                  "confirmationRequired": true
+                }
+              ]
+            },
+            "modalDialog": {
+              "id": "statusModal",
+              "title": "Add/Edit Status",
+              "fields": ["StatusDate", "StatusType", "StatusDescription"],
+              "saveAction": "saveStatus()"
+            }
+          }
+        },
+        {
+          "legacyControl": "grdBerths",
+          "form": "frmFacilityDetail",
+          "tab": "Berths",
+          "modernImplementation": {
+            "technology": "DataTables with inline editing",
+            "features": [
+              "Client-side operations (small dataset)",
+              "Inline row editing",
+              "Add/Edit/Delete buttons",
+              "Numeric input validation",
+              "Checkbox rendering for IsActive"
+            ],
+            "endpoint": null,
+            "dataBinding": "Loaded with parent entity via FacilityLocation.FacilityBerths",
+            "columns": [
+              {
+                "legacyColumn": "FacilityBerthID",
+                "data": "facilityBerthId",
+                "title": "Berth ID",
+                "visible": false,
+                "primaryKey": true
+              },
+              {
+                "legacyColumn": "BerthName",
+                "data": "berthName",
+                "title": "Berth Name",
+                "width": "200px",
+                "editor": "text",
+                "required": true
+              },
+              {
+                "legacyColumn": "BerthNumber",
+                "data": "berthNumber",
+                "title": "Berth Number",
+                "width": "100px",
+                "editor": "text"
+              },
+              {
+                "legacyColumn": "Capacity",
+                "data": "capacity",
+                "title": "Capacity",
+                "width": "100px",
+                "className": "text-end",
+                "editor": "number"
+              },
+              {
+                "legacyColumn": "Length",
+                "data": "length",
+                "title": "Length (ft)",
+                "width": "100px",
+                "className": "text-end",
+                "render": "function(data) { return data ? parseFloat(data).toFixed(2) : ''; }",
+                "editor": "decimal"
+              },
+              {
+                "legacyColumn": "IsActive",
+                "data": "isActive",
+                "title": "Active",
+                "width": "80px",
+                "className": "text-center",
+                "render": "function(data) { return '<input type=\"checkbox\" ' + (data ? 'checked' : '') + ' disabled />'; }",
+                "editor": "checkbox"
+              },
+              {
+                "legacyColumn": "Notes",
+                "data": "notes",
+                "title": "Notes",
+                "width": "250px",
+                "editor": "textarea"
+              }
+            ],
+            "toolbar": {
+              "buttons": [
+                {
+                  "text": "Add Berth",
+                  "className": "btn btn-success btn-sm",
+                  "icon": "bi bi-plus-circle",
+                  "action": "openBerthModal(null)"
+                },
+                {
+                  "text": "Edit Berth",
+                  "className": "btn btn-primary btn-sm",
+                  "icon": "bi bi-pencil",
+                  "action": "openBerthModal(selectedRow)",
+                  "requiresSelection": true
+                },
+                {
+                  "text": "Delete Berth",
+                  "className": "btn btn-danger btn-sm",
+                  "icon": "bi bi-trash",
+                  "action": "deleteBerth(selectedRow)",
+                  "requiresSelection": true,
+                  "confirmationRequired": true
+                }
+              ]
+            },
+            "modalDialog": {
+              "id": "berthModal",
+              "title": "Add/Edit Berth",
+              "fields": ["BerthName", "BerthNumber", "Capacity", "Length", "IsActive", "Notes"],
+              "saveAction": "saveBerth()"
+            }
+          }
+        }
+      ]
+    },
+    "dropdowns": {
+      "legacy": "UltraCombo",
+      "modern": "Select2",
+      "instances": [
+        {
+          "legacyControl": "cboRiver",
+          "form": "frmFacilityDetail",
+          "label": "River",
+          "modernImplementation": {
+            "technology": "Select2 dropdown",
+            "features": [
+              "Searchable dropdown",
+              "AJAX data loading",
+              "Placeholder support",
+              "Clear button",
+              "Null value support"
+            ],
+            "endpoint": {
+              "controller": "FacilityController",
+              "action": "GetRivers",
+              "method": "GET",
+              "route": "/api/Facility/rivers",
+              "responseType": "IEnumerable<SelectListItem>"
+            },
+            "initialization": {
+              "selector": "#RiverId",
+              "options": {
+                "placeholder": "Select a river...",
+                "allowClear": true,
+                "ajax": {
+                  "url": "/api/Facility/rivers",
+                  "dataType": "json",
+                  "delay": 250,
+                  "processResults": "function(data) { return { results: data.map(x => ({ id: x.value, text: x.text })) }; }"
+                },
+                "minimumInputLength": 0,
+                "theme": "bootstrap-5"
+              }
+            },
+            "htmlElement": "<select id=\"RiverId\" name=\"RiverId\" class=\"form-select select2\"></select>",
+            "validation": {
+              "required": false,
+              "conditionalRequired": "Required when Mile is specified"
+            }
+          }
+        },
+        {
+          "legacyControl": "cboBank",
+          "form": "frmFacilityDetail",
+          "label": "Bank",
+          "modernImplementation": {
+            "technology": "Select2 dropdown (static data)",
+            "features": [
+              "Searchable dropdown",
+              "Static data source",
+              "Placeholder support",
+              "Clear button"
+            ],
+            "dataSource": "Static",
+            "options": [
+              {"value": "L", "text": "Left"},
+              {"value": "R", "text": "Right"},
+              {"value": "B", "text": "Both"}
+            ],
+            "initialization": {
+              "selector": "#Bank",
+              "options": {
+                "placeholder": "Select a bank...",
+                "allowClear": true,
+                "theme": "bootstrap-5",
+                "data": "[{id: 'L', text: 'Left'}, {id: 'R', text: 'Right'}, {id: 'B', text: 'Both'}]"
+              }
+            },
+            "htmlElement": "<select id=\"Bank\" name=\"Bank\" class=\"form-select select2\"><option value=\"\">Select a bank...</option><option value=\"L\">Left</option><option value=\"R\">Right</option><option value=\"B\">Both</option></select>"
+          }
+        },
+        {
+          "legacyControl": "cboFacilityType",
+          "form": "frmFacilityDetail",
+          "label": "Facility Type",
+          "modernImplementation": {
+            "technology": "Select2 dropdown",
+            "features": [
+              "Searchable dropdown",
+              "AJAX data loading",
+              "Change event triggers conditional display",
+              "Required field"
+            ],
+            "endpoint": {
+              "controller": "FacilityController",
+              "action": "GetFacilityTypes",
+              "method": "GET",
+              "route": "/api/Facility/facility-types",
+              "responseType": "IEnumerable<SelectListItem>"
+            },
+            "initialization": {
+              "selector": "#BargeExLocationType",
+              "options": {
+                "placeholder": "Select facility type...",
+                "allowClear": false,
+                "ajax": {
+                  "url": "/api/Facility/facility-types",
+                  "dataType": "json",
+                  "delay": 250,
+                  "processResults": "function(data) { return { results: data.map(x => ({ id: x.value, text: x.text })) }; }"
+                },
+                "minimumInputLength": 0,
+                "theme": "bootstrap-5"
+              }
+            },
+            "htmlElement": "<select id=\"BargeExLocationType\" name=\"BargeExLocationType\" class=\"form-select select2\" required></select>",
+            "eventHandlers": {
+              "change": "onFacilityTypeChange()",
+              "description": "Show/hide Lock and Gauge fields based on selection"
+            },
+            "validation": {
+              "required": true,
+              "message": "Facility Type is required"
+            }
+          }
+        },
+        {
+          "legacyControl": "cboRiver",
+          "form": "frmFacilitySearch",
+          "label": "River",
+          "modernImplementation": {
+            "technology": "Select2 dropdown",
+            "features": [
+              "Searchable dropdown",
+              "AJAX data loading",
+              "Placeholder support",
+              "Clear button",
+              "Search criteria"
+            ],
+            "endpoint": {
+              "controller": "FacilityController",
+              "action": "GetRivers",
+              "method": "GET",
+              "route": "/api/Facility/rivers",
+              "responseType": "IEnumerable<SelectListItem>"
+            },
+            "initialization": {
+              "selector": "#SearchRiverId",
+              "options": {
+                "placeholder": "All Rivers",
+                "allowClear": true,
+                "ajax": {
+                  "url": "/api/Facility/rivers",
+                  "dataType": "json",
+                  "delay": 250,
+                  "processResults": "function(data) { return { results: data.map(x => ({ id: x.value, text: x.text })) }; }"
+                },
+                "minimumInputLength": 0,
+                "theme": "bootstrap-5"
+              }
+            },
+            "htmlElement": "<select id=\"SearchRiverId\" name=\"RiverId\" class=\"form-select select2\"></select>"
+          }
+        },
+        {
+          "legacyControl": "cboFacilityType",
+          "form": "frmFacilitySearch",
+          "label": "Facility Type",
+          "modernImplementation": {
+            "technology": "Select2 dropdown",
+            "features": [
+              "Searchable dropdown",
+              "AJAX data loading",
+              "Placeholder support",
+              "Clear button",
+              "Search criteria"
+            ],
+            "endpoint": {
+              "controller": "FacilityController",
+              "action": "GetFacilityTypes",
+              "method": "GET",
+              "route": "/api/Facility/facility-types",
+              "responseType": "IEnumerable<SelectListItem>"
+            },
+            "initialization": {
+              "selector": "#SearchFacilityType",
+              "options": {
+                "placeholder": "All Facility Types",
+                "allowClear": true,
+                "ajax": {
+                  "url": "/api/Facility/facility-types",
+                  "dataType": "json",
+                  "delay": 250,
+                  "processResults": "function(data) { return { results: data.map(x => ({ id: x.value, text: x.text })) }; }"
+                },
+                "minimumInputLength": 0,
+                "theme": "bootstrap-5"
+              }
+            },
+            "htmlElement": "<select id=\"SearchFacilityType\" name=\"BargeExLocationTypeId\" class=\"form-select select2\"></select>"
+          }
+        }
+      ]
+    },
+    "panels": {
+      "legacy": "UltraPanel",
+      "modern": "Bootstrap Card",
+      "instances": [
+        {
+          "legacyControl": "pnlDetails",
+          "form": "frmFacilityDetail",
+          "tab": "Details",
+          "modernImplementation": {
+            "technology": "Bootstrap Card",
+            "features": [
+              "Card header with title",
+              "Card body with form fields",
+              "Responsive layout",
+              "Form validation styling"
+            ],
+            "htmlStructure": "<div class=\"card mb-3\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">Facility Details</h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- Form fields go here -->\n  </div>\n</div>",
+            "cssClasses": ["card", "mb-3"],
+            "contains": [
+              "txtName",
+              "txtShortName",
+              "cboRiver",
+              "txtMile",
+              "cboBank",
+              "cboFacilityType",
+              "txtBargeExCode",
+              "chkIsActive"
+            ]
+          }
+        },
+        {
+          "legacyControl": "pnlLockGauge",
+          "form": "frmFacilityDetail",
+          "tab": "Details",
+          "modernImplementation": {
+            "technology": "Bootstrap Card with conditional display",
+            "features": [
+              "Card header with title",
+              "Card body with form fields",
+              "JavaScript show/hide based on facility type",
+              "Responsive layout"
+            ],
+            "htmlStructure": "<div id=\"lockGaugePanel\" class=\"card mb-3\" style=\"display: none;\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">Lock/Gauge Information</h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- Lock/Gauge fields go here -->\n  </div>\n</div>",
+            "cssClasses": ["card", "mb-3"],
+            "conditionalDisplay": {
+              "trigger": "cboFacilityType change event",
+              "condition": "FacilityType == 'Lock' OR 'Gauge Location'",
+              "jsFunction": "function toggleLockGaugePanel() { var selectedType = $('#BargeExLocationType').val(); $('#lockGaugePanel').toggle(selectedType === 'Lock' || selectedType === 'Gauge Location'); }"
+            },
+            "contains": [
+              "txtLockName",
+              "txtLockNumber",
+              "txtGaugeName"
+            ]
+          }
+        },
+        {
+          "legacyControl": "pnlStatus",
+          "form": "frmFacilityDetail",
+          "tab": "Status",
+          "modernImplementation": {
+            "technology": "Bootstrap Card with DataTable",
+            "features": [
+              "Card header with title and toolbar",
+              "Card body with grid",
+              "Toolbar buttons in header",
+              "Responsive layout"
+            ],
+            "htmlStructure": "<div class=\"card mb-3\">\n  <div class=\"card-header d-flex justify-content-between align-items-center\">\n    <h5 class=\"card-title mb-0\">Facility Status History</h5>\n    <div id=\"statusToolbar\">\n      <!-- Toolbar buttons go here -->\n    </div>\n  </div>\n  <div class=\"card-body\">\n    <table id=\"grdStatus\" class=\"table table-striped table-bordered\"></table>\n  </div>\n</div>",
+            "cssClasses": ["card", "mb-3"],
+            "contains": ["grdStatus"]
+          }
+        },
+        {
+          "legacyControl": "pnlBerths",
+          "form": "frmFacilityDetail",
+          "tab": "Berths",
+          "modernImplementation": {
+            "technology": "Bootstrap Card with DataTable",
+            "features": [
+              "Card header with title and toolbar",
+              "Card body with grid",
+              "Toolbar buttons in header",
+              "Responsive layout"
+            ],
+            "htmlStructure": "<div class=\"card mb-3\">\n  <div class=\"card-header d-flex justify-content-between align-items-center\">\n    <h5 class=\"card-title mb-0\">Facility Berths</h5>\n    <div id=\"berthToolbar\">\n      <!-- Toolbar buttons go here -->\n    </div>\n  </div>\n  <div class=\"card-body\">\n    <table id=\"grdBerths\" class=\"table table-striped table-bordered\"></table>\n  </div>\n</div>",
+            "cssClasses": ["card", "mb-3"],
+            "contains": ["grdBerths"]
+          }
+        },
+        {
+          "legacyControl": "pnlNDC",
+          "form": "frmFacilityDetail",
+          "tab": "NDC Data",
+          "modernImplementation": {
+            "technology": "Bootstrap Card",
+            "features": [
+              "Card header with title",
+              "Card body with form fields",
+              "Responsive layout",
+              "Form validation styling"
+            ],
+            "htmlStructure": "<div class=\"card mb-3\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">NDC Data</h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- NDC fields go here -->\n  </div>\n</div>",
+            "cssClasses": ["card", "mb-3"],
+            "contains": [
+              "txtNdcName",
+              "txtNdcAddress",
+              "txtNdcCity",
+              "txtNdcState",
+              "txtNdcZip"
+            ]
+          }
+        },
+        {
+          "legacyControl": "pnlSearchCriteria",
+          "form": "frmFacilitySearch",
+          "modernImplementation": {
+            "technology": "Bootstrap Collapsible Card",
+            "features": [
+              "Collapsible panel",
+              "Card header with toggle button",
+              "Card body with search fields",
+              "Responsive layout",
+              "Initially expanded"
+            ],
+            "htmlStructure": "<div class=\"card mb-3\">\n  <div class=\"card-header\" id=\"searchCriteriaHeader\">\n    <h5 class=\"mb-0\">\n      <button class=\"btn btn-link\" data-bs-toggle=\"collapse\" data-bs-target=\"#searchCriteriaBody\" aria-expanded=\"true\">\n        <i class=\"bi bi-search\"></i> Search Criteria\n      </button>\n    </h5>\n  </div>\n  <div id=\"searchCriteriaBody\" class=\"collapse show\">\n    <div class=\"card-body\">\n      <!-- Search fields go here -->\n    </div>\n  </div>\n</div>",
+            "cssClasses": ["card", "mb-3"],
+            "contains": [
+              "txtName",
+              "txtShortName",
+              "txtBargeExCode",
+              "cboRiver",
+              "cboFacilityType",
+              "numStartMile",
+              "numEndMile",
+              "chkActiveOnly",
+              "btnSearch",
+              "btnClear"
+            ]
+          }
+        },
+        {
+          "legacyControl": "pnlResults",
+          "form": "frmFacilitySearch",
+          "modernImplementation": {
+            "technology": "Bootstrap Card with DataTable",
+            "features": [
+              "Card header with result count",
+              "Card body with results grid",
+              "Responsive layout"
+            ],
+            "htmlStructure": "<div class=\"card mb-3\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">Search Results <span id=\"resultCount\" class=\"badge bg-primary\"></span></h5>\n  </div>\n  <div class=\"card-body\">\n    <table id=\"grdResults\" class=\"table table-striped table-bordered\"></table>\n  </div>\n</div>",
+            "cssClasses": ["card", "mb-3"],
+            "contains": ["grdResults"]
+          }
+        },
+        {
+          "legacyControl": "pnlActions",
+          "form": "frmFacilitySearch",
+          "modernImplementation": {
+            "technology": "Bootstrap Button Group",
+            "features": [
+              "Button toolbar",
+              "Responsive layout",
+              "Permission-based visibility"
+            ],
+            "htmlStructure": "<div class=\"d-flex justify-content-end gap-2 mb-3\">\n  <button id=\"btnNew\" class=\"btn btn-success\"><i class=\"bi bi-plus-circle\"></i> New</button>\n  <button id=\"btnEdit\" class=\"btn btn-primary\" disabled><i class=\"bi bi-pencil\"></i> Edit</button>\n  <button id=\"btnDelete\" class=\"btn btn-danger\" disabled><i class=\"bi bi-trash\"></i> Delete</button>\n</div>",
+            "cssClasses": ["d-flex", "justify-content-end", "gap-2", "mb-3"],
+            "contains": ["btnNew", "btnEdit", "btnDelete"]
+          }
+        }
+      ]
+    },
+    "tabs": {
+      "legacy": "UltraTabControl",
+      "modern": "Bootstrap Nav Tabs",
+      "instances": [
+        {
+          "legacyControl": "tabControl",
+          "form": "frmFacilityDetail",
+          "modernImplementation": {
+            "technology": "Bootstrap Nav Tabs",
+            "features": [
+              "Tab navigation",
+              "Tab content areas",
+              "Active tab state",
+              "URL hash support for deep linking",
+              "Responsive on mobile (stacked)"
+            ],
+            "htmlStructure": "<ul class=\"nav nav-tabs\" id=\"facilityTabs\" role=\"tablist\">\n  <li class=\"nav-item\" role=\"presentation\">\n    <button class=\"nav-link active\" id=\"details-tab\" data-bs-toggle=\"tab\" data-bs-target=\"#details\" type=\"button\" role=\"tab\">Details</button>\n  </li>\n  <li class=\"nav-item\" role=\"presentation\">\n    <button class=\"nav-link\" id=\"status-tab\" data-bs-toggle=\"tab\" data-bs-target=\"#status\" type=\"button\" role=\"tab\">Status</button>\n  </li>\n  <li class=\"nav-item\" role=\"presentation\">\n    <button class=\"nav-link\" id=\"berths-tab\" data-bs-toggle=\"tab\" data-bs-target=\"#berths\" type=\"button\" role=\"tab\">Berths</button>\n  </li>\n  <li class=\"nav-item\" role=\"presentation\">\n    <button class=\"nav-link\" id=\"ndc-tab\" data-bs-toggle=\"tab\" data-bs-target=\"#ndc\" type=\"button\" role=\"tab\">NDC Data</button>\n  </li>\n</ul>\n<div class=\"tab-content\" id=\"facilityTabContent\">\n  <div class=\"tab-pane fade show active\" id=\"details\" role=\"tabpanel\">...</div>\n  <div class=\"tab-pane fade\" id=\"status\" role=\"tabpanel\">...</div>\n  <div class=\"tab-pane fade\" id=\"berths\" role=\"tabpanel\">...</div>\n  <div class=\"tab-pane fade\" id=\"ndc\" role=\"tabpanel\">...</div>\n</div>",
+            "cssClasses": ["nav", "nav-tabs"],
+            "tabs": [
+              {
+                "legacyTab": "tabDetails",
+                "id": "details",
+                "label": "Details",
+                "order": 1,
+                "active": true,
+                "panels": ["pnlDetails", "pnlLockGauge"]
+              },
+              {
+                "legacyTab": "tabStatus",
+                "id": "status",
+                "label": "Status",
+                "order": 2,
+                "active": false,
+                "panels": ["pnlStatus"],
+                "requiresParentSaved": true,
+                "disabledCondition": "LocationId === 0"
+              },
+              {
+                "legacyTab": "tabBerths",
+                "id": "berths",
+                "label": "Berths",
+                "order": 3,
+                "active": false,
+                "panels": ["pnlBerths"],
+                "requiresParentSaved": true,
+                "disabledCondition": "LocationId === 0"
+              },
+              {
+                "legacyTab": "tabNDC",
+                "id": "ndc",
+                "label": "NDC Data",
+                "order": 4,
+                "active": false,
+                "panels": ["pnlNDC"]
+              }
+            ],
+            "jsFile": "wwwroot/js/facilityDetail.js",
+            "initialization": {
+              "code": "var triggerTabList = [].slice.call(document.querySelectorAll('#facilityTabs button'));\ntriggerTabList.forEach(function(triggerEl) {\n  var tabTrigger = new bootstrap.Tab(triggerEl);\n  triggerEl.addEventListener('click', function(event) {\n    event.preventDefault();\n    tabTrigger.show();\n  });\n});"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "otherControls": {
+    "textEditors": {
+      "legacy": "UltraTextEditor",
+      "modern": "Bootstrap Form Control (input text)",
+      "htmlPattern": "<input type=\"text\" class=\"form-control\" id=\"{controlId}\" name=\"{fieldName}\" />",
+      "validation": "HTML5 validation + jQuery Validation",
+      "examples": [
+        {
+          "legacyControl": "txtName",
+          "modernHtml": "<input type=\"text\" class=\"form-control\" id=\"Name\" name=\"Name\" required maxlength=\"100\" />"
+        }
+      ]
+    },
+    "numericEditors": {
+      "legacy": "UltraNumericEditor",
+      "modern": "Bootstrap Form Control (input number)",
+      "htmlPattern": "<input type=\"number\" class=\"form-control\" id=\"{controlId}\" name=\"{fieldName}\" step=\"{step}\" />",
+      "validation": "HTML5 validation + jQuery Validation",
+      "examples": [
+        {
+          "legacyControl": "txtMile",
+          "modernHtml": "<input type=\"number\" class=\"form-control\" id=\"Mile\" name=\"Mile\" step=\"0.01\" />"
+        }
+      ]
+    },
+    "checkEditors": {
+      "legacy": "UltraCheckEditor",
+      "modern": "Bootstrap Form Check",
+      "htmlPattern": "<div class=\"form-check\">\n  <input type=\"checkbox\" class=\"form-check-input\" id=\"{controlId}\" name=\"{fieldName}\" />\n  <label class=\"form-check-label\" for=\"{controlId}\">{label}</label>\n</div>",
+      "examples": [
+        {
+          "legacyControl": "chkIsActive",
+          "modernHtml": "<div class=\"form-check\">\n  <input type=\"checkbox\" class=\"form-check-input\" id=\"IsActive\" name=\"IsActive\" checked />\n  <label class=\"form-check-label\" for=\"IsActive\">Is Active</label>\n</div>"
+        }
+      ]
+    },
+    "buttons": {
+      "legacy": "UltraButton",
+      "modern": "Bootstrap Button",
+      "htmlPattern": "<button type=\"{type}\" class=\"btn btn-{color}\" id=\"{controlId}\">{text}</button>",
+      "examples": [
+        {
+          "legacyControl": "btnSave",
+          "modernHtml": "<button type=\"submit\" class=\"btn btn-primary\" id=\"btnSave\"><i class=\"bi bi-save\"></i> Save</button>"
+        },
+        {
+          "legacyControl": "btnCancel",
+          "modernHtml": "<button type=\"button\" class=\"btn btn-secondary\" id=\"btnCancel\"><i class=\"bi bi-x-circle\"></i> Cancel</button>"
+        },
+        {
+          "legacyControl": "btnDelete",
+          "modernHtml": "<button type=\"button\" class=\"btn btn-danger\" id=\"btnDelete\"><i class=\"bi bi-trash\"></i> Delete</button>"
+        }
+      ]
+    }
+  },
+  "dependencyManagement": {
+    "npm": {
+      "packages": [
+        "jquery@^3.6.0",
+        "bootstrap@^5.3.0",
+        "datatables.net@^1.13.0",
+        "datatables.net-bs5@^1.13.0",
+        "datatables.net-buttons@^2.3.0",
+        "datatables.net-buttons-bs5@^2.3.0",
+        "select2@^4.1.0",
+        "select2-bootstrap-5-theme@^1.3.0",
+        "moment@^2.29.0",
+        "bootstrap-icons@^1.10.0"
+      ]
+    },
+    "cdn": {
+      "alternatives": [
+        {
+          "library": "DataTables",
+          "css": "https://cdn.datatables.net/1.13.0/css/dataTables.bootstrap5.min.css",
+          "js": "https://cdn.datatables.net/1.13.0/js/jquery.dataTables.min.js"
+        },
+        {
+          "library": "Select2",
+          "css": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css",
+          "js": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"
+        },
+        {
+          "library": "Bootstrap Icons",
+          "css": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+        }
+      ]
+    }
+  },
+  "layoutStructure": {
+    "searchPage": {
+      "controller": "FacilitySearchController",
+      "action": "Index",
+      "view": "Views/FacilitySearch/Index.cshtml",
+      "layout": "~/Views/Shared/_Layout.cshtml",
+      "sections": [
+        {
+          "name": "SearchCriteria",
+          "component": "Bootstrap Collapsible Card",
+          "contains": "Search form fields"
+        },
+        {
+          "name": "ActionButtons",
+          "component": "Button Group",
+          "contains": "New, Edit, Delete buttons"
+        },
+        {
+          "name": "Results",
+          "component": "Bootstrap Card + DataTable",
+          "contains": "Search results grid"
+        }
+      ]
+    },
+    "detailPage": {
+      "controller": "FacilitySearchController",
+      "action": "Edit",
+      "view": "Views/FacilitySearch/Edit.cshtml",
+      "layout": "~/Views/Shared/_Layout.cshtml",
+      "sections": [
+        {
+          "name": "FormHeader",
+          "component": "Page header with title",
+          "contains": "Facility Name / New Facility"
+        },
+        {
+          "name": "TabNavigation",
+          "component": "Bootstrap Nav Tabs",
+          "contains": "Details, Status, Berths, NDC Data tabs"
+        },
+        {
+          "name": "TabContent",
+          "component": "Tab Content Areas",
+          "contains": "Panels within each tab"
+        },
+        {
+          "name": "FormFooter",
+          "component": "Button group",
+          "contains": "Save, Cancel, Delete buttons"
+        }
+      ]
+    }
+  },
+  "migrationNotes": {
+    "ultraGridToDataTables": [
+      "Replace UltraGrid initialization with DataTables",
+      "Convert column definitions to DataTables column format",
+      "Implement server-side processing for large datasets",
+      "Add AJAX endpoint for data retrieval",
+      "Convert toolbar buttons to Bootstrap buttons",
+      "Implement modal dialogs for add/edit operations on child grids",
+      "Use Bootstrap Icons for visual indicators"
+    ],
+    "ultraComboToSelect2": [
+      "Replace UltraCombo with Select2 dropdown",
+      "Implement AJAX endpoints for dynamic data loading",
+      "Configure Select2 with Bootstrap 5 theme",
+      "Add placeholder and allowClear options",
+      "Implement change event handlers for dependent fields",
+      "Handle null/empty values appropriately"
+    ],
+    "ultraPanelToBootstrapCard": [
+      "Replace UltraPanel with Bootstrap Card component",
+      "Use card-header for panel titles",
+      "Use card-body for panel content",
+      "Implement collapsible cards for search criteria",
+      "Use conditional display (JavaScript) for dynamic panels",
+      "Maintain responsive layout with Bootstrap grid"
+    ],
+    "ultraTabControlToBootstrapTabs": [
+      "Replace UltraTabControl with Bootstrap Nav Tabs",
+      "Create tab navigation with nav-tabs class",
+      "Create tab content areas with tab-pane class",
+      "Implement active/inactive tab states",
+      "Add URL hash support for deep linking",
+      "Disable tabs that require parent entity saved",
+      "Ensure mobile responsiveness"
+    ],
+    "validation": [
+      "Replace WinForms validation with HTML5 + jQuery Validation",
+      "Implement server-side validation in controller",
+      "Return ModelState errors to view",
+      "Display validation messages with Bootstrap alert/invalid-feedback",
+      "Use data annotations on ViewModels"
+    ],
+    "authorization": [
+      "Replace CheckSecurity() with [RequirePermission] attributes",
+      "Use IdentityConstants.ApplicationScheme for authentication",
+      "Implement permission-based button visibility in view",
+      "Handle unauthorized access with proper HTTP status codes"
+    ]
+  },
+  "codeGeneration": {
+    "viewModels": [
+      "FacilitySearchViewModel.cs",
+      "FacilityEditViewModel.cs",
+      "FacilityListDto.cs",
+      "FacilityStatusDto.cs",
+      "FacilityBerthDto.cs"
+    ],
+    "controllers": [
+      "FacilitySearchController.cs (MVC UI)",
+      "FacilityController.cs (API)"
+    ],
+    "views": [
+      "Views/FacilitySearch/Index.cshtml",
+      "Views/FacilitySearch/Edit.cshtml",
+      "Views/FacilitySearch/_StatusModal.cshtml",
+      "Views/FacilitySearch/_BerthModal.cshtml"
+    ],
+    "javascript": [
+      "wwwroot/js/facilitySearch.js",
+      "wwwroot/js/facilityDetail.js"
+    ],
+    "css": [
+      "wwwroot/css/facilitySearch.css (optional)"
+    ]
+  }
+}

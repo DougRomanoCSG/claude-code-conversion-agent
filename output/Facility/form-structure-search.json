@@ -1,0 +1,496 @@
+{
+  "formName": "frmFacilitySearch",
+  "implements": ["IBaseSearch"],
+  "formType": "Search",
+  "description": "Search form for Facility entities with criteria panel and results grid",
+  "controls": [
+    {
+      "name": "txtName",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "Facility Name",
+      "dataBinding": null,
+      "validation": {
+        "required": false,
+        "maxLength": null
+      }
+    },
+    {
+      "name": "txtShortName",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "Short Name",
+      "dataBinding": null,
+      "validation": {
+        "required": false,
+        "maxLength": null
+      }
+    },
+    {
+      "name": "txtBargeExCode",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "BargeEx Code",
+      "dataBinding": null,
+      "validation": {
+        "required": false,
+        "maxLength": null
+      }
+    },
+    {
+      "name": "chkActiveOnly",
+      "type": "UltraCheckEditor",
+      "category": "SearchCriteria",
+      "label": "Active Only",
+      "dataBinding": null,
+      "defaultValue": true
+    }
+  ],
+  "dropdowns": [
+    {
+      "name": "cboRiver",
+      "type": "UltraComboEditor",
+      "category": "SearchCriteria",
+      "label": "River",
+      "dataBinding": {
+        "valueField": "RiverID",
+        "displayField": "RiverName",
+        "dataSource": "River lookup"
+      },
+      "allowNull": true,
+      "populationMethod": "LoadRiverDropdown"
+    },
+    {
+      "name": "cboFacilityType",
+      "type": "UltraComboEditor",
+      "category": "SearchCriteria",
+      "label": "Facility Type",
+      "dataBinding": {
+        "valueField": "BargeExLocationTypeID",
+        "displayField": "Description",
+        "dataSource": "BargeExLocationType lookup"
+      },
+      "allowNull": true,
+      "populationMethod": "LoadFacilityTypeDropdown"
+    }
+  ],
+  "numericControls": [
+    {
+      "name": "numStartMile",
+      "type": "UltraNumericEditor",
+      "category": "SearchCriteria",
+      "label": "Start Mile",
+      "dataBinding": null,
+      "validation": {
+        "required": false,
+        "minValue": null,
+        "maxValue": null,
+        "decimalPlaces": 2
+      }
+    },
+    {
+      "name": "numEndMile",
+      "type": "UltraNumericEditor",
+      "category": "SearchCriteria",
+      "label": "End Mile",
+      "dataBinding": null,
+      "validation": {
+        "required": false,
+        "minValue": null,
+        "maxValue": null,
+        "decimalPlaces": 2,
+        "compareWith": "numStartMile",
+        "compareRule": ">=",
+        "errorMessage": "End Mile must be greater than or equal to Start Mile"
+      }
+    }
+  ],
+  "grids": [
+    {
+      "name": "grdResults",
+      "type": "UltraGrid",
+      "uniqueIdentifier": "LocationID",
+      "allowEdit": false,
+      "allowAdd": false,
+      "allowDelete": false,
+      "multiSelect": false,
+      "columns": [
+        {
+          "name": "LocationID",
+          "header": "Location ID",
+          "dataType": "Int32",
+          "width": 100,
+          "visible": false,
+          "key": true
+        },
+        {
+          "name": "Name",
+          "header": "Name",
+          "dataType": "String",
+          "width": 250,
+          "visible": true
+        },
+        {
+          "name": "ShortName",
+          "header": "Short Name",
+          "dataType": "String",
+          "width": 150,
+          "visible": true
+        },
+        {
+          "name": "RiverName",
+          "header": "River",
+          "dataType": "String",
+          "width": 150,
+          "visible": true
+        },
+        {
+          "name": "Mile",
+          "header": "Mile",
+          "dataType": "Decimal",
+          "width": 100,
+          "visible": true,
+          "format": "0.00"
+        },
+        {
+          "name": "Bank",
+          "header": "Bank",
+          "dataType": "String",
+          "width": 100,
+          "visible": true
+        },
+        {
+          "name": "FacilityType",
+          "header": "Facility Type",
+          "dataType": "String",
+          "width": 150,
+          "visible": true
+        },
+        {
+          "name": "BargeExCode",
+          "header": "BargeEx Code",
+          "dataType": "String",
+          "width": 120,
+          "visible": true
+        },
+        {
+          "name": "IsActive",
+          "header": "Active",
+          "dataType": "Boolean",
+          "width": 80,
+          "visible": true,
+          "renderAsCheckbox": true
+        }
+      ],
+      "dataBinding": {
+        "dataSource": "FacilityLocationSearch stored procedure",
+        "updateMode": "ReadOnly"
+      },
+      "events": [
+        {
+          "event": "DoubleClick",
+          "handler": "OpenDetailForm",
+          "description": "Opens frmFacilityDetail for the selected facility"
+        }
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnSearch",
+      "type": "UltraButton",
+      "text": "Search",
+      "category": "Action",
+      "eventHandler": "btnSearch_Click",
+      "description": "Executes search based on criteria"
+    },
+    {
+      "name": "btnClear",
+      "type": "UltraButton",
+      "text": "Clear",
+      "category": "Action",
+      "eventHandler": "btnClear_Click",
+      "description": "Clears all search criteria"
+    },
+    {
+      "name": "btnNew",
+      "type": "UltraButton",
+      "text": "New",
+      "category": "Action",
+      "eventHandler": "btnNew_Click",
+      "description": "Opens frmFacilityDetail for new facility",
+      "requiresPermission": "FacilityModify"
+    },
+    {
+      "name": "btnEdit",
+      "type": "UltraButton",
+      "text": "Edit",
+      "category": "Action",
+      "eventHandler": "btnEdit_Click",
+      "description": "Opens frmFacilityDetail for selected facility",
+      "requiresPermission": "FacilityModify",
+      "requiresSelection": true
+    },
+    {
+      "name": "btnDelete",
+      "type": "UltraButton",
+      "text": "Delete",
+      "category": "Action",
+      "eventHandler": "btnDelete_Click",
+      "description": "Deletes selected facility",
+      "requiresPermission": "FacilityModify",
+      "requiresSelection": true,
+      "confirmationRequired": true
+    }
+  ],
+  "panels": [
+    {
+      "name": "pnlSearchCriteria",
+      "type": "UltraPanel",
+      "dockStyle": "Top",
+      "height": 150,
+      "controls": [
+        "txtName",
+        "txtShortName",
+        "txtBargeExCode",
+        "cboRiver",
+        "cboFacilityType",
+        "numStartMile",
+        "numEndMile",
+        "chkActiveOnly",
+        "btnSearch",
+        "btnClear"
+      ]
+    },
+    {
+      "name": "pnlResults",
+      "type": "UltraPanel",
+      "dockStyle": "Fill",
+      "controls": [
+        "grdResults"
+      ]
+    },
+    {
+      "name": "pnlActions",
+      "type": "UltraPanel",
+      "dockStyle": "Bottom",
+      "height": 50,
+      "controls": [
+        "btnNew",
+        "btnEdit",
+        "btnDelete"
+      ]
+    }
+  ],
+  "eventHandlers": [
+    {
+      "name": "Form_Load",
+      "description": "Initialize form, load dropdowns, set default values",
+      "actions": [
+        "LoadRiverDropdown",
+        "LoadFacilityTypeDropdown",
+        "SetDefaultSearchCriteria",
+        "CheckPermissions"
+      ]
+    },
+    {
+      "name": "btnSearch_Click",
+      "description": "Validate criteria and execute search",
+      "actions": [
+        "ValidateSearchCriteria",
+        "ExecuteFacilityLocationSearch",
+        "BindResultsToGrid"
+      ]
+    },
+    {
+      "name": "btnClear_Click",
+      "description": "Clear all search fields and reset to defaults",
+      "actions": [
+        "ClearAllCriteria",
+        "SetDefaultSearchCriteria",
+        "ClearResultsGrid"
+      ]
+    },
+    {
+      "name": "btnNew_Click",
+      "description": "Open detail form for new facility",
+      "actions": [
+        "CheckModifyPermission",
+        "OpenFacilityDetailForm",
+        "RefreshGridAfterClose"
+      ]
+    },
+    {
+      "name": "btnEdit_Click",
+      "description": "Open detail form for selected facility",
+      "actions": [
+        "CheckModifyPermission",
+        "GetSelectedFacilityID",
+        "OpenFacilityDetailForm",
+        "RefreshGridAfterClose"
+      ]
+    },
+    {
+      "name": "btnDelete_Click",
+      "description": "Delete selected facility with confirmation",
+      "actions": [
+        "CheckModifyPermission",
+        "GetSelectedFacilityID",
+        "ConfirmDeletion",
+        "ExecuteDelete",
+        "RefreshGrid"
+      ]
+    },
+    {
+      "name": "grdResults_DoubleClick",
+      "description": "Open detail form when row double-clicked",
+      "actions": [
+        "GetSelectedFacilityID",
+        "OpenFacilityDetailForm",
+        "RefreshGridAfterClose"
+      ]
+    }
+  ],
+  "validation": {
+    "methodName": "AreFieldsValid",
+    "rules": [
+      {
+        "field": "cboRiver",
+        "rule": "RequiredIfMileRangeSpecified",
+        "message": "River is required when searching by mile range",
+        "condition": "numStartMile.HasValue OR numEndMile.HasValue"
+      },
+      {
+        "field": "numEndMile",
+        "rule": "MustBeGreaterThanOrEqualToStartMile",
+        "message": "End Mile must be greater than or equal to Start Mile",
+        "condition": "numStartMile.HasValue AND numEndMile.HasValue"
+      }
+    ]
+  },
+  "dataAccess": {
+    "searchProcedure": "FacilityLocationSearch",
+    "searchParameters": [
+      {
+        "name": "@Name",
+        "sourceControl": "txtName",
+        "dataType": "String",
+        "nullable": true
+      },
+      {
+        "name": "@ShortName",
+        "sourceControl": "txtShortName",
+        "dataType": "String",
+        "nullable": true
+      },
+      {
+        "name": "@BargeExCode",
+        "sourceControl": "txtBargeExCode",
+        "dataType": "String",
+        "nullable": true
+      },
+      {
+        "name": "@RiverID",
+        "sourceControl": "cboRiver",
+        "dataType": "Int32",
+        "nullable": true
+      },
+      {
+        "name": "@BargeExLocationTypeID",
+        "sourceControl": "cboFacilityType",
+        "dataType": "Int32",
+        "nullable": true
+      },
+      {
+        "name": "@StartMile",
+        "sourceControl": "numStartMile",
+        "dataType": "Decimal",
+        "nullable": true
+      },
+      {
+        "name": "@EndMile",
+        "sourceControl": "numEndMile",
+        "dataType": "Decimal",
+        "nullable": true
+      },
+      {
+        "name": "@ActiveOnly",
+        "sourceControl": "chkActiveOnly",
+        "dataType": "Boolean",
+        "nullable": false
+      }
+    ]
+  },
+  "security": {
+    "subSystem": "frmFacilitySearch",
+    "permissions": {
+      "view": "FacilityReadOnly",
+      "modify": "FacilityModify"
+    },
+    "permissionChecks": [
+      {
+        "control": "btnNew",
+        "permission": "FacilityModify",
+        "action": "Enable/Disable"
+      },
+      {
+        "control": "btnEdit",
+        "permission": "FacilityModify",
+        "action": "Enable/Disable"
+      },
+      {
+        "control": "btnDelete",
+        "permission": "FacilityModify",
+        "action": "Enable/Disable"
+      }
+    ]
+  },
+  "businessRules": [
+    {
+      "rule": "RiverRequiredForMileRange",
+      "description": "River must be specified if searching by mile range",
+      "implementation": "Validation in AreFieldsValid method"
+    },
+    {
+      "rule": "EndMileValidation",
+      "description": "End Mile must be >= Start Mile when both specified",
+      "implementation": "Validation in AreFieldsValid method"
+    },
+    {
+      "rule": "ActiveOnlyDefault",
+      "description": "Active Only checkbox defaults to checked",
+      "implementation": "Set in Form_Load"
+    }
+  ],
+  "modernUIMapping": {
+    "targetFramework": "ASP.NET Core MVC (BargeOps.Admin.UI)",
+    "components": {
+      "searchPanel": "Collapsible Bootstrap card with form controls",
+      "resultsGrid": "DataTables with server-side processing",
+      "searchCriteriaControls": {
+        "txtName": "text input",
+        "txtShortName": "text input",
+        "txtBargeExCode": "text input",
+        "cboRiver": "Select2 dropdown",
+        "cboFacilityType": "Select2 dropdown",
+        "numStartMile": "numeric input with decimal",
+        "numEndMile": "numeric input with decimal",
+        "chkActiveOnly": "Bootstrap checkbox"
+      },
+      "buttons": {
+        "btnSearch": "Primary button (btn-primary)",
+        "btnClear": "Secondary button (btn-secondary)",
+        "btnNew": "Success button (btn-success)",
+        "btnEdit": "Primary button (btn-primary)",
+        "btnDelete": "Danger button (btn-danger)"
+      }
+    },
+    "features": {
+      "serverSidePagination": true,
+      "serverSideSorting": true,
+      "serverSideFiltering": true,
+      "exportToExcel": false,
+      "responsiveDesign": true
+    }
+  }
+}

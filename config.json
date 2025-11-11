@@ -1,0 +1,21 @@
+{
+  "inputDirectory": "C:\\source\\OnShore\\apps\\Onshore",
+  "description": "Configuration for Claude Onshore Conversion Agent",
+  "paths": {
+    "forms": "Forms",
+    "businessObjects": "BusinessLogic/Business Objects",
+    "businessObjectsBase": "BusinessLogic/Business Objects/Base Classes",
+    "lists": "BusinessLogic/Lists"
+  },
+  "referenceProjects": {
+    "crewingApi": "C:\\source\\BargeOps.Crewing.API",
+    "crewingUi": "C:\\source\\BargeOps.Crewing.UI",
+    "description": "Reference projects for ASP.NET MVC patterns and examples"
+  },
+  "targetProjects": {
+    "adminApi": "C:\\source\\BargeOps\\BargeOps.Admin.API",
+    "adminUi": "C:\\source\\BargeOps\\BargeOps.Admin.UI",
+    "description": "Target projects where generated code will be placed"
+  }
+}
+

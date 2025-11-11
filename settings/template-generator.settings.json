@@ -1,0 +1,19 @@
+{
+	"permissions": {
+		"defaultMode": "default",
+		"allow": ["Read", "Glob", "Grep", "Write", "Edit"],
+		"deny": ["Bash(rm)", "Bash(del)"]
+	},
+	"hooks": {
+		"UserPromptSubmit": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "echo \"Interactive Template Generation: Review analysis data and generate conversion templates\""
+					}
+				]
+			}
+		]
+	}
+}

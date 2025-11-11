@@ -1,0 +1,19 @@
+{
+	"permissions": {
+		"defaultMode": "default",
+		"allow": ["Read", "Glob", "Grep", "Write", "Bash(ls)", "Bash(echo)"],
+		"deny": ["Edit", "Task", "WebSearch"]
+	},
+	"hooks": {
+		"UserPromptSubmit": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "echo \"Form Analysis Mode: Extract UI structure, save to output/{entity}/form-structure.json\""
+					}
+				]
+			}
+		]
+	}
+}

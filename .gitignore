@@ -1,0 +1,28 @@
+# Bun
+node_modules
+.bun
+
+# Compiled binaries
+bin/
+
+# Output (conversion analysis results)
+# Uncomment if you want to ignore generated outputs
+# output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local

@@ -1,0 +1,41 @@
+{
+	"name": "claude-onshore-conversion-agent",
+	"version": "1.0.0",
+	"description": "Specialized agents for converting legacy VB.NET Windows Forms to ASP.NET Core MVC",
+	"type": "module",
+	"scripts": {
+		"convert": "bun run agents/orchestrator.ts",
+		"analyze-form": "bun run agents/form-structure-analyzer.ts",
+		"analyze-business": "bun run agents/business-logic-extractor.ts",
+		"analyze-data": "bun run agents/data-access-analyzer.ts",
+		"analyze-security": "bun run agents/security-extractor.ts",
+		"generate-template": "bun run agents/conversion-template-generator.ts",
+		"compile": "bun run scripts/compile-all.ts",
+		"lint": "biome check --write ./agents",
+		"format": "biome format --write ./agents",
+		"check": "biome check ./agents"
+	},
+	"keywords": [
+		"conversion",
+		"legacy",
+		"vb.net",
+		"asp.net-core",
+		"mvc",
+		"bargeops",
+		"agent",
+		"claude"
+	],
+	"author": "BargeOps Development Team",
+	"license": "UNLICENSED",
+	"dependencies": {
+		"@anthropic-ai/claude-code": "latest",
+		"@anthropic-ai/sdk": "latest"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "latest",
+		"@types/bun": "latest"
+	},
+	"engines": {
+		"bun": ">=1.0.0"
+	}
+}
