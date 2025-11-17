@@ -18,7 +18,7 @@
 import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
-import { getProjectRoot, getBusinessObjectPathForPrompt, getBusinessObjectBasePathForPrompt, getLocationBasePathForPrompt, getAdminApiPath } from "../lib/paths";
+import { getProjectRoot, getBusinessObjectPathForPrompt, getBusinessObjectBasePathForPrompt, getLocationBasePathForPrompt, getAdminApiPath, getAdminApiExamples, getCrewingApiExamples } from "../lib/paths";
 import businessLogicSettings from "../settings/business-logic.settings.json" with { type: "json" };
 import businessLogicMcp from "../settings/business-logic.mcp.json" with { type: "json" };
 
@@ -94,8 +94,16 @@ JSON STRUCTURE:
   "initialization": {...}
 }
 
-REFERENCE:
-Compare with BoatLocation patterns in BargeOps.Admin.API (located at: ${getAdminApiPath()})
+REFERENCE EXAMPLES:
+For business logic patterns, reference:
+- BargeOps.Admin.API Domain Models: ${getAdminApiExamples().domainModels}
+  Primary reference: BoatLocation.cs - Canonical Admin domain model pattern
+- BargeOps.Admin.API Services: ${getAdminApiExamples().services}
+  Reference: IBoatLocationService.cs, BoatLocationService.cs - Business logic implementation
+- BargeOps.Crewing.API Domain Models: ${getCrewingApiExamples().domainModels}
+  Examples: Crewing.cs, Boat.cs - See how business rules are structured
+- BargeOps.Crewing.API Services: ${getCrewingApiExamples().services}
+  Examples: ICrewingService.cs, CrewingService.cs - Service layer patterns
 
 Begin extraction now.
 `;

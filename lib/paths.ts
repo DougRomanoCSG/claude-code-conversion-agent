@@ -200,3 +200,133 @@ export function getFormsDirectory(): string {
 	const formsPath = config.paths.forms;
 	return `${inputDir}/${formsPath}`;
 }
+
+/**
+ * Get example paths for BargeOps.Crewing.API
+ */
+export function getCrewingApiExamples(): {
+	controllers: string;
+	domainModels: string;
+	dtos: string;
+	repositories: string;
+	services: string;
+	mappings: string;
+} {
+	const basePath = getCrewingApiPath();
+	return {
+		controllers: `${basePath}/src/Crewing.Api/Controllers`,
+		domainModels: `${basePath}/src/Crewing.Domain/Models`,
+		dtos: `${basePath}/src/Crewing.Domain/Dto`,
+		repositories: `${basePath}/src/Crewing.Infrastructure/Repositories`,
+		services: `${basePath}/src/Crewing.Domain/Services`,
+		mappings: `${basePath}/src/Crewing.Infrastructure/Mappings`,
+	};
+}
+
+/**
+ * Get example paths for BargeOps.Crewing.UI
+ */
+export function getCrewingUiExamples(): {
+	controllers: string;
+	viewModels: string;
+	views: string;
+	javascript: string;
+	css: string;
+	services: string;
+} {
+	const basePath = getCrewingUiPath();
+	return {
+		controllers: `${basePath}/Controllers`,
+		viewModels: `${basePath}/Models`,
+		views: `${basePath}/Views`,
+		javascript: `${basePath}/wwwroot/js`,
+		css: `${basePath}/wwwroot/css`,
+		services: `${basePath}/Services`,
+	};
+}
+
+/**
+ * Get example paths for BargeOps.Admin.API (target patterns)
+ */
+export function getAdminApiExamples(): {
+	controllers: string;
+	domainModels: string;
+	dtos: string;
+	repositories: string;
+	services: string;
+	mappings: string;
+} {
+	const basePath = getAdminApiPath();
+	return {
+		controllers: `${basePath}/src/Admin.Api/Controllers`,
+		domainModels: `${basePath}/src/Admin.Domain/Models`,
+		dtos: `${basePath}/src/Admin.Domain/Dto`,
+		repositories: `${basePath}/src/Admin.Infrastructure/Repositories`,
+		services: `${basePath}/src/Admin.Domain/Services`,
+		mappings: `${basePath}/src/Admin.Infrastructure/Mappings`,
+	};
+}
+
+/**
+ * Get example paths for BargeOps.Admin.UI (target patterns)
+ */
+export function getAdminUiExamples(): {
+	controllers: string;
+	viewModels: string;
+	views: string;
+	javascript: string;
+	css: string;
+	services: string;
+} {
+	const basePath = getAdminUiPath();
+	return {
+		controllers: `${basePath}/Controllers`,
+		viewModels: `${basePath}/Models`,
+		views: `${basePath}/Views`,
+		javascript: `${basePath}/wwwroot/js`,
+		css: `${basePath}/wwwroot/css`,
+		services: `${basePath}/Services`,
+	};
+}
+
+/**
+ * Get detailed reference examples guide for agent prompts (concise version)
+ */
+export function getDetailedReferenceExamples(): string {
+	const crewingApi = getCrewingApiExamples();
+	const crewingUi = getCrewingUiExamples();
+	const adminApi = getAdminApiExamples();
+	const adminUi = getAdminUiExamples();
+	
+	return `REFERENCE EXAMPLES:
+
+BargeOps.Crewing.API (${getCrewingApiPath()}):
+- Controllers: ${crewingApi.controllers} (CrewingController.cs, BoatController.cs)
+- Models: ${crewingApi.domainModels} (Crewing.cs, Boat.cs)
+- DTOs: ${crewingApi.dtos} (CrewingDto.cs, CrewingSearchRequest.cs)
+- Repos: ${crewingApi.repositories} (ICrewingRepository.cs, CrewingRepository.cs)
+- Services: ${crewingApi.services} (ICrewingService.cs, CrewingService.cs)
+- Mappings: ${crewingApi.mappings} (CrewingMappingProfile.cs)
+
+BargeOps.Crewing.UI (${getCrewingUiPath()}):
+- Controllers: ${crewingUi.controllers} (CrewingSearchController.cs, BoatSearchController.cs)
+- ViewModels: ${crewingUi.viewModels} (CrewingSearchViewModel.cs, CrewingEditViewModel.cs)
+- Views: ${crewingUi.views} (CrewingSearch/Index.cshtml, Edit.cshtml)
+- JS: ${crewingUi.javascript} (crewingSearch.js - DataTables patterns)
+- CSS: ${crewingUi.css} (crewingSearch.css)
+- Services: ${crewingUi.services} (ICrewingService.cs, CrewingService.cs)
+
+BargeOps.Admin.API Target (${getAdminApiPath()}):
+- PRIMARY: ${adminApi.controllers}/BoatLocationController.cs (canonical Admin API pattern)
+- Models: ${adminApi.domainModels}/BoatLocation.cs
+- DTOs: ${adminApi.dtos} (BoatLocationDto.cs, BoatLocationSearchRequest.cs)
+- Repos: ${adminApi.repositories} (IBoatLocationRepository.cs, BoatLocationRepository.cs)
+- Services: ${adminApi.services} (IBoatLocationService.cs, BoatLocationService.cs)
+
+BargeOps.Admin.UI Target (${getAdminUiPath()}):
+- PRIMARY: ${adminUi.controllers}/BoatLocationSearchController.cs (canonical Admin UI pattern)
+- ViewModels: ${adminUi.viewModels} (BoatLocationSearchViewModel.cs, BoatLocationEditViewModel.cs)
+- Views: ${adminUi.views}/BoatLocationSearch/ (Index.cshtml, Edit.cshtml)
+- JS: ${adminUi.javascript}/boatLocationSearch.js
+- Services: ${adminUi.services} (IBoatLocationService.cs, BoatLocationService.cs)`;
+}

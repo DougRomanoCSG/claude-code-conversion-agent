@@ -6,7 +6,7 @@
 import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
-import { getProjectRoot, getCrewingUiPath } from "../lib/paths";
+import { getProjectRoot, getCrewingUiPath, getCrewingUiExamples, getAdminUiExamples } from "../lib/paths";
 import uiMapperSettings from "../settings/ui-mapper.settings.json" with { type: "json" };
 import uiMapperMcp from "../settings/ui-mapper.mcp.json" with { type: "json" };
 
@@ -36,7 +36,21 @@ GOALS:
 2. Map UltraCombo to Select2
 3. Map UltraPanel to Bootstrap Card
 4. Map UltraTabControl to Bootstrap Nav Tabs
-5. Use BargeOps.Crewing.UI patterns as reference (located at: ${getCrewingUiPath()})
+5. Map TextBox to Bootstrap Form Input
+6. Map CheckBox to Bootstrap Checkbox
+
+REFERENCE EXAMPLES:
+For UI component mapping patterns, reference BargeOps.Crewing.UI Admin screens:
+- JavaScript/DataTables: ${getCrewingUiExamples().javascript}
+  Look for: crewingSearch.js - See how DataTables are initialized, configured, and handle server-side processing
+- Razor Views: ${getCrewingUiExamples().views}
+  Look for: CrewingSearch/Index.cshtml - See Bootstrap form layouts, Select2 dropdowns, DataTables HTML structure
+- CSS: ${getCrewingUiExamples().css}
+  Look for: crewingSearch.css - Custom styling patterns
+
+Target patterns in BargeOps.Admin.UI:
+- JavaScript: ${getAdminUiExamples().javascript}/boatLocationSearch.js
+- Views: ${getAdminUiExamples().views}/BoatLocationSearch/Index.cshtml
 
 OUTPUT: ${outputPath}/ui-mapping.json
 

@@ -1,0 +1,1 @@
+- When creating file specific to Entities such as @output\Facility\IMPLEMENTATION_STATUS.md always add the EntityName in front and put such files in .claude\tasks.

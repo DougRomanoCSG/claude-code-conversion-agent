@@ -17,7 +17,7 @@
 import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
-import { getProjectRoot, getFormPathForPrompt, getFormDesignerPathForPrompt, getCrewingUiPath, getAdminUiPath } from "../lib/paths";
+import { getProjectRoot, getFormPathForPrompt, getFormDesignerPathForPrompt, getCrewingUiPath, getAdminUiPath, getCrewingUiExamples, getAdminUiExamples } from "../lib/paths";
 import formAnalyzerSettings from "../settings/form-analyzer.settings.json" with { type: "json" };
 import formAnalyzerMcp from "../settings/form-analyzer.mcp.json" with { type: "json" };
 
@@ -96,9 +96,21 @@ JSON STRUCTURE:
   "panels": [...]
 }
 
-REFERENCE:
-Use BargeOps.Crewing.UI patterns for comparison (located at: ${getCrewingUiPath()})
-Target output for BargeOps.Admin.UI (located at: ${getAdminUiPath()})
+REFERENCE EXAMPLES:
+For UI patterns, reference BargeOps.Crewing.UI Admin screens:
+- MVC Controllers: ${getCrewingUiExamples().controllers}
+  Look for: CrewingSearchController.cs, BoatSearchController.cs - Admin search screen patterns
+- Razor Views: ${getCrewingUiExamples().views}
+  Look for: CrewingSearch/Index.cshtml, CrewingSearch/Edit.cshtml - Search and edit form patterns
+- View Models: ${getCrewingUiExamples().viewModels}
+  Look for: CrewingSearchViewModel.cs, CrewingEditViewModel.cs - View model structure
+- JavaScript: ${getCrewingUiExamples().javascript}
+  Look for: crewingSearch.js - DataTables initialization patterns
+
+Target patterns in BargeOps.Admin.UI:
+- Primary reference: ${getAdminUiExamples().controllers}/BoatLocationSearchController.cs
+- Views: ${getAdminUiExamples().views}/BoatLocationSearch/ - Index.cshtml, Edit.cshtml, Details.cshtml
+- View Models: ${getAdminUiExamples().viewModels}/BoatLocationSearchViewModel.cs
 
 Begin analysis now.
 `;

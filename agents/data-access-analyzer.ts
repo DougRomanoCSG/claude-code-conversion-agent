@@ -6,7 +6,7 @@
 import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
-import { getProjectRoot, getListPathForPrompt } from "../lib/paths";
+import { getProjectRoot, getListPathForPrompt, getAdminApiExamples, getCrewingApiExamples } from "../lib/paths";
 import dataAccessSettings from "../settings/data-access.settings.json" with { type: "json" };
 import dataAccessMcp from "../settings/data-access.mcp.json" with { type: "json" };
 
@@ -41,6 +41,13 @@ GOALS:
 3. Extract result column mapping from ReadRow
 4. Identify CRUD operations
 5. Extract data formatting logic
+
+REFERENCE EXAMPLES:
+For data access patterns, reference:
+- BargeOps.Admin.API Repositories: ${getAdminApiExamples().repositories}
+  Primary reference: IBoatLocationRepository.cs, BoatLocationRepository.cs - Dapper implementation patterns
+- BargeOps.Crewing.API Repositories: ${getCrewingApiExamples().repositories}
+  Examples: ICrewingRepository.cs, CrewingRepository.cs - See how stored procedures are called and results mapped
 
 OUTPUT: ${outputPath}/data-access.json
 

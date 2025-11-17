@@ -444,12 +444,63 @@ bun run agents/business-logic-extractor.ts --entity "Facility" --interactive
 
 ## Reference Patterns
 
-This project references:
+This project references Admin screen examples from BargeOps.Crewing projects, configured in `config.json`:
 
-- **BargeOps.Admin.API**: BoatLocation controller, services, repositories (target patterns)
-- **BargeOps.Crewing.API**: Example patterns for clarity
-- **BargeOps.Admin.UI**: BoatLocationSearch controller, views, services (target patterns)
-- **BargeOps.Crewing.UI**: Example UI patterns for reference
+### BargeOps.Crewing.API Examples
+Located at: `C:\source\BargeOps.Crewing.API` (configured in `config.json`)
+
+**Where to find Admin screen patterns:**
+- **API Controllers**: `src/Crewing.Api/Controllers/`
+  - Look for: `CrewingController.cs`, `BoatController.cs`, or similar Admin screen controllers
+- **Domain Models**: `src/Crewing.Domain/Models/`
+  - Look for: `Crewing.cs`, `Boat.cs`, or similar entity models
+- **DTOs**: `src/Crewing.Domain/Dto/`
+  - Look for: `CrewingDto.cs`, `CrewingSearchRequest.cs`, `CrewingSearchResponse.cs`
+- **Repositories**: `src/Crewing.Infrastructure/Repositories/`
+  - Look for: `ICrewingRepository.cs`, `CrewingRepository.cs`
+- **Services**: `src/Crewing.Domain/Services/`
+  - Look for: `ICrewingService.cs`, `CrewingService.cs`
+- **AutoMapper**: `src/Crewing.Infrastructure/Mappings/`
+  - Look for: `CrewingMappingProfile.cs`
+
+### BargeOps.Crewing.UI Examples
+Located at: `C:\source\BargeOps.Crewing.UI` (configured in `config.json`)
+
+**Where to find Admin screen patterns:**
+- **MVC Controllers**: `Controllers/`
+  - Look for: `CrewingSearchController.cs`, `BoatSearchController.cs`, or similar Admin search controllers
+- **View Models**: `Models/`
+  - Look for: `CrewingSearchViewModel.cs`, `CrewingEditViewModel.cs`, `CrewingListModel.cs`
+- **Razor Views**: `Views/`
+  - Look for: `CrewingSearch/Index.cshtml`, `CrewingSearch/Edit.cshtml`, `CrewingSearch/Details.cshtml`
+- **JavaScript**: `wwwroot/js/`
+  - Look for: `crewingSearch.js`, `boatSearch.js` - DataTables initialization and form handling
+- **CSS**: `wwwroot/css/`
+  - Look for: `crewingSearch.css`, `boatSearch.css` - Custom styling
+- **Services**: `Services/`
+  - Look for: `ICrewingService.cs`, `CrewingService.cs` - UI service layer
+
+### BargeOps.Admin.API Target Patterns
+Located at: `C:\source\BargeOps\BargeOps.Admin.API` (configured in `config.json`)
+
+**Primary reference (canonical Admin patterns):**
+- **API Controllers**: `src/Admin.Api/Controllers/BoatLocationController.cs`
+- **Domain Models**: `src/Admin.Domain/Models/BoatLocation.cs`
+- **DTOs**: `src/Admin.Domain/Dto/BoatLocationDto.cs`, `BoatLocationSearchRequest.cs`
+- **Repositories**: `src/Admin.Infrastructure/Repositories/IBoatLocationRepository.cs`, `BoatLocationRepository.cs`
+- **Services**: `src/Admin.Domain/Services/IBoatLocationService.cs`, `BoatLocationService.cs`
+
+### BargeOps.Admin.UI Target Patterns
+Located at: `C:\source\BargeOps\BargeOps.Admin.UI` (configured in `config.json`)
+
+**Primary reference (canonical Admin patterns):**
+- **MVC Controllers**: `Controllers/BoatLocationSearchController.cs`
+- **View Models**: `Models/BoatLocationSearchViewModel.cs`, `BoatLocationEditViewModel.cs`
+- **Razor Views**: `Views/BoatLocationSearch/Index.cshtml`, `Edit.cshtml`, `Details.cshtml`
+- **JavaScript**: `wwwroot/js/boatLocationSearch.js`
+- **Services**: `Services/IBoatLocationService.cs`, `BoatLocationService.cs`
+
+**Note**: All paths are configurable in `config.json`. The agents automatically use these configured paths to provide specific example locations in their prompts.
 
 ## Target Architecture
 

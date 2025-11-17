@@ -19,7 +19,7 @@
 import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
-import { getProjectRoot, getCrewingApiPath, getCrewingUiPath, getAdminApiPath, getAdminUiPath } from "../lib/paths";
+import { getProjectRoot, getCrewingApiPath, getCrewingUiPath, getAdminApiPath, getAdminUiPath, getDetailedReferenceExamples } from "../lib/paths";
 import templateGenSettings from "../settings/template-generator.settings.json" with { type: "json" };
 import templateGenMcp from "../settings/template-generator.mcp.json" with { type: "json" };
 
@@ -96,11 +96,7 @@ Primary file: ${outputPath}/conversion-plan.md
 API templates: ${outputPath}/templates/api/ (for BargeOps.Admin.API)
 UI templates: ${outputPath}/templates/ui/ (for BargeOps.Admin.UI)
 
-REFERENCE PATTERNS:
-- BargeOps.Admin.API: BoatLocation controller, services, repositories (located at: ${getAdminApiPath()})
-- BargeOps.Crewing.API: ${getCrewingApiPath()} (Example patterns for clarity)
-- BargeOps.Admin.UI: BoatLocationSearch controller, views, services (located at: ${getAdminUiPath()})
-- BargeOps.Crewing.UI: ${getCrewingUiPath()} (Example UI patterns)
+${getDetailedReferenceExamples()}
 
 TARGET PROJECTS (where generated code will be placed):
 - API: ${getAdminApiPath()}
