@@ -3,9 +3,13 @@
     "allow": [
       "Bash(mkdir:*)",
       "Bash(test:*)",
-      "Bash(bun run:*)"
+      "Bash(bun run:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\Dev\\BargeOps.Admin.Mono"
+    ]
   }
 }

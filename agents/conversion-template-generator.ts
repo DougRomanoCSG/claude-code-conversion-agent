@@ -19,7 +19,7 @@
 import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
-import { getProjectRoot, getCrewingApiPath, getCrewingUiPath, getAdminApiPath, getAdminUiPath, getDetailedReferenceExamples } from "../lib/paths";
+import { getProjectRoot, getCrewingApiPath, getCrewingUiPath, getAdminApiPath, getAdminUiPath, getSharedProjectPath, getDetailedReferenceExamples } from "../lib/paths";
 import templateGenSettings from "../settings/template-generator.settings.json" with { type: "json" };
 import templateGenMcp from "../settings/template-generator.mcp.json" with { type: "json" };
 
@@ -69,38 +69,127 @@ INPUT DATA:
 You have access to analysis files in: ${outputPath}/
 ${analysisFiles.map((f) => `- ${f}`).join("\n")}
 
+CRITICAL ARCHITECTURE NOTE:
+⭐ This project uses a MONO SHARED structure where DTOs and Models are in a SHARED project!
+⭐ DO NOT duplicate DTOs/Models in API or UI projects!
+⭐ See .claude/tasks/MONO_SHARED_STRUCTURE.md for detailed architecture documentation
+
 GENERATION GOALS:
 1. Review all extracted data from previous agents
 2. Create comprehensive conversion plan document
-3. Generate code templates organized by project:
-   
-   FOR BargeOps.Admin.API (${getAdminApiPath()}):
-   - Domain models (C# classes)
-   - DTOs (Request/Response objects)
-   - Repository interface and implementation
-   - Service interface and implementation
-   - API Controller with all endpoints
-   - AutoMapper profiles
-   
-   FOR BargeOps.Admin.UI (${getAdminUiPath()}):
-   - View models (MVC view models)
-   - Razor views (Index, Edit, Details)
-   - JavaScript files (DataTables initialization)
-   - CSS files (if needed)
-4. Include step-by-step implementation guide
-5. Reference BoatLocation conversion patterns
-6. Use Crewing examples from BargeOps.Crewing.API and BargeOps.Crewing.UI for clarity
+3. Generate code templates organized by project structure:
 
-OUTPUT:
+   ⭐ FOR BargeOps.Shared (${getSharedProjectPath()}):
+   GENERATE FIRST - DTOs are the ONLY data models (no separate Models folder!)
+   - DTOs in Dto/ folder (used by BOTH API and UI):
+     * {Entity}Dto.cs - Complete entity DTO with [Sortable]/[Filterable] attributes
+       - Contains ALL fields from the entity
+       - Used directly by API and UI (no separate domain models)
+     * {Entity}SearchRequest.cs - Search criteria DTO
+     * {Child}Dto.cs - Child entity DTOs (e.g., FacilityBerthDto)
+   - NO Models/ folder - DTOs are the data models!
+
+   FOR BargeOps.Admin.API (${getAdminApiPath()}):
+   - Repository interface and implementation (in Admin.Infrastructure/Repositories/)
+     * I{Entity}Repository.cs - Interface returning DTOs
+     * {Entity}Repository.cs - Dapper implementation with stored procedures
+       - Returns DTOs directly (no mapping needed!)
+       - Uses async/await patterns
+   - Service interface and implementation
+     * I{Entity}Service.cs - Interface (in Admin.Domain/Services/)
+     * {Entity}Service.cs - Implementation (in Admin.Infrastructure/Services/)
+       - Uses DTOs directly from repository
+       - No AutoMapper needed!
+   - API Controller (in Admin.Api/Controllers/)
+     * {Entity}Controller.cs - RESTful endpoints with authorization
+       - Accepts and returns DTOs
+   - NO AutoMapper profiles needed (repositories return DTOs directly)
+
+   FOR BargeOps.Admin.UI (${getAdminUiPath()}):
+   - ViewModels (in ViewModels/ folder)
+     * {Entity}SearchViewModel.cs - Search screen
+       - Contains search criteria properties
+       - Uses DTOs from BargeOps.Shared directly
+     * {Entity}EditViewModel.cs - Edit screen
+       - Contains the entity DTO (from BargeOps.Shared)
+       - Contains lookup lists (also DTOs)
+   - API Client Services (in Services/ folder)
+     * I{Entity}Service.cs - Interface
+     * {Entity}Service.cs - HTTP client to call API
+       - Returns DTOs from BargeOps.Shared
+   - Controllers (in Controllers/ folder)
+     * {Entity}Controller.cs - MVC controller
+       - Uses ViewModels which contain DTOs
+   - Razor views (in Views/{Entity}/ folder)
+     * Index.cshtml - Search/list view
+     * Edit.cshtml - Edit form
+     * _Partials/ - Modal dialogs for child entities
+   - JavaScript files (in wwwroot/js/ folder)
+     * {entity}-search.js - DataTables initialization
+     * {entity}-detail.js - Detail form logic
+
+4. Include step-by-step implementation guide
+5. Reference existing Facility and BoatLocation patterns in the mono repo
+6. Use Crewing examples for additional clarity
+
+OUTPUT STRUCTURE:
 Primary file: ${outputPath}/conversion-plan.md
-API templates: ${outputPath}/templates/api/ (for BargeOps.Admin.API)
-UI templates: ${outputPath}/templates/ui/ (for BargeOps.Admin.UI)
+
+Templates organized by project:
+${outputPath}/templates/
+├── shared/          ⭐ SHARED PROJECT FILES (create these FIRST!)
+│   └── Dto/         ⭐ DTOs are the ONLY data models (no Models/ folder!)
+│       ├── {Entity}Dto.cs - Complete entity DTO
+│       ├── {Entity}SearchRequest.cs - Search criteria
+│       └── {Child}Dto.cs - Child entity DTOs
+├── api/             (API-specific files)
+│   ├── Controllers/
+│   │   └── {Entity}Controller.cs
+│   ├── Repositories/
+│   │   ├── I{Entity}Repository.cs
+│   │   └── {Entity}Repository.cs
+│   ├── Services/
+│   │   ├── I{Entity}Service.cs
+│   │   └── {Entity}Service.cs
+│   └── Mapping/
+│       └── {Entity}MappingProfile.cs
+└── ui/              (UI-specific files)
+    ├── Controllers/
+    │   └── {Entity}Controller.cs
+    ├── Services/
+    │   ├── I{Entity}Service.cs
+    │   └── {Entity}Service.cs
+    ├── ViewModels/
+    │   ├── {Entity}SearchViewModel.cs
+    │   └── {Entity}EditViewModel.cs
+    ├── Views/
+    │   └── {Entity}/
+    │       ├── Index.cshtml
+    │       └── Edit.cshtml
+    └── wwwroot/
+        └── js/
+            ├── {entity}-search.js
+            └── {entity}-detail.js
 
 ${getDetailedReferenceExamples()}
 
 TARGET PROJECTS (where generated code will be placed):
+⭐ Shared: ${getSharedProjectPath()} (DTOs and Models - SINGLE SOURCE OF TRUTH)
 - API: ${getAdminApiPath()}
 - UI: ${getAdminUiPath()}
+
+IMPORTANT IMPLEMENTATION ORDER:
+1. Create SHARED DTOs first (DTOs are the ONLY data models - no separate Models!)
+   - {Entity}Dto.cs - Complete entity with all fields
+   - {Entity}SearchRequest.cs - Search criteria
+   - {Child}Dto.cs - Child entities
+2. Create API Infrastructure (Repositories, Services)
+   - Repositories return DTOs directly (no mapping!)
+   - Services use DTOs (no AutoMapper needed!)
+3. Create API Controller (accepts/returns DTOs)
+4. Create UI Services (API clients that return DTOs)
+5. Create UI ViewModels (contain DTOs from Shared)
+6. Create UI Controllers and Views
 
 This is an INTERACTIVE session. You can ask questions, clarify requirements, and iterate on the templates.
 

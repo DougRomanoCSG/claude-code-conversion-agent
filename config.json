@@ -13,9 +13,10 @@
     "description": "Reference projects for ASP.NET MVC patterns and examples"
   },
   "targetProjects": {
-    "adminApi": "C:\\source\\BargeOps\\BargeOps.Admin.API",
-    "adminUi": "C:\\source\\BargeOps\\BargeOps.Admin.UI",
-    "description": "Target projects where generated code will be placed"
+    "adminApi": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.API",
+    "adminUi": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI",
+    "shared": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.Shared\\BargeOps.Shared",
+    "description": "Target projects where generated code will be placed - using mono shared structure"
   }
 }
 

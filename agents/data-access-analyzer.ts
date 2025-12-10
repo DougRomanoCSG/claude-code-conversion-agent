@@ -6,7 +6,7 @@
 import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
-import { getProjectRoot, getListPathForPrompt, getAdminApiExamples, getCrewingApiExamples } from "../lib/paths";
+import { getProjectRoot, getListPathForPrompt, getAdminApiExamples, getCrewingApiExamples, getSharedExamples } from "../lib/paths";
 import dataAccessSettings from "../settings/data-access.settings.json" with { type: "json" };
 import dataAccessMcp from "../settings/data-access.mcp.json" with { type: "json" };
 
@@ -39,15 +39,33 @@ GOALS:
 1. Extract stored procedure name and parameters
 2. Parse AddFetchParameters for search criteria
 3. Extract result column mapping from ReadRow
-4. Identify CRUD operations
+4. Identify CRUD operations (Insert, Update, Delete, GetByID)
 5. Extract data formatting logic
+6. Identify child entity operations (if any)
+
+ARCHITECTURE NOTE:
+⭐ The target project uses a MONO SHARED structure:
+- DTOs and Models are in BargeOps.Shared (${getSharedExamples().dtos})
+- Repositories use Dapper with stored procedures
+- Results are mapped to DTOs from the shared project
 
 REFERENCE EXAMPLES:
 For data access patterns, reference:
+- BargeOps.Shared DTOs: ${getSharedExamples().dtos}
+  Example: FacilityDto.cs, BoatLocationDto.cs - Target DTOs for query results
 - BargeOps.Admin.API Repositories: ${getAdminApiExamples().repositories}
-  Primary reference: IBoatLocationRepository.cs, BoatLocationRepository.cs - Dapper implementation patterns
+  Primary reference: IFacilityRepository.cs, FacilityRepository.cs - Dapper with stored procedures
+  Primary reference: IBoatLocationRepository.cs, BoatLocationRepository.cs - Complete CRUD patterns
 - BargeOps.Crewing.API Repositories: ${getCrewingApiExamples().repositories}
-  Examples: ICrewingRepository.cs, CrewingRepository.cs - See how stored procedures are called and results mapped
+  Examples: ICrewingRepository.cs, CrewingRepository.cs - Additional patterns
+
+KEY PATTERNS TO IDENTIFY:
+- Search operations: sp_{Entity}Search stored procedure with paging
+- GetByID: sp_{Entity}_GetByID
+- Insert: sp_{Entity}_Insert
+- Update: sp_{Entity}_Update
+- Delete: sp_{Entity}_Delete (usually soft delete)
+- Child entities: sp_{Entity}{Child}_GetByParentID, _Insert, _Update, _Delete
 
 OUTPUT: ${outputPath}/data-access.json
 

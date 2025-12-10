@@ -17,7 +17,7 @@
 import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
-import { getProjectRoot, getFormPathForPrompt, getFormDesignerPathForPrompt, getCrewingUiPath, getAdminUiPath, getCrewingUiExamples, getAdminUiExamples } from "../lib/paths";
+import { getProjectRoot, getFormPathForPrompt, getFormDesignerPathForPrompt, getCrewingUiPath, getAdminUiPath, getCrewingUiExamples, getAdminUiExamples, getSharedExamples } from "../lib/paths";
 import formAnalyzerSettings from "../settings/form-analyzer.settings.json" with { type: "json" };
 import formAnalyzerMcp from "../settings/form-analyzer.mcp.json" with { type: "json" };
 
@@ -96,6 +96,12 @@ JSON STRUCTURE:
   "panels": [...]
 }
 
+ARCHITECTURE NOTE:
+⭐ The target project uses a MONO SHARED structure:
+- DTOs are in BargeOps.Shared (${getSharedExamples().dtos})
+- ViewModels in UI reference shared DTOs
+- No duplication of data models
+
 REFERENCE EXAMPLES:
 For UI patterns, reference BargeOps.Crewing.UI Admin screens:
 - MVC Controllers: ${getCrewingUiExamples().controllers}
@@ -110,7 +116,11 @@ For UI patterns, reference BargeOps.Crewing.UI Admin screens:
 Target patterns in BargeOps.Admin.UI:
 - Primary reference: ${getAdminUiExamples().controllers}/BoatLocationSearchController.cs
 - Views: ${getAdminUiExamples().views}/BoatLocationSearch/ - Index.cshtml, Edit.cshtml, Details.cshtml
-- View Models: ${getAdminUiExamples().viewModels}/BoatLocationSearchViewModel.cs
+- View Models: ${getAdminUiExamples().viewModels}/BoatLocationSearchViewModel.cs, BoatLocationEditViewModel.cs
+
+Shared DTOs (referenced by UI):
+- DTOs: ${getSharedExamples().dtos}/BoatLocationDto.cs, FacilityDto.cs
+- These DTOs are used in ViewModels and API responses
 
 Begin analysis now.
 `;

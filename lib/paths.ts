@@ -149,10 +149,18 @@ export function getAdminUiPath(): string {
 }
 
 /**
+ * Get the configured path to BargeOps.Shared project
+ */
+export function getSharedProjectPath(): string {
+	return config.targetProjects.shared;
+}
+
+/**
  * Get target project paths for use in agent prompts
  */
 export function getTargetProjectsForPrompt(): string {
-	return `- BargeOps.Admin.API: ${getAdminApiPath()}
+	return `- BargeOps.Shared: ${getSharedProjectPath()} (DTOs and Models)
+- BargeOps.Admin.API: ${getAdminApiPath()}
 - BargeOps.Admin.UI: ${getAdminUiPath()}`;
 }
 
@@ -305,24 +313,37 @@ export function getCrewingUiExamples(): {
 }
 
 /**
+ * Get example paths for BargeOps.Shared (shared DTOs - the ONLY data models)
+ */
+export function getSharedExamples(): {
+	dtos: string;
+	constants: string;
+} {
+	const basePath = getSharedProjectPath();
+	return {
+		dtos: `${basePath}/Dto`,
+		constants: `${basePath}/Constants`,
+	};
+}
+
+/**
  * Get example paths for BargeOps.Admin.API (target patterns)
+ * NOTE: DTOs and Models are now in BargeOps.Shared, not in Admin.API
  */
 export function getAdminApiExamples(): {
 	controllers: string;
-	domainModels: string;
-	dtos: string;
 	repositories: string;
 	services: string;
 	mappings: string;
+	infrastructure: string;
 } {
 	const basePath = getAdminApiPath();
 	return {
 		controllers: `${basePath}/src/Admin.Api/Controllers`,
-		domainModels: `${basePath}/src/Admin.Domain/Models`,
-		dtos: `${basePath}/src/Admin.Domain/Dto`,
 		repositories: `${basePath}/src/Admin.Infrastructure/Repositories`,
-		services: `${basePath}/src/Admin.Domain/Services`,
-		mappings: `${basePath}/src/Admin.Infrastructure/Mappings`,
+		services: `${basePath}/src/Admin.Infrastructure/Services`,
+		mappings: `${basePath}/src/Admin.Infrastructure/Mapping`,
+		infrastructure: `${basePath}/src/Admin.Infrastructure`,
 	};
 }
 
@@ -340,7 +361,7 @@ export function getAdminUiExamples(): {
 	const basePath = getAdminUiPath();
 	return {
 		controllers: `${basePath}/Controllers`,
-		viewModels: `${basePath}/Models`,
+		viewModels: `${basePath}/ViewModels`,
 		views: `${basePath}/Views`,
 		javascript: `${basePath}/wwwroot/js`,
 		css: `${basePath}/wwwroot/css`,
@@ -352,12 +373,22 @@ export function getAdminUiExamples(): {
  * Get detailed reference examples guide for agent prompts (concise version)
  */
 export function getDetailedReferenceExamples(): string {
+	const shared = getSharedExamples();
 	const crewingApi = getCrewingApiExamples();
 	const crewingUi = getCrewingUiExamples();
 	const adminApi = getAdminApiExamples();
 	const adminUi = getAdminUiExamples();
-	
+
 	return `REFERENCE EXAMPLES:
+
+⭐ BargeOps.Shared (${getSharedProjectPath()}):
+CRITICAL: DTOs are the ONLY data models - no separate domain models!
+- DTOs: ${shared.dtos} (FacilityDto.cs, BoatLocationDto.cs, LookupItemDto.cs)
+  Example: ${shared.dtos}/FacilityDto.cs - Complete entity DTO with [Sortable]/[Filterable] attributes
+  Example: ${shared.dtos}/BoatLocationDto.cs - Full DTO used by both API and UI
+  Example: ${shared.dtos}/FacilitySearchRequest.cs - Search criteria DTO
+  Example: ${shared.dtos}/PagedResult.cs, DataTableResponse.cs - Generic paging wrappers
+  ⭐ These DTOs are used DIRECTLY by both API and UI - no mapping needed!
 
 BargeOps.Crewing.API (${getCrewingApiPath()}):
 - Controllers: ${crewingApi.controllers} (CrewingController.cs, BoatController.cs)
@@ -375,17 +406,22 @@ BargeOps.Crewing.UI (${getCrewingUiPath()}):
 - CSS: ${crewingUi.css} (crewingSearch.css)
 - Services: ${crewingUi.services} (ICrewingService.cs, CrewingService.cs)
 
-BargeOps.Admin.API Target (${getAdminApiPath()}):
-- PRIMARY: ${adminApi.controllers}/BoatLocationController.cs (canonical Admin API pattern)
-- Models: ${adminApi.domainModels}/BoatLocation.cs
-- DTOs: ${adminApi.dtos} (BoatLocationDto.cs, BoatLocationSearchRequest.cs)
-- Repos: ${adminApi.repositories} (IBoatLocationRepository.cs, BoatLocationRepository.cs)
-- Services: ${adminApi.services} (IBoatLocationService.cs, BoatLocationService.cs)
+⭐ BargeOps.Admin.API Target (${getAdminApiPath()}):
+PRIMARY REFERENCE: FacilityController.cs and BoatLocationController.cs
+NOTE: DTOs are in BargeOps.Shared - API uses them directly!
+- Controllers: ${adminApi.controllers}/FacilityController.cs, BoatLocationController.cs (canonical API patterns)
+- Repos: ${adminApi.repositories} (IFacilityRepository.cs, FacilityRepository.cs - Dapper patterns)
+  Example: FacilityRepository.cs - Returns DTOs directly from stored procedures
+  Example: BoatLocationRepository.cs - Complete CRUD with DTOs
+- Services: ${adminApi.services} (IFacilityService.cs, FacilityService.cs)
+  Example: FacilityService.cs - Service layer using DTOs (no mapping needed!)
+- Mappings: ${adminApi.mappings} (Mapping profiles - usually NOT needed with DTOs)
 
-BargeOps.Admin.UI Target (${getAdminUiPath()}):
-- PRIMARY: ${adminUi.controllers}/BoatLocationSearchController.cs (canonical Admin UI pattern)
+⭐ BargeOps.Admin.UI Target (${getAdminUiPath()}):
+PRIMARY REFERENCE: BoatLocationSearchController.cs
+- Controllers: ${adminUi.controllers}/BoatLocationSearchController.cs (canonical Admin UI pattern)
 - ViewModels: ${adminUi.viewModels} (BoatLocationSearchViewModel.cs, BoatLocationEditViewModel.cs)
 - Views: ${adminUi.views}/BoatLocationSearch/ (Index.cshtml, Edit.cshtml)
-- JS: ${adminUi.javascript}/boatLocationSearch.js
-- Services: ${adminUi.services} (IBoatLocationService.cs, BoatLocationService.cs)`;
+- JS: ${adminUi.javascript}/boatLocationSearch.js (DataTables initialization)
+- Services: ${adminUi.services} (IBoatLocationService.cs, BoatLocationService.cs - API client)`;
 }
