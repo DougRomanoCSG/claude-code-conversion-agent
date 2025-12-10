@@ -1,0 +1,1522 @@
+{
+  "entity": "BoatFuelPrices",
+  "forms": {
+    "search": {
+      "legacyForm": "frmBoatFuelPricesLocationSearch",
+      "modernView": "Views/BoatFuelPricesSearch/Index.cshtml",
+      "modernController": "BoatFuelPricesSearchController",
+      "modernJavaScript": "wwwroot/js/boatFuelPricesSearch.js",
+      "modernCSS": "wwwroot/css/boatFuelPricesSearch.css"
+    },
+    "detail": {
+      "legacyForm": "frmBoatFuelPricesLocationDetail",
+      "modernView": "Views/BoatFuelPricesDetail/Index.cshtml",
+      "modernController": "BoatFuelPricesDetailController",
+      "modernJavaScript": "wwwroot/js/boatFuelPricesDetail.js",
+      "modernCSS": "wwwroot/css/boatFuelPricesDetail.css"
+    }
+  },
+  "controlMappings": {
+    "searchForm": {
+      "filterControls": [
+        {
+          "legacyControl": {
+            "name": "cboBoat",
+            "type": "UltraCombo",
+            "bindingProperty": "BoatID",
+            "displayMember": "BoatName",
+            "valueMember": "BoatID",
+            "dataSource": "sp_Boat_GetAll"
+          },
+          "modernControl": {
+            "type": "Select2",
+            "htmlElement": "select",
+            "cssClass": "form-control select2",
+            "id": "cboBoat",
+            "name": "BoatID",
+            "label": "Boat",
+            "implementation": {
+              "html": "<select id=\"cboBoat\" name=\"BoatID\" class=\"form-control select2\" data-placeholder=\"Select Boat...\"></select>",
+              "javascript": {
+                "initialization": "$('#cboBoat').select2({ placeholder: 'Select Boat...', allowClear: true, ajax: { url: '/api/boats', dataType: 'json', processResults: function(data) { return { results: $.map(data, function(item) { return { id: item.boatID, text: item.boatName }; }) }; } } });",
+                "getValue": "$('#cboBoat').val()",
+                "setValue": "$('#cboBoat').val(value).trigger('change');",
+                "clear": "$('#cboBoat').val(null).trigger('change');"
+              },
+              "razorHelper": "@Html.DropDownListFor(m => m.BoatID, new SelectList(Enumerable.Empty<SelectListItem>()), \"Select Boat...\", new { @class = \"form-control select2\", data_placeholder = \"Select Boat...\" })"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "select2Version": "4.0.x",
+            "apiEndpoint": "/api/boats",
+            "validationRules": {
+              "required": false
+            }
+          },
+          "migrationNotes": [
+            "UltraCombo provides dropdown with autocomplete - Select2 provides equivalent functionality",
+            "Use AJAX to populate dropdown from API endpoint instead of direct database binding",
+            "Select2 supports search, clear, and placeholder out of the box",
+            "Consider implementing server-side filtering for large boat lists"
+          ]
+        },
+        {
+          "legacyControl": {
+            "name": "cboLocation",
+            "type": "UltraCombo",
+            "bindingProperty": "LocationID",
+            "displayMember": "LocationName",
+            "valueMember": "LocationID",
+            "dataSource": "sp_FacilityLocation_GetAll"
+          },
+          "modernControl": {
+            "type": "Select2",
+            "htmlElement": "select",
+            "cssClass": "form-control select2",
+            "id": "cboLocation",
+            "name": "LocationID",
+            "label": "Fuel Location",
+            "implementation": {
+              "html": "<select id=\"cboLocation\" name=\"LocationID\" class=\"form-control select2\" data-placeholder=\"Select Location...\"></select>",
+              "javascript": {
+                "initialization": "$('#cboLocation').select2({ placeholder: 'Select Location...', allowClear: true, ajax: { url: '/api/facilities/locations', dataType: 'json', processResults: function(data) { return { results: $.map(data, function(item) { return { id: item.locationID, text: item.locationName }; }) }; } } });",
+                "getValue": "$('#cboLocation').val()",
+                "setValue": "$('#cboLocation').val(value).trigger('change');",
+                "clear": "$('#cboLocation').val(null).trigger('change');"
+              },
+              "razorHelper": "@Html.DropDownListFor(m => m.LocationID, new SelectList(Enumerable.Empty<SelectListItem>()), \"Select Location...\", new { @class = \"form-control select2\", data_placeholder = \"Select Location...\" })"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "select2Version": "4.0.x",
+            "apiEndpoint": "/api/facilities/locations",
+            "validationRules": {
+              "required": false
+            }
+          },
+          "migrationNotes": [
+            "Map to facility/location API endpoint",
+            "Select2 provides search functionality for location names"
+          ]
+        },
+        {
+          "legacyControl": {
+            "name": "cboFuelType",
+            "type": "UltraCombo",
+            "bindingProperty": "FuelType",
+            "displayMember": "FuelTypeName",
+            "valueMember": "FuelType",
+            "dataSource": "sp_FuelType_GetAll"
+          },
+          "modernControl": {
+            "type": "Select2",
+            "htmlElement": "select",
+            "cssClass": "form-control select2",
+            "id": "cboFuelType",
+            "name": "FuelType",
+            "label": "Fuel Type",
+            "implementation": {
+              "html": "<select id=\"cboFuelType\" name=\"FuelType\" class=\"form-control select2\" data-placeholder=\"Select Fuel Type...\"></select>",
+              "javascript": {
+                "initialization": "$('#cboFuelType').select2({ placeholder: 'Select Fuel Type...', allowClear: true, ajax: { url: '/api/fueltypes', dataType: 'json', processResults: function(data) { return { results: $.map(data, function(item) { return { id: item.fuelType, text: item.fuelTypeName }; }) }; } } });",
+                "getValue": "$('#cboFuelType').val()",
+                "setValue": "$('#cboFuelType').val(value).trigger('change');",
+                "clear": "$('#cboFuelType').val(null).trigger('change');"
+              },
+              "razorHelper": "@Html.DropDownListFor(m => m.FuelType, new SelectList(Enumerable.Empty<SelectListItem>()), \"Select Fuel Type...\", new { @class = \"form-control select2\", data_placeholder = \"Select Fuel Type...\" })"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "select2Version": "4.0.x",
+            "apiEndpoint": "/api/fueltypes",
+            "validationRules": {
+              "required": false
+            },
+            "commonValues": ["Diesel", "Gasoline", "Biodiesel", "E85"]
+          },
+          "migrationNotes": [
+            "Small lookup table - consider caching fuel types on client side",
+            "Could also use static dropdown if fuel types rarely change"
+          ]
+        },
+        {
+          "legacyControl": {
+            "name": "cboVendor",
+            "type": "UltraCombo",
+            "bindingProperty": "VendorID",
+            "displayMember": "VendorName",
+            "valueMember": "VendorID",
+            "dataSource": "sp_Vendor_GetAll"
+          },
+          "modernControl": {
+            "type": "Select2",
+            "htmlElement": "select",
+            "cssClass": "form-control select2",
+            "id": "cboVendor",
+            "name": "VendorID",
+            "label": "Vendor",
+            "implementation": {
+              "html": "<select id=\"cboVendor\" name=\"VendorID\" class=\"form-control select2\" data-placeholder=\"Select Vendor...\"></select>",
+              "javascript": {
+                "initialization": "$('#cboVendor').select2({ placeholder: 'Select Vendor...', allowClear: true, ajax: { url: '/api/vendors', dataType: 'json', processResults: function(data) { return { results: $.map(data, function(item) { return { id: item.vendorID, text: item.vendorName }; }) }; } } });",
+                "getValue": "$('#cboVendor').val()",
+                "setValue": "$('#cboVendor').val(value).trigger('change');",
+                "clear": "$('#cboVendor').val(null).trigger('change');"
+              },
+              "razorHelper": "@Html.DropDownListFor(m => m.VendorID, new SelectList(Enumerable.Empty<SelectListItem>()), \"Select Vendor...\", new { @class = \"form-control select2\", data_placeholder = \"Select Vendor...\" })"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "select2Version": "4.0.x",
+            "apiEndpoint": "/api/vendors",
+            "validationRules": {
+              "required": false
+            }
+          },
+          "migrationNotes": [
+            "Vendor dropdown for filtering fuel price vendors"
+          ]
+        },
+        {
+          "legacyControl": {
+            "name": "dtpStartDate",
+            "type": "UltraDateTimePicker",
+            "bindingProperty": "StartDate",
+            "format": "MM/dd/yyyy",
+            "nullable": true
+          },
+          "modernControl": {
+            "type": "Bootstrap Datepicker",
+            "htmlElement": "input",
+            "cssClass": "form-control datepicker",
+            "id": "dtpStartDate",
+            "name": "StartDate",
+            "label": "Start Date",
+            "implementation": {
+              "html": "<input type=\"text\" id=\"dtpStartDate\" name=\"StartDate\" class=\"form-control datepicker\" placeholder=\"MM/DD/YYYY\" autocomplete=\"off\" />",
+              "javascript": {
+                "initialization": "$('#dtpStartDate').datepicker({ format: 'mm/dd/yyyy', autoclose: true, todayHighlight: true, clearBtn: true });",
+                "getValue": "$('#dtpStartDate').datepicker('getDate')",
+                "setValue": "$('#dtpStartDate').datepicker('setDate', value);",
+                "clear": "$('#dtpStartDate').datepicker('clearDate');"
+              },
+              "razorHelper": "@Html.TextBoxFor(m => m.StartDate, \"{0:MM/dd/yyyy}\", new { @class = \"form-control datepicker\", placeholder = \"MM/DD/YYYY\", autocomplete = \"off\" })"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "datepickerLibrary": "bootstrap-datepicker 1.9.x",
+            "validationRules": {
+              "required": false,
+              "dateFormat": "MM/dd/yyyy",
+              "customValidation": "EndDate >= StartDate"
+            }
+          },
+          "migrationNotes": [
+            "Use bootstrap-datepicker for consistent date input",
+            "Validate that StartDate <= EndDate",
+            "Consider using HTML5 date input as fallback or alternative"
+          ]
+        },
+        {
+          "legacyControl": {
+            "name": "dtpEndDate",
+            "type": "UltraDateTimePicker",
+            "bindingProperty": "EndDate",
+            "format": "MM/dd/yyyy",
+            "nullable": true
+          },
+          "modernControl": {
+            "type": "Bootstrap Datepicker",
+            "htmlElement": "input",
+            "cssClass": "form-control datepicker",
+            "id": "dtpEndDate",
+            "name": "EndDate",
+            "label": "End Date",
+            "implementation": {
+              "html": "<input type=\"text\" id=\"dtpEndDate\" name=\"EndDate\" class=\"form-control datepicker\" placeholder=\"MM/DD/YYYY\" autocomplete=\"off\" />",
+              "javascript": {
+                "initialization": "$('#dtpEndDate').datepicker({ format: 'mm/dd/yyyy', autoclose: true, todayHighlight: true, clearBtn: true });",
+                "getValue": "$('#dtpEndDate').datepicker('getDate')",
+                "setValue": "$('#dtpEndDate').datepicker('setDate', value);",
+                "clear": "$('#dtpEndDate').datepicker('clearDate');"
+              },
+              "razorHelper": "@Html.TextBoxFor(m => m.EndDate, \"{0:MM/dd/yyyy}\", new { @class = \"form-control datepicker\", placeholder = \"MM/DD/YYYY\", autocomplete = \"off\" })"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "datepickerLibrary": "bootstrap-datepicker 1.9.x",
+            "validationRules": {
+              "required": false,
+              "dateFormat": "MM/dd/yyyy",
+              "customValidation": "EndDate >= StartDate"
+            }
+          },
+          "migrationNotes": [
+            "Validate that EndDate >= StartDate",
+            "Consider date range validation in both client and server side"
+          ]
+        },
+        {
+          "legacyControl": {
+            "name": "txtMinPrice",
+            "type": "UltraNumericEditor",
+            "bindingProperty": "MinPrice",
+            "format": "Currency",
+            "decimalPlaces": 4,
+            "nullable": true
+          },
+          "modernControl": {
+            "type": "Bootstrap Form Input",
+            "htmlElement": "input",
+            "cssClass": "form-control text-right",
+            "id": "txtMinPrice",
+            "name": "MinPrice",
+            "label": "Min Price/Gal",
+            "implementation": {
+              "html": "<input type=\"number\" id=\"txtMinPrice\" name=\"MinPrice\" class=\"form-control text-right\" placeholder=\"$0.0000\" step=\"0.0001\" min=\"0\" />",
+              "javascript": {
+                "initialization": "$('#txtMinPrice').on('blur', function() { const val = parseFloat($(this).val()); if (!isNaN(val)) { $(this).val(val.toFixed(4)); } });",
+                "getValue": "parseFloat($('#txtMinPrice').val())",
+                "setValue": "$('#txtMinPrice').val(value.toFixed(4));",
+                "clear": "$('#txtMinPrice').val('');"
+              },
+              "razorHelper": "@Html.TextBoxFor(m => m.MinPrice, new { @class = \"form-control text-right\", type = \"number\", step = \"0.0001\", min = \"0\", placeholder = \"$0.0000\" })"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "validationRules": {
+              "required": false,
+              "dataType": "decimal",
+              "min": 0,
+              "step": 0.0001,
+              "decimalPlaces": 4,
+              "customValidation": "MaxPrice >= MinPrice"
+            }
+          },
+          "migrationNotes": [
+            "Use HTML5 number input with step for decimal precision",
+            "Validate MinPrice <= MaxPrice",
+            "Format display to 4 decimal places on blur",
+            "Consider using input masking library for better UX"
+          ]
+        },
+        {
+          "legacyControl": {
+            "name": "txtMaxPrice",
+            "type": "UltraNumericEditor",
+            "bindingProperty": "MaxPrice",
+            "format": "Currency",
+            "decimalPlaces": 4,
+            "nullable": true
+          },
+          "modernControl": {
+            "type": "Bootstrap Form Input",
+            "htmlElement": "input",
+            "cssClass": "form-control text-right",
+            "id": "txtMaxPrice",
+            "name": "MaxPrice",
+            "label": "Max Price/Gal",
+            "implementation": {
+              "html": "<input type=\"number\" id=\"txtMaxPrice\" name=\"MaxPrice\" class=\"form-control text-right\" placeholder=\"$9.9999\" step=\"0.0001\" min=\"0\" />",
+              "javascript": {
+                "initialization": "$('#txtMaxPrice').on('blur', function() { const val = parseFloat($(this).val()); if (!isNaN(val)) { $(this).val(val.toFixed(4)); } });",
+                "getValue": "parseFloat($('#txtMaxPrice').val())",
+                "setValue": "$('#txtMaxPrice').val(value.toFixed(4));",
+                "clear": "$('#txtMaxPrice').val('');"
+              },
+              "razorHelper": "@Html.TextBoxFor(m => m.MaxPrice, new { @class = \"form-control text-right\", type = \"number\", step = \"0.0001\", min = \"0\", placeholder = \"$9.9999\" })"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "validationRules": {
+              "required": false,
+              "dataType": "decimal",
+              "min": 0,
+              "step": 0.0001,
+              "decimalPlaces": 4,
+              "customValidation": "MaxPrice >= MinPrice"
+            }
+          },
+          "migrationNotes": [
+            "Validate MaxPrice >= MinPrice",
+            "Consistent decimal formatting with MinPrice"
+          ]
+        },
+        {
+          "legacyControl": {
+            "name": "chkActiveOnly",
+            "type": "UltraCheckBox",
+            "bindingProperty": "ActiveOnly",
+            "defaultValue": true,
+            "text": "Active Only"
+          },
+          "modernControl": {
+            "type": "Bootstrap Checkbox",
+            "htmlElement": "input[type=checkbox]",
+            "cssClass": "form-check-input",
+            "id": "chkActiveOnly",
+            "name": "ActiveOnly",
+            "label": "Active Only",
+            "implementation": {
+              "html": "<div class=\"form-check\"><input type=\"checkbox\" id=\"chkActiveOnly\" name=\"ActiveOnly\" class=\"form-check-input\" checked /><label class=\"form-check-label\" for=\"chkActiveOnly\">Active Only</label></div>",
+              "javascript": {
+                "initialization": "$('#chkActiveOnly').prop('checked', true);",
+                "getValue": "$('#chkActiveOnly').is(':checked')",
+                "setValue": "$('#chkActiveOnly').prop('checked', value);",
+                "toggle": "$('#chkActiveOnly').prop('checked', !$('#chkActiveOnly').is(':checked'));"
+              },
+              "razorHelper": "@Html.CheckBoxFor(m => m.ActiveOnly, new { @class = \"form-check-input\", @checked = \"checked\" })\n@Html.LabelFor(m => m.ActiveOnly, \"Active Only\", new { @class = \"form-check-label\" })"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "defaultValue": true,
+            "validationRules": {
+              "required": false
+            }
+          },
+          "migrationNotes": [
+            "Default to checked (true) for ActiveOnly filter",
+            "Use Bootstrap form-check structure for proper styling"
+          ]
+        }
+      ],
+      "dataGrid": {
+        "legacyControl": {
+          "name": "grdResults",
+          "type": "UltraGrid",
+          "dataSource": "sp_BoatFuelPricesLocationSearch",
+          "features": [
+            "Sorting",
+            "Column resizing",
+            "Row selection",
+            "Custom formatting",
+            "Context menu for row actions"
+          ],
+          "columns": [
+            {
+              "key": "BoatFuelPriceID",
+              "header": "BoatFuelPriceID",
+              "visible": false,
+              "isPrimaryKey": true
+            },
+            {
+              "key": "BoatName",
+              "header": "Boat",
+              "width": "150px",
+              "sortable": true
+            },
+            {
+              "key": "LocationName",
+              "header": "Location",
+              "width": "150px",
+              "sortable": true
+            },
+            {
+              "key": "FuelType",
+              "header": "Fuel Type",
+              "width": "100px",
+              "sortable": true
+            },
+            {
+              "key": "PriceDate",
+              "header": "Price Date",
+              "width": "100px",
+              "sortable": true,
+              "format": "MM/dd/yyyy"
+            },
+            {
+              "key": "PricePerGallon",
+              "header": "Price/Gal",
+              "width": "100px",
+              "sortable": true,
+              "format": "$0.0000",
+              "align": "right"
+            },
+            {
+              "key": "Quantity",
+              "header": "Quantity (Gal)",
+              "width": "100px",
+              "sortable": true,
+              "format": "0.00",
+              "align": "right"
+            },
+            {
+              "key": "TotalCost",
+              "header": "Total Cost",
+              "width": "120px",
+              "sortable": true,
+              "format": "$0.00",
+              "align": "right"
+            },
+            {
+              "key": "VendorName",
+              "header": "Vendor",
+              "width": "150px",
+              "sortable": true
+            },
+            {
+              "key": "InvoiceNumber",
+              "header": "Invoice #",
+              "width": "100px",
+              "sortable": true
+            },
+            {
+              "key": "Notes",
+              "header": "Notes",
+              "width": "200px",
+              "sortable": false
+            },
+            {
+              "key": "IsActive",
+              "header": "Active",
+              "width": "80px",
+              "sortable": true,
+              "format": "checkbox"
+            }
+          ]
+        },
+        "modernControl": {
+          "type": "DataTables",
+          "htmlElement": "table",
+          "cssClass": "table table-striped table-bordered dt-responsive nowrap",
+          "id": "grdResults",
+          "implementation": {
+            "html": "<table id=\"grdResults\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\"><thead><tr><th>Boat</th><th>Location</th><th>Fuel Type</th><th>Price Date</th><th>Price/Gal</th><th>Quantity (Gal)</th><th>Total Cost</th><th>Vendor</th><th>Invoice #</th><th>Notes</th><th>Active</th><th>Actions</th></tr></thead></table>",
+            "javascript": {
+              "initialization": "var table = $('#grdResults').DataTable({\n  processing: true,\n  serverSide: true,\n  ajax: {\n    url: '/api/boatfuelprices/search',\n    type: 'POST',\n    data: function(d) {\n      d.boatID = $('#cboBoat').val();\n      d.locationID = $('#cboLocation').val();\n      d.fuelType = $('#cboFuelType').val();\n      d.startDate = $('#dtpStartDate').val();\n      d.endDate = $('#dtpEndDate').val();\n      d.minPrice = $('#txtMinPrice').val();\n      d.maxPrice = $('#txtMaxPrice').val();\n      d.vendorID = $('#cboVendor').val();\n      d.activeOnly = $('#chkActiveOnly').is(':checked');\n    }\n  },\n  columns: [\n    { data: 'boatName', name: 'BoatName' },\n    { data: 'locationName', name: 'LocationName' },\n    { data: 'fuelType', name: 'FuelType' },\n    { data: 'priceDate', name: 'PriceDate', render: function(data) { return moment(data).format('MM/DD/YYYY'); } },\n    { data: 'pricePerGallon', name: 'PricePerGallon', className: 'text-right', render: function(data) { return '$' + parseFloat(data).toFixed(4); } },\n    { data: 'quantity', name: 'Quantity', className: 'text-right', render: function(data) { return data ? parseFloat(data).toFixed(2) : ''; } },\n    { data: 'totalCost', name: 'TotalCost', className: 'text-right', render: function(data) { return data ? '$' + parseFloat(data).toFixed(2) : ''; } },\n    { data: 'vendorName', name: 'VendorName' },\n    { data: 'invoiceNumber', name: 'InvoiceNumber' },\n    { data: 'notes', name: 'Notes' },\n    { data: 'isActive', name: 'IsActive', render: function(data) { return data ? '<input type=\"checkbox\" checked disabled />' : '<input type=\"checkbox\" disabled />'; } },\n    {\n      data: 'boatFuelPriceID',\n      orderable: false,\n      render: function(data, type, row) {\n        var actions = '<div class=\"btn-group btn-group-sm\">';\n        actions += '<button class=\"btn btn-info btn-view\" data-id=\"' + data + '\" title=\"View\"><i class=\"fas fa-eye\"></i></button>';\n        if (hasModifyPermission) {\n          actions += '<button class=\"btn btn-warning btn-edit\" data-id=\"' + data + '\" title=\"Edit\"><i class=\"fas fa-edit\"></i></button>';\n          actions += '<button class=\"btn btn-danger btn-delete\" data-id=\"' + data + '\" title=\"Delete\"><i class=\"fas fa-trash\"></i></button>';\n        }\n        actions += '</div>';\n        return actions;\n      }\n    }\n  ],\n  order: [[3, 'desc']],\n  pageLength: 25,\n  responsive: true,\n  dom: 'Bfrtip',\n  buttons: ['copy', 'csv', 'excel', 'pdf', 'print']\n});",
+              "reload": "table.ajax.reload();",
+              "clear": "table.clear().draw();",
+              "getSelectedRows": "table.rows('.selected').data().toArray();"
+            }
+          },
+          "dataTablesVersion": "1.13.x",
+          "bootstrapVersion": "4.x/5.x",
+          "features": [
+            "Server-side processing",
+            "Sorting",
+            "Pagination",
+            "Column filtering",
+            "Export (CSV, Excel, PDF)",
+            "Responsive design",
+            "Row actions (View, Edit, Delete)"
+          ],
+          "columns": [
+            {
+              "data": "boatName",
+              "name": "BoatName",
+              "title": "Boat",
+              "sortable": true
+            },
+            {
+              "data": "locationName",
+              "name": "LocationName",
+              "title": "Location",
+              "sortable": true
+            },
+            {
+              "data": "fuelType",
+              "name": "FuelType",
+              "title": "Fuel Type",
+              "sortable": true
+            },
+            {
+              "data": "priceDate",
+              "name": "PriceDate",
+              "title": "Price Date",
+              "sortable": true,
+              "render": "moment(data).format('MM/DD/YYYY')"
+            },
+            {
+              "data": "pricePerGallon",
+              "name": "PricePerGallon",
+              "title": "Price/Gal",
+              "sortable": true,
+              "className": "text-right",
+              "render": "'$' + parseFloat(data).toFixed(4)"
+            },
+            {
+              "data": "quantity",
+              "name": "Quantity",
+              "title": "Quantity (Gal)",
+              "sortable": true,
+              "className": "text-right",
+              "render": "data ? parseFloat(data).toFixed(2) : ''"
+            },
+            {
+              "data": "totalCost",
+              "name": "TotalCost",
+              "title": "Total Cost",
+              "sortable": true,
+              "className": "text-right",
+              "render": "data ? '$' + parseFloat(data).toFixed(2) : ''"
+            },
+            {
+              "data": "vendorName",
+              "name": "VendorName",
+              "title": "Vendor",
+              "sortable": true
+            },
+            {
+              "data": "invoiceNumber",
+              "name": "InvoiceNumber",
+              "title": "Invoice #",
+              "sortable": true
+            },
+            {
+              "data": "notes",
+              "name": "Notes",
+              "title": "Notes",
+              "sortable": false
+            },
+            {
+              "data": "isActive",
+              "name": "IsActive",
+              "title": "Active",
+              "sortable": true,
+              "render": "checkbox"
+            },
+            {
+              "data": "boatFuelPriceID",
+              "name": "Actions",
+              "title": "Actions",
+              "sortable": false,
+              "orderable": false,
+              "render": "action buttons"
+            }
+          ],
+          "apiEndpoint": "/api/boatfuelprices/search",
+          "serverSideProcessing": true,
+          "defaultSort": {
+            "column": "PriceDate",
+            "direction": "desc"
+          }
+        },
+        "migrationNotes": [
+          "UltraGrid to DataTables provides similar functionality with web-native components",
+          "Server-side processing recommended for large datasets",
+          "Use DataTables column render functions for formatting (dates, currency, decimals)",
+          "Implement action buttons (View, Edit, Delete) in last column based on permissions",
+          "Use DataTables buttons extension for export functionality",
+          "Consider using DataTables responsive extension for mobile compatibility",
+          "Row selection can be handled via DataTables select extension",
+          "Use moment.js for consistent date formatting"
+        ]
+      },
+      "actionButtons": [
+        {
+          "legacyControl": {
+            "name": "btnSearch",
+            "type": "UltraButton",
+            "text": "Search",
+            "permission": "BoatFuelPricesReadOnly"
+          },
+          "modernControl": {
+            "type": "Bootstrap Button",
+            "htmlElement": "button",
+            "cssClass": "btn btn-primary",
+            "id": "btnSearch",
+            "label": "Search",
+            "icon": "fas fa-search",
+            "implementation": {
+              "html": "<button type=\"button\" id=\"btnSearch\" class=\"btn btn-primary\"><i class=\"fas fa-search\"></i> Search</button>",
+              "javascript": {
+                "clickHandler": "$('#btnSearch').on('click', function() { table.ajax.reload(); });"
+              },
+              "razorHelper": "<button type=\"button\" id=\"btnSearch\" class=\"btn btn-primary\"><i class=\"fas fa-search\"></i> Search</button>"
+            },
+            "permission": "BoatFuelPricesReadOnly",
+            "conditionalRendering": "@if (User.HasClaim(\"Permission\", \"BoatFuelPricesReadOnly\")) { ... }"
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "btnClear",
+            "type": "UltraButton",
+            "text": "Clear",
+            "permission": "BoatFuelPricesReadOnly"
+          },
+          "modernControl": {
+            "type": "Bootstrap Button",
+            "htmlElement": "button",
+            "cssClass": "btn btn-secondary",
+            "id": "btnClear",
+            "label": "Clear",
+            "icon": "fas fa-eraser",
+            "implementation": {
+              "html": "<button type=\"button\" id=\"btnClear\" class=\"btn btn-secondary\"><i class=\"fas fa-eraser\"></i> Clear</button>",
+              "javascript": {
+                "clickHandler": "$('#btnClear').on('click', function() { $('#cboBoat').val(null).trigger('change'); $('#cboLocation').val(null).trigger('change'); $('#cboFuelType').val(null).trigger('change'); $('#cboVendor').val(null).trigger('change'); $('#dtpStartDate').datepicker('clearDate'); $('#dtpEndDate').datepicker('clearDate'); $('#txtMinPrice').val(''); $('#txtMaxPrice').val(''); $('#chkActiveOnly').prop('checked', true); table.clear().draw(); });"
+              },
+              "razorHelper": "<button type=\"button\" id=\"btnClear\" class=\"btn btn-secondary\"><i class=\"fas fa-eraser\"></i> Clear</button>"
+            },
+            "permission": "BoatFuelPricesReadOnly"
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "btnNew",
+            "type": "UltraButton",
+            "text": "New",
+            "permission": "BoatFuelPricesModify"
+          },
+          "modernControl": {
+            "type": "Bootstrap Button",
+            "htmlElement": "button",
+            "cssClass": "btn btn-success",
+            "id": "btnNew",
+            "label": "New",
+            "icon": "fas fa-plus",
+            "implementation": {
+              "html": "<button type=\"button\" id=\"btnNew\" class=\"btn btn-success\"><i class=\"fas fa-plus\"></i> New</button>",
+              "javascript": {
+                "clickHandler": "$('#btnNew').on('click', function() { window.location.href = '/BoatFuelPricesDetail/Create'; });"
+              },
+              "razorHelper": "@if (User.HasClaim(\"Permission\", \"BoatFuelPricesModify\")) { <button type=\"button\" id=\"btnNew\" class=\"btn btn-success\"><i class=\"fas fa-plus\"></i> New</button> }"
+            },
+            "permission": "BoatFuelPricesModify",
+            "conditionalRendering": "@if (User.HasClaim(\"Permission\", \"BoatFuelPricesModify\")) { ... }"
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "btnExport",
+            "type": "UltraButton",
+            "text": "Export",
+            "permission": "BoatFuelPricesReadOnly"
+          },
+          "modernControl": {
+            "type": "Bootstrap Button",
+            "htmlElement": "button",
+            "cssClass": "btn btn-info",
+            "id": "btnExport",
+            "label": "Export",
+            "icon": "fas fa-file-export",
+            "implementation": {
+              "html": "<button type=\"button\" id=\"btnExport\" class=\"btn btn-info\"><i class=\"fas fa-file-export\"></i> Export</button>",
+              "javascript": {
+                "clickHandler": "$('#btnExport').on('click', function() { table.button('.buttons-excel').trigger(); });"
+              },
+              "razorHelper": "<button type=\"button\" id=\"btnExport\" class=\"btn btn-info\"><i class=\"fas fa-file-export\"></i> Export</button>"
+            },
+            "permission": "BoatFuelPricesReadOnly",
+            "notes": "Uses DataTables buttons extension for export functionality"
+          }
+        }
+      ]
+    },
+    "detailForm": {
+      "containerControls": [
+        {
+          "legacyControl": {
+            "name": "pnlBasicInfo",
+            "type": "UltraPanel",
+            "text": "Basic Information",
+            "collapsible": true,
+            "expanded": true
+          },
+          "modernControl": {
+            "type": "Bootstrap Card",
+            "htmlElement": "div",
+            "cssClass": "card mb-3",
+            "id": "pnlBasicInfo",
+            "title": "Basic Information",
+            "implementation": {
+              "html": "<div class=\"card mb-3\" id=\"pnlBasicInfo\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">Basic Information</h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- Form controls go here -->\n  </div>\n</div>",
+              "collapsible": "<div class=\"card mb-3\" id=\"pnlBasicInfo\">\n  <div class=\"card-header\" data-toggle=\"collapse\" data-target=\"#collapseBasicInfo\">\n    <h5 class=\"card-title mb-0\">Basic Information <i class=\"fas fa-chevron-down float-right\"></i></h5>\n  </div>\n  <div id=\"collapseBasicInfo\" class=\"collapse show\">\n    <div class=\"card-body\">\n      <!-- Form controls go here -->\n    </div>\n  </div>\n</div>"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "collapsible": true,
+            "defaultExpanded": true
+          },
+          "migrationNotes": [
+            "UltraPanel maps to Bootstrap Card component",
+            "Use Bootstrap collapse for collapsible panels",
+            "Card header contains the panel title",
+            "Card body contains the form controls"
+          ]
+        },
+        {
+          "legacyControl": {
+            "name": "pnlPriceDetails",
+            "type": "UltraPanel",
+            "text": "Price Details",
+            "collapsible": true,
+            "expanded": true
+          },
+          "modernControl": {
+            "type": "Bootstrap Card",
+            "htmlElement": "div",
+            "cssClass": "card mb-3",
+            "id": "pnlPriceDetails",
+            "title": "Price Details",
+            "implementation": {
+              "html": "<div class=\"card mb-3\" id=\"pnlPriceDetails\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">Price Details</h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- Form controls go here -->\n  </div>\n</div>"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "collapsible": true,
+            "defaultExpanded": true
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "pnlInvoiceInfo",
+            "type": "UltraPanel",
+            "text": "Invoice Information",
+            "collapsible": true,
+            "expanded": false
+          },
+          "modernControl": {
+            "type": "Bootstrap Card",
+            "htmlElement": "div",
+            "cssClass": "card mb-3",
+            "id": "pnlInvoiceInfo",
+            "title": "Invoice Information",
+            "implementation": {
+              "html": "<div class=\"card mb-3\" id=\"pnlInvoiceInfo\">\n  <div class=\"card-header\" data-toggle=\"collapse\" data-target=\"#collapseInvoiceInfo\">\n    <h5 class=\"card-title mb-0\">Invoice Information <i class=\"fas fa-chevron-down float-right\"></i></h5>\n  </div>\n  <div id=\"collapseInvoiceInfo\" class=\"collapse\">\n    <div class=\"card-body\">\n      <!-- Form controls go here -->\n    </div>\n  </div>\n</div>"
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "collapsible": true,
+            "defaultExpanded": false
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "tabMain",
+            "type": "UltraTabControl",
+            "tabs": [
+              {
+                "key": "tabBasic",
+                "text": "Basic"
+              },
+              {
+                "key": "tabHistory",
+                "text": "History"
+              },
+              {
+                "key": "tabAnalytics",
+                "text": "Analytics"
+              }
+            ]
+          },
+          "modernControl": {
+            "type": "Bootstrap Nav Tabs",
+            "htmlElement": "ul.nav + div.tab-content",
+            "cssClass": "nav nav-tabs",
+            "id": "tabMain",
+            "implementation": {
+              "html": "<ul class=\"nav nav-tabs\" id=\"tabMain\" role=\"tablist\">\n  <li class=\"nav-item\">\n    <a class=\"nav-link active\" id=\"tab-basic\" data-toggle=\"tab\" href=\"#tabBasic\" role=\"tab\">Basic</a>\n  </li>\n  <li class=\"nav-item\">\n    <a class=\"nav-link\" id=\"tab-history\" data-toggle=\"tab\" href=\"#tabHistory\" role=\"tab\">History</a>\n  </li>\n  <li class=\"nav-item\">\n    <a class=\"nav-link\" id=\"tab-analytics\" data-toggle=\"tab\" href=\"#tabAnalytics\" role=\"tab\">Analytics</a>\n  </li>\n</ul>\n<div class=\"tab-content\" id=\"tabMainContent\">\n  <div class=\"tab-pane fade show active\" id=\"tabBasic\" role=\"tabpanel\"><!-- Basic tab content --></div>\n  <div class=\"tab-pane fade\" id=\"tabHistory\" role=\"tabpanel\"><!-- History tab content --></div>\n  <div class=\"tab-pane fade\" id=\"tabAnalytics\" role=\"tabpanel\"><!-- Analytics tab content --></div>\n</div>",
+              "javascript": {
+                "initialization": "$('#tabMain a').on('click', function (e) { e.preventDefault(); $(this).tab('show'); });",
+                "activateTab": "$('#tab-basic').tab('show');",
+                "getActiveTab": "$('#tabMain .nav-link.active').attr('href');"
+              }
+            },
+            "bootstrapVersion": "4.x/5.x",
+            "tabs": [
+              {
+                "id": "tabBasic",
+                "label": "Basic",
+                "active": true
+              },
+              {
+                "id": "tabHistory",
+                "label": "History",
+                "active": false
+              },
+              {
+                "id": "tabAnalytics",
+                "label": "Analytics",
+                "active": false
+              }
+            ]
+          },
+          "migrationNotes": [
+            "UltraTabControl maps to Bootstrap Nav Tabs",
+            "First tab is active by default",
+            "Tab content uses tab-pane with fade effect",
+            "Use data-toggle='tab' for tab switching"
+          ]
+        }
+      ],
+      "formFields": [
+        {
+          "legacyControl": {
+            "name": "cboBoat",
+            "type": "UltraCombo",
+            "bindingProperty": "BoatID",
+            "required": true,
+            "displayMember": "BoatName",
+            "valueMember": "BoatID"
+          },
+          "modernControl": {
+            "type": "Select2",
+            "htmlElement": "select",
+            "cssClass": "form-control select2",
+            "id": "cboBoat",
+            "name": "BoatID",
+            "label": "Boat",
+            "required": true,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"cboBoat\">Boat <span class=\"text-danger\">*</span></label>\n  <select id=\"cboBoat\" name=\"BoatID\" class=\"form-control select2\" required></select>\n  <span class=\"text-danger field-validation-valid\" data-valmsg-for=\"BoatID\"></span>\n</div>",
+              "javascript": {
+                "initialization": "$('#cboBoat').select2({ placeholder: 'Select Boat...', allowClear: false, ajax: { url: '/api/boats', dataType: 'json', processResults: function(data) { return { results: $.map(data, function(item) { return { id: item.boatID, text: item.boatName }; }) }; } } });"
+              },
+              "razorHelper": "@Html.DropDownListFor(m => m.BoatID, new SelectList(Enumerable.Empty<SelectListItem>()), \"Select Boat...\", new { @class = \"form-control select2\", required = \"required\" })\n@Html.ValidationMessageFor(m => m.BoatID, \"\", new { @class = \"text-danger\" })"
+            },
+            "validationRules": {
+              "required": true,
+              "errorMessage": "Boat is required"
+            }
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "cboLocation",
+            "type": "UltraCombo",
+            "bindingProperty": "LocationID",
+            "required": false,
+            "displayMember": "LocationName",
+            "valueMember": "LocationID"
+          },
+          "modernControl": {
+            "type": "Select2",
+            "htmlElement": "select",
+            "cssClass": "form-control select2",
+            "id": "cboLocation",
+            "name": "LocationID",
+            "label": "Fuel Location",
+            "required": false,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"cboLocation\">Fuel Location</label>\n  <select id=\"cboLocation\" name=\"LocationID\" class=\"form-control select2\"></select>\n</div>"
+            },
+            "validationRules": {
+              "required": false
+            }
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "cboFuelType",
+            "type": "UltraCombo",
+            "bindingProperty": "FuelType",
+            "required": true,
+            "displayMember": "FuelTypeName",
+            "valueMember": "FuelType"
+          },
+          "modernControl": {
+            "type": "Select2",
+            "htmlElement": "select",
+            "cssClass": "form-control select2",
+            "id": "cboFuelType",
+            "name": "FuelType",
+            "label": "Fuel Type",
+            "required": true,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"cboFuelType\">Fuel Type <span class=\"text-danger\">*</span></label>\n  <select id=\"cboFuelType\" name=\"FuelType\" class=\"form-control select2\" required></select>\n  <span class=\"text-danger field-validation-valid\" data-valmsg-for=\"FuelType\"></span>\n</div>"
+            },
+            "validationRules": {
+              "required": true,
+              "errorMessage": "Fuel Type is required"
+            }
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "dtpPriceDate",
+            "type": "UltraDateTimePicker",
+            "bindingProperty": "PriceDate",
+            "required": true,
+            "format": "MM/dd/yyyy"
+          },
+          "modernControl": {
+            "type": "Bootstrap Datepicker",
+            "htmlElement": "input",
+            "cssClass": "form-control datepicker",
+            "id": "dtpPriceDate",
+            "name": "PriceDate",
+            "label": "Price Date",
+            "required": true,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"dtpPriceDate\">Price Date <span class=\"text-danger\">*</span></label>\n  <input type=\"text\" id=\"dtpPriceDate\" name=\"PriceDate\" class=\"form-control datepicker\" required />\n  <span class=\"text-danger field-validation-valid\" data-valmsg-for=\"PriceDate\"></span>\n</div>",
+              "javascript": {
+                "initialization": "$('#dtpPriceDate').datepicker({ format: 'mm/dd/yyyy', autoclose: true, todayHighlight: true, endDate: '0d' });"
+              }
+            },
+            "validationRules": {
+              "required": true,
+              "errorMessage": "Price Date is required",
+              "customValidation": "PriceDate <= Current Date"
+            }
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "txtPricePerGallon",
+            "type": "UltraNumericEditor",
+            "bindingProperty": "PricePerGallon",
+            "required": true,
+            "format": "Currency",
+            "decimalPlaces": 4,
+            "minValue": 0
+          },
+          "modernControl": {
+            "type": "Bootstrap Form Input",
+            "htmlElement": "input",
+            "cssClass": "form-control text-right",
+            "id": "txtPricePerGallon",
+            "name": "PricePerGallon",
+            "label": "Price Per Gallon",
+            "required": true,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"txtPricePerGallon\">Price Per Gallon <span class=\"text-danger\">*</span></label>\n  <div class=\"input-group\">\n    <div class=\"input-group-prepend\"><span class=\"input-group-text\">$</span></div>\n    <input type=\"number\" id=\"txtPricePerGallon\" name=\"PricePerGallon\" class=\"form-control text-right\" step=\"0.0001\" min=\"0\" required />\n  </div>\n  <span class=\"text-danger field-validation-valid\" data-valmsg-for=\"PricePerGallon\"></span>\n</div>",
+              "javascript": {
+                "initialization": "$('#txtPricePerGallon').on('blur', function() { const val = parseFloat($(this).val()); if (!isNaN(val)) { $(this).val(val.toFixed(4)); calculateTotalCost(); } });",
+                "calculateTotalCost": "function calculateTotalCost() { var price = parseFloat($('#txtPricePerGallon').val()) || 0; var qty = parseFloat($('#txtQuantity').val()) || 0; $('#txtTotalCost').val((price * qty).toFixed(2)); }"
+              }
+            },
+            "validationRules": {
+              "required": true,
+              "dataType": "decimal",
+              "min": 0,
+              "step": 0.0001,
+              "decimalPlaces": 4,
+              "errorMessage": "Price Per Gallon is required and must be greater than 0"
+            }
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "txtQuantity",
+            "type": "UltraNumericEditor",
+            "bindingProperty": "Quantity",
+            "required": false,
+            "format": "Decimal",
+            "decimalPlaces": 2,
+            "minValue": 0
+          },
+          "modernControl": {
+            "type": "Bootstrap Form Input",
+            "htmlElement": "input",
+            "cssClass": "form-control text-right",
+            "id": "txtQuantity",
+            "name": "Quantity",
+            "label": "Quantity (Gallons)",
+            "required": false,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"txtQuantity\">Quantity (Gallons)</label>\n  <input type=\"number\" id=\"txtQuantity\" name=\"Quantity\" class=\"form-control text-right\" step=\"0.01\" min=\"0\" />\n</div>",
+              "javascript": {
+                "initialization": "$('#txtQuantity').on('blur', function() { const val = parseFloat($(this).val()); if (!isNaN(val)) { $(this).val(val.toFixed(2)); calculateTotalCost(); } });"
+              }
+            },
+            "validationRules": {
+              "required": false,
+              "dataType": "decimal",
+              "min": 0,
+              "step": 0.01,
+              "decimalPlaces": 2
+            }
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "txtTotalCost",
+            "type": "UltraNumericEditor",
+            "bindingProperty": "TotalCost",
+            "required": false,
+            "format": "Currency",
+            "decimalPlaces": 2,
+            "readOnly": true
+          },
+          "modernControl": {
+            "type": "Bootstrap Form Input",
+            "htmlElement": "input",
+            "cssClass": "form-control text-right",
+            "id": "txtTotalCost",
+            "name": "TotalCost",
+            "label": "Total Cost",
+            "required": false,
+            "readOnly": true,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"txtTotalCost\">Total Cost</label>\n  <div class=\"input-group\">\n    <div class=\"input-group-prepend\"><span class=\"input-group-text\">$</span></div>\n    <input type=\"text\" id=\"txtTotalCost\" name=\"TotalCost\" class=\"form-control text-right\" readonly />\n  </div>\n</div>"
+            },
+            "validationRules": {
+              "required": false,
+              "readOnly": true
+            },
+            "calculationLogic": "TotalCost = PricePerGallon * Quantity"
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "cboVendor",
+            "type": "UltraCombo",
+            "bindingProperty": "VendorID",
+            "required": false,
+            "displayMember": "VendorName",
+            "valueMember": "VendorID"
+          },
+          "modernControl": {
+            "type": "Select2",
+            "htmlElement": "select",
+            "cssClass": "form-control select2",
+            "id": "cboVendor",
+            "name": "VendorID",
+            "label": "Vendor",
+            "required": false
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "txtInvoiceNumber",
+            "type": "UltraTextEditor",
+            "bindingProperty": "InvoiceNumber",
+            "required": false,
+            "maxLength": 50
+          },
+          "modernControl": {
+            "type": "Bootstrap Form Input",
+            "htmlElement": "input",
+            "cssClass": "form-control",
+            "id": "txtInvoiceNumber",
+            "name": "InvoiceNumber",
+            "label": "Invoice Number",
+            "required": false,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"txtInvoiceNumber\">Invoice Number</label>\n  <input type=\"text\" id=\"txtInvoiceNumber\" name=\"InvoiceNumber\" class=\"form-control\" maxlength=\"50\" />\n</div>",
+              "razorHelper": "@Html.TextBoxFor(m => m.InvoiceNumber, new { @class = \"form-control\", maxlength = \"50\" })"
+            },
+            "validationRules": {
+              "required": false,
+              "maxLength": 50
+            }
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "dtpInvoiceDate",
+            "type": "UltraDateTimePicker",
+            "bindingProperty": "InvoiceDate",
+            "required": false,
+            "format": "MM/dd/yyyy"
+          },
+          "modernControl": {
+            "type": "Bootstrap Datepicker",
+            "htmlElement": "input",
+            "cssClass": "form-control datepicker",
+            "id": "dtpInvoiceDate",
+            "name": "InvoiceDate",
+            "label": "Invoice Date",
+            "required": false
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "txtPurchaseOrderNumber",
+            "type": "UltraTextEditor",
+            "bindingProperty": "PurchaseOrderNumber",
+            "required": false,
+            "maxLength": 50
+          },
+          "modernControl": {
+            "type": "Bootstrap Form Input",
+            "htmlElement": "input",
+            "cssClass": "form-control",
+            "id": "txtPurchaseOrderNumber",
+            "name": "PurchaseOrderNumber",
+            "label": "Purchase Order Number",
+            "required": false,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"txtPurchaseOrderNumber\">Purchase Order Number</label>\n  <input type=\"text\" id=\"txtPurchaseOrderNumber\" name=\"PurchaseOrderNumber\" class=\"form-control\" maxlength=\"50\" />\n</div>"
+            },
+            "validationRules": {
+              "required": false,
+              "maxLength": 50
+            }
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "txtNotes",
+            "type": "UltraTextEditor",
+            "bindingProperty": "Notes",
+            "required": false,
+            "maxLength": 500,
+            "multiline": true,
+            "rows": 4
+          },
+          "modernControl": {
+            "type": "Bootstrap Form Textarea",
+            "htmlElement": "textarea",
+            "cssClass": "form-control",
+            "id": "txtNotes",
+            "name": "Notes",
+            "label": "Notes",
+            "required": false,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <label for=\"txtNotes\">Notes</label>\n  <textarea id=\"txtNotes\" name=\"Notes\" class=\"form-control\" rows=\"4\" maxlength=\"500\"></textarea>\n</div>",
+              "razorHelper": "@Html.TextAreaFor(m => m.Notes, new { @class = \"form-control\", rows = \"4\", maxlength = \"500\" })"
+            },
+            "validationRules": {
+              "required": false,
+              "maxLength": 500
+            }
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "chkIsActive",
+            "type": "UltraCheckBox",
+            "bindingProperty": "IsActive",
+            "defaultValue": true,
+            "text": "Is Active"
+          },
+          "modernControl": {
+            "type": "Bootstrap Checkbox",
+            "htmlElement": "input[type=checkbox]",
+            "cssClass": "form-check-input",
+            "id": "chkIsActive",
+            "name": "IsActive",
+            "label": "Is Active",
+            "defaultValue": true,
+            "implementation": {
+              "html": "<div class=\"form-group\">\n  <div class=\"form-check\">\n    <input type=\"checkbox\" id=\"chkIsActive\" name=\"IsActive\" class=\"form-check-input\" checked />\n    <label class=\"form-check-label\" for=\"chkIsActive\">Is Active</label>\n  </div>\n</div>",
+              "razorHelper": "@Html.CheckBoxFor(m => m.IsActive, new { @class = \"form-check-input\" })\n@Html.LabelFor(m => m.IsActive, \"Is Active\", new { @class = \"form-check-label\" })"
+            },
+            "validationRules": {
+              "required": false
+            }
+          }
+        }
+      ],
+      "actionButtons": [
+        {
+          "legacyControl": {
+            "name": "btnSave",
+            "type": "UltraButton",
+            "text": "Save",
+            "permission": "BoatFuelPricesModify"
+          },
+          "modernControl": {
+            "type": "Bootstrap Button",
+            "htmlElement": "button",
+            "cssClass": "btn btn-primary",
+            "id": "btnSave",
+            "label": "Save",
+            "icon": "fas fa-save",
+            "implementation": {
+              "html": "<button type=\"submit\" id=\"btnSave\" class=\"btn btn-primary\"><i class=\"fas fa-save\"></i> Save</button>",
+              "javascript": {
+                "clickHandler": "$('#frmBoatFuelPrice').on('submit', function(e) { e.preventDefault(); if ($(this).valid()) { var formData = $(this).serialize(); $.post('/api/boatfuelprices', formData).done(function() { toastr.success('Fuel price saved successfully'); window.location.href = '/BoatFuelPricesSearch'; }).fail(function() { toastr.error('Error saving fuel price'); }); } });"
+              }
+            },
+            "permission": "BoatFuelPricesModify",
+            "conditionalRendering": "@if (User.HasClaim(\"Permission\", \"BoatFuelPricesModify\")) { ... }"
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "btnDelete",
+            "type": "UltraButton",
+            "text": "Delete",
+            "permission": "BoatFuelPricesModify"
+          },
+          "modernControl": {
+            "type": "Bootstrap Button",
+            "htmlElement": "button",
+            "cssClass": "btn btn-danger",
+            "id": "btnDelete",
+            "label": "Delete",
+            "icon": "fas fa-trash",
+            "implementation": {
+              "html": "<button type=\"button\" id=\"btnDelete\" class=\"btn btn-danger\"><i class=\"fas fa-trash\"></i> Delete</button>",
+              "javascript": {
+                "clickHandler": "$('#btnDelete').on('click', function() { if (confirm('Are you sure you want to delete this fuel price record?')) { $.ajax({ url: '/api/boatfuelprices/' + boatFuelPriceID, type: 'DELETE' }).done(function() { toastr.success('Fuel price deleted successfully'); window.location.href = '/BoatFuelPricesSearch'; }).fail(function() { toastr.error('Error deleting fuel price'); }); } });"
+              }
+            },
+            "permission": "BoatFuelPricesModify",
+            "conditionalRendering": "@if (User.HasClaim(\"Permission\", \"BoatFuelPricesModify\") && Model.BoatFuelPriceID > 0) { ... }"
+          }
+        },
+        {
+          "legacyControl": {
+            "name": "btnCancel",
+            "type": "UltraButton",
+            "text": "Cancel",
+            "permission": "BoatFuelPricesReadOnly"
+          },
+          "modernControl": {
+            "type": "Bootstrap Button",
+            "htmlElement": "button",
+            "cssClass": "btn btn-secondary",
+            "id": "btnCancel",
+            "label": "Cancel",
+            "icon": "fas fa-times",
+            "implementation": {
+              "html": "<button type=\"button\" id=\"btnCancel\" class=\"btn btn-secondary\"><i class=\"fas fa-times\"></i> Cancel</button>",
+              "javascript": {
+                "clickHandler": "$('#btnCancel').on('click', function() { window.location.href = '/BoatFuelPricesSearch'; });"
+              }
+            },
+            "permission": "BoatFuelPricesReadOnly"
+          }
+        }
+      ]
+    }
+  },
+  "componentLibraries": {
+    "required": [
+      {
+        "name": "Bootstrap",
+        "version": "4.6.x or 5.3.x",
+        "purpose": "Core UI framework for responsive layout and components",
+        "cdn": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
+        "npm": "npm install bootstrap"
+      },
+      {
+        "name": "jQuery",
+        "version": "3.6.x or 3.7.x",
+        "purpose": "Required for Bootstrap, DataTables, Select2, and custom JavaScript",
+        "cdn": "https://code.jquery.com/jquery-3.7.1.min.js",
+        "npm": "npm install jquery"
+      },
+      {
+        "name": "DataTables",
+        "version": "1.13.x",
+        "purpose": "Advanced table functionality with sorting, filtering, pagination",
+        "cdn": "https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css",
+        "npm": "npm install datatables.net datatables.net-bs5",
+        "extensions": [
+          "datatables.net-buttons",
+          "datatables.net-responsive",
+          "datatables.net-select"
+        ]
+      },
+      {
+        "name": "Select2",
+        "version": "4.0.x or 4.1.x",
+        "purpose": "Enhanced dropdown controls with search and AJAX support",
+        "cdn": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css",
+        "npm": "npm install select2"
+      },
+      {
+        "name": "Bootstrap Datepicker",
+        "version": "1.9.x",
+        "purpose": "Date input controls with calendar picker",
+        "cdn": "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css",
+        "npm": "npm install bootstrap-datepicker"
+      },
+      {
+        "name": "Font Awesome",
+        "version": "6.x",
+        "purpose": "Icon library for buttons and UI elements",
+        "cdn": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
+        "npm": "npm install @fortawesome/fontawesome-free"
+      },
+      {
+        "name": "Moment.js",
+        "version": "2.29.x",
+        "purpose": "Date formatting and manipulation",
+        "cdn": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js",
+        "npm": "npm install moment"
+      },
+      {
+        "name": "Toastr",
+        "version": "2.1.x",
+        "purpose": "Toast notifications for success/error messages",
+        "cdn": "https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css",
+        "npm": "npm install toastr"
+      }
+    ],
+    "optional": [
+      {
+        "name": "jQuery Validation",
+        "version": "1.19.x",
+        "purpose": "Client-side form validation",
+        "npm": "npm install jquery-validation"
+      },
+      {
+        "name": "jQuery Validation Unobtrusive",
+        "version": "4.0.x",
+        "purpose": "ASP.NET Core unobtrusive validation support",
+        "npm": "npm install jquery-validation-unobtrusive"
+      }
+    ]
+  },
+  "layoutStructure": {
+    "searchPage": {
+      "structure": [
+        "Page Header (h1 + breadcrumbs)",
+        "Search Filters Card",
+        "  - Filter inputs in Bootstrap grid (row/col)",
+        "  - Action buttons (Search, Clear, New, Export)",
+        "Results Card",
+        "  - DataTables grid"
+      ],
+      "bootstrapGrid": {
+        "filterRow1": [
+          "col-md-3: Boat dropdown",
+          "col-md-3: Location dropdown",
+          "col-md-3: Fuel Type dropdown",
+          "col-md-3: Vendor dropdown"
+        ],
+        "filterRow2": [
+          "col-md-3: Start Date",
+          "col-md-3: End Date",
+          "col-md-2: Min Price",
+          "col-md-2: Max Price",
+          "col-md-2: Active Only checkbox"
+        ],
+        "buttonRow": [
+          "col-12: Button group (Search, Clear, New, Export)"
+        ]
+      }
+    },
+    "detailPage": {
+      "structure": [
+        "Page Header (h1 + breadcrumbs)",
+        "Form (method=POST)",
+        "  - Tab Control or Card Panels",
+        "    - Basic Information Card",
+        "      - Boat, Location, Fuel Type, Price Date",
+        "    - Price Details Card",
+        "      - Price Per Gallon, Quantity, Total Cost",
+        "    - Invoice Information Card (collapsible)",
+        "      - Vendor, Invoice Number, Invoice Date, PO Number",
+        "    - Additional Details Card",
+        "      - Notes, Is Active",
+        "  - Action buttons (Save, Delete, Cancel)"
+      ],
+      "bootstrapGrid": {
+        "basicInfoRow1": [
+          "col-md-6: Boat dropdown",
+          "col-md-6: Location dropdown"
+        ],
+        "basicInfoRow2": [
+          "col-md-6: Fuel Type dropdown",
+          "col-md-6: Price Date"
+        ],
+        "priceDetailsRow": [
+          "col-md-4: Price Per Gallon",
+          "col-md-4: Quantity",
+          "col-md-4: Total Cost (readonly)"
+        ],
+        "invoiceInfoRow1": [
+          "col-md-6: Vendor dropdown",
+          "col-md-6: Invoice Number"
+        ],
+        "invoiceInfoRow2": [
+          "col-md-6: Invoice Date",
+          "col-md-6: Purchase Order Number"
+        ],
+        "additionalRow": [
+          "col-md-9: Notes (textarea)",
+          "col-md-3: Is Active checkbox"
+        ]
+      }
+    }
+  },
+  "validationStrategy": {
+    "clientSide": {
+      "library": "jQuery Validation + Unobtrusive Validation",
+      "implementation": [
+        "Use data-val-* attributes on form inputs",
+        "$.validator.unobtrusive.parse() for dynamic forms",
+        "Custom validation rules for business logic (date ranges, price ranges)",
+        "Real-time validation feedback with Bootstrap validation classes"
+      ],
+      "customRules": [
+        {
+          "rule": "dateRange",
+          "description": "Validate EndDate >= StartDate",
+          "implementation": "$.validator.addMethod('dateRange', function(value, element, params) { ... });"
+        },
+        {
+          "rule": "priceRange",
+          "description": "Validate MaxPrice >= MinPrice",
+          "implementation": "$.validator.addMethod('priceRange', function(value, element, params) { ... });"
+        },
+        {
+          "rule": "futureDate",
+          "description": "Prevent future dates for PriceDate",
+          "implementation": "$.validator.addMethod('futureDate', function(value, element) { return moment(value).isSameOrBefore(moment()); });"
+        }
+      ]
+    },
+    "serverSide": {
+      "framework": "ASP.NET Core Data Annotations + FluentValidation",
+      "implementation": [
+        "Use [Required], [Range], [MaxLength] attributes on ViewModel properties",
+        "Implement FluentValidation validators for complex business rules",
+        "Return validation errors via ModelState",
+        "Use ProblemDetails for API error responses"
+      ]
+    }
+  },
+  "accessibilityConsiderations": {
+    "wcag": "WCAG 2.1 Level AA compliance",
+    "features": [
+      "Semantic HTML5 elements (nav, main, section, article)",
+      "ARIA labels and roles for custom components",
+      "Keyboard navigation support (tab order, enter/space for actions)",
+      "Form labels associated with inputs (for/id)",
+      "Error messages linked to form controls (aria-describedby)",
+      "Sufficient color contrast ratios",
+      "Focus indicators for interactive elements",
+      "Screen reader friendly DataTables configuration"
+    ],
+    "testing": [
+      "Test with NVDA or JAWS screen readers",
+      "Verify keyboard-only navigation",
+      "Use browser accessibility audits (Lighthouse, axe DevTools)"
+    ]
+  },
+  "performanceOptimizations": {
+    "dataLoading": [
+      "Use DataTables server-side processing for large result sets",
+      "Implement pagination with reasonable page sizes (25-100 rows)",
+      "Use AJAX for dropdown population instead of preloading all data",
+      "Cache lookup data (fuel types, vendors) on client side"
+    ],
+    "rendering": [
+      "Lazy load Select2 dropdowns (initialize on focus)",
+      "Use CSS for styling instead of inline JavaScript",
+      "Minimize DOM manipulations",
+      "Debounce search inputs for autocomplete"
+    ],
+    "bundling": [
+      "Bundle and minify JavaScript and CSS files",
+      "Use CDN for common libraries with fallback",
+      "Implement lazy loading for non-critical JavaScript",
+      "Use tree-shaking for unused library code"
+    ]
+  },
+  "migrationChecklist": [
+    "1. Create ViewModels for search criteria and detail form",
+    "2. Create Razor views with Bootstrap layout",
+    "3. Implement Select2 for all dropdown controls",
+    "4. Implement Bootstrap Datepicker for date inputs",
+    "5. Implement DataTables for search results grid",
+    "6. Map UltraPanel to Bootstrap Card components",
+    "7. Map UltraTabControl to Bootstrap Nav Tabs",
+    "8. Implement client-side validation with jQuery Validation",
+    "9. Implement custom validation rules (date range, price range)",
+    "10. Create JavaScript file for DataTables initialization and event handlers",
+    "11. Create JavaScript file for form interactions (calculate total cost)",
+    "12. Implement permission-based conditional rendering in Razor views",
+    "13. Create CSS file for custom styling",
+    "14. Test all form controls for data binding and validation",
+    "15. Test DataTables sorting, filtering, and pagination",
+    "16. Test responsive design on mobile and tablet devices",
+    "17. Test accessibility with keyboard navigation and screen readers",
+    "18. Implement export functionality (CSV, Excel, PDF)",
+    "19. Add loading indicators for AJAX operations",
+    "20. Implement toast notifications for success/error messages"
+  ],
+  "additionalNotes": [
+    "Legacy Infragistics controls (UltraGrid, UltraCombo, UltraPanel) map well to modern web components",
+    "DataTables provides equivalent grid functionality to UltraGrid with additional web-optimized features",
+    "Select2 provides superior dropdown experience compared to UltraCombo with search and AJAX support",
+    "Bootstrap Cards offer clean collapsible panel functionality similar to UltraPanel",
+    "Bootstrap Nav Tabs provide tabbed interface similar to UltraTabControl",
+    "All numeric formatting (currency, decimal) should be handled in DataTables render functions",
+    "Date formatting should use moment.js for consistency",
+    "Consider using a JavaScript module bundler (Webpack, Rollup) for better code organization",
+    "Implement responsive breakpoints for mobile-friendly forms",
+    "Use Bootstrap utility classes (text-right, mb-3, etc.) for spacing and alignment",
+    "Implement proper error handling and user feedback for all AJAX operations",
+    "Consider implementing real-time price calculation (Total Cost = Price * Quantity) in detail form",
+    "Add confirmation dialogs for destructive actions (Delete)",
+    "Implement audit trail display for CreatedBy, CreatedDate, ModifiedBy, ModifiedDate fields"
+  ]
+}

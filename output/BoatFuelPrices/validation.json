@@ -1,0 +1,941 @@
+{
+  "entity": "BoatFuelPrices",
+  "validationRules": {
+    "fieldLevelValidation": [
+      {
+        "field": "BoatID",
+        "dataType": "int",
+        "validations": [
+          {
+            "type": "required",
+            "errorMessage": "Boat is required",
+            "trigger": "onSubmit",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "required",
+                "jQueryValidation": "{ required: true }",
+                "dataAnnotation": "data-val='true' data-val-required='Boat is required'"
+              },
+              "serverSide": {
+                "dataAnnotation": "[Required(ErrorMessage = \"Boat is required\")]",
+                "fluentValidation": "RuleFor(x => x.BoatID).NotEmpty().WithMessage(\"Boat is required\")"
+              }
+            }
+          },
+          {
+            "type": "foreignKey",
+            "description": "BoatID must reference a valid Boat record",
+            "errorMessage": "Invalid Boat selection",
+            "trigger": "onSubmit",
+            "clientSide": false,
+            "serverSide": true,
+            "implementation": {
+              "serverSide": {
+                "fluentValidation": "RuleFor(x => x.BoatID).Must(BeValidBoat).WithMessage(\"Invalid Boat selection\")",
+                "databaseConstraint": "FOREIGN KEY (BoatID) REFERENCES Boat(BoatID)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "LocationID",
+        "dataType": "int",
+        "validations": [
+          {
+            "type": "optional",
+            "nullable": true,
+            "errorMessage": null,
+            "trigger": null,
+            "clientSide": true,
+            "serverSide": true
+          },
+          {
+            "type": "foreignKey",
+            "description": "LocationID must reference a valid Location record if provided",
+            "errorMessage": "Invalid Location selection",
+            "trigger": "onSubmit",
+            "clientSide": false,
+            "serverSide": true,
+            "implementation": {
+              "serverSide": {
+                "fluentValidation": "RuleFor(x => x.LocationID).Must(BeValidLocation).When(x => x.LocationID.HasValue).WithMessage(\"Invalid Location selection\")",
+                "databaseConstraint": "FOREIGN KEY (LocationID) REFERENCES FacilityLocation(LocationID)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "FuelType",
+        "dataType": "nvarchar(50)",
+        "validations": [
+          {
+            "type": "required",
+            "errorMessage": "Fuel Type is required",
+            "trigger": "onSubmit",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "required",
+                "jQueryValidation": "{ required: true }",
+                "dataAnnotation": "data-val='true' data-val-required='Fuel Type is required'"
+              },
+              "serverSide": {
+                "dataAnnotation": "[Required(ErrorMessage = \"Fuel Type is required\")]",
+                "fluentValidation": "RuleFor(x => x.FuelType).NotEmpty().WithMessage(\"Fuel Type is required\")"
+              }
+            }
+          },
+          {
+            "type": "maxLength",
+            "maxLength": 50,
+            "errorMessage": "Fuel Type cannot exceed 50 characters",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "maxlength='50'",
+                "jQueryValidation": "{ maxlength: 50 }"
+              },
+              "serverSide": {
+                "dataAnnotation": "[MaxLength(50, ErrorMessage = \"Fuel Type cannot exceed 50 characters\")]",
+                "fluentValidation": "RuleFor(x => x.FuelType).MaximumLength(50).WithMessage(\"Fuel Type cannot exceed 50 characters\")"
+              }
+            }
+          },
+          {
+            "type": "lookup",
+            "description": "FuelType must be a valid value from FuelType lookup table",
+            "errorMessage": "Invalid Fuel Type",
+            "trigger": "onSubmit",
+            "clientSide": false,
+            "serverSide": true,
+            "commonValues": ["Diesel", "Gasoline", "Biodiesel", "E85"]
+          }
+        ]
+      },
+      {
+        "field": "PriceDate",
+        "dataType": "datetime",
+        "validations": [
+          {
+            "type": "required",
+            "errorMessage": "Price Date is required",
+            "trigger": "onSubmit",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "required",
+                "jQueryValidation": "{ required: true }",
+                "dataAnnotation": "data-val='true' data-val-required='Price Date is required'"
+              },
+              "serverSide": {
+                "dataAnnotation": "[Required(ErrorMessage = \"Price Date is required\")]",
+                "fluentValidation": "RuleFor(x => x.PriceDate).NotEmpty().WithMessage(\"Price Date is required\")"
+              }
+            }
+          },
+          {
+            "type": "dateFormat",
+            "format": "MM/dd/yyyy",
+            "errorMessage": "Price Date must be in MM/DD/YYYY format",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "jQueryValidation": "{ date: true }",
+                "datepickerConfig": "format: 'mm/dd/yyyy'"
+              },
+              "serverSide": {
+                "dataAnnotation": "[DataType(DataType.Date)]"
+              }
+            }
+          },
+          {
+            "type": "maxDate",
+            "maxDate": "currentDate",
+            "description": "Price date cannot be in the future",
+            "errorMessage": "Price Date cannot be in the future",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "jQueryValidation": "$.validator.addMethod('futureDate', function(value, element) { return moment(value).isSameOrBefore(moment()); }, 'Price Date cannot be in the future');",
+                "datepickerConfig": "endDate: '0d'"
+              },
+              "serverSide": {
+                "fluentValidation": "RuleFor(x => x.PriceDate).LessThanOrEqualTo(DateTime.Today).WithMessage(\"Price Date cannot be in the future\")"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "PricePerGallon",
+        "dataType": "decimal(10,4)",
+        "validations": [
+          {
+            "type": "required",
+            "errorMessage": "Price Per Gallon is required",
+            "trigger": "onSubmit",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "required",
+                "jQueryValidation": "{ required: true }",
+                "dataAnnotation": "data-val='true' data-val-required='Price Per Gallon is required'"
+              },
+              "serverSide": {
+                "dataAnnotation": "[Required(ErrorMessage = \"Price Per Gallon is required\")]",
+                "fluentValidation": "RuleFor(x => x.PricePerGallon).NotEmpty().WithMessage(\"Price Per Gallon is required\")"
+              }
+            }
+          },
+          {
+            "type": "dataType",
+            "dataTypeValidation": "decimal",
+            "errorMessage": "Price Per Gallon must be a valid number",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "type='number'",
+                "jQueryValidation": "{ number: true }"
+              },
+              "serverSide": {
+                "dataAnnotation": "[DataType(DataType.Currency)]"
+              }
+            }
+          },
+          {
+            "type": "range",
+            "min": 0.0001,
+            "max": 9999.9999,
+            "description": "Price per gallon must be greater than 0",
+            "errorMessage": "Price Per Gallon must be greater than 0",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "min='0' step='0.0001'",
+                "jQueryValidation": "{ min: 0.0001 }"
+              },
+              "serverSide": {
+                "dataAnnotation": "[Range(0.0001, 9999.9999, ErrorMessage = \"Price Per Gallon must be between 0.0001 and 9999.9999\")]",
+                "fluentValidation": "RuleFor(x => x.PricePerGallon).GreaterThan(0).WithMessage(\"Price Per Gallon must be greater than 0\")"
+              }
+            }
+          },
+          {
+            "type": "precision",
+            "decimalPlaces": 4,
+            "description": "Price per gallon supports 4 decimal places",
+            "errorMessage": "Price Per Gallon cannot exceed 4 decimal places",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "step='0.0001'",
+                "javascript": "$('#txtPricePerGallon').on('blur', function() { const val = parseFloat($(this).val()); if (!isNaN(val)) { $(this).val(val.toFixed(4)); } });"
+              },
+              "serverSide": {
+                "fluentValidation": "RuleFor(x => x.PricePerGallon).PrecisionScale(10, 4, false).WithMessage(\"Price Per Gallon cannot exceed 4 decimal places\")"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "Quantity",
+        "dataType": "decimal(10,2)",
+        "validations": [
+          {
+            "type": "optional",
+            "nullable": true,
+            "errorMessage": null,
+            "trigger": null,
+            "clientSide": true,
+            "serverSide": true
+          },
+          {
+            "type": "dataType",
+            "dataTypeValidation": "decimal",
+            "errorMessage": "Quantity must be a valid number",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "type='number'",
+                "jQueryValidation": "{ number: true }"
+              }
+            }
+          },
+          {
+            "type": "range",
+            "min": 0,
+            "max": 99999999.99,
+            "description": "Quantity must be non-negative",
+            "errorMessage": "Quantity must be 0 or greater",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "min='0' step='0.01'",
+                "jQueryValidation": "{ min: 0 }"
+              },
+              "serverSide": {
+                "dataAnnotation": "[Range(0, 99999999.99, ErrorMessage = \"Quantity must be between 0 and 99999999.99\")]",
+                "fluentValidation": "RuleFor(x => x.Quantity).GreaterThanOrEqualTo(0).When(x => x.Quantity.HasValue).WithMessage(\"Quantity must be 0 or greater\")"
+              }
+            }
+          },
+          {
+            "type": "precision",
+            "decimalPlaces": 2,
+            "description": "Quantity supports 2 decimal places",
+            "errorMessage": "Quantity cannot exceed 2 decimal places",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "step='0.01'",
+                "javascript": "$('#txtQuantity').on('blur', function() { const val = parseFloat($(this).val()); if (!isNaN(val)) { $(this).val(val.toFixed(2)); } });"
+              },
+              "serverSide": {
+                "fluentValidation": "RuleFor(x => x.Quantity).PrecisionScale(10, 2, false).When(x => x.Quantity.HasValue).WithMessage(\"Quantity cannot exceed 2 decimal places\")"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "TotalCost",
+        "dataType": "decimal(18,2)",
+        "validations": [
+          {
+            "type": "optional",
+            "nullable": true,
+            "errorMessage": null,
+            "trigger": null,
+            "clientSide": true,
+            "serverSide": true
+          },
+          {
+            "type": "readOnly",
+            "description": "TotalCost is calculated field (PricePerGallon * Quantity)",
+            "trigger": "onChange",
+            "clientSide": true,
+            "serverSide": false,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "readonly",
+                "javascript": "function calculateTotalCost() { var price = parseFloat($('#txtPricePerGallon').val()) || 0; var qty = parseFloat($('#txtQuantity').val()) || 0; $('#txtTotalCost').val((price * qty).toFixed(2)); }"
+              }
+            }
+          },
+          {
+            "type": "precision",
+            "decimalPlaces": 2,
+            "description": "TotalCost supports 2 decimal places",
+            "errorMessage": "Total Cost cannot exceed 2 decimal places",
+            "trigger": "onChange",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "serverSide": {
+                "fluentValidation": "RuleFor(x => x.TotalCost).PrecisionScale(18, 2, false).When(x => x.TotalCost.HasValue).WithMessage(\"Total Cost cannot exceed 2 decimal places\")"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "VendorID",
+        "dataType": "int",
+        "validations": [
+          {
+            "type": "optional",
+            "nullable": true,
+            "errorMessage": null,
+            "trigger": null,
+            "clientSide": true,
+            "serverSide": true
+          },
+          {
+            "type": "foreignKey",
+            "description": "VendorID must reference a valid Vendor record if provided",
+            "errorMessage": "Invalid Vendor selection",
+            "trigger": "onSubmit",
+            "clientSide": false,
+            "serverSide": true,
+            "implementation": {
+              "serverSide": {
+                "fluentValidation": "RuleFor(x => x.VendorID).Must(BeValidVendor).When(x => x.VendorID.HasValue).WithMessage(\"Invalid Vendor selection\")",
+                "databaseConstraint": "FOREIGN KEY (VendorID) REFERENCES Vendor(VendorID)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "InvoiceNumber",
+        "dataType": "nvarchar(50)",
+        "validations": [
+          {
+            "type": "optional",
+            "nullable": true,
+            "errorMessage": null,
+            "trigger": null,
+            "clientSide": true,
+            "serverSide": true
+          },
+          {
+            "type": "maxLength",
+            "maxLength": 50,
+            "errorMessage": "Invoice Number cannot exceed 50 characters",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "maxlength='50'",
+                "jQueryValidation": "{ maxlength: 50 }"
+              },
+              "serverSide": {
+                "dataAnnotation": "[MaxLength(50, ErrorMessage = \"Invoice Number cannot exceed 50 characters\")]",
+                "fluentValidation": "RuleFor(x => x.InvoiceNumber).MaximumLength(50).When(x => !string.IsNullOrEmpty(x.InvoiceNumber)).WithMessage(\"Invoice Number cannot exceed 50 characters\")"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "InvoiceDate",
+        "dataType": "datetime",
+        "validations": [
+          {
+            "type": "optional",
+            "nullable": true,
+            "errorMessage": null,
+            "trigger": null,
+            "clientSide": true,
+            "serverSide": true
+          },
+          {
+            "type": "dateFormat",
+            "format": "MM/dd/yyyy",
+            "errorMessage": "Invoice Date must be in MM/DD/YYYY format",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "jQueryValidation": "{ date: true }",
+                "datepickerConfig": "format: 'mm/dd/yyyy'"
+              },
+              "serverSide": {
+                "dataAnnotation": "[DataType(DataType.Date)]"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "PurchaseOrderNumber",
+        "dataType": "nvarchar(50)",
+        "validations": [
+          {
+            "type": "optional",
+            "nullable": true,
+            "errorMessage": null,
+            "trigger": null,
+            "clientSide": true,
+            "serverSide": true
+          },
+          {
+            "type": "maxLength",
+            "maxLength": 50,
+            "errorMessage": "Purchase Order Number cannot exceed 50 characters",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "maxlength='50'",
+                "jQueryValidation": "{ maxlength: 50 }"
+              },
+              "serverSide": {
+                "dataAnnotation": "[MaxLength(50, ErrorMessage = \"Purchase Order Number cannot exceed 50 characters\")]",
+                "fluentValidation": "RuleFor(x => x.PurchaseOrderNumber).MaximumLength(50).When(x => !string.IsNullOrEmpty(x.PurchaseOrderNumber)).WithMessage(\"Purchase Order Number cannot exceed 50 characters\")"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "Notes",
+        "dataType": "nvarchar(500)",
+        "validations": [
+          {
+            "type": "optional",
+            "nullable": true,
+            "errorMessage": null,
+            "trigger": null,
+            "clientSide": true,
+            "serverSide": true
+          },
+          {
+            "type": "maxLength",
+            "maxLength": 500,
+            "errorMessage": "Notes cannot exceed 500 characters",
+            "trigger": "onBlur",
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "maxlength='500'",
+                "jQueryValidation": "{ maxlength: 500 }"
+              },
+              "serverSide": {
+                "dataAnnotation": "[MaxLength(500, ErrorMessage = \"Notes cannot exceed 500 characters\")]",
+                "fluentValidation": "RuleFor(x => x.Notes).MaximumLength(500).When(x => !string.IsNullOrEmpty(x.Notes)).WithMessage(\"Notes cannot exceed 500 characters\")"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "IsActive",
+        "dataType": "bit",
+        "validations": [
+          {
+            "type": "boolean",
+            "defaultValue": true,
+            "errorMessage": null,
+            "trigger": null,
+            "clientSide": true,
+            "serverSide": true,
+            "implementation": {
+              "clientSide": {
+                "htmlAttribute": "type='checkbox' checked"
+              },
+              "serverSide": {
+                "dataAnnotation": "[Required]",
+                "defaultValue": "true"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "businessRules": [
+      {
+        "rule": "TotalCostCalculation",
+        "description": "Total cost is calculated from price per gallon and quantity",
+        "formula": "TotalCost = PricePerGallon * Quantity",
+        "trigger": "onChange",
+        "affectedFields": ["PricePerGallon", "Quantity", "TotalCost"],
+        "errorMessage": "Total Cost calculation mismatch",
+        "implementation": {
+          "clientSide": {
+            "javascript": "function calculateTotalCost() {\n  var price = parseFloat($('#txtPricePerGallon').val()) || 0;\n  var qty = parseFloat($('#txtQuantity').val()) || 0;\n  $('#txtTotalCost').val((price * qty).toFixed(2));\n}\n$('#txtPricePerGallon, #txtQuantity').on('blur', calculateTotalCost);"
+          },
+          "serverSide": {
+            "fluentValidation": "RuleFor(x => x).Must(x => {\n  if (x.PricePerGallon.HasValue && x.Quantity.HasValue && x.TotalCost.HasValue) {\n    var calculated = x.PricePerGallon.Value * x.Quantity.Value;\n    return Math.Abs(calculated - x.TotalCost.Value) < 0.01m;\n  }\n  return true;\n}).WithMessage(\"Total Cost must equal Price Per Gallon * Quantity\")"
+          }
+        },
+        "validationTolerance": 0.01,
+        "validationCondition": "If both PricePerGallon and Quantity are provided, verify TotalCost calculation within rounding tolerance"
+      },
+      {
+        "rule": "DateRangeValidation",
+        "description": "End date must be greater than or equal to start date in search",
+        "formula": "EndDate >= StartDate",
+        "trigger": "onSubmit",
+        "affectedFields": ["StartDate", "EndDate"],
+        "errorMessage": "End Date must be greater than or equal to Start Date",
+        "scope": "SearchForm",
+        "implementation": {
+          "clientSide": {
+            "jQueryValidation": "$.validator.addMethod('dateRange', function(value, element, params) {\n  var startDate = $(params.startDate).val();\n  var endDate = value;\n  if (!startDate || !endDate) return true;\n  return moment(endDate).isSameOrAfter(moment(startDate));\n}, 'End Date must be greater than or equal to Start Date');\n$('#dtpEndDate').rules('add', { dateRange: { startDate: '#dtpStartDate' } });"
+          },
+          "serverSide": {
+            "fluentValidation": "RuleFor(x => x.EndDate).GreaterThanOrEqualTo(x => x.StartDate).When(x => x.StartDate.HasValue && x.EndDate.HasValue).WithMessage(\"End Date must be greater than or equal to Start Date\")"
+          }
+        }
+      },
+      {
+        "rule": "PriceRangeValidation",
+        "description": "Max price must be greater than or equal to min price in search",
+        "formula": "MaxPrice >= MinPrice",
+        "trigger": "onSubmit",
+        "affectedFields": ["MinPrice", "MaxPrice"],
+        "errorMessage": "Max Price must be greater than or equal to Min Price",
+        "scope": "SearchForm",
+        "implementation": {
+          "clientSide": {
+            "jQueryValidation": "$.validator.addMethod('priceRange', function(value, element, params) {\n  var minPrice = $(params.minPrice).val();\n  var maxPrice = value;\n  if (!minPrice || !maxPrice) return true;\n  return parseFloat(maxPrice) >= parseFloat(minPrice);\n}, 'Max Price must be greater than or equal to Min Price');\n$('#txtMaxPrice').rules('add', { priceRange: { minPrice: '#txtMinPrice' } });"
+          },
+          "serverSide": {
+            "fluentValidation": "RuleFor(x => x.MaxPrice).GreaterThanOrEqualTo(x => x.MinPrice).When(x => x.MinPrice.HasValue && x.MaxPrice.HasValue).WithMessage(\"Max Price must be greater than or equal to Min Price\")"
+          }
+        }
+      },
+      {
+        "rule": "FutureDatePrevention",
+        "description": "Price date cannot be in the future",
+        "formula": "PriceDate <= Current Date",
+        "trigger": "onBlur",
+        "affectedFields": ["PriceDate"],
+        "errorMessage": "Price Date cannot be in the future",
+        "scope": "DetailForm",
+        "implementation": {
+          "clientSide": {
+            "jQueryValidation": "$.validator.addMethod('futureDate', function(value, element) {\n  return moment(value).isSameOrBefore(moment());\n}, 'Price Date cannot be in the future');\n$('#dtpPriceDate').rules('add', { futureDate: true });",
+            "datepickerConfig": "$('#dtpPriceDate').datepicker({ endDate: '0d' });"
+          },
+          "serverSide": {
+            "fluentValidation": "RuleFor(x => x.PriceDate).LessThanOrEqualTo(DateTime.Today).WithMessage(\"Price Date cannot be in the future\")"
+          }
+        }
+      },
+      {
+        "rule": "RequiredFieldsForInsert",
+        "description": "Boat, FuelType, PriceDate, and PricePerGallon are required for new records",
+        "trigger": "onSubmit",
+        "affectedFields": ["BoatID", "FuelType", "PriceDate", "PricePerGallon"],
+        "errorMessage": "All required fields must be completed",
+        "scope": "DetailForm",
+        "requiredFields": [
+          {
+            "field": "BoatID",
+            "reason": "Boat is always required for fuel price records"
+          },
+          {
+            "field": "FuelType",
+            "reason": "Fuel type is always required"
+          },
+          {
+            "field": "PriceDate",
+            "reason": "Price date is always required"
+          },
+          {
+            "field": "PricePerGallon",
+            "reason": "Price per gallon is always required"
+          }
+        ],
+        "implementation": {
+          "clientSide": {
+            "htmlAttributes": "required attribute on BoatID, FuelType, PriceDate, PricePerGallon inputs"
+          },
+          "serverSide": {
+            "dataAnnotations": "[Required] attributes on ViewModel properties",
+            "storedProcedure": "@BoatID, @FuelType, @PriceDate, @PricePerGallon marked as nullable=false, required=true in sp_BoatFuelPrices_Insert"
+          }
+        }
+      }
+    ],
+    "dataIntegrityRules": [
+      {
+        "rule": "BoatForeignKey",
+        "description": "BoatID must reference valid Boat record",
+        "constraint": "FOREIGN KEY (BoatID) REFERENCES Boat(BoatID)",
+        "errorMessage": "The selected Boat does not exist",
+        "implementation": {
+          "database": "FOREIGN KEY constraint on BoatID",
+          "application": "Validate BoatID exists in Boat table before insert/update"
+        }
+      },
+      {
+        "rule": "LocationForeignKey",
+        "description": "LocationID must reference valid Location record if provided",
+        "constraint": "FOREIGN KEY (LocationID) REFERENCES FacilityLocation(LocationID)",
+        "errorMessage": "The selected Location does not exist",
+        "implementation": {
+          "database": "FOREIGN KEY constraint on LocationID",
+          "application": "Validate LocationID exists in FacilityLocation table when provided"
+        }
+      },
+      {
+        "rule": "VendorForeignKey",
+        "description": "VendorID must reference valid Vendor record if provided",
+        "constraint": "FOREIGN KEY (VendorID) REFERENCES Vendor(VendorID)",
+        "errorMessage": "The selected Vendor does not exist",
+        "implementation": {
+          "database": "FOREIGN KEY constraint on VendorID",
+          "application": "Validate VendorID exists in Vendor table when provided"
+        }
+      },
+      {
+        "rule": "AuditFields",
+        "description": "CreatedBy and CreatedDate are required for new records; ModifiedBy and ModifiedDate updated on changes",
+        "affectedFields": ["CreatedBy", "CreatedDate", "ModifiedBy", "ModifiedDate"],
+        "implementation": {
+          "insert": "CreatedBy and CreatedDate set automatically on insert",
+          "update": "ModifiedBy and ModifiedDate set automatically on update"
+        }
+      },
+      {
+        "rule": "SoftDelete",
+        "description": "Delete operations are soft deletes (set IsActive = 0)",
+        "affectedFields": ["IsActive", "ModifiedBy", "ModifiedDate"],
+        "implementation": {
+          "storedProcedure": "sp_BoatFuelPrices_Delete sets IsActive = 0, updates ModifiedBy and ModifiedDate",
+          "application": "Delete button calls soft delete API endpoint"
+        }
+      }
+    ],
+    "validationTriggers": {
+      "clientSide": [
+        {
+          "trigger": "onSubmit",
+          "description": "Form submission validation",
+          "validations": [
+            "Required field validation",
+            "Data type validation",
+            "Range validation",
+            "Business rule validation (date range, price range, total cost calculation)"
+          ],
+          "implementation": "$('#frmBoatFuelPrice').on('submit', function(e) { if (!$(this).valid()) { e.preventDefault(); return false; } });"
+        },
+        {
+          "trigger": "onBlur",
+          "description": "Field loses focus",
+          "validations": [
+            "Required field validation",
+            "Data type validation",
+            "Range validation",
+            "Max length validation",
+            "Format validation",
+            "Future date prevention",
+            "Decimal precision formatting"
+          ],
+          "implementation": "$('input, select, textarea').on('blur', function() { $(this).valid(); });"
+        },
+        {
+          "trigger": "onChange",
+          "description": "Field value changes",
+          "validations": [
+            "Total cost calculation",
+            "Real-time validation feedback"
+          ],
+          "implementation": "$('#txtPricePerGallon, #txtQuantity').on('blur', calculateTotalCost);"
+        },
+        {
+          "trigger": "onKeyup",
+          "description": "Key pressed in field",
+          "validations": [
+            "Character count display for text fields with maxlength",
+            "Real-time format validation"
+          ],
+          "implementation": "$('#txtNotes').on('keyup', function() { var remaining = 500 - $(this).val().length; $('#charCount').text(remaining + ' characters remaining'); });"
+        }
+      ],
+      "serverSide": [
+        {
+          "trigger": "ModelValidation",
+          "description": "ASP.NET Core model validation on controller action",
+          "validations": [
+            "Data Annotations validation",
+            "FluentValidation rules",
+            "Custom validation attributes"
+          ],
+          "implementation": "if (!ModelState.IsValid) { return BadRequest(ModelState); }"
+        },
+        {
+          "trigger": "BusinessLogicValidation",
+          "description": "Service layer validation before database operations",
+          "validations": [
+            "Foreign key existence validation",
+            "Business rule validation",
+            "Duplicate record checks",
+            "Data integrity checks"
+          ],
+          "implementation": "var validationResult = await _validator.ValidateAsync(dto); if (!validationResult.IsValid) { throw new ValidationException(validationResult.Errors); }"
+        },
+        {
+          "trigger": "DatabaseConstraints",
+          "description": "Database-level constraint validation",
+          "validations": [
+            "Foreign key constraints",
+            "Check constraints",
+            "Unique constraints",
+            "Not null constraints"
+          ],
+          "implementation": "try { await _repository.SaveAsync(); } catch (SqlException ex) { // Handle constraint violations }"
+        }
+      ]
+    },
+    "errorMessages": {
+      "required": {
+        "BoatID": "Boat is required",
+        "FuelType": "Fuel Type is required",
+        "PriceDate": "Price Date is required",
+        "PricePerGallon": "Price Per Gallon is required"
+      },
+      "dataType": {
+        "PricePerGallon": "Price Per Gallon must be a valid number",
+        "Quantity": "Quantity must be a valid number",
+        "PriceDate": "Price Date must be in MM/DD/YYYY format",
+        "InvoiceDate": "Invoice Date must be in MM/DD/YYYY format"
+      },
+      "range": {
+        "PricePerGallon": "Price Per Gallon must be greater than 0",
+        "Quantity": "Quantity must be 0 or greater"
+      },
+      "maxLength": {
+        "FuelType": "Fuel Type cannot exceed 50 characters",
+        "InvoiceNumber": "Invoice Number cannot exceed 50 characters",
+        "PurchaseOrderNumber": "Purchase Order Number cannot exceed 50 characters",
+        "Notes": "Notes cannot exceed 500 characters"
+      },
+      "businessRules": {
+        "dateRange": "End Date must be greater than or equal to Start Date",
+        "priceRange": "Max Price must be greater than or equal to Min Price",
+        "futureDate": "Price Date cannot be in the future",
+        "totalCostCalculation": "Total Cost must equal Price Per Gallon * Quantity"
+      },
+      "foreignKey": {
+        "BoatID": "The selected Boat does not exist",
+        "LocationID": "The selected Location does not exist",
+        "VendorID": "The selected Vendor does not exist"
+      },
+      "database": {
+        "foreignKeyViolation": "Cannot save record due to invalid reference data",
+        "duplicateRecord": "A fuel price record with these details already exists",
+        "concurrency": "This record has been modified by another user. Please refresh and try again"
+      }
+    },
+    "validationLibraries": {
+      "clientSide": [
+        {
+          "name": "jQuery Validation",
+          "version": "1.19.x",
+          "purpose": "Core client-side validation framework",
+          "cdn": "https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+        },
+        {
+          "name": "jQuery Validation Unobtrusive",
+          "version": "4.0.x",
+          "purpose": "ASP.NET Core integration for data-val-* attributes",
+          "cdn": "https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"
+        },
+        {
+          "name": "Moment.js",
+          "version": "2.29.x",
+          "purpose": "Date validation and manipulation",
+          "cdn": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"
+        }
+      ],
+      "serverSide": [
+        {
+          "name": "System.ComponentModel.DataAnnotations",
+          "version": ".NET Core built-in",
+          "purpose": "Attribute-based validation"
+        },
+        {
+          "name": "FluentValidation",
+          "version": "11.x",
+          "purpose": "Fluent API for complex validation rules",
+          "nuget": "FluentValidation.AspNetCore"
+        }
+      ]
+    },
+    "customValidationRules": [
+      {
+        "ruleName": "dateRange",
+        "description": "Validates that end date is greater than or equal to start date",
+        "parameters": ["startDate"],
+        "errorMessage": "End Date must be greater than or equal to Start Date",
+        "implementation": {
+          "clientSide": "$.validator.addMethod('dateRange', function(value, element, params) {\n  var startDate = $(params.startDate).val();\n  var endDate = value;\n  if (!startDate || !endDate) return true;\n  return moment(endDate).isSameOrAfter(moment(startDate));\n}, 'End Date must be greater than or equal to Start Date');"
+        }
+      },
+      {
+        "ruleName": "priceRange",
+        "description": "Validates that max price is greater than or equal to min price",
+        "parameters": ["minPrice"],
+        "errorMessage": "Max Price must be greater than or equal to Min Price",
+        "implementation": {
+          "clientSide": "$.validator.addMethod('priceRange', function(value, element, params) {\n  var minPrice = $(params.minPrice).val();\n  var maxPrice = value;\n  if (!minPrice || !maxPrice) return true;\n  return parseFloat(maxPrice) >= parseFloat(minPrice);\n}, 'Max Price must be greater than or equal to Min Price');"
+        }
+      },
+      {
+        "ruleName": "futureDate",
+        "description": "Prevents future dates for price date",
+        "parameters": [],
+        "errorMessage": "Price Date cannot be in the future",
+        "implementation": {
+          "clientSide": "$.validator.addMethod('futureDate', function(value, element) {\n  return moment(value).isSameOrBefore(moment());\n}, 'Price Date cannot be in the future');"
+        }
+      },
+      {
+        "ruleName": "totalCostCalculation",
+        "description": "Validates that total cost equals price per gallon times quantity",
+        "parameters": ["pricePerGallon", "quantity"],
+        "errorMessage": "Total Cost must equal Price Per Gallon * Quantity",
+        "tolerance": 0.01,
+        "implementation": {
+          "serverSide": "RuleFor(x => x).Must(x => {\n  if (x.PricePerGallon.HasValue && x.Quantity.HasValue && x.TotalCost.HasValue) {\n    var calculated = x.PricePerGallon.Value * x.Quantity.Value;\n    return Math.Abs(calculated - x.TotalCost.Value) < 0.01m;\n  }\n  return true;\n}).WithMessage(\"Total Cost must equal Price Per Gallon * Quantity\")"
+        }
+      }
+    ],
+    "migrationNotes": {
+      "vbToAspNetCore": [
+        "VB.NET AreFieldsValid() method maps to client-side jQuery Validation + server-side Data Annotations/FluentValidation",
+        "VB.NET CheckBusinessRules() method maps to FluentValidation custom rules in service layer",
+        "Legacy error message display (MessageBox) maps to Bootstrap validation feedback + Toastr notifications",
+        "Field-level validation triggers (AfterExitEditMode) map to onBlur/onChange jQuery events",
+        "Form-level validation (BeforeSave) maps to onSubmit jQuery validation + ModelState validation in controller"
+      ],
+      "validationStrategy": [
+        "Implement dual validation (client-side and server-side) for all critical fields",
+        "Use data-val-* attributes for declarative validation on form inputs",
+        "Use FluentValidation for complex business rules that are difficult to express with Data Annotations",
+        "Implement custom jQuery Validation methods for business rules (date range, price range)",
+        "Display validation errors inline using Bootstrap validation classes (is-invalid, invalid-feedback)",
+        "Use Toastr for success/error notifications on form submission",
+        "Handle database constraint violations gracefully with user-friendly error messages"
+      ],
+      "recommendations": [
+        "Create a shared validation.js file with all custom jQuery Validation methods",
+        "Create FluentValidation validators for BoatFuelPriceSearchDto and BoatFuelPriceDto",
+        "Implement validation result mapping from FluentValidation to ProblemDetails for API responses",
+        "Use consistent error message format across client and server validation",
+        "Implement field dependency validation (e.g., if Quantity is provided, warn if TotalCost is not calculated)",
+        "Add real-time calculation feedback when PricePerGallon or Quantity changes",
+        "Consider adding validation for reasonable price ranges based on historical data",
+        "Implement duplicate detection (e.g., same boat, same fuel type, same date) with user confirmation"
+      ]
+    }
+  },
+  "extractionMetadata": {
+    "extractedFrom": [
+      "output/BoatFuelPrices/data-access.json",
+      "output/BoatFuelPrices/ui-mapping.json"
+    ],
+    "extractionDate": "2025-12-10",
+    "validationRulesSources": [
+      "Stored procedure parameters (required, nullable, data types)",
+      "Business rules section in data-access.json",
+      "Control validation rules in ui-mapping.json",
+      "Custom validation sections in ui-mapping.json"
+    ],
+    "completeness": "Comprehensive - extracted from available JSON artifacts"
+  }
+}

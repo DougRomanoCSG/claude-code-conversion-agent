@@ -178,24 +178,75 @@ export async function getAvailableForms(): Promise<string[]> {
 	const inputDir = getInputDirectory();
 	const formsPath = config.paths.forms;
 	const formsDir = `${inputDir}/${formsPath}`;
-	
+
 	if (!existsSync(formsDir)) {
 		return [];
 	}
-	
+
 	try {
 		const files = await readdir(formsDir);
 		// Filter for .vb files that start with "frm" and end with "Search" or "Detail"
-		const formFiles = files.filter(file => 
-			file.endsWith(".vb") && 
+		const formFiles = files.filter(file =>
+			file.endsWith(".vb") &&
 			!file.endsWith(".Designer.vb") &&
 			file.match(/^frm.+?(Search|Detail)\.vb$/i)
 		);
-		
+
 		// Extract form names (without .vb extension)
 		return formFiles.map(file => file.replace(/\.vb$/, ""));
 	} catch (error) {
 		console.error(`Error reading forms directory: ${error}`);
+		return [];
+	}
+}
+
+/**
+ * Detect child forms opened by a parent form by analyzing the VB code
+ */
+export async function detectChildForms(formName: string): Promise<string[]> {
+	const inputDir = getInputDirectory();
+	const formsPath = config.paths.forms;
+	const formFilePath = `${inputDir}/${formsPath}/${formName}.vb`;
+
+	if (!existsSync(formFilePath)) {
+		return [];
+	}
+
+	try {
+		const file = Bun.file(formFilePath);
+		const content = await file.text();
+
+		const childForms = new Set<string>();
+
+		// Pattern 1: Dim frm As New frmChildForm() or similar
+		const newFormPattern = /Dim\s+\w+\s+As\s+New\s+(frm\w+)/gi;
+		let match;
+		while ((match = newFormPattern.exec(content)) !== null) {
+			childForms.add(match[1]);
+		}
+
+		// Pattern 2: frmChildForm.Show() or frmChildForm.ShowDialog()
+		const showFormPattern = /(frm\w+)\.(Show|ShowDialog)\s*\(/gi;
+		while ((match = showFormPattern.exec(content)) !== null) {
+			childForms.add(match[1]);
+		}
+
+		// Pattern 3: Dim frm As frmChildForm = New frmChildForm()
+		const dimAsFormPattern = /Dim\s+\w+\s+As\s+(frm\w+)\s*=/gi;
+		while ((match = dimAsFormPattern.exec(content)) !== null) {
+			childForms.add(match[1]);
+		}
+
+		// Pattern 4: Direct instantiation: New frmChildForm()
+		const directNewPattern = /New\s+(frm\w+)\s*\(/gi;
+		while ((match = directNewPattern.exec(content)) !== null) {
+			childForms.add(match[1]);
+		}
+
+		// Filter out the parent form itself
+		return Array.from(childForms).filter(f => f !== formName);
+	} catch (error) {
+		console.error(`Error detecting child forms for ${formName}: ${error}`);
 		return [];
 	}
 }

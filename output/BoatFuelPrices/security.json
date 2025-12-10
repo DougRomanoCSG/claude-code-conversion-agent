@@ -1,0 +1,399 @@
+{
+  "entity": "BoatFuelPrices",
+  "subsystem": {
+    "identifier": "frmBoatFuelPricesSearch",
+    "description": "Boat fuel prices location search and detail forms subsystem",
+    "source": "InitializeBase method"
+  },
+  "permissions": {
+    "readOnly": {
+      "name": "BoatFuelPricesReadOnly",
+      "description": "Read-only access to boat fuel price data",
+      "applicableTo": ["Search", "View", "Detail"],
+      "modernAttribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+      "scope": "Read operations on boat fuel price entities"
+    },
+    "modify": {
+      "name": "BoatFuelPricesModify",
+      "description": "Full modify access to boat fuel price data",
+      "applicableTo": ["Create", "Update", "Delete"],
+      "modernAttribute": "[Authorize(Policy = \"BoatFuelPricesModify\")]",
+      "scope": "Create, update, and delete operations on boat fuel price entities"
+    }
+  },
+  "buttonSecurity": {
+    "searchForm": {
+      "btnSearch": {
+        "buttonType": "Search",
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "controlAuthorizationType": "ReadOnly",
+        "modernMapping": "Search button visible with BoatFuelPricesReadOnly"
+      },
+      "btnClear": {
+        "buttonType": "Clear",
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "controlAuthorizationType": "ReadOnly",
+        "modernMapping": "Clear button always visible to authorized users"
+      },
+      "btnNew": {
+        "buttonType": "New",
+        "requiredPermission": "BoatFuelPricesModify",
+        "controlAuthorizationType": "Modify",
+        "modernMapping": "New button visible only with BoatFuelPricesModify"
+      },
+      "btnExport": {
+        "buttonType": "Export",
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "controlAuthorizationType": "ReadOnly",
+        "modernMapping": "Export button visible with BoatFuelPricesReadOnly for data export"
+      }
+    },
+    "detailForm": {
+      "btnSave": {
+        "buttonType": "Save",
+        "requiredPermission": "BoatFuelPricesModify",
+        "controlAuthorizationType": "Modify",
+        "modernMapping": "Save button enabled only with BoatFuelPricesModify"
+      },
+      "btnDelete": {
+        "buttonType": "Delete",
+        "requiredPermission": "BoatFuelPricesModify",
+        "controlAuthorizationType": "Modify",
+        "modernMapping": "Delete button enabled only with BoatFuelPricesModify"
+      },
+      "btnCancel": {
+        "buttonType": "Cancel",
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "controlAuthorizationType": "ReadOnly",
+        "modernMapping": "Cancel button always visible to authorized users"
+      }
+    },
+    "gridActions": {
+      "editRow": {
+        "buttonType": "Edit",
+        "requiredPermission": "BoatFuelPricesModify",
+        "controlAuthorizationType": "Modify",
+        "modernMapping": "Edit action in grid visible only with BoatFuelPricesModify"
+      },
+      "viewRow": {
+        "buttonType": "View",
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "controlAuthorizationType": "ReadOnly",
+        "modernMapping": "View action in grid visible with BoatFuelPricesReadOnly"
+      }
+    }
+  },
+  "controlAuthorization": {
+    "setButtonTypeCalls": [
+      {
+        "control": "btnSearch",
+        "buttonType": "Search",
+        "permission": "BoatFuelPricesReadOnly",
+        "location": "frmBoatFuelPricesLocationSearch"
+      },
+      {
+        "control": "btnClear",
+        "buttonType": "Clear",
+        "permission": "BoatFuelPricesReadOnly",
+        "location": "frmBoatFuelPricesLocationSearch"
+      },
+      {
+        "control": "btnNew",
+        "buttonType": "New",
+        "permission": "BoatFuelPricesModify",
+        "location": "frmBoatFuelPricesLocationSearch"
+      },
+      {
+        "control": "btnExport",
+        "buttonType": "Export",
+        "permission": "BoatFuelPricesReadOnly",
+        "location": "frmBoatFuelPricesLocationSearch"
+      },
+      {
+        "control": "btnSave",
+        "buttonType": "Save",
+        "permission": "BoatFuelPricesModify",
+        "location": "frmBoatFuelPricesLocationDetail"
+      },
+      {
+        "control": "btnDelete",
+        "buttonType": "Delete",
+        "permission": "BoatFuelPricesModify",
+        "location": "frmBoatFuelPricesLocationDetail"
+      },
+      {
+        "control": "btnCancel",
+        "buttonType": "Cancel",
+        "permission": "BoatFuelPricesReadOnly",
+        "location": "frmBoatFuelPricesLocationDetail"
+      }
+    ]
+  },
+  "modernAuthorizationMapping": {
+    "api": {
+      "description": "Authorization attributes for BargeOps.Admin.API controllers",
+      "examples": [
+        {
+          "endpoint": "GET /api/boatfuelprices",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly"
+        },
+        {
+          "endpoint": "GET /api/boatfuelprices/{id}",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly"
+        },
+        {
+          "endpoint": "POST /api/boatfuelprices",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesModify\")]",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "endpoint": "PUT /api/boatfuelprices/{id}",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesModify\")]",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "endpoint": "DELETE /api/boatfuelprices/{id}",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesModify\")]",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "endpoint": "GET /api/boatfuelprices/search",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly"
+        },
+        {
+          "endpoint": "GET /api/boatfuelprices/boat/{boatId}",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly",
+          "notes": "Retrieves fuel price history for a specific boat"
+        },
+        {
+          "endpoint": "GET /api/boatfuelprices/location/{locationId}",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly",
+          "notes": "Retrieves fuel price history for a specific location"
+        },
+        {
+          "endpoint": "GET /api/boatfuelprices/analytics/average",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly",
+          "notes": "Analytics endpoint for average prices by fuel type"
+        },
+        {
+          "endpoint": "GET /api/boatfuelprices/analytics/trends",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly",
+          "notes": "Analytics endpoint for price trends over time"
+        }
+      ]
+    },
+    "mvc": {
+      "description": "Authorization attributes for BargeOps.Admin.UI MVC controllers",
+      "examples": [
+        {
+          "action": "Index (Search)",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly"
+        },
+        {
+          "action": "Search",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly"
+        },
+        {
+          "action": "Details",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly"
+        },
+        {
+          "action": "Create",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesModify\")]",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "action": "Edit",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesModify\")]",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "action": "Delete",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesModify\")]",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "action": "Export",
+          "attribute": "[Authorize(Policy = \"BoatFuelPricesReadOnly\")]",
+          "permission": "BoatFuelPricesReadOnly",
+          "notes": "Export action for generating reports/CSV files"
+        }
+      ]
+    },
+    "razorViews": {
+      "description": "UI elements conditional rendering based on permissions",
+      "examples": [
+        {
+          "element": "New Button",
+          "condition": "@User.HasClaim(\"Permission\", \"BoatFuelPricesModify\")",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "element": "Edit Button in Grid",
+          "condition": "@User.HasClaim(\"Permission\", \"BoatFuelPricesModify\")",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "element": "Delete Button",
+          "condition": "@User.HasClaim(\"Permission\", \"BoatFuelPricesModify\")",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "element": "Save Button",
+          "condition": "@User.HasClaim(\"Permission\", \"BoatFuelPricesModify\")",
+          "permission": "BoatFuelPricesModify"
+        },
+        {
+          "element": "Export Button",
+          "condition": "@User.HasClaim(\"Permission\", \"BoatFuelPricesReadOnly\")",
+          "permission": "BoatFuelPricesReadOnly"
+        },
+        {
+          "element": "Search Button",
+          "condition": "@User.HasClaim(\"Permission\", \"BoatFuelPricesReadOnly\")",
+          "permission": "BoatFuelPricesReadOnly"
+        }
+      ]
+    }
+  },
+  "policyConfiguration": {
+    "description": "Policy configuration for Startup.cs or Program.cs",
+    "policies": [
+      {
+        "name": "BoatFuelPricesReadOnly",
+        "requirement": "User must have BoatFuelPricesReadOnly claim",
+        "configurationCode": "options.AddPolicy(\"BoatFuelPricesReadOnly\", policy => policy.RequireClaim(\"Permission\", \"BoatFuelPricesReadOnly\"));"
+      },
+      {
+        "name": "BoatFuelPricesModify",
+        "requirement": "User must have BoatFuelPricesModify claim",
+        "configurationCode": "options.AddPolicy(\"BoatFuelPricesModify\", policy => policy.RequireClaim(\"Permission\", \"BoatFuelPricesModify\"));"
+      }
+    ]
+  },
+  "dataAccessSecurity": {
+    "description": "Security considerations for data access operations",
+    "storedProcedures": {
+      "sp_BoatFuelPricesLocationSearch": {
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "notes": "Search operation requires read-only permission"
+      },
+      "sp_BoatFuelPrices_GetByID": {
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "notes": "GetByID operation requires read-only permission"
+      },
+      "sp_BoatFuelPrices_Insert": {
+        "requiredPermission": "BoatFuelPricesModify",
+        "notes": "Insert operation requires modify permission"
+      },
+      "sp_BoatFuelPrices_Update": {
+        "requiredPermission": "BoatFuelPricesModify",
+        "notes": "Update operation requires modify permission"
+      },
+      "sp_BoatFuelPrices_Delete": {
+        "requiredPermission": "BoatFuelPricesModify",
+        "notes": "Soft delete operation requires modify permission"
+      },
+      "sp_BoatFuelPrices_GetByBoatID": {
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "notes": "Retrieval by boat requires read-only permission"
+      },
+      "sp_BoatFuelPrices_GetByLocationID": {
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "notes": "Retrieval by location requires read-only permission"
+      },
+      "sp_BoatFuelPrices_GetAveragePriceByFuelType": {
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "notes": "Analytics operation requires read-only permission"
+      },
+      "sp_BoatFuelPrices_GetPriceTrends": {
+        "requiredPermission": "BoatFuelPricesReadOnly",
+        "notes": "Analytics operation requires read-only permission"
+      }
+    }
+  },
+  "relatedEntitySecurity": {
+    "boat": {
+      "relationship": "Parent entity - BoatFuelPrices belongs to Boat",
+      "permissions": {
+        "read": "User needs BoatFuelPricesReadOnly to view fuel prices for a boat",
+        "modify": "User needs BoatFuelPricesModify to add/edit fuel prices for a boat"
+      },
+      "notes": "Boat selection in dropdown requires BoatReadOnly permission (from Boat entity)"
+    },
+    "location": {
+      "relationship": "Reference entity - BoatFuelPrices references Location (facility)",
+      "permissions": {
+        "read": "User needs BoatFuelPricesReadOnly to view fuel prices by location",
+        "modify": "User needs BoatFuelPricesModify to add/edit fuel prices with location"
+      },
+      "notes": "Location selection in dropdown requires FacilityReadOnly permission (from Facility entity)"
+    },
+    "vendor": {
+      "relationship": "Reference entity - BoatFuelPrices references Vendor",
+      "permissions": {
+        "read": "User needs BoatFuelPricesReadOnly to view fuel prices by vendor",
+        "modify": "User needs BoatFuelPricesModify to add/edit fuel prices with vendor"
+      },
+      "notes": "Vendor selection in dropdown requires VendorReadOnly permission (from Vendor entity)"
+    }
+  },
+  "notes": [
+    "Legacy system uses ControlAuthorization.SetButtonType to control button visibility and enablement",
+    "Modern system uses [Authorize] attributes at controller/action level",
+    "UI buttons should use @User.HasClaim to conditionally render based on permissions",
+    "Both BoatFuelPricesReadOnly and BoatFuelPricesModify require authentication",
+    "BoatFuelPricesModify permission implies BoatFuelPricesReadOnly capabilities",
+    "Related entity dropdowns (Boat, Location, Vendor) require their respective ReadOnly permissions",
+    "Analytics endpoints (average prices, trends) require BoatFuelPricesReadOnly permission",
+    "Export functionality requires BoatFuelPricesReadOnly permission",
+    "Consider implementing hierarchical permission checking where BoatFuelPricesModify includes BoatFuelPricesReadOnly",
+    "Audit logging should capture CreatedBy and ModifiedBy for all insert/update operations"
+  ],
+  "migrationGuidance": {
+    "steps": [
+      "1. Define policies in Startup.cs/Program.cs authorization configuration",
+      "2. Apply [Authorize(Policy = \"...\")] attributes to API controllers and actions",
+      "3. Apply [Authorize(Policy = \"...\")] attributes to MVC controllers and actions",
+      "4. Update Razor views to conditionally render buttons based on @User.HasClaim",
+      "5. Update JavaScript to show/hide grid action buttons based on user permissions",
+      "6. Ensure authentication middleware is properly configured",
+      "7. Implement authorization checks in repository methods that call stored procedures",
+      "8. Configure cross-entity permission dependencies (Boat, Location, Vendor)",
+      "9. Test permission enforcement at all layers (API, MVC, UI, Data Access)",
+      "10. Configure audit logging for fuel price modifications"
+    ],
+    "considerations": [
+      "Ensure consistent permission naming between legacy and modern systems during migration",
+      "Consider caching permission lookups for performance",
+      "Log authorization failures for security auditing",
+      "Implement proper error handling for unauthorized access attempts",
+      "Consider graceful degradation (hide features vs show disabled features)",
+      "Plan for permission migration/mapping during user database migration",
+      "Fuel price data may be sensitive financial information - ensure proper access controls",
+      "Consider implementing row-level security if users should only see prices for specific boats",
+      "Analytics endpoints may require additional caching for performance",
+      "Export functionality should respect the same permission model as search/view"
+    ],
+    "securityBestPractices": [
+      "Validate that CreatedBy and ModifiedBy fields are populated from authenticated user context",
+      "Ensure soft deletes (IsActive = 0) respect BoatFuelPricesModify permission",
+      "Implement rate limiting on analytics endpoints to prevent abuse",
+      "Consider implementing data retention policies for historical fuel price data",
+      "Validate that price data modifications include proper audit trail",
+      "Ensure decimal precision validation (PricePerGallon to 4 decimal places) is enforced",
+      "Implement business rule validation that prevents future-dated price entries",
+      "Consider implementing approval workflow for high-value or unusual fuel price entries"
+    ]
+  }
+}

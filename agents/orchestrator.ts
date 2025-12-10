@@ -22,7 +22,7 @@
 
 import { spawn } from "bun";
 import { parsedArgs } from "../lib/flags";
-import { getProjectRoot, parseEntityFromFormName, getAvailableForms, getFormsDirectory } from "../lib/paths";
+import { getProjectRoot, parseEntityFromFormName, getAvailableForms, getFormsDirectory, detectChildForms } from "../lib/paths";
 import { mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import { createInterface } from "readline";
@@ -48,6 +48,7 @@ interface OrchestratorOptions {
 	outputDir?: string;
 	skipSteps?: number[];
 	isSingleForm?: boolean;
+	childForms?: string[];
 }
 
 interface AgentStep {
@@ -180,7 +181,40 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 		process.exit(1);
 	}
 
-	return { entity: finalEntity, formName: finalFormName, outputDir, skipSteps, isSingleForm };
+	// Detect child forms if we have a form name
+	let childForms: string[] = [];
+	if (finalFormName) {
+		console.log(`\nScanning for child forms opened by ${finalFormName}...`);
+		childForms = await detectChildForms(finalFormName);
+		if (childForms.length > 0) {
+			console.log(`Found ${childForms.length} child form(s):`);
+			childForms.forEach(child => console.log(`  - ${child}`));
+		} else {
+			console.log("No child forms detected.");
+		}
+	}
+
+	// Also detect child forms from Search/Detail forms if entity is provided
+	if (finalEntity && !isSingleForm) {
+		const searchForm = `frm${finalEntity}Search`;
+		const detailForm = `frm${finalEntity}Detail`;
+
+		console.log(`\nScanning for child forms in ${finalEntity} Search/Detail forms...`);
+		const searchChildren = await detectChildForms(searchForm);
+		const detailChildren = await detectChildForms(detailForm);
+
+		const allChildren = new Set([...childForms, ...searchChildren, ...detailChildren]);
+		childForms = Array.from(allChildren);
+
+		if (childForms.length > 0) {
+			console.log(`Found ${childForms.length} child form(s) total:`);
+			childForms.forEach(child => console.log(`  - ${child}`));
+		} else {
+			console.log("No child forms detected.");
+		}
+	}
+
+	return { entity: finalEntity, formName: finalFormName, outputDir, skipSteps, isSingleForm, childForms };
 }
 
 function getAgentSteps(isSingleForm: boolean, formName?: string): AgentStep[] {
@@ -346,14 +380,31 @@ async function main() {
 	const agentSteps = getAgentSteps(options.isSingleForm || false, options.formName);
 	const totalSteps = agentSteps.length;
 
+	const childFormsCount = options.childForms?.length || 0;
+	let childFormsList = "";
+	if (childFormsCount > 0) {
+		const childFormsStr = options.childForms!.join(", ");
+		if (childFormsStr.length <= 65) {
+			childFormsList = `║  Child Forms: ${childFormsStr.padEnd(62, " ")}║\n`;
+		} else {
+			childFormsList = `║  Child Forms: ${childFormsCount} form(s) detected${" ".padEnd(42, " ")}║\n`;
+		}
+	}
+
 	console.log(`
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                  CLAUDE ONSHORE CONVERSION ORCHESTRATOR                    ║
 ║                                                                            ║
 ║  Entity: ${options.entity.padEnd(68, " ")}║
-${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` : ""}${options.isSingleForm ? `║  Form Type: Single Form (non-Search/Detail)${" ".padEnd(30, " ")}║\n` : ""}║  Output: ${outputPath.padEnd(67, " ")}║
+${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` : ""}${options.isSingleForm ? `║  Form Type: Single Form (non-Search/Detail)${" ".padEnd(30, " ")}║\n` : ""}${childFormsList}║  Output: ${outputPath.padEnd(67, " ")}║
 ╚════════════════════════════════════════════════════════════════════════════╝
 	`);
+
+	if (childFormsCount > 0) {
+		console.log("Child forms detected:");
+		options.childForms!.forEach(child => console.log(`  • ${child}`));
+		console.log();
+	}
 
 	console.log(`This orchestrator will run ${totalSteps} analysis agents in sequence:`);
 	console.log(`\nSteps 1-${totalSteps}: Automatic analysis and data extraction`);
@@ -368,6 +419,21 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 			await mkdir(normalizedOutputPath, { recursive: true });
 		}
 		await Bun.write(`${outputPath}/.gitkeep`, "");
+
+		// Write child forms list to output directory
+		if (options.childForms && options.childForms.length > 0) {
+			const childFormsData = {
+				mainForm: options.formName || `frm${options.entity}Search`,
+				entity: options.entity,
+				childForms: options.childForms,
+				detectedAt: new Date().toISOString(),
+			};
+			await Bun.write(
+				`${outputPath}/child-forms.json`,
+				JSON.stringify(childFormsData, null, 2)
+			);
+			console.log(`✓ Child forms list written to: ${outputPath}/child-forms.json\n`);
+		}
 	} catch (error: any) {
 		console.error(`Error creating output directory: ${error.message}`);
 		console.error(`Path: ${outputPath}`);
@@ -392,6 +458,13 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		currentStep++;
 	}
 
+	let childFormsMessage = "";
+	if (childFormsCount > 0) {
+		childFormsMessage = `║                                                                            ║
+║  ${childFormsCount} child form(s) detected - see child-forms.json for details${" ".padEnd(21, " ")}║
+`;
+	}
+
 	console.log(`
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                    ANALYSIS COMPLETE ✅                                     ║
@@ -399,7 +472,7 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 ║  All ${totalSteps} analysis steps completed successfully for ${options.entity.padEnd(28 - totalSteps.toString().length, " ")}║
 ║                                                                            ║
 ║  Output directory: ${outputPath.padEnd(55, " ")}║
-║                                                                            ║
+${childFormsMessage}║                                                                            ║
 ║  Next step: Generate conversion templates:                                 ║
 ║  bun run generate-template --entity "${options.entity}"${" ".padEnd(Math.max(0, 36 - options.entity.length), " ")}║
 ╚════════════════════════════════════════════════════════════════════════════╝
