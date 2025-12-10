@@ -14,6 +14,7 @@ export const parsedArgs = parseArgs({
 		"mcp-config": { type: "string" },
 		"output-format": { type: "string" },
 		entity: { type: "string", short: "e" },
+		"form-name": { type: "string" },
 		"form-type": { type: "string" },
 		output: { type: "string", short: "o" },
 		"skip-steps": { type: "string" },
@@ -35,7 +36,7 @@ export function buildClaudeFlags(
 
 	for (const [key, value] of Object.entries(merged)) {
 		if (value === undefined || value === null) continue;
-		if (key === "entity" || key === "form-type" || key === "output" || key === "skip-steps") {
+		if (key === "entity" || key === "form-name" || key === "form-type" || key === "output" || key === "skip-steps") {
 			continue;
 		}
 

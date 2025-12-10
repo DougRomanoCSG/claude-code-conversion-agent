@@ -1,21 +1,23 @@
 #!/usr/bin/env -S bun run
 /**
- * ORCHESTRATOR: Master agent that runs analysis steps 1-10
+ * ORCHESTRATOR: Master agent that runs analysis steps 1-10 (or 1-9 for single forms)
  *
- * This agent coordinates the execution of 10 analysis agents in sequence,
+ * This agent coordinates the execution of analysis agents in sequence,
  * passing data between them and orchestrating the complete analysis workflow.
  *
- * All 10 agents run automatically to gather data.
- * Step 11 (conversion-template-generator) should be run separately.
+ * Supports both Search/Detail form pairs and single standalone forms.
+ * All agents run automatically to gather data.
+ * Template generation should be run separately.
  *
  * Usage:
  *   bun run agents/orchestrator.ts --entity "Facility" --form-name "frmFacilitySearch"
  *   bun run agents/orchestrator.ts --form-name "frmFacilitySearch"  (entity extracted from form name)
+ *   bun run agents/orchestrator.ts --form-name "frmFuelPrices"  (single form, entity extracted)
  *   bun run agents/orchestrator.ts --entity "Facility"  (form names will be constructed)
  *   bun run agents/orchestrator.ts  (will prompt for form selection)
- * 
- * Note: This runs steps 1-10 (analysis only). Step 11 (template generation) 
- *       should be run separately with: bun run generate-template --entity "Facility"
+ *
+ * Note: This runs analysis steps only. Template generation should be run separately:
+ *       bun run generate-template --entity "Facility"
  */
 
 import { spawn } from "bun";
@@ -45,6 +47,7 @@ interface OrchestratorOptions {
 	formName?: string;
 	outputDir?: string;
 	skipSteps?: number[];
+	isSingleForm?: boolean;
 }
 
 interface AgentStep {
@@ -109,6 +112,7 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 
 	let finalEntity = entity;
 	let finalFormName = formName;
+	let isSingleForm = false;
 
 	// If form name is provided, try to extract entity from it
 	if (formName && !entity) {
@@ -117,9 +121,18 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 			finalEntity = extractedEntity;
 			finalFormName = formName;
 		} else {
-			console.error(`Error: Could not parse entity name from form name "${formName}"`);
-			console.error("Expected format: frm{Entity}Search or frm{Entity}Detail");
-			process.exit(1);
+			// Try to extract entity by removing "frm" prefix for non-standard forms
+			if (formName.toLowerCase().startsWith("frm")) {
+				finalEntity = formName.substring(3);
+				finalFormName = formName;
+				isSingleForm = true;
+				console.log(`Detected single form (non-Search/Detail): ${formName}`);
+				console.log(`Extracted entity: ${finalEntity}`);
+			} else {
+				console.error(`Error: Could not parse entity name from form name "${formName}"`);
+				console.error("Expected format: frm{Entity}Search, frm{Entity}Detail, or frm{Entity}");
+				process.exit(1);
+			}
 		}
 	}
 
@@ -127,20 +140,28 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 	if (!finalEntity && !finalFormName) {
 		console.log("No entity or form name provided. Searching for available forms...");
 		const selectedForm = await promptForForm();
-		
+
 		if (!selectedForm) {
 			console.error("Error: No form selected");
 			process.exit(1);
 		}
-		
+
 		finalFormName = selectedForm;
 		const extractedEntity = parseEntityFromFormName(selectedForm);
-		
+
 		if (extractedEntity) {
 			finalEntity = extractedEntity;
 		} else {
-			console.error(`Error: Could not parse entity name from form name "${selectedForm}"`);
-			process.exit(1);
+			// Try to extract entity by removing "frm" prefix for non-standard forms
+			if (selectedForm.toLowerCase().startsWith("frm")) {
+				finalEntity = selectedForm.substring(3);
+				isSingleForm = true;
+				console.log(`Detected single form (non-Search/Detail): ${selectedForm}`);
+				console.log(`Extracted entity: ${finalEntity}`);
+			} else {
+				console.error(`Error: Could not parse entity name from form name "${selectedForm}"`);
+				process.exit(1);
+			}
 		}
 	}
 
@@ -154,95 +175,120 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 		console.error("Error: Entity name is required");
 		console.error("Usage: bun run agents/orchestrator.ts --entity \"Facility\" --form-name \"frmFacilitySearch\"");
 		console.error("   or: bun run agents/orchestrator.ts --form-name \"frmFacilitySearch\"");
+		console.error("   or: bun run agents/orchestrator.ts --form-name \"frmFuelPrices\" (single form)");
 		console.error("   or: bun run agents/orchestrator.ts (will prompt for form selection)");
 		process.exit(1);
 	}
 
-	return { entity: finalEntity, formName: finalFormName, outputDir, skipSteps };
+	return { entity: finalEntity, formName: finalFormName, outputDir, skipSteps, isSingleForm };
 }
 
-const AGENT_STEPS: AgentStep[] = [
-	{
-		name: "Form Structure Analyzer (Search)",
-		script: "form-structure-analyzer.ts",
-		description: "Extract search form UI components",
-		outputFile: "form-structure-search.json",
-		interactive: false,
-		extraArgs: ["--form-type", "Search"],
-	},
-	{
-		name: "Form Structure Analyzer (Detail)",
-		script: "form-structure-analyzer.ts",
-		description: "Extract detail form UI components",
-		outputFile: "form-structure-detail.json",
-		interactive: false,
-		extraArgs: ["--form-type", "Detail"],
-	},
-	{
-		name: "Business Logic Extractor",
-		script: "business-logic-extractor.ts",
-		description: "Extract business rules and validation",
-		outputFile: "business-logic.json",
-		interactive: false,
-	},
-	{
-		name: "Data Access Pattern Analyzer",
-		script: "data-access-analyzer.ts",
-		description: "Extract stored procedures and queries",
-		outputFile: "data-access.json",
-		interactive: false,
-	},
-	{
-		name: "Security & Authorization Extractor",
-		script: "security-extractor.ts",
-		description: "Extract permissions and authorization",
-		outputFile: "security.json",
-		interactive: false,
-	},
-	{
-		name: "UI Component Mapper",
-		script: "ui-component-mapper.ts",
-		description: "Map legacy controls to modern equivalents",
-		outputFile: "ui-mapping.json",
-		interactive: false,
-	},
-	{
-		name: "Form Workflow Analyzer",
-		script: "form-workflow-analyzer.ts",
-		description: "Extract user flows and state management",
-		outputFile: "workflow.json",
-		interactive: false,
-	},
-	{
-		name: "Detail Form Tab Analyzer",
-		script: "detail-tab-analyzer.ts",
-		description: "Extract tab structure and related entities",
-		outputFile: "tabs.json",
-		interactive: false,
-	},
-	{
-		name: "Validation Rule Extractor",
-		script: "validation-extractor.ts",
-		description: "Extract all validation logic",
-		outputFile: "validation.json",
-		interactive: false,
-	},
-	{
-		name: "Related Entity Analyzer",
-		script: "related-entity-analyzer.ts",
-		description: "Extract entity relationships",
-		outputFile: "related-entities.json",
-		interactive: false,
-	},
-];
+function getAgentSteps(isSingleForm: boolean, formName?: string): AgentStep[] {
+	const steps: AgentStep[] = [];
+
+	if (isSingleForm && formName) {
+		// For single forms, run the analyzer once with the specific form name
+		steps.push({
+			name: `Form Structure Analyzer (${formName})`,
+			script: "form-structure-analyzer.ts",
+			description: `Extract ${formName} UI components`,
+			outputFile: "form-structure.json",
+			interactive: false,
+			extraArgs: ["--form-name", formName],
+		});
+	} else {
+		// For standard Search/Detail pairs
+		steps.push(
+			{
+				name: "Form Structure Analyzer (Search)",
+				script: "form-structure-analyzer.ts",
+				description: "Extract search form UI components",
+				outputFile: "form-structure-search.json",
+				interactive: false,
+				extraArgs: ["--form-type", "Search"],
+			},
+			{
+				name: "Form Structure Analyzer (Detail)",
+				script: "form-structure-analyzer.ts",
+				description: "Extract detail form UI components",
+				outputFile: "form-structure-detail.json",
+				interactive: false,
+				extraArgs: ["--form-type", "Detail"],
+			}
+		);
+	}
+
+	// Common steps for all forms
+	steps.push(
+		{
+			name: "Business Logic Extractor",
+			script: "business-logic-extractor.ts",
+			description: "Extract business rules and validation",
+			outputFile: "business-logic.json",
+			interactive: false,
+		},
+		{
+			name: "Data Access Pattern Analyzer",
+			script: "data-access-analyzer.ts",
+			description: "Extract stored procedures and queries",
+			outputFile: "data-access.json",
+			interactive: false,
+		},
+		{
+			name: "Security & Authorization Extractor",
+			script: "security-extractor.ts",
+			description: "Extract permissions and authorization",
+			outputFile: "security.json",
+			interactive: false,
+		},
+		{
+			name: "UI Component Mapper",
+			script: "ui-component-mapper.ts",
+			description: "Map legacy controls to modern equivalents",
+			outputFile: "ui-mapping.json",
+			interactive: false,
+		},
+		{
+			name: "Form Workflow Analyzer",
+			script: "form-workflow-analyzer.ts",
+			description: "Extract user flows and state management",
+			outputFile: "workflow.json",
+			interactive: false,
+		},
+		{
+			name: "Detail Form Tab Analyzer",
+			script: "detail-tab-analyzer.ts",
+			description: "Extract tab structure and related entities",
+			outputFile: "tabs.json",
+			interactive: false,
+		},
+		{
+			name: "Validation Rule Extractor",
+			script: "validation-extractor.ts",
+			description: "Extract all validation logic",
+			outputFile: "validation.json",
+			interactive: false,
+		},
+		{
+			name: "Related Entity Analyzer",
+			script: "related-entity-analyzer.ts",
+			description: "Extract entity relationships",
+			outputFile: "related-entities.json",
+			interactive: false,
+		}
+	);
+
+	return steps;
+}
 
 async function runAgentStep(
 	step: AgentStep,
 	stepNumber: number,
 	options: OrchestratorOptions,
+	totalSteps: number,
 ): Promise<number> {
 	console.log(`\n${"=".repeat(80)}`);
-	console.log(`STEP ${stepNumber}/10: ${step.name}`);
+	console.log(`STEP ${stepNumber}/${totalSteps}: ${step.name}`);
 	console.log(`Description: ${step.description}`);
 	console.log(`${"=".repeat(80)}\n`);
 
@@ -257,6 +303,10 @@ async function runAgentStep(
 		"--output",
 		outputPath,
 	];
+
+	if (options.formName) {
+		args.push("--form-name", options.formName);
+	}
 
 	if (step.extraArgs) {
 		args.push(...step.extraArgs);
@@ -293,19 +343,21 @@ async function runAgentStep(
 async function main() {
 	const options = await parseOptions();
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
+	const agentSteps = getAgentSteps(options.isSingleForm || false, options.formName);
+	const totalSteps = agentSteps.length;
 
 	console.log(`
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                  CLAUDE ONSHORE CONVERSION ORCHESTRATOR                    ║
 ║                                                                            ║
 ║  Entity: ${options.entity.padEnd(68, " ")}║
-${options.formName ? `║  Form Name: ${options.formName.padEnd(67, " ")}║\n` : ""}║  Output: ${outputPath.padEnd(67, " ")}║
+${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` : ""}${options.isSingleForm ? `║  Form Type: Single Form (non-Search/Detail)${" ".padEnd(30, " ")}║\n` : ""}║  Output: ${outputPath.padEnd(67, " ")}║
 ╚════════════════════════════════════════════════════════════════════════════╝
 	`);
 
-	console.log("This orchestrator will run 10 analysis agents in sequence:");
-	console.log("\nSteps 1-10: Automatic analysis and data extraction");
-	console.log("\nNote: Step 11 (Template Generation) should be run separately:");
+	console.log(`This orchestrator will run ${totalSteps} analysis agents in sequence:`);
+	console.log(`\nSteps 1-${totalSteps}: Automatic analysis and data extraction`);
+	console.log(`\nNote: Step ${totalSteps + 1} (Template Generation) should be run separately:`);
 	console.log(`   bun run generate-template --entity "${options.entity}"`);
 	console.log("   or: bun run agents/conversion-template-generator.ts --entity \"" + options.entity + "\"\n");
 
@@ -324,14 +376,14 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(67, " ")}║\n` 
 	}
 
 	let currentStep = 1;
-	for (const step of AGENT_STEPS) {
+	for (const step of agentSteps) {
 		if (options.skipSteps?.includes(currentStep)) {
 			console.log(`\n⏭️  Skipping Step ${currentStep}: ${step.name}`);
 			currentStep++;
 			continue;
 		}
 
-		const exitCode = await runAgentStep(step, currentStep, options);
+		const exitCode = await runAgentStep(step, currentStep, options, totalSteps);
 		if (exitCode !== 0) {
 			console.error(`\n💥 Orchestrator stopped at step ${currentStep} due to error`);
 			process.exit(exitCode);
@@ -344,12 +396,12 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(67, " ")}║\n` 
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                    ANALYSIS COMPLETE ✅                                     ║
 ║                                                                            ║
-║  All 10 analysis steps completed successfully for ${options.entity.padEnd(30, " ")}║
+║  All ${totalSteps} analysis steps completed successfully for ${options.entity.padEnd(28 - totalSteps.toString().length, " ")}║
 ║                                                                            ║
 ║  Output directory: ${outputPath.padEnd(55, " ")}║
 ║                                                                            ║
 ║  Next step: Generate conversion templates:                                 ║
-║  bun run generate-template --entity "${options.entity}"                    ║
+║  bun run generate-template --entity "${options.entity}"${" ".padEnd(Math.max(0, 36 - options.entity.length), " ")}║
 ╚════════════════════════════════════════════════════════════════════════════╝
 	`);
 

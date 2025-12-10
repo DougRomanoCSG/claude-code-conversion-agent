@@ -84,6 +84,11 @@ export function getFormPathForPrompt(entity: string, formType: "Search" | "Detai
 	return `${getInputDirectory()}/${formsPath}/frm${entity}${formType}.vb`;
 }
 
+export function getFormDesignerPathForPrompt(entity: string, formType: "Search" | "Detail"): string {
+	const formsPath = config.paths.forms;
+	return `${getInputDirectory()}/${formsPath}/frm${entity}${formType}.Designer.vb`;
+}
+
 export function getBusinessObjectPathForPrompt(entity: string): string {
 	const businessObjectsPath = config.paths.businessObjects;
 	return `${getInputDirectory()}/${businessObjectsPath}/${entity}Location.vb`;
@@ -154,7 +159,10 @@ export function getTargetProjectsForPrompt(): string {
 /**
  * Parse entity name from form name (e.g., "frmFacilitySearch" -> "Facility")
  */
-export function parseEntityFromFormName(formName: string): string | null {
+export function parseEntityFromFormName(formName: string | undefined): string | null {
+	if (!formName) {
+		return null;
+	}
 	// Remove "frm" prefix and "Search"/"Detail" suffix
 	const match = formName.match(/^frm(.+?)(Search|Detail)$/i);
 	if (match) {
