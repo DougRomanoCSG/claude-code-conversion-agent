@@ -30,6 +30,9 @@ const agents = [
 	"validation-extractor.ts",
 	"related-entity-analyzer.ts",
 	"conversion-template-generator.ts",
+	"entity-converter.ts",
+	"viewmodel-creator.ts",
+	"conversion-planner.ts",
 ];
 
 async function compileAgent(agentFile: string): Promise<boolean> {

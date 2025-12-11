@@ -23,31 +23,49 @@ export const parsedArgs = parseArgs({
 	allowPositionals: true,
 });
 
+/**
+ * Convert flags object to command line arguments
+ */
+export function toFlags(flagsObj: ClaudeFlags): string[] {
+	return Object.entries(flagsObj).flatMap(([key, value]) => {
+		if (value === true) return [`--${key}`];
+		if (value === false) return [`--no-${key}`];
+		if (value !== undefined) return [`--${key}`, String(value)];
+		return [];
+	});
+}
+
 export function getPositionals(): string[] {
 	return parsedArgs.positionals;
 }
 
+/**
+ * Merge default flags with user flags and convert to CLI format
+ * User flags override defaults.
+ */
 export function buildClaudeFlags(
 	baseFlags: Partial<ClaudeFlags>,
-	userFlags: ClaudeFlags,
+	userFlags: ClaudeFlags = parsedArgs.values as ClaudeFlags,
 ): string[] {
 	const merged = { ...baseFlags, ...userFlags };
-	const flags: string[] = [];
+
+	// Filter out custom agent-specific flags that shouldn't be passed to Claude
+	const customFlags = ["entity", "form-name", "form-type", "output", "skip-steps"];
+	const claudeFlags: ClaudeFlags = {};
 
 	for (const [key, value] of Object.entries(merged)) {
-		if (value === undefined || value === null) continue;
-		if (key === "entity" || key === "form-name" || key === "form-type" || key === "output" || key === "skip-steps") {
-			continue;
-		}
-
-		if (typeof value === "boolean") {
-			if (value) {
-				flags.push(`--${key}`);
-			}
-		} else {
-			flags.push(`--${key}`, String(value));
+		if (!customFlags.includes(key)) {
+			claudeFlags[key] = value;
 		}
 	}
 
-	return flags;
+	return toFlags(claudeFlags);
+}
+
+/**
+ * Resolve path relative to a file
+ */
+export function resolvePath(relativeFromFile: string, importMetaUrl: string): string {
+	const url = new URL(relativeFromFile, importMetaUrl);
+	return url.pathname;
 }

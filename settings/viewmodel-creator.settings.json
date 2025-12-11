@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(test:*)",
+      "Bash(bun run:*)",
+      "Bash(tree:*)"
+    ]
+  },
+  "hooks": {}
+}

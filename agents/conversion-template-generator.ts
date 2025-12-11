@@ -20,12 +20,15 @@ import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
 import { getProjectRoot, getCrewingApiPath, getCrewingUiPath, getAdminApiPath, getAdminUiPath, getSharedProjectPath, getDetailedReferenceExamples } from "../lib/paths";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import templateGenSettings from "../settings/template-generator.settings.json" with { type: "json" };
-import templateGenMcp from "../settings/template-generator.mcp.json" with { type: "json" };
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const projectRoot = getProjectRoot(import.meta.url);
 const settingsJson = JSON.stringify(templateGenSettings);
-const mcpJson = JSON.stringify(templateGenMcp);
+const mcpConfigPath = join(__dirname, "..", "settings", "template-generator.mcp.json");
 
 interface GeneratorOptions {
 	entity: string;
@@ -92,9 +95,10 @@ GENERATION GOALS:
    FOR BargeOps.Admin.API (${getAdminApiPath()}):
    - Repository interface and implementation (in Admin.Infrastructure/Repositories/)
      * I{Entity}Repository.cs - Interface returning DTOs
-     * {Entity}Repository.cs - Dapper implementation with stored procedures
+     * {Entity}Repository.cs - Dapper implementation with DIRECT SQL QUERIES (NOT stored procedures)
        - Returns DTOs directly (no mapping needed!)
        - Uses async/await patterns
+       - Uses parameterized SQL queries (not SPs)
    - Service interface and implementation
      * I{Entity}Service.cs - Interface (in Admin.Domain/Services/)
      * {Entity}Service.cs - Implementation (in Admin.Infrastructure/Services/)
@@ -198,11 +202,15 @@ Begin template generation now.
 
 	const baseFlags = {
 		settings: settingsJson,
-		"mcp-config": mcpJson,
+		"mcp-config": mcpConfigPath,
+		"append-system-prompt": systemPrompt,
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
-	const args = [...flags, systemPrompt];
+
+	// Initial prompt to start the interactive session
+	const initialPrompt = `Generate conversion templates for the ${options.entity} entity based on the analysis files in ${outputPath}`;
+	const args = [...flags, initialPrompt];
 
 	console.log(`
 ╔════════════════════════════════════════════════════════════════════════════╗

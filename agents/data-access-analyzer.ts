@@ -46,26 +46,30 @@ GOALS:
 ARCHITECTURE NOTE:
 ⭐ The target project uses a MONO SHARED structure:
 - DTOs and Models are in BargeOps.Shared (${getSharedExamples().dtos})
-- Repositories use Dapper with stored procedures
+- Repositories use Dapper with DIRECT SQL QUERIES (NOT stored procedures)
 - Results are mapped to DTOs from the shared project
+- Legacy VB.NET code uses stored procedures, but modern C# uses parameterized SQL queries
 
 REFERENCE EXAMPLES:
 For data access patterns, reference:
 - BargeOps.Shared DTOs: ${getSharedExamples().dtos}
   Example: FacilityDto.cs, BoatLocationDto.cs - Target DTOs for query results
 - BargeOps.Admin.API Repositories: ${getAdminApiExamples().repositories}
-  Primary reference: IFacilityRepository.cs, FacilityRepository.cs - Dapper with stored procedures
-  Primary reference: IBoatLocationRepository.cs, BoatLocationRepository.cs - Complete CRUD patterns
+  Primary reference: IFacilityRepository.cs, FacilityRepository.cs - Dapper with DIRECT SQL QUERIES
+  Primary reference: IBoatLocationRepository.cs, BoatLocationRepository.cs - Complete CRUD patterns with parameterized SQL
 - BargeOps.Crewing.API Repositories: ${getCrewingApiExamples().repositories}
-  Examples: ICrewingRepository.cs, CrewingRepository.cs - Additional patterns
+  Examples: ICrewingRepository.cs, CrewingRepository.cs - Additional Dapper query patterns
 
-KEY PATTERNS TO IDENTIFY:
-- Search operations: sp_{Entity}Search stored procedure with paging
-- GetByID: sp_{Entity}_GetByID
-- Insert: sp_{Entity}_Insert
-- Update: sp_{Entity}_Update
-- Delete: sp_{Entity}_Delete (usually soft delete)
-- Child entities: sp_{Entity}{Child}_GetByParentID, _Insert, _Update, _Delete
+KEY PATTERNS TO IDENTIFY (Legacy VB.NET Stored Procedures):
+⭐ IMPORTANT: Extract these SP patterns from legacy VB.NET code, but document that they will be CONVERTED to Dapper SQL queries:
+- Search operations: sp_{Entity}Search stored procedure → Convert to dynamic SQL query with WHERE clause
+- GetByID: sp_{Entity}_GetByID → Convert to SELECT with parameter
+- Insert: sp_{Entity}_Insert → Convert to INSERT with OUTPUT clause
+- Update: sp_{Entity}_Update → Convert to UPDATE with parameters
+- Delete: sp_{Entity}_Delete → Convert to soft delete UPDATE (IsActive = 0)
+- Child entities: sp_{Entity}{Child}_GetByParentID → Convert to SELECT with JOIN
+
+CONVERSION NOTE: All extracted SP names and parameters should be documented in data-access.json with a note that they will be implemented as Dapper queries, NOT database stored procedures.
 
 OUTPUT: ${outputPath}/data-access.json
 
