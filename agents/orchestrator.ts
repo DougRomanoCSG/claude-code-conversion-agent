@@ -473,8 +473,17 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 ║                                                                            ║
 ║  Output directory: ${outputPath.padEnd(55, " ")}║
 ${childFormsMessage}║                                                                            ║
-║  Next step: Generate conversion templates:                                 ║
-║  bun run generate-template --entity "${options.entity}"${" ".padEnd(Math.max(0, 36 - options.entity.length), " ")}║
+║  NEXT STEPS:                                                               ║
+║                                                                            ║
+║  1. Generate conversion templates (interactive):                           ║
+║     bun run generate-template --entity "${options.entity}"${" ".padEnd(Math.max(0, 33 - options.entity.length), " ")}║
+║                                                                            ║
+║  2. Use interactive agents for implementation help:                        ║
+║     bun run plan-conversion --entity "${options.entity}"${" ".padEnd(Math.max(0, 32 - options.entity.length), " ")}║
+║     bun run entity-convert --entity "${options.entity}"${" ".padEnd(Math.max(0, 33 - options.entity.length), " ")}║
+║     bun run viewmodel-create --entity "${options.entity}"${" ".padEnd(Math.max(0, 31 - options.entity.length), " ")}║
+║                                                                            ║
+║  See QUICK_START.md for detailed next steps and examples                  ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 	`);
 

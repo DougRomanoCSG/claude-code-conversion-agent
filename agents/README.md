@@ -18,7 +18,7 @@ These are the extraction agents that analyze legacy forms and generate templates
 - **detail-tab-analyzer.ts** - Step 7: Extracts tab structure and related entities
 - **validation-extractor.ts** - Step 8: Extracts all validation logic
 - **related-entity-analyzer.ts** - Step 9: Extracts entity relationships
-- **conversion-template-generator.ts** - Step 10: Interactive template generation (run separately)
+- **conversion-template-generator.ts** - Step 10: Interactive template and ViewModel generation (run separately)
 
 **Orchestrator Usage:**
 ```bash
@@ -52,7 +52,7 @@ bun run agents/conversion-template-generator.ts --entity "Facility"
 These agents use specialized system prompts for guided conversion work:
 
 #### entity-converter.ts
-Converts and migrates entities with proper EF Core relationships.
+Converts and migrates entities with proper Dapper data access patterns.
 
 **Uses:** `system-prompts/entity-conversion-prompt.md`
 
@@ -73,10 +73,10 @@ bun run entity-convert --entity Facility
 
 **Features:**
 - Entity analysis and relationship mapping
-- ViewModel integration guidance
+- Dapper repository pattern guidance
 - Implementation status documentation
 - Safety checks for data integrity
-- Follows project MVVM patterns
+- Follows project architecture patterns
 
 #### viewmodel-creator.ts
 Creates ViewModels following MVVM patterns with validation and display attributes.
@@ -136,7 +136,7 @@ bun run plan-conversion --entity Facility
 
 ### System Prompt Agents (Interactive)
 ```bash
-# Entity conversion with EF Core relationships
+# Entity conversion with Dapper data access
 bun run entity-convert [--entity <name>] [prompt]
 
 # ViewModel creation following MVVM patterns

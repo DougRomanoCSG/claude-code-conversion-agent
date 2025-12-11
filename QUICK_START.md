@@ -61,8 +61,9 @@ output/{EntityName}/
 ├── related-entities.json
 ├── conversion-plan.md          ← Main conversion plan
 └── templates/                   ← Code templates
-    ├── api/                     ← BargeOps.Admin.API templates
-    └── ui/                      ← BargeOps.Admin.UI templates
+    ├── shared/                  ← BargeOps.Shared DTOs (create first!)
+    ├── api/                     ← BargeOps.API templates
+    └── ui/                      ← BargeOps.UI templates
 ```
 
 ## Common Commands
@@ -86,6 +87,8 @@ bun run agents/conversion-template-generator.ts --entity "Facility"
 
 ## Agent Overview
 
+### Analysis Agents (Run via Orchestrator)
+
 | # | Agent Name | Purpose | Output File |
 |---|------------|---------|-------------|
 | 1 | Form Structure Analyzer | Extract UI controls | `form-structure-*.json` |
@@ -97,7 +100,15 @@ bun run agents/conversion-template-generator.ts --entity "Facility"
 | 7 | Detail Tab Analyzer | Extract tab structure | `tabs.json` |
 | 8 | Validation Extractor | Extract validation | `validation.json` |
 | 9 | Related Entity Analyzer | Extract relationships | `related-entities.json` |
-| 10 | Template Generator | Generate code (INTERACTIVE) | `conversion-plan.md` |
+
+### Interactive Implementation Agents (Run Separately)
+
+| Agent | Purpose | Usage |
+|-------|---------|-------|
+| Template Generator | Generate conversion plan and code templates | `bun run generate-template --entity "Facility"` |
+| Conversion Planner | Create comprehensive conversion plans | `bun run plan-conversion --entity "Facility"` |
+| Entity Converter | Help implement entities with Dapper | `bun run entity-convert --entity "Facility"` |
+| ViewModel Creator | Create ViewModels following MVVM | `bun run viewmodel-create --entity "Facility" --form-type Search` |
 
 ## Examples
 
@@ -124,7 +135,28 @@ bun run agents/conversion-template-generator.ts --entity "Facility"
 
 This launches Claude Code interactively to regenerate templates.
 
-### Example 3: Debugging a Specific Agent
+### Example 3: Using Interactive Implementation Agents
+
+After running the orchestrator, use interactive agents for implementation help:
+
+```bash
+# Step 1: Plan the conversion
+bun run plan-conversion --entity "Facility"
+# Creates: .claude/tasks/Facility_IMPLEMENTATION_STATUS.md
+
+# Step 2: Get help implementing the entity
+bun run entity-convert --entity "Facility" "Implement the Facility DTO with all properties"
+# Interactive session - helps create DTO in BargeOps.Shared
+
+# Step 3: Create ViewModels for each form
+bun run viewmodel-create --entity "Facility" --form-type Search
+# Interactive session - helps create FacilitySearchViewModel
+
+bun run viewmodel-create --entity "Facility" --form-type Detail
+# Interactive session - helps create FacilityEditViewModel
+```
+
+### Example 4: Debugging a Specific Agent
 
 Run an individual agent interactively to debug:
 
@@ -135,9 +167,11 @@ bun run agents/business-logic-extractor.ts --entity "Facility" --interactive
 ## Tips
 
 1. **Always start with the orchestrator** - It runs all agents in the correct order
-2. **Agent 10 is interactive** - You'll interact with Claude Code to refine templates
-3. **Check examples/** - Review `examples/Crewing/` for reference implementations
-4. **Output is entity-specific** - Each entity gets its own `output/{EntityName}/` folder
+2. **Use interactive agents during implementation** - They provide targeted help for specific tasks
+3. **Template generation is optional** - You can use the interactive agents directly after orchestrator
+4. **Interactive agents can be rerun** - Iterate on entities and ViewModels as needed
+5. **Check examples/** - Review `examples/Crewing/` for reference implementations
+6. **Output is entity-specific** - Each entity gets its own `output/{EntityName}/` folder
 
 ## Troubleshooting
 
@@ -161,12 +195,57 @@ bun run agents/{agent-name}.ts --entity "Facility" --interactive
 
 ## Next Steps
 
-After conversion plan is generated:
-1. Review `output/{Entity}/conversion-plan.md`
-2. Examine code templates in `output/{Entity}/templates/`
-3. Implement in BargeOps.Admin.API
-4. Implement in BargeOps.Admin.UI
-5. Test and iterate
+After analysis completes, you have multiple options for implementation:
+
+### Option 1: Generate Templates First (Recommended)
+```bash
+# Generate conversion plan, code templates, AND ViewModels interactively
+bun run generate-template --entity "Facility"
+```
+
+**What it generates:**
+- Conversion plan document
+- Shared DTOs (create first!)
+- API templates (Controllers, Services, Repositories)
+- UI templates (Controllers, Views, JavaScript)
+- **ViewModels** (Search, Edit, Details, ListItem) ⭐ NEW!
+
+**Interactive prompts:**
+- During the session, you'll be asked which ViewModels to generate
+- Choose: Search, Edit, Details, and/or ListItem ViewModels
+- Each ViewModel follows MVVM patterns with proper validation
+
+Then review:
+1. `output/Facility/conversion-plan.md` - Complete conversion strategy
+2. `output/Facility/templates/shared/` - Shared DTOs (create first!)
+3. `output/Facility/templates/api/` - API code templates
+4. `output/Facility/templates/ui/` - UI code templates (including ViewModels!)
+
+### Option 2: Use Interactive Implementation Agents
+
+These agents provide interactive help during implementation:
+
+```bash
+# Plan the conversion with dependency management
+bun run plan-conversion --entity "Facility"
+
+# Get help implementing entities with Dapper data access
+bun run entity-convert --entity "Facility"
+bun run entity-convert --entity "Facility" "Add auditing fields"
+
+# Get help creating ViewModels following MVVM patterns
+bun run viewmodel-create --entity "Facility" --form-type Search
+bun run viewmodel-create --entity "Facility" --form-type Detail
+```
+
+### Implementation Order
+
+1. **FIRST**: Implement Shared DTOs in `src/BargeOps.Shared/BargeOps.Shared/Dto/`
+2. Implement API components in `src/BargeOps.API/` (Controllers, Services, Repositories)
+3. Implement UI components in `src/BargeOps.UI/` (Controllers, ViewModels, Views)
+4. Test and iterate
+
+**Tip**: Use the interactive agents throughout implementation for specific help!
 
 ## Reference
 

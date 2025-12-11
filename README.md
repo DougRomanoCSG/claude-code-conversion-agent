@@ -4,7 +4,7 @@ A specialized suite of TypeScript agents designed to systematically extract, ana
 
 ## Overview
 
-This project provides **10 specialized agents** that work together to automate the conversion process from legacy OnShore VB.NET Windows Forms to modern BargeOps.Admin.API and BargeOps.Admin.UI applications.
+This project provides **10 specialized agents** that work together to automate the conversion process from legacy OnShore VB.NET Windows Forms to modern BargeOps.API and BargeOps.UI applications.
 
 ### Key Features
 
@@ -13,7 +13,7 @@ This project provides **10 specialized agents** that work together to automate t
 - **Interactive Template Generation**: Agent 10 always runs interactively in Claude Code for collaborative template creation
 - **Entity-Specific Outputs**: Each conversion creates organized output in `output/{EntityName}/`
 - **Code Examples**: Includes reference implementations from BargeOps.Crewing for clarity
-- **Target-Specific**: Generates code specifically for BargeOps.Admin.API and BargeOps.Admin.UI
+- **Target-Specific**: Generates code specifically for BargeOps.Shared (DTOs), BargeOps.API, and BargeOps.UI
 
 ## Quick Start
 
@@ -22,7 +22,7 @@ This project provides **10 specialized agents** that work together to automate t
 - [Bun](https://bun.sh) >= 1.0.0
 - [Claude Code CLI](https://claude.ai/code)
 - Access to OnShore legacy codebase
-- Access to BargeOps.Admin.API and BargeOps.Admin.UI projects
+- Access to BargeOps.Admin.Mono monorepo (BargeOps.Shared, BargeOps.API, BargeOps.UI)
 
 ### Installation
 
@@ -49,8 +49,10 @@ The input directory for OnShore source files is configured in `config.json`:
     "crewingUi": "C:\\source\\BargeOps.Crewing.UI"
   },
   "targetProjects": {
-    "adminApi": "C:\\source\\BargeOps\\BargeOps.Admin.API",
-    "adminUi": "C:\\source\\BargeOps\\BargeOps.Admin.UI"
+    "monorepo": "C:\\Dev\\BargeOps.Admin.Mono",
+    "adminShared": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.Shared",
+    "adminApi": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.API",
+    "adminUi": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI"
   }
 }
 ```
@@ -79,8 +81,10 @@ The input directory for OnShore source files is configured in `config.json`:
   - **BargeOps.Crewing.API**: `C:\source\BargeOps.Crewing.API` (Example API patterns)
   - **BargeOps.Crewing.UI**: `C:\source\BargeOps.Crewing.UI` (Example UI patterns)
 - **Target Projects** (where code will be generated):
-  - **BargeOps.Admin.API**: `C:\source\BargeOps\BargeOps.Admin.API` (Target API project)
-  - **BargeOps.Admin.UI**: `C:\source\BargeOps\BargeOps.Admin.UI` (Target UI project)
+  - **BargeOps.Admin.Mono**: `C:\Dev\BargeOps.Admin.Mono` (Monorepo root)
+  - **BargeOps.Shared**: `C:\Dev\BargeOps.Admin.Mono\src\BargeOps.Shared` (Shared DTOs - create first!)
+  - **BargeOps.API**: `C:\Dev\BargeOps.Admin.Mono\src\BargeOps.API` (API project)
+  - **BargeOps.UI**: `C:\Dev\BargeOps.Admin.Mono\src\BargeOps.UI` (UI project)
 
 ### Basic Usage
 
@@ -271,7 +275,7 @@ bun run check
 **Output**: `related-entities.json`
 
 ### Step 11: Conversion Template Generator (ALWAYS INTERACTIVE)
-**Purpose**: Generate complete conversion plan and code templates
+**Purpose**: Generate complete conversion plan, code templates, and ViewModels
 
 **Usage**: Run separately after steps 1-10 complete:
 ```bash
@@ -280,20 +284,25 @@ bun run generate-template --entity "Facility"
 
 **Generates**:
 - Comprehensive conversion plan document
-- Domain models (C# for BargeOps.Admin.API)
-- DTOs (Request/Response objects)
+- **Shared DTOs** (BargeOps.Shared - create first!)
 - Repository interface and implementation
 - Service interface and implementation
 - API Controller with endpoints
-- View models (BargeOps.Admin.UI)
+- **ViewModels** (Search, Edit, Details, ListItem) - Interactive prompts
 - Razor views (Index, Edit, Details)
 - JavaScript files (DataTables)
 - Step-by-step implementation guide
 
-**Output**: 
+**Interactive ViewModel Generation**:
+- During the session, you'll be asked which ViewModels to generate
+- Choose from: SearchViewModel, EditViewModel, DetailsViewModel, ListItemViewModel
+- Each ViewModel follows MVVM patterns with proper validation and display attributes
+
+**Output**:
 - `conversion-plan.md` - Main conversion plan document
-- `templates/api/` - Code templates for BargeOps.Admin.API
-- `templates/ui/` - Code templates for BargeOps.Admin.UI
+- `templates/shared/` - DTOs for BargeOps.Shared (create first!)
+- `templates/api/` - Code templates for BargeOps.API
+- `templates/ui/` - Code templates for BargeOps.UI
 
 **NOTE**: 
 - This step **ALWAYS** runs interactively in Claude Code
@@ -364,18 +373,22 @@ output/Facility/
 ├── related-entities.json           # Agent 9 output
 ├── conversion-plan.md              # Step 11 output (primary)
 └── templates/                      # Step 11 output (code templates)
-    ├── api/                        # BargeOps.Admin.API templates
-    │   ├── domain-models/
-    │   ├── dtos/
-    │   ├── repositories/
-    │   ├── services/
-    │   ├── controllers/
-    │   └── mappings/
-    └── ui/                         # BargeOps.Admin.UI templates
-        ├── view-models/
-        ├── views/
-        ├── javascript/
-        └── css/
+    ├── shared/                     # BargeOps.Shared (create first!)
+    │   └── Dto/
+    │       ├── {Entity}Dto.cs
+    │       ├── {Entity}SearchRequest.cs
+    │       └── Admin/              # If admin-specific
+    ├── api/                        # BargeOps.API templates
+    │   ├── Controllers/
+    │   ├── Services/
+    │   ├── Repositories/
+    │   └── DataAccess/Sql/
+    └── ui/                         # BargeOps.UI templates
+        ├── Models/                 # ViewModels
+        ├── Controllers/
+        ├── Views/
+        ├── wwwroot/js/
+        └── wwwroot/css/
 ```
 
 ## Workflow Example: Converting "Facility" Entity
@@ -419,8 +432,9 @@ This launches Claude Code in interactive mode. You can:
 
 Check the generated output:
 - `output/Facility/conversion-plan.md` - Complete conversion strategy and implementation guide
-- `output/Facility/templates/api/` - All API code templates (domain models, DTOs, repositories, services, controllers)
-- `output/Facility/templates/ui/` - All UI code templates (view models, Razor views, JavaScript)
+- `output/Facility/templates/shared/` - Shared DTOs (create these first in BargeOps.Shared!)
+- `output/Facility/templates/api/` - All API code templates (repositories, services, controllers, SQL)
+- `output/Facility/templates/ui/` - All UI code templates (ViewModels, Razor views, JavaScript)
 
 ## Advanced Usage
 
@@ -480,42 +494,50 @@ Located at: `C:\source\BargeOps.Crewing.UI` (configured in `config.json`)
 - **Services**: `Services/`
   - Look for: `ICrewingService.cs`, `CrewingService.cs` - UI service layer
 
-### BargeOps.Admin.API Target Patterns
-Located at: `C:\source\BargeOps\BargeOps.Admin.API` (configured in `config.json`)
+### BargeOps.Admin.Mono Target Patterns
+Located at: `C:\Dev\BargeOps.Admin.Mono` (configured in `config.json`)
 
 **Primary reference (canonical Admin patterns):**
-- **API Controllers**: `src/Admin.Api/Controllers/BoatLocationController.cs`
-- **Domain Models**: `src/Admin.Domain/Models/BoatLocation.cs`
-- **DTOs**: `src/Admin.Domain/Dto/BoatLocationDto.cs`, `BoatLocationSearchRequest.cs`
-- **Repositories**: `src/Admin.Infrastructure/Repositories/IBoatLocationRepository.cs`, `BoatLocationRepository.cs`
-- **Services**: `src/Admin.Domain/Services/IBoatLocationService.cs`, `BoatLocationService.cs`
 
-### BargeOps.Admin.UI Target Patterns
-Located at: `C:\source\BargeOps\BargeOps.Admin.UI` (configured in `config.json`)
+**Shared DTOs (create first!):**
+- Location: `src/BargeOps.Shared/BargeOps.Shared/Dto/`
+- Namespace: `BargeOps.Shared.Dto`
+- Example: `BoatLocation.cs`, `BoatLocationDto.cs`
 
-**Primary reference (canonical Admin patterns):**
+**API Project:**
+- Location: `src/BargeOps.API/`
+- **Controllers**: `src/Admin.Api/Controllers/BoatLocationController.cs`
+- **Services**: `src/Admin.Api/Services/BoatLocationService.cs`
+- **Repository Interfaces**: `src/Admin.Infrastructure/Abstractions/IBoatLocationRepository.cs`
+- **Repository Implementations**: `src/Admin.Infrastructure/Repositories/BoatLocationRepository.cs`
+- **SQL Files**: `src/Admin.Infrastructure/DataAccess/Sql/BoatLocation_*.sql`
+
+**UI Project:**
+- Location: `src/BargeOps.UI/`
 - **MVC Controllers**: `Controllers/BoatLocationSearchController.cs`
-- **View Models**: `Models/BoatLocationSearchViewModel.cs`, `BoatLocationEditViewModel.cs`
-- **Razor Views**: `Views/BoatLocationSearch/Index.cshtml`, `Edit.cshtml`, `Details.cshtml`
+- **ViewModels**: `Models/BoatLocationSearchViewModel.cs`, `BoatLocationEditViewModel.cs`
+- **Razor Views**: `Views/BoatLocationSearch/Index.cshtml`, `Edit.cshtml`
 - **JavaScript**: `wwwroot/js/boatLocationSearch.js`
-- **Services**: `Services/IBoatLocationService.cs`, `BoatLocationService.cs`
+- **Services**: `Services/IBargeService.cs` (inherits BargeOpsAdminBaseService)
 
 **Note**: All paths are configurable in `config.json`. The agents automatically use these configured paths to provide specific example locations in their prompts.
 
 ## Target Architecture
 
-**API Layer** (BargeOps.Admin.API):
-- Domain Models
-- DTOs
-- Repository Pattern
-- Service Layer
-- API Controllers
-- AutoMapper
-- Dapper for data access
+**Shared Layer** (BargeOps.Shared) - **Create First!**:
+- DTOs in `BargeOps.Shared.Dto` namespace
+- Repository Interfaces in `BargeOps.Shared.Interfaces`
+- Service Interfaces in `BargeOps.Shared.Services`
 
-**UI Layer** (BargeOps.Admin.UI):
-- MVC Controllers
-- View Models
+**API Layer** (BargeOps.API):
+- Repository Pattern (Dapper with SQL files as embedded resources)
+- Service Layer (business logic)
+- API Controllers (inherit ApiControllerBase)
+- SQL queries in `.sql` files
+
+**UI Layer** (BargeOps.UI):
+- MVC Controllers (inherit AppController)
+- ViewModels (MVVM pattern - NO ViewBag/ViewData)
 - Razor Views
 - Bootstrap 5
 - DataTables (server-side)

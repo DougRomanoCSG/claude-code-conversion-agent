@@ -3,7 +3,7 @@
  * ENTITY CONVERTER: Convert and migrate entities using entity-conversion-prompt
  *
  * This agent specializes in converting legacy entities to ASP.NET Core entities
- * with proper EF Core relationships, ViewModels, and documentation.
+ * with proper Dapper data access, ViewModels, and documentation.
  *
  * Usage:
  *   bun run agents/entity-converter.ts "Convert the Facility entity"

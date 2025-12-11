@@ -35,8 +35,8 @@ ClaudeOnshoreConversionAgent/
 │
 ├── examples/                       # Reference implementations
 │   ├── Crewing/
-│   │   ├── CrewingController.cs    # API example (BargeOps.Admin.API)
-│   │   ├── CrewingSearchController.cs  # UI example (BargeOps.Admin.UI)
+│   │   ├── CrewingController.cs    # API example (BargeOps.API)
+│   │   ├── CrewingSearchController.cs  # UI example (BargeOps.UI)
 │   │   └── README.md
 │   └── Facility/
 │       └── README.md
@@ -168,18 +168,22 @@ output/{EntityName}/
 ├── related-entities.json           # Agent 9
 ├── conversion-plan.md              # Step 11 (primary output)
 └── templates/                      # Step 11 (code templates)
-    ├── api/                        # BargeOps.Admin.API templates
-    │   ├── domain-models/          # C# domain models
-    │   ├── dtos/                   # DTOs
-    │   ├── repositories/           # Repository pattern
-    │   ├── services/               # Service layer
-    │   ├── controllers/            # API controllers
-    │   └── mappings/               # AutoMapper profiles
-    └── ui/                         # BargeOps.Admin.UI templates
-        ├── view-models/            # MVC view models
-        ├── views/                  # Razor views
-        ├── javascript/             # Client-side code
-        └── css/                    # Stylesheets
+    ├── shared/                     # BargeOps.Shared (create first!)
+    │   └── Dto/
+    │       ├── {Entity}Dto.cs      # Base DTOs
+    │       ├── {Entity}SearchRequest.cs
+    │       └── Admin/              # Admin-specific DTOs (if needed)
+    ├── api/                        # BargeOps.API templates
+    │   ├── Controllers/            # API controllers
+    │   ├── Services/               # Service layer
+    │   ├── Repositories/           # Repository implementations
+    │   └── DataAccess/Sql/         # SQL files (embedded resources)
+    └── ui/                         # BargeOps.UI templates
+        ├── Models/                 # ViewModels
+        ├── Controllers/            # MVC controllers
+        ├── Views/                  # Razor views
+        ├── wwwroot/js/             # JavaScript files
+        └── wwwroot/css/            # Stylesheets
 ```
 
 ## 🎓 Examples
@@ -188,8 +192,8 @@ output/{EntityName}/
 
 Located in `examples/Crewing/`:
 
-- **`CrewingController.cs`** - Complete API controller for BargeOps.Admin.API
-- **`CrewingSearchController.cs`** - Complete MVC controller for BargeOps.Admin.UI
+- **`CrewingController.cs`** - Complete API controller for BargeOps.API
+- **`CrewingSearchController.cs`** - Complete MVC controller for BargeOps.UI
 - **`README.md`** - Detailed explanation of patterns
 
 These examples demonstrate:
@@ -228,20 +232,25 @@ bun run check     # Check without fixing
 
 ## 🎯 Target Architecture
 
-### BargeOps.Admin.API (ASP.NET Core 6.0)
+### BargeOps.Shared (Shared DTOs and Interfaces) - **Create First!**
 
-- Domain Models
-- DTOs
-- Repository Pattern (Dapper)
-- Service Layer
-- API Controllers
-- AutoMapper
+- DTOs in `BargeOps.Shared.Dto` namespace
+- Repository Interfaces in `BargeOps.Shared.Interfaces`
+- Service Interfaces in `BargeOps.Shared.Services`
+- Located in: `src/BargeOps.Shared/BargeOps.Shared/Dto/`
+
+### BargeOps.API (ASP.NET Core 8 Web API)
+
+- Repository Pattern (Dapper with SQL files as embedded resources)
+- Service Layer (business logic)
+- API Controllers (inherit ApiControllerBase)
+- SQL queries in `.sql` files (embedded resources)
 - Dependency Injection
 
-### BargeOps.Admin.UI (ASP.NET Core MVC)
+### BargeOps.UI (ASP.NET Core 8 MVC)
 
-- MVC Controllers
-- View Models
+- MVC Controllers (inherit AppController)
+- ViewModels (MVVM pattern - NO ViewBag/ViewData)
 - Razor Views
 - Bootstrap 5
 - DataTables (server-side)
@@ -298,10 +307,12 @@ bun run check     # Check without fixing
 
 - **First 10 agents run automatically** - No interaction needed for analysis
 - **Agent 10 is always interactive** - Ensures quality and allows iteration
-- **Targets BargeOps.Admin specifically** - Not generic, but tailored
+- **Targets BargeOps.Admin.Mono specifically** - Not generic, but tailored to monorepo structure
+- **3-Layer Architecture** - Shared DTOs → API → UI (proper dependency flow)
 - **Uses Crewing for reference** - Clarity through examples
 - **Complete code templates** - Not just documentation, but actual code
 - **Entity-focused** - Each conversion is self-contained
+- **Namespace-correct** - All generated code uses correct BargeOps.Shared.Dto namespaces
 
 ## 🚦 Next Steps
 
@@ -322,9 +333,10 @@ bun run check     # Check without fixing
    - Check `output/Facility/conversion-plan.md`
    - Examine generated templates in `output/Facility/templates/`
 
-4. **Implement in BargeOps.Admin**:
-   - Copy templates to BargeOps.Admin.API
-   - Copy templates to BargeOps.Admin.UI
+4. **Implement in BargeOps.Admin.Mono**:
+   - **FIRST**: Copy Shared DTOs to `src/BargeOps.Shared/BargeOps.Shared/Dto/`
+   - Copy API templates to `src/BargeOps.API/`
+   - Copy UI templates to `src/BargeOps.UI/`
    - Customize as needed
    - Test and iterate
 
@@ -352,7 +364,9 @@ For issues or questions:
 1. Check **QUICK_START.md** for common commands
 2. Review **README.md** for detailed documentation
 3. Examine **examples/** for reference implementations
-4. Run agents with `--interactive` flag for debugging
+4. Review **agents/README.md** for namespace conventions
+5. Check **.claude/tasks/SYSTEM_PROMPTS_UPDATE_SUMMARY.md** for recent updates
+6. Run agents with `--interactive` flag for debugging
 
 ## 📄 License
 
@@ -363,6 +377,20 @@ UNLICENSED - Internal BargeOps use only
 **Project Status**: ✅ Complete and Ready to Use
 
 **Created**: November 11, 2025
+**Updated**: December 10, 2025 (BargeOps.Admin.Mono alignment)
 **Total Files**: 47+
 **Total Lines of Code**: ~3,000+
-**Documentation**: ~27KB across 5 files
+**Documentation**: ~35KB across 7 files
+
+## 🔄 Recent Updates (December 10, 2025)
+
+- ✅ Updated all system prompts to reflect BargeOps.Admin.Mono structure
+- ✅ Added comprehensive namespace conventions (BargeOps.Shared.Dto)
+- ✅ Updated all code examples with correct namespaces
+- ✅ Added Shared project emphasis (create DTOs first!)
+- ✅ Updated README.md and QUICK_START.md
+- ✅ Documented deprecated namespaces to avoid
+- ✅ Added uppercase ID naming convention throughout
+- ✅ Updated agents/README.md with project conventions
+
+**See**: `.claude/tasks/SYSTEM_PROMPTS_UPDATE_SUMMARY.md` for complete details

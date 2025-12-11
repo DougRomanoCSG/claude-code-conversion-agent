@@ -163,9 +163,11 @@ ${outputPath}/templates/
     ├── Services/
     │   ├── I{Entity}Service.cs
     │   └── {Entity}Service.cs
-    ├── ViewModels/
-    │   ├── {Entity}SearchViewModel.cs
-    │   └── {Entity}EditViewModel.cs
+    ├── ViewModels/      ⭐ OFFER TO GENERATE THESE DURING INTERACTIVE SESSION
+    │   ├── {Entity}SearchViewModel.cs   - Search/list screen
+    │   ├── {Entity}EditViewModel.cs     - Edit/create form
+    │   ├── {Entity}DetailsViewModel.cs  - Read-only details
+    │   └── {Entity}ListItemViewModel.cs - Grid row data (optional)
     ├── Views/
     │   └── {Entity}/
     │       ├── Index.cshtml
@@ -195,6 +197,32 @@ IMPORTANT IMPLEMENTATION ORDER:
 5. Create UI ViewModels (contain DTOs from Shared)
 6. Create UI Controllers and Views
 
+VIEWMODEL GENERATION:
+As part of template generation, you should offer to create ViewModels for common scenarios:
+- SearchViewModel - For search/list screens
+- EditViewModel - For edit/create forms
+- DetailsViewModel - For read-only detail views
+- ListItemViewModel - For grid row data (if different from DTO)
+
+For each ViewModel, follow these patterns:
+1. **Namespace**: BargeOpsAdmin.ViewModels (file-scoped)
+2. **Location**: src/BargeOps.UI/Models/
+3. **MVVM Pattern**: NO ViewBag/ViewData - all data on ViewModel
+4. **DateTime Properties**: Single property (e.g., PositionUpdatedDateTime)
+   - View splits into date + time inputs
+   - JavaScript combines on submit
+5. **Dropdowns**: IEnumerable<SelectListItem> properties on ViewModel
+6. **Validation**: Data annotations on ViewModel properties
+7. **Display Attributes**: [Display(Name = "...")] for all user-facing properties
+8. **ID Fields**: Uppercase ID (LocationID, BargeID, NOT LocationId)
+
+INTERACTIVE WORKFLOW:
+1. Generate initial templates based on analysis
+2. Ask: "Would you like me to generate ViewModels for this entity?"
+3. If yes, ask which types: Search, Edit, Details, ListItem
+4. Generate requested ViewModels following patterns above
+5. Iterate and refine based on user feedback
+
 This is an INTERACTIVE session. You can ask questions, clarify requirements, and iterate on the templates.
 
 Begin template generation now.
@@ -209,7 +237,7 @@ Begin template generation now.
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
 
 	// Initial prompt to start the interactive session
-	const initialPrompt = `Generate conversion templates for the ${options.entity} entity based on the analysis files in ${outputPath}`;
+	const initialPrompt = `Generate conversion templates for the ${options.entity} entity based on the analysis files in ${outputPath}. Include ViewModels for the UI layer.`;
 	const args = [...flags, initialPrompt];
 
 	console.log(`
