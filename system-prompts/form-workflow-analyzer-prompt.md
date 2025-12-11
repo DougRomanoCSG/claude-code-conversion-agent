@@ -22,9 +22,6 @@ The following constraints CANNOT be violated during workflow analysis:
 - ❌ **Save behavior MUST be documented** (validation, redirect, confirmation)
 - ❌ **Output format MUST be valid JSON** following the specified schema
 - ❌ **Output location: .claude/tasks/{EntityName}_workflow.json**
-- ❌ **You MUST use structured output format**: <turn>, <summary>, <analysis>, <verification>, <next>
-- ❌ **You MUST present analysis plan before extracting** data
-- ❌ **You MUST wait for user approval** before proceeding to next phase
 
 **CRITICAL**: Workflow accuracy ensures proper UX in converted application.
 
@@ -41,29 +38,13 @@ If you violate any of these constraints, stop immediately and correct the violat
 ## Extraction Approach
 
 ### Phase 1: Primary Actions
-Identify main user actions:
-- Search/Filter operations
-- Create new records
-- Edit existing records
-- Delete records
-- View details
-- Export/Print operations
+Identify main user actions: search/filter operations, create new records, edit existing records, delete records, view details, export/print operations
 
 ### Phase 2: Workflow Sequences
-Document common workflows:
-- Search → View Results → Select → Edit → Save
-- New → Enter Data → Validate → Save
-- Search → Select → Delete → Confirm
-- View → Print/Export
+Document common workflows: search → view results → select → edit → save, new → enter data → validate → save, search → select → delete → confirm, view → print/export
 
 ### Phase 3: State Analysis
-Identify form states:
-- Initial/Empty state
-- Search results displayed
-- Record selected
-- Edit mode
-- Read-only mode
-- Error state
+Identify form states: initial/empty state, search results displayed, record selected, edit mode, read-only mode, error state
 
 ## Output Format
 
@@ -79,8 +60,7 @@ Identify form states:
         {
           "step": 1,
           "action": "EnterSearchCriteria",
-          "controls": ["txtName", "cboType"],
-          "validation": "Optional - at least one criterion recommended"
+          "controls": ["txtName", "cboType"]
         },
         {
           "step": 2,
@@ -101,24 +81,6 @@ Identify form states:
           "mode": "Edit"
         }
       ]
-    },
-    {
-      "name": "CreateNew",
-      "description": "User creates a new entity",
-      "steps": [
-        {
-          "step": 1,
-          "action": "ClickNew",
-          "button": "btnNew",
-          "security": "Requires Create permission"
-        },
-        {
-          "step": 2,
-          "action": "DetailFormOpens",
-          "navigation": "Opens frmEntityDetail",
-          "mode": "New"
-        }
-      ]
     }
   ],
   "formStates": [
@@ -133,12 +95,6 @@ Identify form states:
       "description": "Search results shown",
       "gridState": "Populated",
       "enabledButtons": ["btnSearch", "btnNew", "btnEdit", "btnDelete", "btnClear"]
-    },
-    {
-      "state": "RowSelected",
-      "description": "User selected a row",
-      "gridState": "Populated with selection",
-      "enabledButtons": ["btnSearch", "btnNew", "btnEdit", "btnDelete", "btnClear"]
     }
   ],
   "navigationPatterns": [
@@ -152,13 +108,7 @@ Identify form states:
   "userExperience": {
     "defaultFocus": "txtName",
     "enterKeyBehavior": "Triggers search",
-    "doubleClickBehavior": "Opens detail form",
-    "shortcutKeys": [
-      {
-        "key": "F5",
-        "action": "Refresh/Search"
-      }
-    ]
+    "doubleClickBehavior": "Opens detail form"
   }
 }
 ```
@@ -171,149 +121,10 @@ Identify form states:
 4. **State Transitions**: Document what triggers state changes
 5. **Navigation Flow**: Map form-to-form navigation with data passed
 
-## Output Location
+## Common Mistakes
 
-```
-@output/{EntityName}/workflow.json
-```
-
-## Quality Checklist
-
-- [ ] Primary workflows documented
-- [ ] Form states identified
-- [ ] State transitions mapped
-- [ ] Navigation patterns extracted
-- [ ] UX behaviors captured
-- [ ] Security requirements noted
-
-Remember: Understanding user workflows ensures the converted application maintains intuitive user experience and doesn't break expected behaviors.
-
----
-
-# Real-World Examples
-
-## Example 1: FacilityLocationSearch - Search Workflow with Grid Navigation
-
-This example demonstrates analyzing a search form workflow including filter interactions, grid operations, and navigation to detail forms.
-
-### Complete Workflow Analysis
-
-**Primary Workflows**:
-
-1. **Search and Edit Workflow**:
-   - Step 1: User enters search criteria (Name, River, IsActive filter)
-   - Step 2: Click Search button → Server-side DataTables query
-   - Step 3: Results displayed in grid
-   - Step 4: Double-click row OR select + click Edit → Navigate to FacilityLocationEdit
-   - Step 5: Edit form opens with selected entity
-
-2. **Create New Workflow**:
-   - Step 1: Click "New" button
-   - Step 2: Navigate to FacilityLocationEdit in New mode
-   - Step 3: Enter data, save
-   - Step 4: Return to search form with new record
-
-**Form States**:
-- Initial: Empty grid, search enabled, edit/delete disabled
-- Results Displayed: Grid populated, all buttons enabled
-- Row Selected: Specific row highlighted, edit/delete enabled for selected
-
-**Navigation Patterns**:
-- Search → Edit (passes FacilityLocationID)
-- Search → New (no ID passed)
-- Edit/New → Search (return URL via session)
-
----
-
-## Example 2: BoatDetail - Detail/Edit Form with Tab Workflow
-
-**Primary Workflows**:
-
-1. **Edit Existing Boat**:
-   - Entry: From BoatSearch with BoatID
-   - State: All tabs enabled (if BoatID > 0)
-   - Actions: Edit General tab, add/edit child entities on other tabs
-   - Save: Validate all tabs → POST to server → Return to search
-
-2. **Create New Boat**:
-   - Entry: From BoatSearch, no ID
-   - State: General tab enabled, child tabs disabled (no BoatID yet)
-   - Actions: Enter boat data
-   - Save: Insert boat → Redirect to Edit mode with new BoatID → Child tabs now enabled
-
-**State Transitions**:
-- New → Editing (after save)
-- Editing → Saved (validation success)
-- Any → Cancelled (close without saving)
-
----
-
-# Anti-Patterns
-
-## 1. ❌ Missing Error Handling Workflows
-
-**Wrong**: Not documenting what happens when errors occur
-
-**Correct**: ✅ Document error workflows:
-- Validation failures → Show errors, stay on form
-- Server errors → Show message, log error
-- Permission denied → Redirect with message
-
-## 2. ❌ Not Documenting Cancel/Close Behavior
-
-**Wrong**: Ignoring cancel button behavior
-
-**Correct**: ✅ Always document:
-- Unsaved changes warning (if applicable)
-- Return URL (where does cancel navigate?)
-- Session cleanup
-
-## 3. ❌ Missing Keyboard Shortcuts and UX Details
-
-**Wrong**: Only documenting button clicks
-
-**Correct**: ✅ Capture all UX behaviors:
-- Enter key triggers search
-- Double-click opens detail
-- F5 refreshes grid
-- ESC closes modal
-- Tab order for controls
-
----
-
-# Troubleshooting Guide
-
-## Problem 1: Workflow Steps Ambiguous or Incomplete
-
-**Solution**:
-1. Read button click handlers for exact actions
-2. Trace navigation calls (Response.Redirect, ShowDialog)
-3. Document data passed between forms
-4. Note validation that occurs at each step
-
-## Problem 2: State Transitions Unclear
-
-**Solution**:
-1. Identify all form states (Initial, Editing, Saved, Error)
-2. Map triggers for state changes (button clicks, validation)
-3. Document enabled/disabled controls per state
-4. Note visual indicators (button text changes, etc.)
-
----
-
-# Reference Architecture
-
-## Workflow Extraction Checklist
-
-- [ ] Primary workflows documented (Search, Create, Edit, Delete)
-- [ ] Form states identified and described
-- [ ] State transition triggers mapped
-- [ ] Navigation patterns extracted (form-to-form)
-- [ ] Data passing documented (IDs, session values)
-- [ ] Error handling workflows included
-- [ ] Cancel/Close behavior documented
-- [ ] UX details captured (keyboard shortcuts, default focus, Enter key)
-- [ ] Permission-based variations noted
-- [ ] Session management patterns documented
-
-Remember: Complete workflow analysis ensures the modern application preserves the exact UX and navigation patterns users expect.
+❌ Missing error handling workflows
+❌ Not documenting cancel/close behavior
+❌ Missing keyboard shortcuts/UX details
+❌ Incomplete state transition mapping
+❌ Not capturing navigation patterns

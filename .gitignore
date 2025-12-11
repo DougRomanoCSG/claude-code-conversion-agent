@@ -1,13 +1,13 @@
 # Bun
 node_modules
 .bun
+*.bun-build
 
 # Compiled binaries
 bin/
 
 # Output (conversion analysis results)
-# Uncomment if you want to ignore generated outputs
-# output/
+output/
 
 # OS
 .DS_Store

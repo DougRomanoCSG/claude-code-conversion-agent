@@ -1,0 +1,42 @@
+{
+  "description": "EXAMPLE Configuration - Copy this to config.json and customize for your machine",
+
+  "inputDirectory": "C:\\path\\to\\OnShore\\apps\\Onshore",
+  "inputDirectoryDescription": "Path to the OnShore legacy VB.NET codebase",
+
+  "paths": {
+    "forms": "Forms",
+    "businessObjects": "BusinessLogic/Business Objects",
+    "businessObjectsBase": "BusinessLogic/Business Objects/Base Classes",
+    "lists": "BusinessLogic/Lists",
+    "pathsDescription": "Relative paths within the inputDirectory to find legacy source files"
+  },
+
+  "referenceProjects": {
+    "crewingApi": "C:\\path\\to\\BargeOps.Crewing.API",
+    "crewingUi": "C:\\path\\to\\BargeOps.Crewing.UI",
+    "description": "Reference projects showing ASP.NET Core MVC patterns and examples"
+  },
+
+  "targetProjects": {
+    "monorepo": "C:\\path\\to\\BargeOps.Admin.Mono",
+    "adminApi": "C:\\path\\to\\BargeOps.Admin.Mono\\src\\BargeOps.API",
+    "adminUi": "C:\\path\\to\\BargeOps.Admin.Mono\\src\\BargeOps.UI",
+    "shared": "C:\\path\\to\\BargeOps.Admin.Mono\\src\\BargeOps.Shared\\BargeOps.Shared",
+    "description": "Target projects where generated code will be placed (BargeOps.Admin.Mono monorepo structure)"
+  },
+
+  "notes": [
+    "SETUP INSTRUCTIONS:",
+    "1. Copy this file to config.json: cp config.example.json config.json",
+    "2. Update inputDirectory to point to your OnShore legacy codebase",
+    "3. Update referenceProjects to point to your BargeOps.Crewing projects",
+    "4. Update targetProjects to point to your BargeOps.Admin.Mono monorepo",
+    "",
+    "IMPORTANT:",
+    "- All paths should use double backslashes (\\\\) for Windows paths",
+    "- Use absolute paths for all directories",
+    "- The 'paths' object contains relative paths within inputDirectory",
+    "- config.json is gitignored so your local paths won't be committed"
+  ]
+}

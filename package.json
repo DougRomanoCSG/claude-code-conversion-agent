@@ -13,7 +13,9 @@
 		"entity-convert": "bun run agents/entity-converter.ts",
 		"viewmodel-create": "bun run agents/viewmodel-creator.ts",
 		"plan-conversion": "bun run agents/conversion-planner.ts",
-		"compile": "bun run scripts/compile-all.ts",
+		"compile": "bun scripts/compile.ts",
+		"watch": "bun scripts/watch-agents.ts",
+		"gen-assets": "bun scripts/gen-assets.ts",
 		"lint": "biome check --write ./agents",
 		"format": "biome format --write ./agents",
 		"check": "biome check ./agents"
