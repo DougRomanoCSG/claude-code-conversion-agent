@@ -286,12 +286,47 @@ output/<Entity>/
 
 ## Project Conventions
 
-All agents follow these project standards from `CLAUDE.md`:
+All agents follow these project standards from BargeOps.Admin.Mono `CLAUDE.md` and `.cursorrules`:
+
+### Critical Conventions
 
 - ✅ Always use `IdentityConstants.ApplicationScheme` (not "Cookies")
 - ✅ Use MVVM pattern: ViewModels over @ViewBag/@ViewData
 - ✅ Add comments sparingly, only for complex issues
 - ✅ Entity-specific files go in `.claude/tasks/{EntityName}_*.md`
+
+### Namespace Conventions
+
+**Shared Project (DTOs and Models):**
+- Base DTOs: `BargeOps.Shared.Dto` - Location: `src/BargeOps.Shared/BargeOps.Shared/Dto/`
+- Admin DTOs: `BargeOps.Shared.Dto.Admin` - Location: `src/BargeOps.Shared/BargeOps.Shared/Dto/Admin/`
+- Repository Interfaces: `BargeOps.Shared.Interfaces`
+- Service Interfaces: `BargeOps.Shared.Services`
+
+**API Project:**
+- Controllers: `Admin.Api.Controllers`
+- Services: `Admin.Api.Services`
+- Interfaces: `Admin.Api.Interfaces`
+- Repository Abstractions: `Admin.Infrastructure.Abstractions`
+- Repository Implementations: `Admin.Infrastructure.Repositories`
+
+**UI Project:**
+- Controllers: `BargeOpsAdmin.Controllers`
+- ViewModels: `BargeOpsAdmin.ViewModels`
+- Services: `BargeOpsAdmin.Services`
+- AppClasses: `BargeOpsAdmin.AppClasses`
+
+**Deprecated (DO NOT USE):**
+- ❌ `Admin.Domain.Models` → Use `BargeOps.Shared.Dto`
+- ❌ `Admin.Domain.Dto` → Use `BargeOps.Shared.Dto`
+- ❌ `Admin.Domain.Interfaces` → Use `BargeOps.Shared.Interfaces`
+
+### Naming Conventions
+
+- **ID Fields**: Always uppercase `ID` (e.g., `LocationID`, `BargeID`, `CustomerID`, NOT `LocationId`)
+- **File-Scoped Namespaces**: Prefer `namespace BargeOps.Shared.Dto;` over braced namespaces
+- **Async Methods**: Must use suffix "Async" (e.g., `GetByIdAsync`, `SaveAsync`)
+- **Interfaces**: Prefix with "I" (e.g., `IBoatLocationService`)
 
 ## System Prompts
 

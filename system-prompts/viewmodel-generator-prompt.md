@@ -38,6 +38,36 @@ If you violate any of these constraints, stop immediately and correct the violat
 4. **Display Attributes**: Include display names and formatting hints
 5. **Screen Logic**: Add properties for UI state, dropdown lists, etc.
 
+## Critical Namespace Conventions
+
+### UI Project Namespaces
+
+**ViewModels:**
+- Namespace: `BargeOpsAdmin.ViewModels`
+- Location: `src/BargeOps.UI/Models/`
+- File-scoped namespace: `namespace BargeOpsAdmin.ViewModels;`
+
+**Controllers:**
+- Namespace: `BargeOpsAdmin.Controllers`
+- Location: `src/BargeOps.UI/Controllers/`
+
+**Services:**
+- Namespace: `BargeOpsAdmin.Services`
+- Location: `src/BargeOps.UI/Services/`
+
+### Shared DTOs (for mapping)
+
+When mapping from entities, use:
+- `using BargeOps.Shared.Dto;` - For base DTOs (Facility, BoatLocation, etc.)
+- `using BargeOps.Shared.Dto.Admin;` - For admin DTOs (BargeDto, CommodityDto, etc.)
+
+### Naming Conventions
+
+- **ID Fields**: Always uppercase `ID` (e.g., `LocationID`, `BargeID`, `CustomerID`, NOT `LocationId`)
+- **File-Scoped Namespaces**: Always use `namespace BargeOpsAdmin.ViewModels;`
+- **ViewModel Suffixes**: Use descriptive suffixes (SearchViewModel, EditViewModel, CreateViewModel, ListViewModel)
+- **Properties**: Use PascalCase for all properties
+
 ## ViewModel Creation Approach
 
 ### Analysis Phase
@@ -494,9 +524,15 @@ public DateTime? PositionUpdatedDateTime { get; set; }
 ### Example: Complete Edit ViewModel with DateTime
 
 ```csharp
+// File: src/BargeOps.UI/Models/BoatLocationEditViewModel.cs
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace BargeOpsAdmin.ViewModels;  // ✅ CORRECT: File-scoped namespace
+
 public class BoatLocationEditViewModel
 {
-    public int BoatLocationID { get; set; }
+    public int BoatLocationID { get; set; }  // ✅ CORRECT: Uppercase ID
 
     [Required]
     [Display(Name = "Boat Name")]

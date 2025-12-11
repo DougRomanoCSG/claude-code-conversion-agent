@@ -41,6 +41,41 @@ If you violate any of these constraints, stop immediately and correct the violat
 4. **Styling Guidance**: Provide CSS/styling recommendations
 5. **Accessibility**: Ensure accessible component choices
 
+## Target UI Architecture
+
+### Project Structure
+
+**ViewModels:**
+- Location: `src/BargeOps.UI/Models/`
+- Namespace: `BargeOpsAdmin.ViewModels`
+- File-scoped: `namespace BargeOpsAdmin.ViewModels;`
+
+**Controllers:**
+- Location: `src/BargeOps.UI/Controllers/`
+- Namespace: `BargeOpsAdmin.Controllers`
+- Inherit from: `AppController`
+
+**Views:**
+- Location: `src/BargeOps.UI/Views/{EntityName}/`
+- Examples: `Index.cshtml`, `Edit.cshtml`, `Create.cshtml`
+
+**JavaScript:**
+- Location: `src/BargeOps.UI/wwwroot/js/`
+- Pattern: `{entityName}Search.js`, `{entityName}Edit.js`
+
+**CSS:**
+- Location: `src/BargeOps.UI/wwwroot/css/`
+- Use Bootstrap 5 classes primarily
+
+### Technology Stack
+
+- **UI Framework**: ASP.NET Core 8 MVC with Razor Views
+- **CSS Framework**: Bootstrap 5
+- **Grid Component**: DataTables (server-side processing)
+- **Dropdown Component**: Select2
+- **Validation**: jQuery Validate + Unobtrusive Validation
+- **DateTime**: Split inputs (type="date" + type="time" with 24-hour format)
+
 ## Extraction Approach
 
 ### Phase 1: Control Inventory

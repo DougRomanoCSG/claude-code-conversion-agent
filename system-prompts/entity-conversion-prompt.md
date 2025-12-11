@@ -39,18 +39,57 @@ If you violate any of these constraints, stop immediately and correct the violat
 6. **SQL File Creation**: Create `.sql` files as embedded resources for all queries
 7. **Soft Delete Implementation**: Use IsActive pattern instead of hard deletes
 
+## Critical Namespace Conventions
+
+### ALWAYS Use BargeOps.Shared Namespaces
+
+**DTOs and Models:**
+- Base DTOs: `BargeOps.Shared.Dto` (e.g., `Facility`, `BoatLocation`, `FacilityDto`, `BoatLocationDto`)
+- Admin DTOs: `BargeOps.Shared.Dto.Admin` (e.g., `BargeDto`, `CommodityDto`, `CustomerDto`)
+
+**Interfaces and Services:**
+- Repository Interfaces: `BargeOps.Shared.Interfaces` (e.g., `IFacilityRepository`, `IBoatLocationRepository`)
+- Service Interfaces: `BargeOps.Shared.Services` (e.g., `IBoatLocationService`, `IFacilityService`)
+
+**DO NOT USE (Deprecated):**
+- ❌ `Admin.Domain.Models` - Use `BargeOps.Shared.Dto` instead
+- ❌ `Admin.Domain.Dto` - Use `BargeOps.Shared.Dto` instead
+- ❌ `Admin.Domain.Interfaces` - Use `BargeOps.Shared.Interfaces` instead
+
+### Naming Conventions
+
+- **ID Fields**: Always uppercase `ID` (e.g., `LocationID`, `BargeID`, `CustomerID`, NOT `LocationId`)
+- **File-Scoped Namespaces**: Prefer `namespace BargeOps.Shared.Dto;` over braced namespaces
+- **Async Methods**: Must use suffix "Async" (e.g., `GetByIdAsync`, `SaveAsync`)
+- **Interfaces**: Prefix with "I" (e.g., `IBoatLocationService`)
+
 ## Project Structure
 
 ```
 BargeOps.Admin.Mono/
 ├── src/
 │   ├── BargeOps.API/
-│   │   ├── src/Admin.Api/           # Controllers (inherit ApiControllerBase)
-│   │   ├── src/Admin.Domain/        # Domain models, DTOs, interfaces
-│   │   └── src/Admin.Infrastructure/
-│   │       ├── DataAccess/Sql/      # *.sql files (embedded resources)
-│   │       └── Repositories/        # Repository implementations
-│   └── BargeOps.UI/                 # MVC (controllers inherit AppController)
+│   │   ├── src/
+│   │   │   ├── Admin.Api/            # API Controllers, Services
+│   │   │   │   ├── Controllers/       # API Controllers (inherit ApiControllerBase)
+│   │   │   │   ├── Interfaces/        # Service interfaces
+│   │   │   │   └── Services/          # Service implementations
+│   │   │   └── Admin.Infrastructure/  # Repositories, SQL queries
+│   │   │       ├── Abstractions/      # Repository interfaces
+│   │   │       ├── Repositories/      # Repository implementations
+│   │   │       └── DataAccess/Sql/    # *.sql files (embedded resources)
+│   ├── BargeOps.Shared/       # Shared DTOs and Models
+│   │   └── BargeOps.Shared/
+│   │       ├── Dto/           # DTOs (namespace: BargeOps.Shared.Dto)
+│   │       │   └── Admin/     # Admin-specific DTOs (namespace: BargeOps.Shared.Dto.Admin)
+│   │       ├── Interfaces/    # Repository interfaces
+│   │       └── Services/      # Service interfaces
+│   └── BargeOps.UI/           # MVC Web App (.NET 8, Razor, jQuery)
+│       ├── Controllers/             # MVC Controllers (inherit AppController)
+│       ├── Views/                   # Razor Views
+│       ├── Models/                  # ViewModels
+│       ├── Services/                # API service layer
+│       └── wwwroot/                 # Static files, JS
 ```
 
 ## Conversion Approach
@@ -255,11 +294,13 @@ Use this checklist for every entity conversion:
 ## {Entity} Conversion Verification
 
 ### Domain Layer
-- [ ] Domain model created in Admin.Domain
-- [ ] Inherits from BargeOpsAdminBaseModel<T> (if audit needed)
+- [ ] Domain model/DTO created in BargeOps.Shared/Dto/ (use namespace BargeOps.Shared.Dto)
+- [ ] Inherits from base model if needed (audit fields)
 - [ ] All properties have correct types
 - [ ] Data annotations present (Required, StringLength, etc.)
 - [ ] IsActive property added for soft delete
+- [ ] All ID fields use uppercase `ID` (LocationID, BargeID, etc.)
+- [ ] File-scoped namespace used (namespace BargeOps.Shared.Dto;)
 - [ ] Navigation properties documented (not loaded in model)
 
 ### Data Access Layer
@@ -808,27 +849,37 @@ The BoatLocation entity is the canonical reference for all conversions in BargeO
 #### Reference Files
 ```
 BargeOps.Admin.Mono/
-├── src/BargeOps.API/src/Admin.Domain/
-│   └── BoatLocation.cs                           # Domain model
-├── src/BargeOps.API/src/Admin.Infrastructure/
-│   ├── DataAccess/Sql/
-│   │   ├── BoatLocation_GetById.sql              # SQL as embedded resource
-│   │   ├── BoatLocation_Search.sql
-│   │   ├── BoatLocation_Insert.sql
-│   │   ├── BoatLocation_Update.sql
-│   │   └── BoatLocation_SetActive.sql            # Soft delete (NOT Delete.sql)
-│   └── Repositories/
-│       ├── IBoatLocationRepository.cs
-│       └── BoatLocationRepository.cs             # Uses SqlText.GetSqlText()
-├── src/BargeOps.API/src/Admin.Services/
-│   ├── IBoatLocationService.cs
-│   └── BoatLocationService.cs                    # Loads related entities
+├── src/BargeOps.Shared/BargeOps.Shared/
+│   └── Dto/
+│       └── BoatLocation.cs                       # Domain model (namespace: BargeOps.Shared.Dto)
+├── src/BargeOps.API/src/
+│   ├── Admin.Api/
+│   │   ├── Interfaces/
+│   │   │   └── IBoatLocationService.cs
+│   │   ├── Services/
+│   │   │   └── BoatLocationService.cs            # Loads related entities
+│   │   └── Controllers/
+│   │       └── BoatLocationController.cs         # Inherits ApiControllerBase
+│   └── Admin.Infrastructure/
+│       ├── Abstractions/
+│       │   └── IBoatLocationRepository.cs        # (namespace: Admin.Infrastructure.Abstractions)
+│       ├── Repositories/
+│       │   └── BoatLocationRepository.cs         # Uses SqlText.GetSqlText()
+│       └── DataAccess/Sql/
+│           ├── BoatLocation_GetById.sql          # SQL as embedded resource
+│           ├── BoatLocation_Search.sql
+│           ├── BoatLocation_Insert.sql
+│           ├── BoatLocation_Update.sql
+│           └── BoatLocation_SetActive.sql        # Soft delete (NOT Delete.sql)
 └── src/BargeOps.UI/
-    ├── ViewModels/
+    ├── Models/                                   # ViewModels (namespace: BargeOpsAdmin.ViewModels)
     │   ├── BoatLocationSearchViewModel.cs        # NO ViewBag usage
     │   └── BoatLocationEditViewModel.cs          # Single DateTime properties
     ├── Controllers/
     │   └── BoatLocationSearchController.cs       # Inherits AppController
+    ├── Services/
+    │   ├── IBargeService.cs
+    │   └── BargeService.cs                       # Inherits BargeOpsAdminBaseService
     ├── Views/BoatLocationSearch/
     │   ├── Index.cshtml                          # Search page
     │   └── Edit.cshtml                           # DateTime split in view
@@ -838,15 +889,18 @@ BargeOps.Admin.Mono/
 
 #### Domain Model Example (BoatLocation.cs)
 ```csharp
+// File: src/BargeOps.Shared/BargeOps.Shared/Dto/BoatLocation.cs
+namespace BargeOps.Shared.Dto;  // ✅ CORRECT: File-scoped namespace
+
 public class BoatLocation
 {
-    public int BoatLocationID { get; set; }
+    public int BoatLocationID { get; set; }  // ✅ CORRECT: Uppercase ID
 
     [Required]
     [StringLength(100)]
     public string BoatName { get; set; }
 
-    public int? RiverID { get; set; }
+    public int? RiverID { get; set; }  // ✅ CORRECT: Uppercase ID
 
     [Display(Name = "Position Updated")]
     [DataType(DataType.DateTime)]
@@ -881,6 +935,13 @@ WHERE BoatLocationID = @BoatLocationID
 
 #### Repository Example (BoatLocationRepository.cs)
 ```csharp
+// File: src/BargeOps.API/src/Admin.Infrastructure/Repositories/BoatLocationRepository.cs
+using BargeOps.Shared.Dto;  // ✅ CORRECT: Use BargeOps.Shared.Dto namespace
+using BargeOps.Shared.Interfaces;
+using Admin.Infrastructure.Abstractions;
+
+namespace Admin.Infrastructure.Repositories;  // ✅ CORRECT: File-scoped namespace
+
 public class BoatLocationRepository : IBoatLocationRepository
 {
     private readonly IDbConnection _connection;
@@ -892,7 +953,7 @@ public class BoatLocationRepository : IBoatLocationRepository
 
         return await _connection.QuerySingleOrDefaultAsync<BoatLocation>(
             sql,
-            new { BoatLocationID = id }
+            new { BoatLocationID = id }  // ✅ CORRECT: Uppercase ID
         );
     }
 
@@ -922,9 +983,14 @@ public class BoatLocationRepository : IBoatLocationRepository
 
 #### ViewModel Example (BoatLocationEditViewModel.cs)
 ```csharp
+// File: src/BargeOps.UI/Models/BoatLocationEditViewModel.cs
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace BargeOpsAdmin.ViewModels;  // ✅ CORRECT: File-scoped namespace for UI ViewModels
+
 public class BoatLocationEditViewModel
 {
-    public int BoatLocationID { get; set; }
+    public int BoatLocationID { get; set; }  // ✅ CORRECT: Uppercase ID
 
     [Required(ErrorMessage = "Boat name is required")]
     [Display(Name = "Boat Name")]
@@ -932,7 +998,7 @@ public class BoatLocationEditViewModel
     public string BoatName { get; set; }
 
     [Display(Name = "River")]
-    public int? RiverID { get; set; }
+    public int? RiverID { get; set; }  // ✅ CORRECT: Uppercase ID
 
     /// <summary>
     /// Position updated date and time.
@@ -955,6 +1021,14 @@ public class BoatLocationEditViewModel
 
 #### Controller Example (BoatLocationSearchController.cs)
 ```csharp
+// File: src/BargeOps.UI/Controllers/BoatLocationSearchController.cs
+using BargeOpsAdmin.ViewModels;
+using BargeOpsAdmin.AppClasses;
+using BargeOpsAdmin.Services;
+using Microsoft.AspNetCore.Authorization;
+
+namespace BargeOpsAdmin.Controllers;  // ✅ CORRECT: File-scoped namespace for UI Controllers
+
 // ✅ CORRECT: Inherits from AppController with [Authorize]
 [Authorize]
 public class BoatLocationSearchController : AppController
@@ -968,9 +1042,9 @@ public class BoatLocationSearchController : AppController
 
         var viewModel = new BoatLocationEditViewModel
         {
-            BoatLocationID = entity.BoatLocationID,
+            BoatLocationID = entity.BoatLocationID,  // ✅ CORRECT: Uppercase ID
             BoatName = entity.BoatName,
-            RiverID = entity.RiverID,
+            RiverID = entity.RiverID,  // ✅ CORRECT: Uppercase ID
             PositionUpdatedDateTime = entity.PositionUpdatedDateTime,
             CreatedDate = entity.CreatedDate
         };
@@ -1447,15 +1521,15 @@ The BoatLocation entity is the **canonical reference** for all conversions. When
 
 | Layer | File Path | What to Learn |
 |-------|-----------|---------------|
-| **Domain** | `src/BargeOps.API/src/Admin.Domain/BoatLocation.cs` | Domain model structure, IsActive pattern, audit fields |
+| **Domain/DTO** | `src/BargeOps.Shared/BargeOps.Shared/Dto/BoatLocation.cs` | Domain model structure, namespace (BargeOps.Shared.Dto), IsActive pattern, audit fields, uppercase ID |
 | **SQL** | `src/BargeOps.API/src/Admin.Infrastructure/DataAccess/Sql/BoatLocation_*.sql` | SQL file naming, embedded resource pattern, SetActive vs Delete |
-| **Repository Interface** | `src/BargeOps.API/src/Admin.Infrastructure/Repositories/IBoatLocationRepository.cs` | Repository method signatures, SetActiveAsync pattern |
-| **Repository Impl** | `src/BargeOps.API/src/Admin.Infrastructure/Repositories/BoatLocationRepository.cs` | SqlText.GetSqlText() usage, Dapper patterns |
-| **Service Interface** | `src/BargeOps.API/src/Admin.Services/IBoatLocationService.cs` | Service layer contracts |
-| **Service Impl** | `src/BargeOps.API/src/Admin.Services/BoatLocationService.cs` | Related entity loading, business logic |
-| **ViewModel** | `src/BargeOps.UI/ViewModels/BoatLocationSearchViewModel.cs` | ViewModel structure, dropdown properties |
-| **ViewModel** | `src/BargeOps.UI/ViewModels/BoatLocationEditViewModel.cs` | DateTime single property, validation attributes |
-| **Controller** | `src/BargeOps.UI/Controllers/BoatLocationSearchController.cs` | AppController inheritance, DataTables, soft delete endpoint |
+| **Repository Interface** | `src/BargeOps.API/src/Admin.Infrastructure/Abstractions/IBoatLocationRepository.cs` | Repository method signatures, SetActiveAsync pattern, namespace (Admin.Infrastructure.Abstractions) |
+| **Repository Impl** | `src/BargeOps.API/src/Admin.Infrastructure/Repositories/BoatLocationRepository.cs` | SqlText.GetSqlText() usage, Dapper patterns, namespace (Admin.Infrastructure.Repositories) |
+| **Service Interface** | `src/BargeOps.API/src/Admin.Api/Interfaces/IBoatLocationService.cs` | Service layer contracts, namespace (Admin.Api.Interfaces) |
+| **Service Impl** | `src/BargeOps.API/src/Admin.Api/Services/BoatLocationService.cs` | Related entity loading, business logic, namespace (Admin.Api.Services) |
+| **ViewModel** | `src/BargeOps.UI/Models/BoatLocationSearchViewModel.cs` | ViewModel structure, dropdown properties, namespace (BargeOpsAdmin.ViewModels) |
+| **ViewModel** | `src/BargeOps.UI/Models/BoatLocationEditViewModel.cs` | DateTime single property, validation attributes, namespace (BargeOpsAdmin.ViewModels) |
+| **Controller** | `src/BargeOps.UI/Controllers/BoatLocationSearchController.cs` | AppController inheritance, DataTables, soft delete endpoint, namespace (BargeOpsAdmin.Controllers) |
 | **View** | `src/BargeOps.UI/Views/BoatLocationSearch/Index.cshtml` | Search form, DataTables initialization |
 | **View** | `src/BargeOps.UI/Views/BoatLocationSearch/Edit.cshtml` | DateTime split inputs, Select2 dropdowns, validation |
 | **JavaScript** | `src/BargeOps.UI/wwwroot/js/boatLocationSearch.js` | DataTables config, DateTime split/combine, Select2 init |

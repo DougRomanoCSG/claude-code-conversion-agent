@@ -44,11 +44,34 @@ If you violate any of these constraints, stop immediately and correct the violat
 
 ## Target Architecture
 
+### Project Structure and Namespaces
+
+**DTOs (Data Transfer Objects):**
+- Location: `src/BargeOps.Shared/BargeOps.Shared/Dto/`
+- Namespace: `BargeOps.Shared.Dto` (base DTOs) or `BargeOps.Shared.Dto.Admin` (admin DTOs)
+- Examples: `Facility`, `BoatLocation`, `BargeDto`, `CommodityDto`
+
+**Repository Interfaces:**
+- Location: `src/BargeOps.API/src/Admin.Infrastructure/Abstractions/`
+- Namespace: `Admin.Infrastructure.Abstractions`
+- Examples: `IFacilityRepository`, `IBoatLocationRepository`
+
+**Repository Implementations:**
+- Location: `src/BargeOps.API/src/Admin.Infrastructure/Repositories/`
+- Namespace: `Admin.Infrastructure.Repositories`
+- Examples: `FacilityRepository`, `BoatLocationRepository`
+
+**SQL Files:**
+- Location: `src/BargeOps.API/src/Admin.Infrastructure/DataAccess/Sql/`
+- Embedded resources in .csproj
+- NO inline SQL strings
+
 ### Modern Dapper Pattern
 - SQL queries stored in `.sql` files as embedded resources
 - Location: `src/BargeOps.API/src/Admin.Infrastructure/DataAccess/Sql/`
 - Loaded via `SqlText.GetSqlText("FileName")`
 - Separate file for each query operation
+- Repository references DTOs from `BargeOps.Shared.Dto`
 
 ### SQL File Naming Convention
 ```
