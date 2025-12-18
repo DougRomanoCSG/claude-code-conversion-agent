@@ -1,0 +1,813 @@
+{
+  "formName": "frmBargeSeriesSearch",
+  "formType": "Search",
+  "relatedForms": {
+    "detailForm": "frmBargeSeriesDetail",
+    "relationshipType": "ParentChild"
+  },
+  "primaryWorkflows": [
+    {
+      "name": "SearchAndView",
+      "description": "User searches for barge series using filter criteria and views results",
+      "steps": [
+        {
+          "step": 1,
+          "action": "EnterSearchCriteria",
+          "controls": [
+            "txtBargeSeries",
+            "cboCustomerID",
+            "cboHullType",
+            "cboCoverType",
+            "chkActiveOnly"
+          ],
+          "details": "User can filter by series name, customer/owner, hull type, cover type, and active status"
+        },
+        {
+          "step": 2,
+          "action": "ClickSearch",
+          "button": "btnFind",
+          "trigger": "btnFind_Click",
+          "result": "Calls BargeSeriesSearch.GetList() and displays results in grdSearch grid"
+        },
+        {
+          "step": 3,
+          "action": "ReviewResults",
+          "control": "grdSearch",
+          "displayedColumns": [
+            "Name",
+            "Customer",
+            "HullType",
+            "CoverType",
+            "Dimensions",
+            "DraftLight",
+            "TonsPerInch",
+            "IsActive"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CreateNewBargeSeries",
+      "description": "User creates a new barge series record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickNew",
+          "trigger": "ItemAdd() via IBaseSearch interface",
+          "source": "frmBargeSeriesSearch:37-43",
+          "implementation": "Creates frmBargeSeriesDetail with BargeSeries.NewBargeSeries()"
+        },
+        {
+          "step": 2,
+          "action": "OpenDetailForm",
+          "navigation": "Opens frmBargeSeriesDetail as modal dialog",
+          "mode": "New",
+          "dataPassed": "New BargeSeries business object",
+          "formTitle": "New - Barge Series Detail"
+        },
+        {
+          "step": 3,
+          "action": "EnterBasicInfo",
+          "section": "pnlDetailEdit",
+          "fields": [
+            {
+              "control": "txtName",
+              "label": "Series",
+              "required": true,
+              "validation": "String type, max length from BargeSeries.MaxLength.Name"
+            },
+            {
+              "control": "cboCustomerID",
+              "label": "Owner",
+              "type": "Dropdown",
+              "source": "Lists.CustomerList.GetList"
+            },
+            {
+              "control": "cboHullType",
+              "label": "Hull type",
+              "type": "ValidationList",
+              "source": "ValidationList.ValidationTypes.HullType"
+            },
+            {
+              "control": "cboCoverType",
+              "label": "Cover type",
+              "type": "ValidationList",
+              "source": "ValidationList.ValidationTypes.CoverType"
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "action": "EnterDimensions",
+          "section": "pnlDetailEdit",
+          "fields": [
+            {
+              "control": "txtLength",
+              "label": "Length",
+              "validation": "Decimal"
+            },
+            {
+              "control": "txtWidth",
+              "label": "Width",
+              "validation": "Decimal"
+            },
+            {
+              "control": "txtDepth",
+              "label": "Depth",
+              "validation": "Decimal"
+            },
+            {
+              "control": "txtTonsPerInch",
+              "label": "Tons/inch",
+              "validation": "Decimal"
+            },
+            {
+              "control": "txtDraftLightFeet",
+              "label": "Light draft (feet)",
+              "validation": "Int32"
+            },
+            {
+              "control": "txtDraftLightInches",
+              "label": "Light draft (inches)",
+              "validation": "Int32"
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "action": "EnterDraftTonnageData",
+          "section": "grdBargeSeriesDraft",
+          "description": "User enters tonnage data for drafts 0-13 feet at inch increments (0-11 inches)",
+          "gridStructure": {
+            "rows": 14,
+            "draftRange": "0-13 feet",
+            "columns": [
+              "DraftFeet (read-only)",
+              "Tons00 (0 inches)",
+              "Tons01 (1 inch)",
+              "Tons02 (2 inches)",
+              "Tons03 (3 inches)",
+              "Tons04 (4 inches)",
+              "Tons05 (5 inches)",
+              "Tons06 (6 inches)",
+              "Tons07 (7 inches)",
+              "Tons08 (8 inches)",
+              "Tons09 (9 inches)",
+              "Tons10 (10 inches)",
+              "Tons11 (11 inches)"
+            ]
+          },
+          "editBehavior": {
+            "cellClickAction": "EditAndSelectText",
+            "tabNavigation": "NextControlOnLastCell",
+            "keyboardNavigation": "Arrow keys move between cells in edit mode",
+            "nullDisplay": "xxx",
+            "invalidValueBehavior": "RetainValueAndFocus",
+            "validation": "Integer values only, non-numeric entries converted to 'xxx'"
+          },
+          "pasteFromClipboard": {
+            "button": "Paste from Clipboard (toolbar)",
+            "supportedFormats": ["CSV", "Tab-delimited"],
+            "behavior": "Pastes data starting from Tons00 column, validates and converts to integers",
+            "source": "frmBargeSeriesDetail:789-850"
+          }
+        },
+        {
+          "step": 6,
+          "action": "SetActiveStatus",
+          "control": "chkIsActive",
+          "label": "Active",
+          "defaultValue": true
+        },
+        {
+          "step": 7,
+          "action": "SubmitForm",
+          "button": "btnSubmit",
+          "trigger": "btnSubmit_Click",
+          "processing": [
+            "ProcessBargeSeriesDraft() - iterates grid rows, creates/updates BargeSeriesDraft children",
+            "SubmitNoRefreshClick() - validates and saves via business object",
+            "Closes dialog on success"
+          ],
+          "validation": "ValidatorExtender validates all required fields before submission"
+        },
+        {
+          "step": 8,
+          "action": "RefreshSearchGrid",
+          "trigger": "Modal dialog closes",
+          "behavior": "Parent search form automatically refreshes after dialog closes"
+        }
+      ]
+    },
+    {
+      "name": "EditExistingBargeSeries",
+      "description": "User edits an existing barge series record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRecord",
+          "control": "grdSearch",
+          "trigger": "Row selected in search grid"
+        },
+        {
+          "step": 2,
+          "action": "ClickEdit",
+          "trigger": "ItemModify() via IBaseSearch interface",
+          "source": "frmBargeSeriesSearch:46-52",
+          "implementation": "Loads BargeSeries via BargeSeries.GetBargeSeries(GridControlIndex)"
+        },
+        {
+          "step": 3,
+          "action": "OpenDetailForm",
+          "navigation": "Opens frmBargeSeriesDetail as modal dialog",
+          "mode": "Edit",
+          "dataPassed": "Existing BargeSeries business object with ID",
+          "formTitle": "{Name} - Barge Series Detail"
+        },
+        {
+          "step": 4,
+          "action": "LoadExistingData",
+          "trigger": "Form_Load event",
+          "source": "frmBargeSeriesDetail:92-115",
+          "sequence": [
+            "FormatControls() - sets up grid, combos, validators",
+            "LoadControlsForBargeSeries() - populates fields from business object",
+            "RefreshList() - builds draft tonnage grid from BargeSeriesDrafts collection"
+          ]
+        },
+        {
+          "step": 5,
+          "action": "ModifyFields",
+          "description": "User modifies any fields in pnlDetailEdit or grdBargeSeriesDraft",
+          "validatedEvents": [
+            "cboCustomerID_Validated",
+            "txtName_Validated",
+            "cboHullType_Validated",
+            "cboCoverType_Validated",
+            "txtLength_Validated",
+            "txtWidth_Validated",
+            "txtDepth_Validated",
+            "txtTonsPerInch_Validated",
+            "txtDraftLightFeet_Validated",
+            "txtDraftLightInches_Validated",
+            "chkIsActive_Validated"
+          ],
+          "updatePattern": "Each control's Validated event updates the BargeSeries business object"
+        },
+        {
+          "step": 6,
+          "action": "SubmitChanges",
+          "button": "btnSubmit",
+          "processing": [
+            "ProcessBargeSeriesDraft() - updates existing BargeSeriesDraft children by ID",
+            "SubmitNoRefreshClick() - validates and saves changes",
+            "Closes dialog on success"
+          ]
+        },
+        {
+          "step": 7,
+          "action": "RefreshSearchGrid",
+          "trigger": "Modal dialog closes",
+          "behavior": "Parent search form refreshes to show updated data"
+        }
+      ]
+    },
+    {
+      "name": "DeleteBargeSeries",
+      "description": "User deletes a barge series record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRecord",
+          "control": "grdSearch",
+          "trigger": "Row selected in search grid"
+        },
+        {
+          "step": 2,
+          "action": "ClickDelete",
+          "trigger": "ItemRemove() via IBaseSearch interface",
+          "source": "frmBargeSeriesSearch:55-63"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDelete",
+          "dialog": "Main.ItemRemoveDialog",
+          "message": "Confirm deletion of 'Barge Series'",
+          "options": ["Yes", "No"]
+        },
+        {
+          "step": 4,
+          "action": "ExecuteDelete",
+          "condition": "User clicks Yes",
+          "implementation": "BargeSeries.DeleteBargeSeries(GridControlIndex)",
+          "cascade": "Deletes associated BargeSeriesDraft records"
+        },
+        {
+          "step": 5,
+          "action": "RefreshList",
+          "trigger": "RefreshList(False) called after deletion",
+          "behavior": "Grid refreshes without selecting first row"
+        }
+      ]
+    },
+    {
+      "name": "ResetSearchCriteria",
+      "description": "User clears all search filters",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickReset",
+          "button": "btnReset",
+          "trigger": "btnReset_Click",
+          "source": "frmBargeSeriesSearch:181-197"
+        },
+        {
+          "step": 2,
+          "action": "ClearFields",
+          "method": "ResetControls()",
+          "fieldDefaults": {
+            "cboCustomerID": "Empty",
+            "cboHullType": "Empty",
+            "cboCoverType": "Empty",
+            "txtBargeSeries": "Empty",
+            "chkActiveOnly": "True (checked)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ExportDraftTonnage",
+      "description": "User exports draft tonnage grid data",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenDetailForm",
+          "context": "User must be in frmBargeSeriesDetail (new or edit mode)"
+        },
+        {
+          "step": 2,
+          "action": "ClickExport",
+          "button": "Export (toolbar)",
+          "trigger": "ToolbarsManager_ToolClick with key='Export'",
+          "source": "frmBargeSeriesDetail:174-175"
+        },
+        {
+          "step": 3,
+          "action": "ExportGrid",
+          "implementation": "Main.ExportGrid(grdBargeSeriesDraft, staStatus, formTitle)",
+          "behavior": "Exports grid data to file format (likely Excel/CSV)"
+        }
+      ]
+    },
+    {
+      "name": "CancelEdit",
+      "description": "User cancels changes and closes detail form",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickCancel",
+          "button": "btnCancel",
+          "trigger": "btnCancel_Click",
+          "source": "frmBargeSeriesDetail:149-163"
+        },
+        {
+          "step": 2,
+          "action": "RollbackChanges",
+          "method": "CancelClick()",
+          "behavior": "Calls business object's CancelEdit(), discards all changes"
+        },
+        {
+          "step": 3,
+          "action": "CloseForm",
+          "result": "Dialog closes without saving, returns to search form"
+        }
+      ]
+    }
+  ],
+  "formStates": {
+    "searchForm": [
+      {
+        "state": "Initial",
+        "description": "Form first loaded into main panel",
+        "trigger": "pnlSearch_HandleCreated",
+        "gridState": "Empty",
+        "searchCriteria": {
+          "txtBargeSeries": "Empty",
+          "cboCustomerID": "Empty",
+          "cboHullType": "Empty",
+          "cboCoverType": "Empty",
+          "chkActiveOnly": "Checked (true)"
+        },
+        "enabledButtons": ["btnFind", "btnReset"],
+        "defaultFocus": "txtBargeSeries",
+        "initialization": [
+          "FormatControls() called",
+          "Grid settings restored from MyAppSettingHelper",
+          "Combo lists populated from database"
+        ]
+      },
+      {
+        "state": "ResultsDisplayed",
+        "description": "Search results shown in grid",
+        "gridState": "Populated with BargeSeriesList",
+        "gridSort": "Name ascending (default)",
+        "enabledButtons": ["btnFind", "btnReset", "Add", "Edit", "Delete (if row selected)"],
+        "uniqueIdentifier": "BargeSeriesID"
+      },
+      {
+        "state": "RowSelected",
+        "description": "User has selected a row in grid",
+        "gridState": "Populated with selection",
+        "enabledButtons": ["btnFind", "btnReset", "Add", "Edit", "Delete"],
+        "actions": ["Can edit selected record", "Can delete selected record"]
+      },
+      {
+        "state": "Destroyed",
+        "description": "Panel being destroyed",
+        "trigger": "pnlSearch_HandleDestroyed",
+        "behavior": "Grid settings saved via MyAppSettingHelper.SaveGrid()"
+      }
+    ],
+    "detailForm": [
+      {
+        "state": "NewMode",
+        "description": "Creating new barge series",
+        "trigger": "Initialize() called with NewBargeSeries()",
+        "businessObject": "BargeSeries.IsNew = True",
+        "formTitle": "New - Barge Series Detail",
+        "fieldDefaults": {
+          "txtName": "Empty",
+          "chkIsActive": "Checked",
+          "allDraftCells": "xxx (null text)"
+        },
+        "enabledControls": "All in pnlDetailEdit and grdBargeSeriesDraft",
+        "enabledButtons": ["btnSubmit", "btnCancel", "Paste", "Export"],
+        "editMode": "BeginEdit() called on business object"
+      },
+      {
+        "state": "EditMode",
+        "description": "Editing existing barge series",
+        "trigger": "Initialize() called with GetBargeSeries(ID)",
+        "businessObject": "BargeSeries.IsNew = False",
+        "formTitle": "{Name} - Barge Series Detail",
+        "dataLoaded": "All fields populated from BargeSeries object",
+        "gridLoaded": "14 rows with existing BargeSeriesDraft data",
+        "enabledControls": "All in pnlDetailEdit and grdBargeSeriesDraft",
+        "enabledButtons": ["btnSubmit", "btnCancel", "Paste", "Export"],
+        "editMode": "BeginEdit() called on business object"
+      },
+      {
+        "state": "GridEditActive",
+        "description": "User is editing draft tonnage grid cell",
+        "activeGrid": "grdBargeSeriesDraft",
+        "cellActivation": "EditAndSelectText",
+        "keyboardBehavior": {
+          "Up": "Exit edit, move up, enter edit",
+          "Down": "Exit edit, move down, enter edit",
+          "Left": "Exit edit, move previous cell, enter edit",
+          "Right": "Exit edit, move next cell, enter edit",
+          "Tab": "Next cell (snaking pattern)"
+        },
+        "validation": {
+          "onCellUpdate": "grdBargeSeriesDraft_AfterCellUpdate",
+          "emptyValue": "Converted to 'xxx'",
+          "numericValue": "Parsed and converted to integer",
+          "nonNumericValue": "Converted to 'xxx'",
+          "preventManualUpdateLoop": "_ManualCellUpdate flag used"
+        }
+      },
+      {
+        "state": "Validating",
+        "description": "Form validation in progress",
+        "trigger": "btnSubmit clicked",
+        "validator": "ValidatorExtender",
+        "statusDisplay": "staStatus shows validation messages",
+        "failureBehavior": "Focus moves to invalid field, form remains open"
+      },
+      {
+        "state": "Saving",
+        "description": "Data being saved to database",
+        "sequence": [
+          "ProcessBargeSeriesDraft() processes all grid rows",
+          "Creates or updates BargeSeriesDraft children",
+          "SubmitNoRefreshClick() validates business object",
+          "Business object saved via ApplyEdit()",
+          "Database stored procedures called (Insert/Update)"
+        ]
+      },
+      {
+        "state": "Closed",
+        "description": "Form closed (saved or cancelled)",
+        "trigger": "frmDetailEdit_FormClosed",
+        "dialogResult": "OK (if saved) or Cancel (if cancelled)",
+        "businessObject": "Either saved (ApplyEdit) or rolled back (CancelEdit)",
+        "parentBehavior": "Search form refreshes if saved"
+      }
+    ]
+  },
+  "navigationPatterns": [
+    {
+      "from": "frmBargeSeriesSearch",
+      "to": "frmBargeSeriesDetail",
+      "trigger": "Add button (ItemAdd interface method)",
+      "method": "New",
+      "dataPassed": "BargeSeries.NewBargeSeries()",
+      "modalDialog": true,
+      "returnBehavior": "Search grid optionally refreshed"
+    },
+    {
+      "from": "frmBargeSeriesSearch",
+      "to": "frmBargeSeriesDetail",
+      "trigger": "Edit button (ItemModify interface method) or double-click grid row",
+      "method": "Edit",
+      "dataPassed": "BargeSeries.GetBargeSeries(BargeSeriesID)",
+      "modalDialog": true,
+      "returnBehavior": "Search grid optionally refreshed"
+    },
+    {
+      "from": "frmBargeSeriesDetail",
+      "to": "frmBargeSeriesSearch",
+      "trigger": "btnSubmit (save) or btnCancel (discard)",
+      "method": "Close",
+      "dataPassed": "DialogResult (OK or Cancel)",
+      "modalDialog": false,
+      "returnBehavior": "Control returns to parent search form"
+    }
+  ],
+  "stateTransitions": [
+    {
+      "from": "Initial",
+      "to": "ResultsDisplayed",
+      "trigger": "btnFind.Click or RefreshList(True) called",
+      "action": "Execute search and populate grid"
+    },
+    {
+      "from": "ResultsDisplayed",
+      "to": "RowSelected",
+      "trigger": "User clicks row in grid",
+      "action": "Enable Edit and Delete buttons"
+    },
+    {
+      "from": "RowSelected",
+      "to": "NewMode (Detail Form)",
+      "trigger": "Add button clicked",
+      "action": "Open frmBargeSeriesDetail with new object"
+    },
+    {
+      "from": "RowSelected",
+      "to": "EditMode (Detail Form)",
+      "trigger": "Edit button or double-click",
+      "action": "Open frmBargeSeriesDetail with existing object"
+    },
+    {
+      "from": "NewMode",
+      "to": "GridEditActive",
+      "trigger": "User clicks draft tonnage grid cell",
+      "action": "Enable cell editing with validation"
+    },
+    {
+      "from": "EditMode",
+      "to": "GridEditActive",
+      "trigger": "User clicks draft tonnage grid cell",
+      "action": "Enable cell editing with validation"
+    },
+    {
+      "from": "NewMode/EditMode",
+      "to": "Validating",
+      "trigger": "btnSubmit clicked",
+      "action": "Process grid data and validate business object"
+    },
+    {
+      "from": "Validating",
+      "to": "Saving",
+      "trigger": "Validation passes",
+      "action": "Save business object and children to database"
+    },
+    {
+      "from": "Validating",
+      "to": "NewMode/EditMode",
+      "trigger": "Validation fails",
+      "action": "Display error, remain in form"
+    },
+    {
+      "from": "Saving",
+      "to": "Closed",
+      "trigger": "Save succeeds",
+      "action": "Close form with DialogResult.OK"
+    },
+    {
+      "from": "NewMode/EditMode",
+      "to": "Closed",
+      "trigger": "btnCancel clicked",
+      "action": "Rollback changes, close with DialogResult.Cancel"
+    },
+    {
+      "from": "ResultsDisplayed",
+      "to": "Initial",
+      "trigger": "btnReset clicked",
+      "action": "Clear search criteria, empty grid"
+    }
+  ],
+  "sessionManagement": {
+    "gridSettings": {
+      "persistence": "MyAppSettingHelper (database)",
+      "saveOn": "pnlSearch_HandleDestroyed",
+      "restoreOn": "pnlSearch_HandleCreated",
+      "settings": ["Column widths", "Column order", "Sort order"]
+    },
+    "formLifecycle": {
+      "searchForm": {
+        "createEvent": "pnlSearch_HandleCreated (panel re-parented into main form)",
+        "destroyEvent": "pnlSearch_HandleDestroyed",
+        "parentContainer": "Main form explorer panel",
+        "isPersistent": "Yes - panel remains loaded in main form"
+      },
+      "detailForm": {
+        "createEvent": "Form_Load",
+        "destroyEvent": "FormClosed",
+        "displayMode": "Modal dialog (ShowDialog)",
+        "parentForm": "LocalPanel.Parent (main form)",
+        "isPersistent": "No - disposed after closing"
+      }
+    },
+    "businessObjectPattern": {
+      "editSequence": [
+        "BeginEdit() - starts edit transaction",
+        "User modifies properties",
+        "Validated events update business object",
+        "ApplyEdit() (if saved) or CancelEdit() (if cancelled)"
+      ],
+      "childObjects": "BargeSeriesDrafts collection managed within transaction"
+    }
+  },
+  "userExperience": {
+    "searchForm": {
+      "defaultFocus": "txtBargeSeries",
+      "enterKeyBehavior": "Triggers search (AcceptButton = btnFind)",
+      "doubleClickBehavior": "Opens detail form in edit mode (implied by IBaseSearch)",
+      "gridInteraction": "Single row selection, double-click to edit",
+      "filterPersistence": "Search criteria not persisted between sessions",
+      "resultsDefaultSort": "Name ascending"
+    },
+    "detailForm": {
+      "defaultFocus": "First control (txtName)",
+      "tabOrder": "Sequential through all fields",
+      "validationFeedback": "Displayed in staStatus bar",
+      "unsavedChangesPrompt": "Not implemented (DialogResult.Cancel directly closes)",
+      "gridNavigation": {
+        "cellClickAction": "EditAndSelectText",
+        "keyboardShortcuts": {
+          "Arrow keys": "Navigate cells while maintaining edit mode",
+          "Tab": "Move to next cell (snaking pattern)",
+          "Shift+Tab": "Move to previous cell"
+        },
+        "mouseInteraction": "Click cell to edit",
+        "pasteShortcut": "Toolbar button (no Ctrl+V handler visible)"
+      },
+      "toolbarActions": [
+        {
+          "button": "Paste from Clipboard",
+          "icon": "Paste",
+          "function": "Import CSV or tab-delimited tonnage data",
+          "securityType": "Action"
+        },
+        {
+          "button": "Export",
+          "icon": "ExportResults",
+          "function": "Export grid data to file",
+          "securityType": "Open"
+        }
+      ]
+    },
+    "errorHandling": {
+      "pattern": "Try-Catch-Finally with ExceptionManager.Publish(ex)",
+      "cursorManagement": "WaitCursor during operations, restored in Finally",
+      "formCloseOnError": "Detail form attempts to close if Form_Load fails"
+    }
+  },
+  "securityModel": {
+    "authorization": "ControlAuthorizationBase via InitializeBase(SubSystem.frmBargeSeriesSearch)",
+    "buttonTypes": {
+      "btnFind": "Open",
+      "btnReset": "Open",
+      "btnSubmit": "Submit",
+      "btnCancel": "Cancel",
+      "Paste": "Action",
+      "Export": "Open"
+    },
+    "subsystem": "SubSystem.frmBargeSeriesSearch",
+    "permissionCheck": "SetPermissions called during Initialize()"
+  },
+  "dataFlow": {
+    "search": {
+      "input": "Search criteria from form controls",
+      "businessLogic": "Lists.BargeSeriesSearch.GetList()",
+      "parameters": [
+        "seriesName: String",
+        "customerID: String",
+        "hullType: String",
+        "coverType: String",
+        "activeOnly: Boolean"
+      ],
+      "output": "BargeSeriesList bound to grdSearch"
+    },
+    "load": {
+      "input": "BargeSeriesID from selected grid row",
+      "businessLogic": "BargeSeries.GetBargeSeries(ID)",
+      "output": "BargeSeries object with BargeSeriesDrafts collection",
+      "childRecords": "14 BargeSeriesDraft objects (one per draft foot 0-13)"
+    },
+    "save": {
+      "input": "BargeSeries object with modified properties and children",
+      "processing": [
+        "ProcessBargeSeriesDraft() updates children from grid",
+        "New mode: Creates new BargeSeriesDraft for each grid row",
+        "Edit mode: Updates existing BargeSeriesDraft by ID"
+      ],
+      "validation": "BargeSeries.IsValid checked",
+      "businessLogic": "BargeSeries.ApplyEdit()",
+      "storedProcedures": [
+        "BargeSeriesInsert (if new)",
+        "BargeSeriesUpdate (if editing)",
+        "BargeSeriesDraftInsert (for new drafts)",
+        "BargeSeriesDraftUpdate (for existing drafts)"
+      ]
+    },
+    "delete": {
+      "input": "BargeSeriesID from selected grid row",
+      "confirmation": "User confirms via ItemRemoveDialog",
+      "businessLogic": "BargeSeries.DeleteBargeSeries(ID)",
+      "storedProcedure": "BargeSeriesDelete",
+      "cascade": "Deletes associated BargeSeriesDraft records"
+    }
+  },
+  "specialBehaviors": {
+    "draftTonnageGrid": {
+      "description": "Editable grid with 14 rows (0-13 feet) and 12 columns (0-11 inches)",
+      "prePopulated": true,
+      "rowsFixedCount": 14,
+      "draftFeetReadOnly": true,
+      "nullRepresentation": "xxx",
+      "dataType": "String (to allow 'xxx'), converted to Integer on save",
+      "sortingDisabled": true,
+      "addNewDisabled": true,
+      "cellUpdateValidation": {
+        "event": "grdBargeSeriesDraft_AfterCellUpdate",
+        "source": "frmBargeSeriesDetail:188-216",
+        "logic": [
+          "Empty or null values → converted to 'xxx'",
+          "Valid decimal → rounded to integer",
+          "Invalid decimal → converted to 'xxx'"
+        ],
+        "recursionPrevention": "_ManualCellUpdate flag"
+      }
+    },
+    "clipboardPaste": {
+      "description": "Paste tonnage data from Excel or CSV into grid",
+      "supportedFormats": ["CSV (comma-delimited)", "Text (tab-delimited)"],
+      "pasteRange": "Starts from Tons00 column, 14 rows",
+      "validation": "Decimal values rounded to integers, invalid values skipped",
+      "source": "frmBargeSeriesDetail:789-866"
+    },
+    "gridCustomComparer": {
+      "column": "TonsPerInch",
+      "comparer": "NumericSortComparer",
+      "reason": "Ensures numeric sorting instead of alphabetic"
+    }
+  },
+  "relatedEntities": {
+    "parent": null,
+    "children": [
+      {
+        "entityName": "BargeSeriesDraft",
+        "relationship": "One-to-Many",
+        "cardinality": "1 BargeSeries : 0-14 BargeSeriesDrafts",
+        "description": "Tonnage data for each draft foot/inch combination",
+        "managedInGrid": "grdBargeSeriesDraft",
+        "cascadeDelete": true
+      }
+    ],
+    "references": [
+      {
+        "entityName": "Customer",
+        "relationship": "Many-to-One",
+        "foreignKey": "CustomerID",
+        "displayField": "Name",
+        "control": "cboCustomerID",
+        "label": "Owner"
+      },
+      {
+        "entityName": "ValidationList",
+        "validationType": "HullType",
+        "relationship": "Lookup",
+        "control": "cboHullType"
+      },
+      {
+        "entityName": "ValidationList",
+        "validationType": "CoverType",
+        "relationship": "Lookup",
+        "control": "cboCoverType"
+      }
+    ]
+  }
+}

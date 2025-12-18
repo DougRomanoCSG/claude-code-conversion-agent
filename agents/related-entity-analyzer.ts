@@ -8,6 +8,7 @@ import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
 import relatedSettings from "../settings/related-entity.settings.json" with { type: "json" };
 import relatedMcp from "../settings/related-entity.mcp.json" with { type: "json" };
+import relatedEntityAnalyzerPrompt from "../system-prompts/related-entity-analyzer-prompt.md" with { type: "text" };
 
 function resolvePath(relativeFromThisFile: string): string {
 	const url = new URL(relativeFromThisFile, import.meta.url);
@@ -30,30 +31,31 @@ async function main() {
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
 
-	const systemPrompt = `
-You are a Related Entity Analyzer agent.
-
+	// Build context-specific prompt with entity details and paths
+	const contextPrompt = `
 TASK: Extract entity relationships for ${entity}.
 
-GOALS:
+ANALYSIS GOALS:
 1. Identify child collection properties
 2. Extract CRUD methods for related entities
 3. Identify grid structures for related entities
 4. Extract parent-child key relationships
 
-OUTPUT: ${outputPath}/related-entities.json
+OUTPUT:
+Generate a JSON file at: ${outputPath}/related-entities.json
 
 Begin analysis.
 `;
 
 	const baseFlags = {
+		"append-system-prompt": relatedEntityAnalyzerPrompt,
 		settings: settingsJson,
 		"mcp-config": mcpJson,
 		...(interactive ? {} : { print: true, "output-format": "json" }),
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
-	const child = spawn(["claude", ...flags, systemPrompt], {
+	const child = spawn(["claude", ...flags, contextPrompt], {
 		stdin: "inherit",
 		stdout: interactive ? "inherit" : "pipe",
 		stderr: "inherit",

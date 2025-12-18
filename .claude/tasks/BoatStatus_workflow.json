@@ -1,0 +1,778 @@
+{
+  "formName": "frmBoatStatus",
+  "formType": "DetailEditList",
+  "baseForm": "frmBaseDetailEditList",
+  "primaryEntity": "BoatLocation",
+  "childEntity": "BoatMaintenanceLog",
+  "formPurpose": "Manage boat status history including status changes, division/facility changes, and boat role changes",
+
+  "primaryWorkflows": [
+    {
+      "name": "ViewBoatStatusHistory",
+      "description": "User opens form to view boat status history",
+      "steps": [
+        {
+          "step": 1,
+          "action": "FormLoad",
+          "method": "frmDetailEdit_Load",
+          "details": "Form is initialized with BoatLocation object and boat name",
+          "execution": [
+            "FormatControls() - Setup combos, validation, grid columns",
+            "RefreshList(True) - Load BoatMaintenanceLogs into grid"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "ViewGridData",
+          "control": "grdDetailEditList",
+          "gridColumns": [
+            "StartDateTime (Date)",
+            "MaintenanceType (Type)",
+            "Status",
+            "Division",
+            "PortFacility",
+            "BoatRole",
+            "Note"
+          ],
+          "sorting": "StartDateTime descending (default)"
+        }
+      ]
+    },
+    {
+      "name": "AddBoatStatus",
+      "description": "User adds new boat status record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickAddButton",
+          "button": "ToolbarsManager.Tools[Add]",
+          "handler": "ToolbarsManager_ToolClick -> ItemAdd()",
+          "validation": "Cannot add if already editing child (IsEditingChild = True)"
+        },
+        {
+          "step": 2,
+          "action": "CreateNewRecord",
+          "method": "ItemAdd()",
+          "execution": [
+            "Create new BoatMaintenanceLog via BoatMaintenanceLogs.NewBoatMaintenanceLog",
+            "Call BeginEdit() on new object",
+            "LoadControlsForBoatMaintenanceLog() - Clear/initialize controls",
+            "EnableDisableControls(True) - Enter edit mode",
+            "SetIsEditingChild = True",
+            "Focus on dtStartDate"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "SelectMaintenanceType",
+          "control": "optMaintenanceType",
+          "options": [
+            "Boat Status - enables cboStatus",
+            "Change Division/Facility - enables cboDivision, cboPortFacilityID",
+            "Change Boat Role - enables cboBoatRoleID"
+          ],
+          "trigger": "optMaintenanceType_ValueChanged -> EnableDisableMaintenanceTypes(True)",
+          "note": "Maintenance type cannot be changed once saved (IsNew = False)"
+        },
+        {
+          "step": 4,
+          "action": "EnterData",
+          "fields": [
+            {
+              "control": "dtStartDate",
+              "label": "Start date/time",
+              "required": true,
+              "validated": "dtStartDate_Validated"
+            },
+            {
+              "control": "cboStartTime",
+              "label": "Time",
+              "validated": "cboStartTime_Validated"
+            },
+            {
+              "control": "cboStatus",
+              "label": "Status",
+              "conditionallyEnabled": "Only if MaintenanceType = 'Boat Status'",
+              "validated": "cboStatus_Validated"
+            },
+            {
+              "control": "cboDivision",
+              "label": "Division",
+              "conditionallyEnabled": "Only if MaintenanceType = 'Change Division/Facility'",
+              "validated": "cboDivision_Validated",
+              "sideEffect": "cboDivision_ValueChanged triggers PopulatePortFacilityCombo()"
+            },
+            {
+              "control": "cboPortFacilityID",
+              "label": "Port Facility",
+              "conditionallyEnabled": "Only if MaintenanceType = 'Change Division/Facility'",
+              "validated": "cboPortFacilityID_Validated",
+              "note": "List filtered by FleetID if IsFleetBoat, otherwise all facilities"
+            },
+            {
+              "control": "cboBoatRoleID",
+              "label": "Boat Role",
+              "conditionallyEnabled": "Only if MaintenanceType = 'Change Boat Role'",
+              "validated": "cboBoatRoleID_Validated"
+            },
+            {
+              "control": "txtNote",
+              "label": "Note",
+              "multiline": true,
+              "validated": "txtNote_Validated"
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "action": "SaveRecord",
+          "button": "btnSetEdit",
+          "handler": "btnSetEdit_Click -> SetClickListAndDetail(_BoatMaintenanceLog)",
+          "execution": [
+            "ClearUnusedFields() - Clear fields not applicable to selected MaintenanceType",
+            "MyBase.SetClickListAndDetail(businessObject)",
+            "Validate via _BoatMaintenanceLog.IsValid",
+            "If valid: _BoatMaintenanceLog.ApplyEdit()",
+            "Add to _BoatLocation.BoatMaintenanceLogs collection if new",
+            "ClearControls()",
+            "EnableDisableControls(False) - Exit edit mode",
+            "RefreshList(wasAdd) - Refresh grid, select first row if new"
+          ],
+          "validation": "Shows BrokenRulesCollection if invalid"
+        },
+        {
+          "step": 6,
+          "action": "CancelEdit",
+          "button": "btnCancelEdit",
+          "handler": "btnCancelEdit_Click -> CancelClickListAndDetail(_BoatMaintenanceLog)",
+          "execution": [
+            "Check for unsaved changes via FormIsClosable()",
+            "If changed and user confirms cancel: _BoatMaintenanceLog.CancelEdit()",
+            "ClearControls()",
+            "EnableDisableControls(False) - Exit edit mode",
+            "RefreshList(False) - Refresh to clear uncommitted changes"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ModifyBoatStatus",
+      "description": "User edits existing boat status record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRecord",
+          "control": "grdDetailEditList",
+          "trigger": "Either double-click row OR select row and click Modify button"
+        },
+        {
+          "step": 2,
+          "action": "OpenForEdit",
+          "handler": "UltraGridControl_DoubleClick OR ToolbarsManager_ToolClick[Modify] -> ItemModify()",
+          "validation": "Cannot modify if already editing child (IsEditingChild = True)",
+          "execution": [
+            "Get selected BoatMaintenanceLog from grid.Selected.Rows(0).ListObject",
+            "Call _BoatMaintenanceLog.BeginEdit()",
+            "LoadControlsForBoatMaintenanceLog() - Populate controls with current values",
+            "EnableDisableControls(True) - Enter edit mode",
+            "Set optMaintenanceType to ReadOnly (cannot change type on existing record)",
+            "Focus on dtStartDate"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "EditData",
+          "details": "User modifies fields (same as Add workflow step 4)",
+          "note": "Maintenance type is readonly and cannot be changed"
+        },
+        {
+          "step": 4,
+          "action": "SaveChanges",
+          "details": "Same as Add workflow step 5"
+        },
+        {
+          "step": 5,
+          "action": "CancelChanges",
+          "details": "Same as Add workflow step 6"
+        }
+      ]
+    },
+    {
+      "name": "RemoveBoatStatus",
+      "description": "User deletes boat status record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRecord",
+          "control": "grdDetailEditList",
+          "details": "Select row in grid"
+        },
+        {
+          "step": 2,
+          "action": "ClickRemoveButton",
+          "button": "ToolbarsManager.Tools[Remove]",
+          "handler": "ToolbarsManager_ToolClick -> ItemRemove()",
+          "validation": "Cannot remove if already editing child (IsEditingChild = True)"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDeletion",
+          "method": "ItemRemove()",
+          "execution": [
+            "Show confirmation dialog via Main.ItemRemoveDialog('Boat Status')",
+            "If Yes: _BoatLocation.BoatMaintenanceLogs.Remove(selected BoatMaintenanceLog)",
+            "RefreshList(True) - Refresh grid"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ExportToExcel",
+      "description": "User exports grid data to Excel",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickExportButton",
+          "button": "ToolbarsManager.Tools[Export]",
+          "handler": "ToolbarsManager_ToolClick -> Main.ExportGrid(grdDetailEditList, staStatus, Me.Text)",
+          "validation": "Enabled only if grid has at least one row"
+        }
+      ]
+    },
+    {
+      "name": "CloseForm",
+      "description": "User closes the boat status form",
+      "steps": [
+        {
+          "step": 1,
+          "action": "InitiateClose",
+          "trigger": "btnClose click OR form X button",
+          "handler": "btnClose_Click OR WndProc -> CancelClick()"
+        },
+        {
+          "step": 2,
+          "action": "CheckUnsavedChanges",
+          "method": "CancelClick() override",
+          "execution": [
+            "If IsEditingChild: Check for unsaved child changes",
+            "Set DirtyCheckChoice = DirtyCheck.ChangedThisEdit",
+            "Call CancelClickListAndDetail(_BoatMaintenanceLog)",
+            "If user cancels: Abort close (Exit Sub)",
+            "Restore original DirtyCheckChoice"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "SaveAndClose",
+          "execution": [
+            "If _BoatLocation IsNot Nothing: _BoatLocation.ApplyEdit()",
+            "Set DialogResult = DialogResult.OK",
+            "Call Me.Close()"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "FormClosed",
+          "handler": "frmDetailEdit_FormClosed",
+          "execution": [
+            "Save grid settings via MyAppSettingHelper.SaveGrid(Me, grdDetailEditList, True)"
+          ]
+        }
+      ]
+    }
+  ],
+
+  "formStates": [
+    {
+      "state": "Initial",
+      "description": "Form first loaded with boat status history",
+      "isEditingChild": false,
+      "gridState": "Populated with BoatMaintenanceLogs",
+      "detailSection": "Disabled",
+      "enabledButtons": [
+        "Add (if authorized)",
+        "Modify (if row selected and authorized)",
+        "Remove (if row selected and authorized)",
+        "Export (if rows exist and authorized)",
+        "Close"
+      ],
+      "focusControl": "grdDetailEditList"
+    },
+    {
+      "state": "AddingNewRecord",
+      "description": "User clicked Add to create new boat status",
+      "isEditingChild": true,
+      "gridState": "Selection disabled (BeforeSelectChange cancels)",
+      "detailSection": "Enabled",
+      "enabledButtons": [
+        "Set",
+        "Cancel",
+        "Close"
+      ],
+      "disabledButtons": [
+        "Add",
+        "Modify",
+        "Remove",
+        "Export"
+      ],
+      "focusControl": "dtStartDate",
+      "editMode": "Creating new BoatMaintenanceLog"
+    },
+    {
+      "state": "EditingExistingRecord",
+      "description": "User double-clicked row or clicked Modify",
+      "isEditingChild": true,
+      "gridState": "Selection disabled",
+      "detailSection": "Enabled (optMaintenanceType is readonly)",
+      "enabledButtons": [
+        "Set",
+        "Cancel",
+        "Close"
+      ],
+      "disabledButtons": [
+        "Add",
+        "Modify",
+        "Remove",
+        "Export"
+      ],
+      "focusControl": "dtStartDate",
+      "editMode": "Editing existing BoatMaintenanceLog"
+    },
+    {
+      "state": "ClosingWithUnsavedChanges",
+      "description": "User clicked Close while editing child",
+      "isEditingChild": true,
+      "behavior": "Show unsaved changes dialog",
+      "options": [
+        "Save changes: Complete save then close",
+        "Discard changes: Cancel edit then close",
+        "Abort close: Return to edit state"
+      ]
+    }
+  ],
+
+  "navigationPatterns": [
+    {
+      "from": "ParentForm",
+      "to": "frmBoatStatus",
+      "trigger": "Parent form calls Initialize(BoatLocation, boatName)",
+      "mode": "Modal dialog (ShowInTaskbar = False, StartPosition = CenterParent)",
+      "dataPassed": {
+        "businessObject": "BoatLocation instance",
+        "boatName": "Used for form title: '{boatName} - Boat Status'"
+      }
+    },
+    {
+      "from": "frmBoatStatus",
+      "to": "ParentForm",
+      "trigger": "btnClose click or form X button",
+      "dialogResult": "DialogResult.OK",
+      "dataPersisted": "BoatLocation.ApplyEdit() called before close",
+      "note": "Grid settings saved to MyAppSettingHelper on FormClosed"
+    }
+  ],
+
+  "stateTransitions": [
+    {
+      "from": "Initial",
+      "to": "AddingNewRecord",
+      "trigger": "Add button click",
+      "method": "ItemAdd()"
+    },
+    {
+      "from": "Initial",
+      "to": "EditingExistingRecord",
+      "trigger": "Double-click grid row OR Modify button click",
+      "method": "ItemModify()"
+    },
+    {
+      "from": "AddingNewRecord",
+      "to": "Initial",
+      "trigger": "Set button click (valid)",
+      "method": "SetClickListAndDetail()"
+    },
+    {
+      "from": "AddingNewRecord",
+      "to": "Initial",
+      "trigger": "Cancel button click",
+      "method": "CancelClickListAndDetail()"
+    },
+    {
+      "from": "EditingExistingRecord",
+      "to": "Initial",
+      "trigger": "Set button click (valid)",
+      "method": "SetClickListAndDetail()"
+    },
+    {
+      "from": "EditingExistingRecord",
+      "to": "Initial",
+      "trigger": "Cancel button click",
+      "method": "CancelClickListAndDetail()"
+    },
+    {
+      "from": "AddingNewRecord|EditingExistingRecord",
+      "to": "ClosingWithUnsavedChanges",
+      "trigger": "Close button or X button while IsEditingChild = True",
+      "method": "CancelClick() override"
+    }
+  ],
+
+  "eventHandlerChains": [
+    {
+      "event": "Form Load",
+      "chain": [
+        "frmDetailEdit_Load",
+        "→ FormatControls()",
+        "  → GridControlUniqueIdentifierCol set to 'BoatMaintenanceLogID'",
+        "  → AddToInitialColumnSortOrder (StartDateTime descending)",
+        "  → InfragisticsHelper.PopulateTimeCombo(cboStartTime)",
+        "  → Main.PopulateValidationListCombo for cboStatus, cboDivision",
+        "  → SetValidatorExtenderForBoatMaintenanceLog()",
+        "  → SetMaxLengthsForBoatMaintenanceLog()",
+        "  → EnableDisableControls(False)",
+        "→ RefreshList(True)",
+        "  → RefreshListBase(grdDetailEditList, True, _BoatLocation.BoatMaintenanceLogs, True)",
+        "  → SetToolState(grdDetailEditList)"
+      ]
+    },
+    {
+      "event": "Add Button Click",
+      "chain": [
+        "ToolbarsManager_ToolClick (e.Tool.Key = 'Add')",
+        "→ ItemAdd()",
+        "  → Check IsEditingChild (exit if true)",
+        "  → BoatMaintenanceLogs.NewBoatMaintenanceLog",
+        "  → _BoatMaintenanceLog.BeginEdit()",
+        "  → LoadControlsForBoatMaintenanceLog()",
+        "  → EnableDisableControls(True)",
+        "    → SetState(grpDetailEditChild, Enabled)",
+        "    → SetState(optMaintenanceType, Enabled)",
+        "    → EnableDisableMaintenanceTypes(True)",
+        "    → SetIsEditingChild = True",
+        "    → SetToolState(grdDetailEditList)",
+        "  → dtStartDate.Focus()"
+      ]
+    },
+    {
+      "event": "Modify Button Click / Grid Double-Click",
+      "chain": [
+        "UltraGridControl_DoubleClick OR ToolbarsManager_ToolClick (e.Tool.Key = 'Modify')",
+        "→ ItemModify(grdDetailEditList)",
+        "  → Check IsEditingChild (exit if true)",
+        "  → Get BoatMaintenanceLog from grid.Selected.Rows(0).ListObject",
+        "  → _BoatMaintenanceLog.BeginEdit()",
+        "  → LoadControlsForBoatMaintenanceLog()",
+        "    → Set dtStartDate, cboStartTime from StartDateTime",
+        "    → InfragisticsHelper.SetOptionButtons(optMaintenanceType)",
+        "    → EnableDisableMaintenanceTypes(True)",
+        "    → Set cboStatus, cboDivision values",
+        "    → PopulatePortFacilityCombo()",
+        "    → Set cboPortFacilityID, cboBoatRoleID values",
+        "  → EnableDisableControls(True)",
+        "    → If not IsNew: SetState(optMaintenanceType, Readonly)",
+        "  → dtStartDate.Focus()"
+      ]
+    },
+    {
+      "event": "Division ValueChanged",
+      "chain": [
+        "cboDivision_ValueChanged",
+        "→ PopulatePortFacilityCombo()",
+        "  → cboPortFacilityID.ResetDisplayMember/ResetValueMember()",
+        "  → If IsFleetBoat AND FleetID exists:",
+        "    → PopulateListCombo with FleetList.Facilities filtered by FleetID",
+        "  → Else:",
+        "    → PopulateListCombo with FacilityLocationList.GetList"
+      ]
+    },
+    {
+      "event": "MaintenanceType ValueChanged",
+      "chain": [
+        "optMaintenanceType_ValueChanged",
+        "→ EnableDisableMaintenanceTypes(True)",
+        "  → If 'Boat Status': Enable cboStatus",
+        "  → If 'Change Division/Facility': Enable cboDivision, cboPortFacilityID",
+        "  → If 'Change Boat Role': Enable cboBoatRoleID",
+        "  → If IsEditing AND not IsNew: SetState(optMaintenanceType, Readonly)"
+      ]
+    },
+    {
+      "event": "Set Button Click",
+      "chain": [
+        "btnSetEdit_Click",
+        "→ SetClickListAndDetail(_BoatMaintenanceLog)",
+        "  → ClearUnusedFields()",
+        "    → If MaintenanceType != 'Boat Status': Clear Status",
+        "    → If MaintenanceType != 'Change Division/Facility': Clear Division, PortFacilityID",
+        "    → If MaintenanceType != 'Change Boat Role': Clear BoatRoleID",
+        "  → MyBase.SetClickListAndDetail(businessObject)",
+        "    → _BoatMaintenanceLog.IsValid check",
+        "    → If valid: _BoatMaintenanceLog.ApplyEdit()",
+        "    → Else: ShowBrokenRules(_BoatMaintenanceLog.BrokenRulesCollection)",
+        "  → If not in collection: _BoatLocation.BoatMaintenanceLogs.Add(_BoatMaintenanceLog)",
+        "  → ClearControls()",
+        "  → EnableDisableControls(False)",
+        "  → RefreshList(wasAdd)"
+      ]
+    },
+    {
+      "event": "Cancel Button Click",
+      "chain": [
+        "btnCancelEdit_Click",
+        "→ CancelClickListAndDetail(_BoatMaintenanceLog)",
+        "  → Set DirtyCheckChoice = DirtyCheck.ChangedThisEdit",
+        "  → FormIsClosable(_BoatMaintenanceLog, False)",
+        "    → Check if changed this edit",
+        "    → If changed: Show unsaved changes dialog",
+        "    → If user chooses to discard: _BoatMaintenanceLog.CancelEdit()",
+        "  → Restore original DirtyCheckChoice",
+        "  → ClearControls()",
+        "  → EnableDisableControls(False)",
+        "  → RefreshList(False)"
+      ]
+    },
+    {
+      "event": "Remove Button Click",
+      "chain": [
+        "ToolbarsManager_ToolClick (e.Tool.Key = 'Remove')",
+        "→ ItemRemove()",
+        "  → Check IsEditingChild (exit if true)",
+        "  → Main.ItemRemoveDialog('Boat Status')",
+        "  → If DialogResult.Yes:",
+        "    → _BoatLocation.BoatMaintenanceLogs.Remove(selected BoatMaintenanceLog)",
+        "    → RefreshList(True)"
+      ]
+    },
+    {
+      "event": "Close Button / X Click",
+      "chain": [
+        "btnClose_Click OR WndProc",
+        "→ CancelClick() override",
+        "  → If IsEditingChild:",
+        "    → Save original DirtyCheckChoice",
+        "    → Set DirtyCheckChoice = DirtyCheck.ChangedThisEdit",
+        "    → MyBase.CancelClickListAndDetail(_BoatMaintenanceLog)",
+        "      → FormIsClosable with unsaved changes check",
+        "      → If user cancels: Exit Sub (abort close)",
+        "    → Restore original DirtyCheckChoice",
+        "  → If _BoatLocation IsNot Nothing: _BoatLocation.ApplyEdit()",
+        "  → DialogResult = DialogResult.OK",
+        "  → Me.Close()",
+        "→ frmDetailEdit_FormClosed",
+        "  → MyAppSettingHelper.SaveGrid(Me, grdDetailEditList, True)"
+      ]
+    },
+    {
+      "event": "Grid AfterSelectChange",
+      "chain": [
+        "UltraGridControl_AfterSelectChange (inherited from base)",
+        "→ SetToolState(grdDetailEditList)",
+        "  → Enable/disable Add button based on IsEditingChild and authorization",
+        "  → Enable/disable Modify button based on row selection, IsEditingChild, authorization",
+        "  → Enable/disable Remove button based on row selection, IsEditingChild, authorization",
+        "  → Enable/disable Export button based on row count, IsEditingChild, authorization",
+        "→ Store selected rows in SelectedRowsStrings dictionary (for re-selection after refresh)"
+      ]
+    },
+    {
+      "event": "Grid BeforeSelectChange",
+      "chain": [
+        "UltraGridControl_BeforeSelectChange (inherited from base)",
+        "→ If IsEditingChild: Cancel = True (prevent selection changes while editing)"
+      ]
+    }
+  ],
+
+  "sessionManagement": {
+    "formInitialization": {
+      "method": "Initialize(ByRef businessObject As BusinessLogicBase, ByVal boatName As String)",
+      "execution": [
+        "Set form title to '{boatName} - Boat Status' or 'Boat Status'",
+        "Call IBaseDetailEdit.Initialize(businessObject)",
+        "Cast businessObject to BoatLocation",
+        "Call _BoatLocation.BeginEdit()",
+        "Call InitializeBase(businessObject, SubSystem.frmBoatSearch)"
+      ]
+    },
+    "gridStatePersistence": {
+      "saveOn": "FormClosed",
+      "method": "MyAppSettingHelper.SaveGrid(Me, grdDetailEditList, True)",
+      "includes": [
+        "Column widths",
+        "Column order",
+        "Sort order"
+      ]
+    },
+    "rowSelectionPersistence": {
+      "uniqueIdentifier": "BoatMaintenanceLogID",
+      "storage": "SelectedRowsStrings dictionary (in-memory)",
+      "restoreOn": "UltraGridControl_InitializeRow",
+      "purpose": "Re-select rows after grid refresh"
+    },
+    "editStatePersistence": {
+      "parentObject": "BoatLocation (ApplyEdit called on form close)",
+      "childObject": "BoatMaintenanceLog (BeginEdit/ApplyEdit/CancelEdit)",
+      "pattern": "BeginEdit on entry to edit mode, ApplyEdit on save, CancelEdit on cancel"
+    }
+  },
+
+  "modalDialogPatterns": {
+    "unsavedChangesDialog": {
+      "trigger": "Close while IsEditingChild = True OR Cancel edit with changes",
+      "method": "FormIsClosable() via CancelClickListAndDetail()",
+      "dirtyCheck": "DirtyCheck.ChangedThisEdit",
+      "options": [
+        "Save changes and proceed",
+        "Discard changes and proceed",
+        "Cancel and return to form"
+      ]
+    },
+    "deleteConfirmationDialog": {
+      "trigger": "Remove button click",
+      "method": "Main.ItemRemoveDialog('Boat Status')",
+      "message": "Confirm deletion of Boat Status record",
+      "options": [
+        "Yes - Delete and refresh grid",
+        "No - Cancel deletion"
+      ]
+    }
+  },
+
+  "refreshUpdateTriggers": [
+    {
+      "trigger": "Form Load",
+      "method": "RefreshList(True)",
+      "behavior": "Load all BoatMaintenanceLogs, select first row"
+    },
+    {
+      "trigger": "Save New Record (Set button)",
+      "method": "RefreshList(wasAdd=True)",
+      "behavior": "Refresh grid, select first row (newly added record sorted to top)"
+    },
+    {
+      "trigger": "Save Edited Record (Set button)",
+      "method": "RefreshList(wasAdd=False)",
+      "behavior": "Refresh grid, re-select previously selected row"
+    },
+    {
+      "trigger": "Cancel Edit (Cancel button)",
+      "method": "RefreshList(False)",
+      "behavior": "Refresh grid to clear uncommitted changes from collection-bound grid"
+    },
+    {
+      "trigger": "Delete Record (Remove button)",
+      "method": "RefreshList(True)",
+      "behavior": "Refresh grid, select first row"
+    },
+    {
+      "trigger": "Division Change",
+      "method": "PopulatePortFacilityCombo()",
+      "behavior": "Reload port facility combo based on selected division and fleet"
+    }
+  ],
+
+  "gridInteractionPatterns": {
+    "doubleClickBehavior": "Opens selected record for editing (calls ItemModify)",
+    "selectionBehavior": "Single or multiple row selection, triggers SetToolState to enable/disable buttons",
+    "editModeBehavior": "Selection changes prevented when IsEditingChild = True",
+    "sortingBehavior": "User can sort by clicking column headers, sort state persisted via MyAppSettingHelper",
+    "defaultSort": "StartDateTime descending",
+    "uniqueRowIdentifier": "BoatMaintenanceLogID",
+    "dataBinding": "_BoatLocation.BoatMaintenanceLogs collection (live binding)",
+    "refreshPattern": "RefreshListBase with collection rebind and row re-selection"
+  },
+
+  "userExperience": {
+    "defaultFocus": {
+      "initialLoad": "grdDetailEditList",
+      "editMode": "dtStartDate"
+    },
+    "enterKeyBehavior": "Standard tab order through controls",
+    "escapeKeyBehavior": "Not explicitly handled",
+    "validationDisplayControl": "staStatus (status bar)",
+    "cursorManagement": "WaitCursor during operations, restored in Finally blocks",
+    "formPosition": "CenterParent",
+    "formMode": "Modal dialog (ShowInTaskbar = False)",
+    "minimizeBox": false,
+    "minimumSize": "1016 x 675"
+  },
+
+  "conditionalLogicPatterns": [
+    {
+      "condition": "optMaintenanceType = 'Boat Status'",
+      "enabledControls": ["cboStatus"],
+      "disabledControls": ["cboDivision", "cboPortFacilityID", "cboBoatRoleID"]
+    },
+    {
+      "condition": "optMaintenanceType = 'Change Division/Facility'",
+      "enabledControls": ["cboDivision", "cboPortFacilityID"],
+      "disabledControls": ["cboStatus", "cboBoatRoleID"]
+    },
+    {
+      "condition": "optMaintenanceType = 'Change Boat Role'",
+      "enabledControls": ["cboBoatRoleID"],
+      "disabledControls": ["cboStatus", "cboDivision", "cboPortFacilityID"]
+    },
+    {
+      "condition": "IsFleetBoat = True AND FleetID is not empty",
+      "effect": "cboPortFacilityID populated with FleetList.Facilities filtered by FleetID"
+    },
+    {
+      "condition": "IsFleetBoat = False OR FleetID is empty",
+      "effect": "cboPortFacilityID populated with all FacilityLocationList"
+    },
+    {
+      "condition": "BoatMaintenanceLog.IsNew = False (editing existing)",
+      "effect": "optMaintenanceType set to Readonly (cannot change type)"
+    },
+    {
+      "condition": "Division in cboDivision.InitializeRow",
+      "effect": "Hide 'Freight' division from list via InfragisticsHelper.HideValidationListRow"
+    }
+  ],
+
+  "validationRules": [
+    {
+      "field": "txtNote",
+      "validationType": "String",
+      "maxLength": "BusinessLogic.BoatMaintenanceLog.MaxLength.Note",
+      "required": false
+    },
+    {
+      "field": "All fields",
+      "validationTrigger": "Set button click",
+      "validationMethod": "_BoatMaintenanceLog.IsValid",
+      "errorDisplay": "ShowBrokenRules via staStatus"
+    }
+  ],
+
+  "securityAuthorization": {
+    "buttonTypes": {
+      "btnClose": "ButtonType.Cancel",
+      "btnSetEdit": "ButtonType.Submit",
+      "btnCancelEdit": "ButtonType.CancelEdit",
+      "Add (toolbar)": "ButtonType.Add",
+      "Modify (toolbar)": "ButtonType.Open",
+      "Remove (toolbar)": "ButtonType.Remove",
+      "Export (toolbar)": "ButtonType.Open"
+    },
+    "authorizationCheck": "ControlAuthorization.ToolbarButtonCanBeEnabled(tool, form, _ToolbarButtonTypes)",
+    "note": "Toolbar buttons checked against security via _ToolbarButtonTypes hashtable"
+  },
+
+  "implementationNotes": [
+    "Form inherits from frmBaseDetailEditList which provides grid management, edit state tracking, and toolbar handling",
+    "Uses Infragistics UltraGrid for data display and UltraToolbarsManager for toolbar",
+    "BeginEdit/ApplyEdit/CancelEdit pattern used for transaction management on BoatMaintenanceLog objects",
+    "Parent BoatLocation object also uses BeginEdit/ApplyEdit for transaction management",
+    "ClearUnusedFields() ensures only relevant fields are saved based on MaintenanceType selection",
+    "Grid is bound to live collection (_BoatLocation.BoatMaintenanceLogs), requiring RefreshList after CancelEdit to clear uncommitted changes",
+    "DirtyCheckChoice pattern allows checking if object changed during current edit session vs. any time since load",
+    "OptionSetCreationFilter used to custom position radio buttons for MaintenanceType options",
+    "Division combo excludes 'Freight' division via InitializeRow filtering",
+    "Port facility combo dynamically populated based on division and fleet boat status",
+    "Form title includes boat name for context: '{boatName} - Boat Status'",
+    "Grid settings (columns, sort) persisted to user preferences via MyAppSettingHelper",
+    "All exceptions published via ExceptionManager.Publish(ex) for centralized error handling"
+  ]
+}

@@ -11,13 +11,14 @@ You are a specialized Conversion Template Generator agent for creating comprehen
 
 ## Non-Negotiables
 
-- ❌ **Template MUST include all conversion phases** (Foundation, Service, Presentation, Testing)
+- ❌ **Template MUST include all conversion phases** (Foundation, Service, Presentation, Template Deployment, Testing)
 - ❌ **Task sequencing MUST be logical** with proper dependencies
 - ❌ **Code templates MUST use correct patterns** (SqlText.GetSqlText, ApiControllerBase, AppController)
 - ❌ **SQL files MUST be documented** as embedded resources (NOT inline SQL)
 - ❌ **Soft delete pattern MUST be used** if IsActive property exists
 - ❌ **DateTime format MUST be 24-hour** (HH:mm, split inputs in UI)
 - ❌ **References MUST point to existing examples** (BoatLocation, Crewing)
+- ❌ **Template deployment MUST be included** (copy templates to target projects with namespace verification)
 - ❌ **Testing requirements MUST be comprehensive** (unit, integration, manual)
 - ❌ **Acceptance criteria MUST be specific** and measurable
 - ❌ **Output location: .claude/tasks/{EntityName}_CONVERSION_TEMPLATE.md**
@@ -30,7 +31,8 @@ You are a specialized Conversion Template Generator agent for creating comprehen
 2. **Task Sequencing**: Order implementation tasks logically
 3. **Dependency Management**: Identify task dependencies
 4. **Code Templates**: Provide code scaffolding for key components
-5. **Testing Guidance**: Include testing requirements for each phase
+5. **Template Deployment**: Include steps to copy templates to target projects
+6. **Testing Guidance**: Include testing requirements for each phase
 
 ## Template Generation Approach
 
@@ -38,9 +40,17 @@ You are a specialized Conversion Template Generator agent for creating comprehen
 Review all extracted analysis files: form structure, business logic, data access patterns, security requirements, validation rules, related entities, UI mappings, workflows
 
 ### Phase 2: Template Structure
-Create a comprehensive template with: executive summary, entity overview, conversion phases, task breakdown, code templates, testing requirements, acceptance criteria
+Create a comprehensive template with: executive summary, entity overview, conversion phases, task breakdown, code templates, template deployment steps, testing requirements, acceptance criteria
 
-### Phase 3: Implementation Guidance
+### Phase 3: Template Deployment Planning
+Include detailed steps for copying generated templates to target projects:
+- Shared DTOs to BargeOps.Shared
+- API templates to BargeOps.Admin.API
+- UI templates to BargeOps.Admin.UI
+- Namespace verification and correction
+- Project reference updates
+
+### Phase 4: Implementation Guidance
 Provide detailed guidance for: entity creation, ViewModel design, controller implementation, view creation, JavaScript initialization, service layer, testing strategy
 
 ## Output Format
@@ -108,12 +118,45 @@ Provide detailed guidance for: entity creation, ViewModel design, controller imp
 
 **Reference**: BargeOps.Admin.UI/Views/BoatLocationSearch/*.cshtml
 
-### Phase 6: Testing (Day 8)
-- Task 6.1: Unit Tests (service layer, validation)
-- Task 6.2: Integration Tests (API endpoints, database)
-- Task 6.3: Manual Testing Checklist
+### Phase 6: Template Deployment (Before Implementation)
+- Task 6.1: Copy Shared DTOs to target project
+  - Copy `templates/shared/Dto/*.cs` to `BargeOps.Shared/Dto/`
+  - Verify namespace matches project structure
+  - Update project references if needed
+- Task 6.2: Copy API templates to target project
+  - Copy `templates/api/Controllers/*.cs` to `BargeOps.Admin.API/Admin.Api/Controllers/`
+  - Copy `templates/api/Repositories/*.cs` to `BargeOps.Admin.API/Admin.Infrastructure/Repositories/`
+  - Copy `templates/api/Services/*.cs` to `BargeOps.Admin.API/Admin.Infrastructure/Services/`
+  - Verify namespaces and project references
+- Task 6.3: Copy UI templates to target project
+  - Copy `templates/ui/Controllers/*.cs` to `BargeOps.Admin.UI/Controllers/`
+  - Copy `templates/ui/Services/*.cs` to `BargeOps.Admin.UI/Services/`
+  - Copy `templates/ui/ViewModels/*.cs` to `BargeOps.Admin.UI/ViewModels/`
+  - Copy `templates/ui/Views/**/*.cshtml` to `BargeOps.Admin.UI/Views/{Entity}/`
+  - Copy `templates/ui/wwwroot/js/*.js` to `BargeOps.Admin.UI/wwwroot/js/`
+  - Verify namespaces, project references, and file paths
+
+**Important**: After copying templates, review and adjust:
+- Namespaces to match target project structure
+- Using statements and project references
+- File paths in embedded resources (SQL files)
+- DI registration in Startup.cs/Program.cs
+
+### Phase 7: Testing (Day 8)
+- Task 7.1: Unit Tests (service layer, validation)
+- Task 7.2: Integration Tests (API endpoints, database)
+- Task 7.3: Manual Testing Checklist
 
 ## Implementation Checklist
+
+### Template Deployment
+- [ ] Templates generated in `output/{Entity}/templates/` directory
+- [ ] Shared DTOs copied to `BargeOps.Shared/Dto/`
+- [ ] API templates copied to `BargeOps.Admin.API/` (Controllers, Repositories, Services)
+- [ ] UI templates copied to `BargeOps.Admin.UI/` (Controllers, Services, ViewModels, Views, JavaScript)
+- [ ] Namespaces verified and corrected
+- [ ] Project references verified
+- [ ] DI registration added to Startup.cs/Program.cs
 
 ### Domain Layer
 - [ ] Domain model created

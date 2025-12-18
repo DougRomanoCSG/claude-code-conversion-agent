@@ -20,6 +20,7 @@ import type { ClaudeFlags } from "../lib/claude-flags.types";
 import { getProjectRoot, getFormPathForPrompt, getFormDesignerPathForPrompt, getCrewingUiPath, getAdminUiPath, getCrewingUiExamples, getAdminUiExamples, getSharedExamples } from "../lib/paths";
 import formAnalyzerSettings from "../settings/form-analyzer.settings.json" with { type: "json" };
 import formAnalyzerMcp from "../settings/form-analyzer.mcp.json" with { type: "json" };
+import formStructureAnalyzerPrompt from "../system-prompts/form-structure-analyzer-prompt.md" with { type: "text" };
 
 const projectRoot = getProjectRoot(import.meta.url);
 const settingsJson = JSON.stringify(formAnalyzerSettings);
@@ -50,89 +51,52 @@ async function runFormAnalyzer(options: AnalyzerOptions): Promise<number> {
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
 	const outputFileName = `form-structure-${options.formType.toLowerCase()}.json`;
 
-	const systemPrompt = `
-You are a specialized Form Structure Analyzer agent.
-
+	// Build context-specific prompt with entity details and paths
+	const contextPrompt = `
 TASK: Extract complete form structure from legacy VB.NET Windows Forms for ${options.entity}${options.formType}.
 
 TARGET FILES:
 - Form: ${getFormPathForPrompt(options.entity, options.formType)}
 - Designer: ${getFormDesignerPathForPrompt(options.entity, options.formType)}
 
-EXTRACTION GOALS:
-1. Extract ALL controls (textboxes, dropdowns, buttons, grids, checkboxes)
-2. Extract grid column definitions from FormatGridColumns method
-3. Extract event handler mappings
-4. Extract validation patterns from AreFieldsValid
-5. Extract dropdown population methods
-6. Extract layout structure (panels, tabs)
-
-OUTPUT FORMAT:
+OUTPUT:
 Generate a JSON file at: ${outputPath}/${outputFileName}
 
-JSON STRUCTURE:
-{
-  "formName": "frm${options.entity}${options.formType}",
-  "implements": ["IBaseSearch" or "IBaseDetailEdit"],
-  "controls": [
-    {
-      "name": "txtName",
-      "type": "UltraTextEditor",
-      "category": "SearchCriteria",
-      "label": "Field Name",
-      "dataBinding": null
-    }
-  ],
-  "grids": [
-    {
-      "name": "grdResults",
-      "type": "UltraGrid",
-      "uniqueIdentifier": "ID",
-      "columns": [...]
-    }
-  ],
-  "dropdowns": [...],
-  "buttons": [...],
-  "panels": [...]
-}
-
-ARCHITECTURE NOTE:
-⭐ The target project uses a MONO SHARED structure:
-- DTOs are in BargeOps.Shared (${getSharedExamples().dtos})
-- ViewModels in UI reference shared DTOs
-- No duplication of data models
+ARCHITECTURE REFERENCES:
+- Shared DTOs: ${getSharedExamples().dtos}
+- Crewing UI Controllers: ${getCrewingUiExamples().controllers}
+- Crewing UI Views: ${getCrewingUiExamples().views}
+- Crewing UI ViewModels: ${getCrewingUiExamples().viewModels}
+- Crewing UI JavaScript: ${getCrewingUiExamples().javascript}
+- Admin UI Controllers: ${getAdminUiExamples().controllers}
+- Admin UI Views: ${getAdminUiExamples().views}
+- Admin UI ViewModels: ${getAdminUiExamples().viewModels}
 
 REFERENCE EXAMPLES:
 For UI patterns, reference BargeOps.Crewing.UI Admin screens:
-- MVC Controllers: ${getCrewingUiExamples().controllers}
-  Look for: CrewingSearchController.cs, BoatSearchController.cs - Admin search screen patterns
-- Razor Views: ${getCrewingUiExamples().views}
-  Look for: CrewingSearch/Index.cshtml, CrewingSearch/Edit.cshtml - Search and edit form patterns
-- View Models: ${getCrewingUiExamples().viewModels}
-  Look for: CrewingSearchViewModel.cs, CrewingEditViewModel.cs - View model structure
-- JavaScript: ${getCrewingUiExamples().javascript}
-  Look for: crewingSearch.js - DataTables initialization patterns
+- Look for: CrewingSearchController.cs, BoatSearchController.cs - Admin search screen patterns
+- Look for: CrewingSearch/Index.cshtml, CrewingSearch/Edit.cshtml - Search and edit form patterns
+- Look for: CrewingSearchViewModel.cs, CrewingEditViewModel.cs - View model structure
+- Look for: crewingSearch.js - DataTables initialization patterns
 
 Target patterns in BargeOps.Admin.UI:
-- Primary reference: ${getAdminUiExamples().controllers}/BoatLocationSearchController.cs
-- Views: ${getAdminUiExamples().views}/BoatLocationSearch/ - Index.cshtml, Edit.cshtml, Details.cshtml
-- View Models: ${getAdminUiExamples().viewModels}/BoatLocationSearchViewModel.cs, BoatLocationEditViewModel.cs
-
-Shared DTOs (referenced by UI):
-- DTOs: ${getSharedExamples().dtos}/BoatLocationDto.cs, FacilityDto.cs
-- These DTOs are used in ViewModels and API responses
+- Primary reference: BoatLocationSearchController.cs
+- Views: BoatLocationSearch/ - Index.cshtml, Edit.cshtml, Details.cshtml
+- View Models: BoatLocationSearchViewModel.cs, BoatLocationEditViewModel.cs
+- DTOs: BoatLocationDto.cs, FacilityDto.cs (used in ViewModels and API responses)
 
 Begin analysis now.
 `;
 
 	const baseFlags = {
+		"append-system-prompt": formStructureAnalyzerPrompt,
 		settings: settingsJson,
 		"mcp-config": mcpJson,
 		...(options.interactive ? {} : { print: true, "output-format": "json" }),
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
-	const args = [...flags, systemPrompt];
+	const args = [...flags, contextPrompt];
 
 	const child = spawn(["claude", ...args], {
 		stdin: "inherit",

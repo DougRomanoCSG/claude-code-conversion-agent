@@ -18,6 +18,9 @@ export const parsedArgs = parseArgs({
 		"form-type": { type: "string" },
 		output: { type: "string", short: "o" },
 		"skip-steps": { type: "string" },
+		resume: { type: "boolean" },
+		"rerun-failed": { type: "boolean" },
+		"dry-run": { type: "boolean" },
 	},
 	strict: false,
 	allowPositionals: true,
@@ -50,7 +53,7 @@ export function buildClaudeFlags(
 	const merged = { ...baseFlags, ...userFlags };
 
 	// Filter out custom agent-specific flags that shouldn't be passed to Claude
-	const customFlags = ["entity", "form-name", "form-type", "output", "skip-steps"];
+	const customFlags = ["entity", "form-name", "form-type", "output", "skip-steps", "resume", "rerun-failed"];
 	const claudeFlags: ClaudeFlags = {};
 
 	for (const [key, value] of Object.entries(merged)) {

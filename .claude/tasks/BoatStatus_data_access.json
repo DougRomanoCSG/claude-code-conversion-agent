@@ -1,0 +1,647 @@
+{
+  "entity": "BoatStatus",
+  "description": "BoatStatus represents the BoatMaintenanceLog entity which tracks boat status changes, division/facility changes, and boat role changes. This is a child entity of BoatLocation.",
+  "softDelete": false,
+  "hasIsActive": false,
+  "isChildEntity": true,
+  "parentEntity": "BoatLocation",
+  "parentKey": "LocationID",
+  "legacyImplementation": {
+    "businessObject": "BoatMaintenanceLog",
+    "businessObjectPath": "OnShore/apps/Onshore.BusinessLogic/Business Objects/BoatMaintenanceLog.vb",
+    "form": "frmBoatStatus",
+    "formPath": "OnShore/apps/Onshore/Forms/frmBoatStatus.vb"
+  },
+  "storedProcedures": [
+    {
+      "name": "BoatMaintenanceLogSelect",
+      "operation": "GetById",
+      "description": "Fetch single BoatMaintenanceLog record by ID with related PortFacility and BoatRole names",
+      "parameters": [
+        {
+          "name": "@BoatMaintenanceLogID",
+          "type": "int",
+          "required": true,
+          "description": "Primary key of BoatMaintenanceLog record"
+        }
+      ],
+      "resultColumns": [
+        {
+          "column": "BoatMaintenanceLogID",
+          "property": "BoatMaintenanceLogId",
+          "type": "int",
+          "isPrimaryKey": true
+        },
+        {
+          "column": "LocationID",
+          "property": "LocationId",
+          "type": "int",
+          "isForeignKey": true,
+          "references": "BoatLocation.LocationID"
+        },
+        {
+          "column": "Division",
+          "property": "Division",
+          "type": "string",
+          "maxLength": 14,
+          "nullable": true
+        },
+        {
+          "column": "PortFacilityID",
+          "property": "PortFacilityId",
+          "type": "int",
+          "nullable": true,
+          "isForeignKey": true,
+          "references": "Location.LocationID"
+        },
+        {
+          "column": "MaintenanceType",
+          "property": "MaintenanceType",
+          "type": "string",
+          "maxLength": 50,
+          "required": true,
+          "validValues": [
+            "Boat Status",
+            "Change Division/Facility",
+            "Change Boat Role"
+          ]
+        },
+        {
+          "column": "ModifyDateTime",
+          "property": "ModifyDateTime",
+          "type": "DateTime",
+          "nullable": true
+        },
+        {
+          "column": "StartDateTime",
+          "property": "StartDateTime",
+          "type": "DateTime",
+          "required": true,
+          "description": "Date and time when the status change occurred"
+        },
+        {
+          "column": "Status",
+          "property": "Status",
+          "type": "string",
+          "maxLength": 50,
+          "nullable": true,
+          "description": "Required when MaintenanceType is 'Boat Status', must be blank otherwise"
+        },
+        {
+          "column": "Note",
+          "property": "Note",
+          "type": "string",
+          "maxLength": 500,
+          "nullable": true
+        },
+        {
+          "column": "BoatRoleID",
+          "property": "BoatRoleId",
+          "type": "int",
+          "nullable": true,
+          "isForeignKey": true,
+          "references": "BoatRole.BoatRoleID",
+          "description": "Required when MaintenanceType is 'Change Boat Role', must be blank otherwise"
+        },
+        {
+          "column": "DeckLogActivityID",
+          "property": "DeckLogActivityId",
+          "type": "int",
+          "nullable": true,
+          "isForeignKey": true,
+          "references": "DeckLogActivity.DeckLogActivityID"
+        },
+        {
+          "column": "PortFacility",
+          "property": "PortFacility",
+          "type": "string",
+          "description": "Computed from LEFT JOIN with Location table"
+        },
+        {
+          "column": "BoatRole",
+          "property": "BoatRole",
+          "type": "string",
+          "description": "Computed from LEFT JOIN with BoatRole table"
+        }
+      ],
+      "joins": [
+        "INNER JOIN BoatLocation ON BoatLocation.LocationID = BoatMaintenanceLog.LocationID",
+        "LEFT JOIN Location pf ON pf.LocationID = BoatMaintenanceLog.PortFacilityID",
+        "LEFT JOIN BoatRole br ON br.BoatRoleID = BoatMaintenanceLog.BoatRoleID"
+      ]
+    },
+    {
+      "name": "BoatMaintenanceLogsSelect",
+      "operation": "GetByParentId",
+      "description": "Fetch all BoatMaintenanceLog records for a specific boat (LocationID)",
+      "parameters": [
+        {
+          "name": "@LocationID",
+          "type": "int",
+          "required": true,
+          "description": "Parent BoatLocation ID"
+        }
+      ],
+      "resultColumns": "Same as BoatMaintenanceLogSelect",
+      "joins": [
+        "INNER JOIN BoatLocation ON BoatLocation.LocationID = BoatMaintenanceLog.LocationID",
+        "LEFT JOIN Location pf ON pf.LocationID = BoatMaintenanceLog.PortFacilityID",
+        "LEFT JOIN BoatRole br ON br.BoatRoleID = BoatMaintenanceLog.BoatRoleID"
+      ],
+      "orderBy": "BoatMaintenanceLog.LocationID ASC, BoatMaintenanceLog.BoatMaintenanceLogID ASC"
+    },
+    {
+      "name": "BoatMaintenanceLogInsert",
+      "operation": "Insert",
+      "description": "Create new BoatMaintenanceLog record. Note: Deletes existing DeckLogActivity-created status with same StartDateTime before insert.",
+      "parameters": [
+        {
+          "name": "@LocationID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@Division",
+          "type": "varchar(14)",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@PortFacilityID",
+          "type": "int",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@MaintenanceType",
+          "type": "varchar(50)",
+          "required": true
+        },
+        {
+          "name": "@ModifyDateTime",
+          "type": "DateTime",
+          "direction": "OUTPUT",
+          "description": "Set by stored procedure using dbo.GetTenantDate()"
+        },
+        {
+          "name": "@ModifyUser",
+          "type": "varchar(50)",
+          "required": true
+        },
+        {
+          "name": "@StartDateTime",
+          "type": "DateTime",
+          "required": true
+        },
+        {
+          "name": "@Status",
+          "type": "varchar(50)",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@Note",
+          "type": "varchar(500)",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@BoatRoleID",
+          "type": "int",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@BoatMaintenanceLogID",
+          "type": "int",
+          "direction": "OUTPUT",
+          "description": "Returns SCOPE_IDENTITY() of inserted record"
+        },
+        {
+          "name": "@DeckLogActivityID",
+          "type": "int",
+          "required": false,
+          "nullable": true
+        }
+      ],
+      "specialLogic": [
+        "Deletes existing 'Boat Status' record if @DeckLogActivityID is provided and matches StartDateTime",
+        "Sets CreateDateTime and ModifyDateTime to dbo.GetTenantDate()",
+        "Returns new primary key via SCOPE_IDENTITY()"
+      ]
+    },
+    {
+      "name": "BoatMaintenanceLogUpdate",
+      "operation": "Update",
+      "description": "Update existing BoatMaintenanceLog record with optimistic concurrency check",
+      "parameters": [
+        {
+          "name": "@BoatMaintenanceLogID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@LocationID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@Division",
+          "type": "varchar(14)",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@PortFacilityID",
+          "type": "int",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@MaintenanceType",
+          "type": "varchar(50)",
+          "required": true
+        },
+        {
+          "name": "@ModifyDateTime",
+          "type": "DateTime",
+          "direction": "INPUT/OUTPUT",
+          "description": "Used for optimistic concurrency check"
+        },
+        {
+          "name": "@ModifyUser",
+          "type": "varchar(50)",
+          "required": true
+        },
+        {
+          "name": "@StartDateTime",
+          "type": "DateTime",
+          "required": true
+        },
+        {
+          "name": "@Status",
+          "type": "varchar(50)",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@Note",
+          "type": "varchar(500)",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@BoatRoleID",
+          "type": "int",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "@DeckLogActivityID",
+          "type": "int",
+          "required": false,
+          "nullable": true
+        }
+      ],
+      "specialLogic": [
+        "Optimistic concurrency check: WHERE ModifyDateTime = @ModifyDateTime OR ModifyDateTime IS NULL",
+        "Calls HandleNoRowsAffected stored procedure if @@ROWCOUNT = 0",
+        "Returns new ModifyDateTime via OUTPUT parameter"
+      ]
+    },
+    {
+      "name": "BoatMaintenanceLogDelete",
+      "operation": "Delete",
+      "description": "Hard delete BoatMaintenanceLog record (not soft delete). Nullifies references in UnitTowTripDownTime first.",
+      "parameters": [
+        {
+          "name": "@BoatMaintenanceLogID",
+          "type": "int",
+          "required": true
+        }
+      ],
+      "specialLogic": [
+        "Transaction wrapped",
+        "First updates UnitTowTripDownTime.BoatMaintenanceLogID to NULL",
+        "Then deletes BoatMaintenanceLog record",
+        "Error handling with ROLLBACK on failure"
+      ]
+    }
+  ],
+  "sqlFiles": [
+    {
+      "fileName": "BoatMaintenanceLog_GetById.sql",
+      "operation": "GetById",
+      "description": "Fetch single BoatMaintenanceLog record by ID with related PortFacility and BoatRole names",
+      "basedOn": "BoatMaintenanceLogSelect stored procedure",
+      "notes": "Convert to embedded resource, load via SqlText.GetSqlText()"
+    },
+    {
+      "fileName": "BoatMaintenanceLog_GetByBoatId.sql",
+      "operation": "GetByParentId",
+      "description": "Fetch all BoatMaintenanceLog records for a specific boat (LocationID)",
+      "basedOn": "BoatMaintenanceLogsSelect stored procedure",
+      "notes": "Convert to embedded resource, load via SqlText.GetSqlText()"
+    },
+    {
+      "fileName": "BoatMaintenanceLog_Insert.sql",
+      "operation": "Insert",
+      "description": "Create new BoatMaintenanceLog record",
+      "basedOn": "BoatMaintenanceLogInsert stored procedure",
+      "notes": "Include special DELETE logic for DeckLogActivity duplicates, return SCOPE_IDENTITY()"
+    },
+    {
+      "fileName": "BoatMaintenanceLog_Update.sql",
+      "operation": "Update",
+      "description": "Update existing BoatMaintenanceLog record",
+      "basedOn": "BoatMaintenanceLogUpdate stored procedure",
+      "notes": "Include optimistic concurrency check with ModifyDateTime"
+    },
+    {
+      "fileName": "BoatMaintenanceLog_Delete.sql",
+      "operation": "Delete",
+      "description": "Hard delete BoatMaintenanceLog record with related cleanup",
+      "basedOn": "BoatMaintenanceLogDelete stored procedure",
+      "notes": "Include transaction and UnitTowTripDownTime cleanup logic"
+    }
+  ],
+  "targetArchitecture": {
+    "dto": {
+      "name": "BoatMaintenanceLog",
+      "namespace": "BargeOps.Shared.Dto",
+      "path": "src/BargeOps.Shared/BargeOps.Shared/Dto/BoatMaintenanceLog.cs",
+      "properties": [
+        "int BoatMaintenanceLogId",
+        "int LocationId",
+        "string Division",
+        "int? PortFacilityId",
+        "string PortFacility",
+        "string MaintenanceType",
+        "DateTime StartDateTime",
+        "string Status",
+        "string Note",
+        "int? BoatRoleId",
+        "string BoatRole",
+        "int? DeckLogActivityId",
+        "DateTime? ModifyDateTime",
+        "string ModifyUser"
+      ]
+    },
+    "repositoryInterface": {
+      "name": "IBoatMaintenanceLogRepository",
+      "namespace": "Admin.Infrastructure.Abstractions",
+      "path": "src/BargeOps.API/src/Admin.Infrastructure/Abstractions/IBoatMaintenanceLogRepository.cs",
+      "methods": [
+        {
+          "name": "GetByIdAsync",
+          "returnType": "Task<BoatMaintenanceLog>",
+          "parameters": [
+            "int boatMaintenanceLogId"
+          ],
+          "description": "Fetch single record by ID"
+        },
+        {
+          "name": "GetByBoatIdAsync",
+          "returnType": "Task<IEnumerable<BoatMaintenanceLog>>",
+          "parameters": [
+            "int locationId"
+          ],
+          "description": "Fetch all maintenance logs for a boat"
+        },
+        {
+          "name": "CreateAsync",
+          "returnType": "Task<int>",
+          "parameters": [
+            "BoatMaintenanceLog boatMaintenanceLog"
+          ],
+          "description": "Create new record, returns new ID"
+        },
+        {
+          "name": "UpdateAsync",
+          "returnType": "Task",
+          "parameters": [
+            "BoatMaintenanceLog boatMaintenanceLog"
+          ],
+          "description": "Update existing record with concurrency check"
+        },
+        {
+          "name": "DeleteAsync",
+          "returnType": "Task",
+          "parameters": [
+            "int boatMaintenanceLogId"
+          ],
+          "description": "Hard delete record with cleanup"
+        }
+      ]
+    },
+    "repositoryImplementation": {
+      "name": "BoatMaintenanceLogRepository",
+      "namespace": "Admin.Infrastructure.Repositories",
+      "path": "src/BargeOps.API/src/Admin.Infrastructure/Repositories/BoatMaintenanceLogRepository.cs",
+      "pattern": "Dapper with SqlText.GetSqlText() for embedded SQL resources",
+      "dependencies": [
+        "IDbConnectionFactory",
+        "Dapper",
+        "SqlText"
+      ]
+    },
+    "sqlResourceLocation": {
+      "path": "src/BargeOps.API/src/Admin.Infrastructure/DataAccess/Sql/",
+      "markedAs": "Embedded Resource in .csproj",
+      "loadedVia": "SqlText.GetSqlText(\"BoatMaintenanceLog_GetById\")"
+    }
+  },
+  "businessRules": [
+    {
+      "rule": "MaintenanceType Validation",
+      "description": "MaintenanceType must be one of: 'Boat Status', 'Change Division/Facility', or 'Change Boat Role'",
+      "enforcedIn": "Business Logic"
+    },
+    {
+      "rule": "Status Field Conditional",
+      "description": "If MaintenanceType is 'Boat Status', Status is required. Otherwise, Status must be blank.",
+      "enforcedIn": "CheckBusinessRules method in BoatMaintenanceLog.vb:166-183"
+    },
+    {
+      "rule": "Division/PortFacility Conditional",
+      "description": "If MaintenanceType is 'Change Division/Facility', Division is required. Otherwise, Division and PortFacilityID must be blank.",
+      "enforcedIn": "CheckBusinessRules method in BoatMaintenanceLog.vb:185-203"
+    },
+    {
+      "rule": "BoatRoleID Conditional",
+      "description": "If MaintenanceType is 'Change Boat Role', BoatRoleID is required. Otherwise, BoatRoleID must be blank.",
+      "enforcedIn": "CheckBusinessRules method in BoatMaintenanceLog.vb:205-222"
+    },
+    {
+      "rule": "StartDateTime Required",
+      "description": "StartDateTime is required and defaults to Date.Now for new records",
+      "enforcedIn": "Initialize method in BoatMaintenanceLog.vb:152"
+    },
+    {
+      "rule": "MaintenanceType Immutable",
+      "description": "MaintenanceType cannot be changed when editing existing records",
+      "enforcedIn": "frmBoatStatus.vb:604-606 (optMaintenanceType set to Readonly)"
+    },
+    {
+      "rule": "DeckLogActivity Duplicate Prevention",
+      "description": "When inserting a 'Boat Status' record from DeckLogActivity, any existing status with same LocationID, StartDateTime, and non-null DeckLogActivityID is deleted first",
+      "enforcedIn": "BoatMaintenanceLogInsert stored procedure:30-37"
+    }
+  ],
+  "dataTransformations": [
+    {
+      "field": "StartDateTime",
+      "transformation": "Combined from date picker and time combo",
+      "format": "Military time (HH:mm)",
+      "source": "InfragisticsHelper.SetCombinedDateTimeProp(dtStartDate, cboStartTime, _BoatMaintenanceLog.StartDateTime)"
+    },
+    {
+      "field": "PortFacilityID",
+      "transformation": "Conditional population based on FleetID",
+      "logic": "If boat is fleet boat, populate from FleetList.Facilities. Otherwise, from FacilityLocationList.",
+      "source": "frmBoatStatus.vb:628-643"
+    },
+    {
+      "field": "ModifyDateTime",
+      "transformation": "Set by database via dbo.GetTenantDate()",
+      "notes": "Used for optimistic concurrency control"
+    }
+  ],
+  "listQueryFields": {
+    "filterable": [
+      "MaintenanceType",
+      "Status",
+      "Division",
+      "StartDateTime"
+    ],
+    "sortable": [
+      "StartDateTime",
+      "MaintenanceType",
+      "Status",
+      "Division",
+      "PortFacility",
+      "BoatRole"
+    ],
+    "defaultSort": "StartDateTime DESC",
+    "gridColumns": [
+      {
+        "column": "StartDateTime",
+        "header": "Date",
+        "width": 103,
+        "alignment": "Left",
+        "customComparer": "DateTimeSortComparer"
+      },
+      {
+        "column": "MaintenanceType",
+        "header": "Type",
+        "width": 142,
+        "alignment": "Left"
+      },
+      {
+        "column": "Status",
+        "header": "Status",
+        "width": 207,
+        "alignment": "Left"
+      },
+      {
+        "column": "Division",
+        "header": "Division",
+        "width": 94,
+        "alignment": "Left"
+      },
+      {
+        "column": "PortFacility",
+        "header": "Port Facility",
+        "width": 150,
+        "alignment": "Left"
+      },
+      {
+        "column": "BoatRole",
+        "header": "Boat Role",
+        "width": 125,
+        "alignment": "Left"
+      },
+      {
+        "column": "Note",
+        "header": "Note",
+        "width": 130,
+        "alignment": "Left"
+      }
+    ]
+  },
+  "lookupLists": [
+    {
+      "name": "BoatStatus",
+      "type": "ValidationList",
+      "populatedBy": "Lists.ValidationList.ValidationTypes.BoatStatus",
+      "usedIn": "cboStatus combo box"
+    },
+    {
+      "name": "Division",
+      "type": "ValidationList",
+      "populatedBy": "Lists.ValidationList.ValidationTypes.Division",
+      "usedIn": "cboDivision combo box",
+      "excludes": "Freight division hidden in InitializeRow"
+    },
+    {
+      "name": "PortFacility",
+      "type": "Dynamic",
+      "populatedBy": "Lists.FacilityLocationList.GetList() or Lists.FleetList.Facilities()",
+      "usedIn": "cboPortFacilityID combo box",
+      "conditional": true
+    },
+    {
+      "name": "BoatRole",
+      "type": "List",
+      "populatedBy": "Lists.BoatRoleList.GetList()",
+      "usedIn": "cboBoatRoleID combo box"
+    }
+  ],
+  "relatedEntities": [
+    {
+      "entity": "BoatLocation",
+      "relationship": "Parent",
+      "cardinality": "1:N",
+      "foreignKey": "LocationID"
+    },
+    {
+      "entity": "Location (PortFacility)",
+      "relationship": "Reference",
+      "cardinality": "N:1",
+      "foreignKey": "PortFacilityID"
+    },
+    {
+      "entity": "BoatRole",
+      "relationship": "Reference",
+      "cardinality": "N:1",
+      "foreignKey": "BoatRoleID"
+    },
+    {
+      "entity": "DeckLogActivity",
+      "relationship": "Reference",
+      "cardinality": "N:1",
+      "foreignKey": "DeckLogActivityID"
+    },
+    {
+      "entity": "UnitTowTripDownTime",
+      "relationship": "Reference",
+      "cardinality": "1:N",
+      "foreignKey": "BoatMaintenanceLogID",
+      "notes": "Must be nullified before delete"
+    }
+  ],
+  "conversionNotes": [
+    "BoatStatus form manages BoatMaintenanceLog child records for a BoatLocation parent",
+    "MaintenanceType acts as a discriminator controlling which fields are required/visible",
+    "Form uses option buttons to select MaintenanceType, which enables/disables corresponding fields",
+    "PortFacility combo population is conditional based on whether boat is a fleet boat",
+    "Time combo uses military time format (HH:mm)",
+    "Grid uniquely identifies rows by BoatMaintenanceLogID for reselection after refresh",
+    "Default sort is StartDateTime descending (newest first)",
+    "Insert SP has special logic to prevent duplicate DeckLogActivity-created status records",
+    "Hard delete (not soft delete) with cleanup of related UnitTowTripDownTime records",
+    "Optimistic concurrency control via ModifyDateTime comparison in UPDATE",
+    "All SQL operations should be converted to embedded .sql resource files"
+  ],
+  "implementationStatus": "Data access patterns extracted and documented for modern Dapper implementation"
+}

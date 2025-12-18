@@ -1,0 +1,259 @@
+{
+  "entity": "BoatStatus",
+  "formType": "Detail Edit List (Master-Detail)",
+  "legacyFormInfo": {
+    "formName": "frmBoatStatus",
+    "inherits": "frmBaseDetailEditList",
+    "namespace": "BargeOps.Onshore",
+    "location": "OnShore/apps/Onshore/Forms/frmBoatStatus.vb",
+    "designerFile": "OnShore/apps/Onshore/Forms/frmBoatStatus.designer.vb"
+  },
+  "targetArchitecture": {
+    "viewModel": "src/BargeOps.UI/Models/BoatStatusViewModel.cs",
+    "viewModelNamespace": "BargeOpsAdmin.ViewModels",
+    "controller": "src/BargeOps.UI/Controllers/BoatStatusController.cs",
+    "controllerNamespace": "BargeOpsAdmin.Controllers",
+    "controllerBase": "AppController",
+    "views": {
+      "index": "src/BargeOps.UI/Views/BoatStatus/Index.cshtml",
+      "search": "src/BargeOps.UI/Views/BoatStatus/_Search.cshtml",
+      "searchResults": "src/BargeOps.UI/Views/BoatStatus/_SearchResults.cshtml"
+    },
+    "javascript": {
+      "search": "src/BargeOps.UI/wwwroot/js/boatStatusSearch.js"
+    }
+  },
+  "technologyStack": {
+    "framework": "ASP.NET Core 8 MVC",
+    "css": "Bootstrap 5",
+    "gridLibrary": "DataTables (server-side processing)",
+    "dropdownLibrary": "Select2",
+    "validation": "jQuery Validate + Unobtrusive Validation",
+    "dateTimePattern": "Split inputs (date + time 24-hour format)"
+  },
+  "legacyControlInventory": [
+    {
+      "controlType": "UltraPanel",
+      "instances": ["pnlBoatStatus", "pnlDetailEditList"],
+      "purpose": "Container panels for layout organization"
+    },
+    {
+      "controlType": "UltraGroupBox",
+      "instances": ["grpSubmitCancel", "grpDetailEditList", "grpDetailEditChild"],
+      "purpose": "Grouped control sections with headers"
+    },
+    {
+      "controlType": "UltraGrid",
+      "instances": ["grdDetailEditList"],
+      "purpose": "Master grid displaying boat maintenance log entries"
+    },
+    {
+      "controlType": "UltraToolbarsManager",
+      "instances": ["ToolbarsManager"],
+      "purpose": "Toolbar with Add/Modify/Remove/Export buttons"
+    },
+    {
+      "controlType": "UltraDateTimeEditor",
+      "instances": ["dtStartDate"],
+      "purpose": "Date picker for start date"
+    },
+    {
+      "controlType": "UltraComboEditor",
+      "instances": ["cboStartTime", "cboStatus", "cboDivision", "cboPortFacilityID", "cboBoatRoleID"],
+      "purpose": "Dropdown selectors for various fields"
+    },
+    {
+      "controlType": "UltraTextEditor",
+      "instances": ["txtNote"],
+      "purpose": "Multiline text input for notes"
+    },
+    {
+      "controlType": "UltraOptionSet",
+      "instances": ["optMaintenanceType"],
+      "purpose": "Radio button group for maintenance type selection"
+    },
+    {
+      "controlType": "UltraButton",
+      "instances": ["btnClose", "btnSetEdit", "btnCancelEdit"],
+      "purpose": "Action buttons"
+    },
+    {
+      "controlType": "UltraStatusBar",
+      "instances": ["staStatus"],
+      "purpose": "Status bar for validation messages"
+    },
+    {
+      "controlType": "UltraLabel",
+      "instances": ["lblStartDateTime", "lblStatus", "lblPortFacilityID", "lblDivision", "lblNote", "lblBoatRoleID"],
+      "purpose": "Field labels"
+    }
+  ],
+  "controlMappings": [
+    {
+      "legacyControl": "UltraPanel",
+      "modernEquivalent": "Bootstrap Container/Card",
+      "html": "<div class=\"container-fluid\"> or <div class=\"card\">",
+      "bootstrapClasses": ["container-fluid", "card", "card-body"],
+      "notes": "Panels map to Bootstrap cards for visual grouping"
+    },
+    {
+      "legacyControl": "UltraGroupBox",
+      "modernEquivalent": "Bootstrap Card with Header",
+      "html": "<div class=\"card\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">Header Text</h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- Content -->\n  </div>\n</div>",
+      "bootstrapClasses": ["card", "card-header", "card-body", "card-title"],
+      "notes": "GroupBoxes with headers map to Bootstrap cards"
+    },
+    {
+      "legacyControl": "UltraGrid",
+      "modernEquivalent": "DataTables (Server-Side)",
+      "html": "<div class=\"table-responsive\">\n  <table id=\"boatStatusTable\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\">\n    <thead>\n      <tr>\n        <th>Actions</th>\n        <th>Date</th>\n        <th>Type</th>\n        <th>Status</th>\n        <th>Division</th>\n        <th>Port Facility</th>\n        <th>Boat Role</th>\n        <th>Note</th>\n      </tr>\n    </thead>\n    <tbody></tbody>\n  </table>\n</div>",
+      "javascript": "$(document).ready(function() {\n  var dataTable = $('#boatStatusTable').DataTable({\n    processing: true,\n    serverSide: true,\n    stateSave: true,\n    stateKey: 'boatStatusTable_v1',\n    responsive: true,\n    autoWidth: false,\n    ajax: {\n      url: '/BoatStatus/BoatStatusTable',\n      type: 'POST',\n      data: function(d) {\n        d.boatLocationId = $('#BoatLocationId').val();\n      }\n    },\n    columns: [\n      {\n        data: null,\n        name: 'actions',\n        orderable: false,\n        searchable: false,\n        className: 'text-center',\n        width: '80px',\n        render: function(data, type, row) {\n          return '<div class=\"btn-group btn-group-sm\" role=\"group\">' +\n                 '<a href=\"/BoatStatus/Edit/' + row.boatMaintenanceLogId + '\" class=\"btn btn-sm btn-primary\" title=\"Edit\">' +\n                 '<i class=\"fas fa-edit\"></i></a>' +\n                 '<button class=\"btn btn-sm btn-danger btn-delete\" data-id=\"' + row.boatMaintenanceLogId + '\" title=\"Delete\">' +\n                 '<i class=\"fas fa-trash\"></i></button>' +\n                 '</div>';\n        }\n      },\n      { data: 'startDateTime', name: 'startDateTime', render: function(data) { return data || ''; } },\n      { data: 'maintenanceType', name: 'maintenanceType', defaultContent: '' },\n      { data: 'status', name: 'status', defaultContent: '' },\n      { data: 'division', name: 'division', defaultContent: '' },\n      { data: 'portFacility', name: 'portFacility', defaultContent: '' },\n      { data: 'boatRole', name: 'boatRole', defaultContent: '' },\n      { data: 'note', name: 'note', defaultContent: '' }\n    ],\n    order: [[1, 'desc']],\n    pageLength: 25,\n    lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],\n    language: {\n      processing: '<i class=\"fas fa-spinner fa-spin\"></i> Loading...'\n    },\n    drawCallback: function(settings) {\n      $('[data-bs-toggle=\"tooltip\"]').tooltip();\n      \n      $('.btn-delete').off('click').on('click', function(e) {\n        e.preventDefault();\n        var id = $(this).data('id');\n        if (confirm('Are you sure you want to delete this boat status entry?')) {\n          $.post('/BoatStatus/Delete/' + id, function() {\n            dataTable.ajax.reload();\n          });\n        }\n      });\n    }\n  });\n});",
+      "bootstrapClasses": ["table", "table-striped", "table-bordered", "dt-responsive", "nowrap", "table-responsive"],
+      "notes": "CRITICAL: Use server-side DataTables for all grids. Actions column first with Edit/Delete buttons. Date sorted descending by default."
+    },
+    {
+      "legacyControl": "UltraToolbarsManager (Add/Modify/Remove/Export)",
+      "modernEquivalent": "Bootstrap Button Group + DataTables Buttons",
+      "html": "<!-- Integrated into DataTables actions column and Add button in form -->\n<button type=\"button\" id=\"btnAdd\" class=\"btn btn-success\">\n  <i class=\"fas fa-plus\"></i> Add\n</button>\n<button type=\"button\" id=\"btnExport\" class=\"btn btn-secondary\">\n  <i class=\"fas fa-file-export\"></i> Export\n</button>",
+      "javascript": "// Add button opens modal or detail section\n$('#btnAdd').on('click', function() {\n  $('#detailSection').show();\n  $('#maintenanceType').prop('disabled', false);\n  clearForm();\n});\n\n// Export functionality\n$('#btnExport').on('click', function() {\n  dataTable.buttons('.buttons-excel').trigger();\n});",
+      "bootstrapClasses": ["btn", "btn-success", "btn-primary", "btn-danger", "btn-secondary", "btn-group", "btn-group-sm"],
+      "notes": "Toolbar buttons map to Bootstrap buttons. Add/Modify/Remove actions integrated into grid and detail section."
+    },
+    {
+      "legacyControl": "UltraDateTimeEditor (dtStartDate) + UltraComboEditor (cboStartTime)",
+      "modernEquivalent": "SPLIT Date + Time Inputs (24-hour format)",
+      "html": "<!-- CRITICAL: DateTime MUST be split into separate date and time inputs -->\n<div class=\"row mb-3\">\n  <div class=\"col-md-6\">\n    <label asp-for=\"StartDateTime\" class=\"form-label\">Start Date</label>\n    <input asp-for=\"StartDateTime\" class=\"form-control\" type=\"date\" id=\"dtStartDate\" />\n    <span asp-validation-for=\"StartDateTime\" class=\"text-danger\"></span>\n  </div>\n  <div class=\"col-md-6\">\n    <label class=\"form-label\">Start Time (24-hour)</label>\n    <input type=\"time\" class=\"form-control\" id=\"dtStartTime\" />\n  </div>\n</div>",
+      "javascript": "// Split datetime on load\nfunction splitDateTime(dateTimeValue, dateFieldId, timeFieldId) {\n  if (dateTimeValue) {\n    var date = new Date(dateTimeValue);\n    if (!isNaN(date.getTime())) {\n      $('#' + dateFieldId).val(date.toISOString().split('T')[0]);\n      var hours = ('0' + date.getHours()).slice(-2);\n      var minutes = ('0' + date.getMinutes()).slice(-2);\n      $('#' + timeFieldId).val(hours + ':' + minutes);\n    }\n  }\n}\n\n// Combine datetime on submit\nfunction combineDateTime(dateFieldId, timeFieldId) {\n  var date = $('#' + dateFieldId).val();\n  var time = $('#' + timeFieldId).val();\n  return (date && time) ? date + 'T' + time + ':00' : (date ? date + 'T00:00:00' : '');\n}\n\n$(function() {\n  var startDateTime = '@Model.StartDateTime?.ToString(\"o\")';\n  if (startDateTime) {\n    splitDateTime(startDateTime, 'dtStartDate', 'dtStartTime');\n  }\n  \n  $('form').on('submit', function() {\n    var combined = combineDateTime('dtStartDate', 'dtStartTime');\n    if (combined) $('#dtStartDate').val(combined);\n  });\n});",
+      "displayFormat": "MM/dd/yyyy HH:mm",
+      "displayExample": "02/07/2025 23:52",
+      "bootstrapClasses": ["form-control"],
+      "notes": "❌ CRITICAL: DateTime controls MUST be split into separate date and time inputs. Time MUST use 24-hour format (HH:mm), NOT 12-hour with AM/PM. Display format is MM/dd/yyyy HH:mm (military time)."
+    },
+    {
+      "legacyControl": "UltraComboEditor (Status, Division, PortFacility, BoatRole)",
+      "modernEquivalent": "Select2 Enhanced Dropdown",
+      "html": "<div class=\"mb-3\">\n  <label asp-for=\"Status\" class=\"form-label required\">Status</label>\n  <select asp-for=\"Status\" class=\"form-select\" data-select2=\"true\" id=\"cboStatus\">\n    <option value=\"\">-- Select Status --</option>\n  </select>\n  <span asp-validation-for=\"Status\" class=\"text-danger\"></span>\n</div>\n\n<div class=\"mb-3\">\n  <label asp-for=\"DivisionId\" class=\"form-label\">Division</label>\n  <select asp-for=\"DivisionId\" asp-items=\"Model.Divisions\" class=\"form-select\" data-select2=\"true\" id=\"cboDivision\">\n    <option value=\"\">-- Select Division --</option>\n  </select>\n  <span asp-validation-for=\"DivisionId\" class=\"text-danger\"></span>\n</div>\n\n<div class=\"mb-3\">\n  <label asp-for=\"PortFacilityId\" class=\"form-label\">Port Facility</label>\n  <select asp-for=\"PortFacilityId\" asp-items=\"Model.PortFacilities\" class=\"form-select\" data-select2=\"true\" id=\"cboPortFacility\">\n    <option value=\"\">-- Select Port Facility --</option>\n  </select>\n  <span asp-validation-for=\"PortFacilityId\" class=\"text-danger\"></span>\n</div>\n\n<div class=\"mb-3\">\n  <label asp-for=\"BoatRoleId\" class=\"form-label\">Boat Role</label>\n  <select asp-for=\"BoatRoleId\" asp-items=\"Model.BoatRoles\" class=\"form-select\" data-select2=\"true\" id=\"cboBoatRole\">\n    <option value=\"\">-- Select Boat Role --</option>\n  </select>\n  <span asp-validation-for=\"BoatRoleId\" class=\"text-danger\"></span>\n</div>",
+      "javascript": "$(document).ready(function() {\n  // Initialize Select2 for all dropdowns\n  $('[data-select2=\"true\"]').select2({\n    placeholder: function() {\n      return $(this).data('placeholder') || '-- Select --';\n    },\n    allowClear: true,\n    width: '100%'\n  });\n  \n  // Cascade: Division change triggers PortFacility reload\n  $('#cboDivision').on('change', function() {\n    var divisionId = $(this).val();\n    var $portFacility = $('#cboPortFacility');\n    \n    if (divisionId) {\n      $.get('/BoatStatus/GetPortFacilitiesByDivision', { divisionId: divisionId }, function(data) {\n        $portFacility.empty().append('<option value=\"\">-- Select Port Facility --</option>');\n        $.each(data, function(i, item) {\n          $portFacility.append($('<option>', { value: item.value, text: item.text }));\n        });\n        $portFacility.trigger('change.select2');\n      });\n    } else {\n      $portFacility.empty().append('<option value=\"\">-- Select Port Facility --</option>').trigger('change.select2');\n    }\n  });\n});",
+      "bootstrapClasses": ["form-select"],
+      "notes": "❌ CRITICAL: All dropdowns MUST use Select2 for enhanced accessibility and user experience. Cascade logic: Division change reloads PortFacility options."
+    },
+    {
+      "legacyControl": "UltraTextEditor (Multiline Note)",
+      "modernEquivalent": "Bootstrap Textarea",
+      "html": "<div class=\"mb-3\">\n  <label asp-for=\"Note\" class=\"form-label\">Note</label>\n  <textarea asp-for=\"Note\" class=\"form-control\" rows=\"4\" maxlength=\"1000\" id=\"txtNote\" placeholder=\"Enter notes...\"></textarea>\n  <span asp-validation-for=\"Note\" class=\"text-danger\"></span>\n</div>",
+      "bootstrapClasses": ["form-control"],
+      "notes": "Multiline text editor maps to textarea with form-control class"
+    },
+    {
+      "legacyControl": "UltraOptionSet (Maintenance Type Radio Buttons)",
+      "modernEquivalent": "Bootstrap Radio Button Group",
+      "html": "<div class=\"mb-3\">\n  <label class=\"form-label required\">Maintenance Type</label>\n  <div>\n    <div class=\"form-check\">\n      <input class=\"form-check-input\" type=\"radio\" name=\"MaintenanceType\" id=\"optBoatStatus\" value=\"Boat Status\" checked />\n      <label class=\"form-check-label\" for=\"optBoatStatus\">Boat Status</label>\n    </div>\n    <div class=\"form-check\">\n      <input class=\"form-check-input\" type=\"radio\" name=\"MaintenanceType\" id=\"optDivisionFacility\" value=\"Change Division/Facility\" />\n      <label class=\"form-check-label\" for=\"optDivisionFacility\">Division / Facility</label>\n    </div>\n    <div class=\"form-check\">\n      <input class=\"form-check-input\" type=\"radio\" name=\"MaintenanceType\" id=\"optBoatRole\" value=\"Change Boat Role\" />\n      <label class=\"form-check-label\" for=\"optBoatRole\">Boat Role</label>\n    </div>\n  </div>\n  <span asp-validation-for=\"MaintenanceType\" class=\"text-danger\"></span>\n</div>",
+      "javascript": "$(document).ready(function() {\n  // Enable/disable fields based on maintenance type selection\n  $('input[name=\"MaintenanceType\"]').on('change', function() {\n    var selectedType = $(this).val();\n    \n    // Disable all conditional fields\n    $('#cboStatus, #cboDivision, #cboPortFacility, #cboBoatRole').prop('disabled', true);\n    \n    // Enable fields based on selection\n    if (selectedType === 'Boat Status') {\n      $('#cboStatus').prop('disabled', false);\n    } else if (selectedType === 'Change Division/Facility') {\n      $('#cboDivision, #cboPortFacility').prop('disabled', false);\n    } else if (selectedType === 'Change Boat Role') {\n      $('#cboBoatRole').prop('disabled', false);\n    }\n  });\n  \n  // Trigger on load to set initial state\n  $('input[name=\"MaintenanceType\"]:checked').trigger('change');\n  \n  // Disable MaintenanceType radio buttons when editing existing record\n  if ($('#IsEditMode').val() === 'true' && $('#IsNew').val() === 'false') {\n    $('input[name=\"MaintenanceType\"]').prop('disabled', true);\n  }\n});",
+      "bootstrapClasses": ["form-check", "form-check-input", "form-check-label"],
+      "notes": "Radio button group with conditional field enabling. Maintenance type selection controls which fields are enabled. Cannot be changed when editing existing records."
+    },
+    {
+      "legacyControl": "UltraButton (Submit/Cancel)",
+      "modernEquivalent": "Bootstrap Button",
+      "html": "<div class=\"row\">\n  <div class=\"col-12\">\n    <button type=\"submit\" id=\"btnSet\" class=\"btn btn-primary\">\n      <i class=\"fas fa-save\"></i> Save\n    </button>\n    <button type=\"button\" id=\"btnCancel\" class=\"btn btn-secondary\">\n      <i class=\"fas fa-times\"></i> Cancel\n    </button>\n    <button type=\"button\" id=\"btnClose\" class=\"btn btn-secondary float-end\">\n      <i class=\"fas fa-times\"></i> Close\n    </button>\n  </div>\n</div>",
+      "bootstrapClasses": ["btn", "btn-primary", "btn-secondary", "float-end"],
+      "notes": "Standard Bootstrap buttons with Font Awesome icons"
+    },
+    {
+      "legacyControl": "UltraStatusBar",
+      "modernEquivalent": "Bootstrap Alert (Validation Summary)",
+      "html": "<div asp-validation-summary=\"All\" class=\"alert alert-danger\" role=\"alert\"></div>",
+      "bootstrapClasses": ["alert", "alert-danger", "alert-success", "alert-dismissible"],
+      "notes": "Validation messages display using Bootstrap alerts and asp-validation-for helpers"
+    },
+    {
+      "legacyControl": "UltraLabel",
+      "modernEquivalent": "Bootstrap Label with asp-for",
+      "html": "<label asp-for=\"PropertyName\" class=\"form-label\"></label>\n<!-- For required fields -->\n<label asp-for=\"PropertyName\" class=\"form-label required\"></label>",
+      "bootstrapClasses": ["form-label", "required"],
+      "notes": "Labels use asp-for tag helper for automatic binding to model properties. Add 'required' class for required fields."
+    }
+  ],
+  "formPatterns": {
+    "masterDetailLayout": {
+      "description": "Top section shows grid of boat maintenance log entries, bottom section shows detail edit form",
+      "html": "<div class=\"container-fluid\">\n  <!-- Master Grid Section -->\n  <div class=\"card mb-3\">\n    <div class=\"card-header\">\n      <h5 class=\"card-title mb-0\">\n        <i class=\"fas fa-list\"></i> Boat Maintenance Log\n      </h5>\n    </div>\n    <div class=\"card-body\">\n      <button type=\"button\" id=\"btnAdd\" class=\"btn btn-success mb-3\">\n        <i class=\"fas fa-plus\"></i> Add Entry\n      </button>\n      <button type=\"button\" id=\"btnExport\" class=\"btn btn-secondary mb-3\">\n        <i class=\"fas fa-file-export\"></i> Export\n      </button>\n      <div class=\"table-responsive\">\n        <table id=\"boatStatusTable\" class=\"table table-striped table-bordered\">\n          <!-- Grid definition -->\n        </table>\n      </div>\n    </div>\n  </div>\n  \n  <!-- Detail Edit Section (hidden by default) -->\n  <div class=\"card\" id=\"detailSection\" style=\"display:none;\">\n    <div class=\"card-header\">\n      <h5 class=\"card-title mb-0\">Detail</h5>\n    </div>\n    <div class=\"card-body\">\n      <form id=\"detailForm\">\n        <!-- Form fields -->\n      </form>\n    </div>\n  </div>\n</div>",
+      "javascript": "// Show/hide detail section\n$('#btnAdd').on('click', function() {\n  $('#detailSection').show();\n  clearForm();\n  $('input[name=\"MaintenanceType\"]').prop('disabled', false);\n});\n\n$('#btnCancel').on('click', function() {\n  if (confirm('Discard changes?')) {\n    $('#detailSection').hide();\n    clearForm();\n  }\n});\n\n// Edit button in grid\n$(document).on('click', '.btn-edit', function() {\n  var id = $(this).data('id');\n  $.get('/BoatStatus/GetById/' + id, function(data) {\n    loadForm(data);\n    $('#detailSection').show();\n    $('input[name=\"MaintenanceType\"]').prop('disabled', true); // Cannot change type on edit\n  });\n});",
+      "notes": "Master-detail pattern: Grid on top, detail edit form below. Detail section hidden until Add/Edit clicked."
+    },
+    "conditionalFieldEnabling": {
+      "description": "Fields are enabled/disabled based on MaintenanceType radio button selection",
+      "javascript": "function enableDisableFields() {\n  var selectedType = $('input[name=\"MaintenanceType\"]:checked').val();\n  \n  // Disable all conditional fields\n  $('#cboStatus').prop('disabled', true).closest('.mb-3').hide();\n  $('#cboDivision, #cboPortFacility').prop('disabled', true).closest('.mb-3').hide();\n  $('#cboBoatRole').prop('disabled', true).closest('.mb-3').hide();\n  \n  // Enable and show fields based on selection\n  if (selectedType === 'Boat Status') {\n    $('#cboStatus').prop('disabled', false).closest('.mb-3').show();\n  } else if (selectedType === 'Change Division/Facility') {\n    $('#cboDivision, #cboPortFacility').prop('disabled', false).closest('.mb-3').show();\n  } else if (selectedType === 'Change Boat Role') {\n    $('#cboBoatRole').prop('disabled', false).closest('.mb-3').show();\n  }\n}\n\n$('input[name=\"MaintenanceType\"]').on('change', enableDisableFields);\n$(document).ready(enableDisableFields);",
+      "notes": "Dynamic field visibility and enabling based on maintenance type. Only relevant fields are shown for each type."
+    },
+    "validation": {
+      "description": "jQuery Validate with unobtrusive validation",
+      "html": "<!-- Add validation attributes to ViewModel properties -->\n[Required(ErrorMessage = \"Start Date/Time is required\")]\npublic DateTime? StartDateTime { get; set; }\n\n[Required(ErrorMessage = \"Maintenance Type is required\")]\npublic string MaintenanceType { get; set; }\n\n[StringLength(1000, ErrorMessage = \"Note cannot exceed 1000 characters\")]\npublic string Note { get; set; }",
+      "javascript": "// Validation initialized automatically by unobtrusive validation\n// Custom validation rules if needed:\n$('#detailForm').validate({\n  rules: {\n    StartDateTime: { required: true },\n    MaintenanceType: { required: true },\n    Status: {\n      required: function() {\n        return $('input[name=\"MaintenanceType\"]:checked').val() === 'Boat Status';\n      }\n    },\n    DivisionId: {\n      required: function() {\n        return $('input[name=\"MaintenanceType\"]:checked').val() === 'Change Division/Facility';\n      }\n    },\n    BoatRoleId: {\n      required: function() {\n        return $('input[name=\"MaintenanceType\"]:checked').val() === 'Change Boat Role';\n      }\n    }\n  },\n  messages: {\n    Status: \"Status is required for Boat Status entries\",\n    DivisionId: \"Division is required when changing division/facility\",\n    BoatRoleId: \"Boat Role is required when changing boat role\"\n  },\n  errorPlacement: function(error, element) {\n    error.addClass('text-danger');\n    error.insertAfter(element);\n  }\n});",
+      "notes": "Conditional validation based on maintenance type selection. Use both server-side DataAnnotations and client-side jQuery Validate."
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "serverSide": true,
+      "stateSave": true,
+      "responsive": true,
+      "features": {
+        "sorting": true,
+        "pagination": true,
+        "searching": false,
+        "lengthChange": true,
+        "actionColumn": "First column with Edit/Delete buttons",
+        "dateFormatting": "MM/dd/yyyy HH:mm (24-hour time)"
+      },
+      "notes": "Server-side processing for performance. State saved to localStorage. Actions column first with inline Edit/Delete buttons."
+    }
+  },
+  "businessLogicNotes": {
+    "maintenanceTypeOptions": [
+      "Boat Status - Enables Status field only",
+      "Change Division/Facility - Enables Division and Port Facility fields",
+      "Change Boat Role - Enables Boat Role field only"
+    ],
+    "maintenanceTypeRestriction": "Cannot be changed when editing existing records (read-only on edit)",
+    "cascadingDropdowns": "Division selection filters PortFacility dropdown options",
+    "clearUnusedFields": "Before saving, fields not relevant to selected MaintenanceType are cleared",
+    "gridSorting": "Default sort by StartDateTime descending (most recent first)",
+    "dateTimeHandling": "CRITICAL: Date and time stored as combined DateTime, but displayed/edited in separate inputs with 24-hour time format"
+  },
+  "accessibilityNotes": {
+    "labels": "All inputs have associated labels using asp-for tag helper",
+    "required": "Required fields marked with 'required' class and aria-required attribute",
+    "validation": "Validation messages use aria-describedby to associate with inputs",
+    "buttons": "All buttons have descriptive text and Font Awesome icons for visual clarity",
+    "select2": "Select2 provides enhanced keyboard navigation for dropdowns"
+  },
+  "criticalImplementationNotes": [
+    "❌ DateTime fields MUST be split into separate date (type=date) and time (type=time) inputs",
+    "❌ Time input MUST use 24-hour format (HH:mm), NOT 12-hour with AM/PM",
+    "❌ Display format MUST be MM/dd/yyyy HH:mm (military time)",
+    "❌ JavaScript MUST split datetime on page load and combine on form submit",
+    "❌ DataTables MUST be used for all grids with server-side processing",
+    "❌ Select2 MUST be used for all dropdown controls",
+    "❌ Bootstrap 5 classes MUST be used for all styling (NO inline styles)",
+    "❌ Form controls MUST have form-control or form-select class",
+    "❌ Labels MUST use asp-for tag helper with associated input",
+    "❌ Validation MUST use jquery.validate and unobtrusive validation",
+    "❌ MaintenanceType radio buttons control which fields are enabled (conditional logic required)",
+    "❌ MaintenanceType cannot be changed when editing existing records",
+    "❌ Division dropdown change must reload PortFacility dropdown (cascading)",
+    "❌ Unused fields must be cleared before save based on MaintenanceType",
+    "❌ Actions column MUST be first in grid with Edit/Delete buttons",
+    "❌ Master-detail layout: Grid on top, detail edit form below (initially hidden)",
+    "❌ Output location: .claude/tasks/BoatStatus_ui_mapping.json"
+  ],
+  "fileOutputs": {
+    "location": ".claude/tasks/BoatStatus_ui_mapping.json",
+    "relatedFiles": [
+      ".claude/tasks/BoatStatus_data_access.json"
+    ]
+  },
+  "exampleCode": {
+    "razorView": "@model BargeOpsAdmin.ViewModels.BoatStatusViewModel\n@{\n  ViewData[\"Title\"] = \"Boat Status - \" + Model.BoatName;\n}\n\n<div class=\"container-fluid\">\n  <h2>@ViewData[\"Title\"]</h2>\n  <hr />\n  \n  @if (TempData[\"SuccessMessage\"] != null)\n  {\n    <div class=\"alert alert-success alert-dismissible fade show\" role=\"alert\">\n      @TempData[\"SuccessMessage\"]\n      <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"></button>\n    </div>\n  }\n  \n  <!-- Master Grid -->\n  <div class=\"card mb-3\">\n    <div class=\"card-header\">\n      <h5 class=\"card-title mb-0\">\n        <i class=\"fas fa-list\"></i> Maintenance Log\n      </h5>\n    </div>\n    <div class=\"card-body\">\n      <button type=\"button\" id=\"btnAdd\" class=\"btn btn-success mb-3\">\n        <i class=\"fas fa-plus\"></i> Add\n      </button>\n      <div class=\"table-responsive\">\n        <table id=\"boatStatusTable\" class=\"table table-striped table-bordered\">\n          <thead>\n            <tr>\n              <th>Actions</th>\n              <th>Date</th>\n              <th>Type</th>\n              <th>Status</th>\n              <th>Division</th>\n              <th>Port Facility</th>\n              <th>Boat Role</th>\n              <th>Note</th>\n            </tr>\n          </thead>\n          <tbody></tbody>\n        </table>\n      </div>\n    </div>\n  </div>\n  \n  <!-- Detail Edit Section -->\n  <div class=\"card\" id=\"detailSection\" style=\"display:none;\">\n    <div class=\"card-header\">\n      <h5 class=\"card-title mb-0\">Detail</h5>\n    </div>\n    <div class=\"card-body\">\n      <form id=\"detailForm\" asp-action=\"Save\" asp-controller=\"BoatStatus\" method=\"post\">\n        <input type=\"hidden\" asp-for=\"BoatMaintenanceLogId\" />\n        <input type=\"hidden\" asp-for=\"BoatLocationId\" />\n        <input type=\"hidden\" id=\"IsEditMode\" value=\"@(Model.BoatMaintenanceLogId > 0)\" />\n        <input type=\"hidden\" id=\"IsNew\" asp-for=\"IsNew\" />\n        \n        <!-- Start Date/Time - SPLIT INPUTS -->\n        <div class=\"row mb-3\">\n          <div class=\"col-md-6\">\n            <label asp-for=\"StartDateTime\" class=\"form-label required\">Start Date</label>\n            <input asp-for=\"StartDateTime\" class=\"form-control\" type=\"date\" id=\"dtStartDate\" />\n            <span asp-validation-for=\"StartDateTime\" class=\"text-danger\"></span>\n          </div>\n          <div class=\"col-md-6\">\n            <label class=\"form-label required\">Start Time (24-hour)</label>\n            <input type=\"time\" class=\"form-control\" id=\"dtStartTime\" />\n          </div>\n        </div>\n        \n        <!-- Maintenance Type Radio Buttons -->\n        <div class=\"mb-3\">\n          <label class=\"form-label required\">Maintenance Type</label>\n          <div>\n            <div class=\"form-check\">\n              <input class=\"form-check-input\" type=\"radio\" asp-for=\"MaintenanceType\" value=\"Boat Status\" id=\"optBoatStatus\" />\n              <label class=\"form-check-label\" for=\"optBoatStatus\">Boat Status</label>\n            </div>\n            <div class=\"form-check\">\n              <input class=\"form-check-input\" type=\"radio\" asp-for=\"MaintenanceType\" value=\"Change Division/Facility\" id=\"optDivisionFacility\" />\n              <label class=\"form-check-label\" for=\"optDivisionFacility\">Division / Facility</label>\n            </div>\n            <div class=\"form-check\">\n              <input class=\"form-check-input\" type=\"radio\" asp-for=\"MaintenanceType\" value=\"Change Boat Role\" id=\"optBoatRole\" />\n              <label class=\"form-check-label\" for=\"optBoatRole\">Boat Role</label>\n            </div>\n          </div>\n          <span asp-validation-for=\"MaintenanceType\" class=\"text-danger\"></span>\n        </div>\n        \n        <!-- Conditional Fields -->\n        <div class=\"mb-3\" id=\"statusSection\">\n          <label asp-for=\"Status\" class=\"form-label required\">Status</label>\n          <select asp-for=\"Status\" class=\"form-select\" data-select2=\"true\" id=\"cboStatus\">\n            <option value=\"\">-- Select Status --</option>\n          </select>\n          <span asp-validation-for=\"Status\" class=\"text-danger\"></span>\n        </div>\n        \n        <div class=\"mb-3\" id=\"divisionSection\">\n          <label asp-for=\"DivisionId\" class=\"form-label required\">Division</label>\n          <select asp-for=\"DivisionId\" asp-items=\"Model.Divisions\" class=\"form-select\" data-select2=\"true\" id=\"cboDivision\">\n            <option value=\"\">-- Select Division --</option>\n          </select>\n          <span asp-validation-for=\"DivisionId\" class=\"text-danger\"></span>\n        </div>\n        \n        <div class=\"mb-3\" id=\"facilitySection\">\n          <label asp-for=\"PortFacilityId\" class=\"form-label required\">Port Facility</label>\n          <select asp-for=\"PortFacilityId\" class=\"form-select\" data-select2=\"true\" id=\"cboPortFacility\">\n            <option value=\"\">-- Select Port Facility --</option>\n          </select>\n          <span asp-validation-for=\"PortFacilityId\" class=\"text-danger\"></span>\n        </div>\n        \n        <div class=\"mb-3\" id=\"boatRoleSection\">\n          <label asp-for=\"BoatRoleId\" class=\"form-label required\">Boat Role</label>\n          <select asp-for=\"BoatRoleId\" asp-items=\"Model.BoatRoles\" class=\"form-select\" data-select2=\"true\" id=\"cboBoatRole\">\n            <option value=\"\">-- Select Boat Role --</option>\n          </select>\n          <span asp-validation-for=\"BoatRoleId\" class=\"text-danger\"></span>\n        </div>\n        \n        <!-- Note Field -->\n        <div class=\"mb-3\">\n          <label asp-for=\"Note\" class=\"form-label\">Note</label>\n          <textarea asp-for=\"Note\" class=\"form-control\" rows=\"4\" maxlength=\"1000\" id=\"txtNote\"></textarea>\n          <span asp-validation-for=\"Note\" class=\"text-danger\"></span>\n        </div>\n        \n        <!-- Action Buttons -->\n        <div class=\"row\">\n          <div class=\"col-12\">\n            <button type=\"submit\" class=\"btn btn-primary\">\n              <i class=\"fas fa-save\"></i> Save\n            </button>\n            <button type=\"button\" id=\"btnCancel\" class=\"btn btn-secondary\">\n              <i class=\"fas fa-times\"></i> Cancel\n            </button>\n          </div>\n        </div>\n      </form>\n    </div>\n  </div>\n  \n  <div class=\"mt-3\">\n    <a href=\"@Url.Action(\"Index\", \"BoatLocationSearch\")\" class=\"btn btn-secondary\">\n      <i class=\"fas fa-arrow-left\"></i> Back to Boat Search\n    </a>\n  </div>\n</div>\n\n@section Scripts {\n  <script src=\"~/js/boatStatus.js\"></script>\n}",
+    "javascriptFile": "// boatStatus.js\n$(document).ready(function() {\n  // Initialize DataTable\n  var boatLocationId = $('#BoatLocationId').val();\n  var dataTable = $('#boatStatusTable').DataTable({\n    processing: true,\n    serverSide: true,\n    stateSave: true,\n    stateKey: 'boatStatusTable_v1',\n    responsive: true,\n    autoWidth: false,\n    ajax: {\n      url: '/BoatStatus/GetMaintenanceLog',\n      type: 'POST',\n      data: function(d) {\n        d.boatLocationId = boatLocationId;\n      }\n    },\n    columns: [\n      {\n        data: null,\n        orderable: false,\n        searchable: false,\n        className: 'text-center',\n        width: '80px',\n        render: function(data, type, row) {\n          return '<div class=\"btn-group btn-group-sm\">' +\n                 '<button class=\"btn btn-primary btn-edit\" data-id=\"' + row.boatMaintenanceLogId + '\">' +\n                 '<i class=\"fas fa-edit\"></i></button>' +\n                 '<button class=\"btn btn-danger btn-delete\" data-id=\"' + row.boatMaintenanceLogId + '\">' +\n                 '<i class=\"fas fa-trash\"></i></button>' +\n                 '</div>';\n        }\n      },\n      { data: 'startDateTime', render: function(data) { return data ? new Date(data).toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : ''; } },\n      { data: 'maintenanceType', defaultContent: '' },\n      { data: 'status', defaultContent: '' },\n      { data: 'division', defaultContent: '' },\n      { data: 'portFacility', defaultContent: '' },\n      { data: 'boatRole', defaultContent: '' },\n      { data: 'note', defaultContent: '' }\n    ],\n    order: [[1, 'desc']],\n    pageLength: 25,\n    lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],\n    drawCallback: function() {\n      // Edit button handler\n      $('.btn-edit').off('click').on('click', function() {\n        var id = $(this).data('id');\n        $.get('/BoatStatus/GetById/' + id, function(data) {\n          loadForm(data);\n          $('#detailSection').show();\n          $('input[name=\"MaintenanceType\"]').prop('disabled', true);\n        });\n      });\n      \n      // Delete button handler\n      $('.btn-delete').off('click').on('click', function() {\n        var id = $(this).data('id');\n        if (confirm('Are you sure you want to delete this entry?')) {\n          $.post('/BoatStatus/Delete/' + id, function() {\n            dataTable.ajax.reload();\n          });\n        }\n      });\n    }\n  });\n  \n  // Initialize Select2\n  $('[data-select2=\"true\"]').select2({\n    allowClear: true,\n    width: '100%'\n  });\n  \n  // Add button\n  $('#btnAdd').on('click', function() {\n    clearForm();\n    $('#detailSection').show();\n    $('input[name=\"MaintenanceType\"]').prop('disabled', false);\n  });\n  \n  // Cancel button\n  $('#btnCancel').on('click', function() {\n    if (confirm('Discard changes?')) {\n      $('#detailSection').hide();\n      clearForm();\n    }\n  });\n  \n  // Maintenance Type change handler\n  $('input[name=\"MaintenanceType\"]').on('change', function() {\n    enableDisableFields();\n  });\n  \n  // Division change cascades to PortFacility\n  $('#cboDivision').on('change', function() {\n    var divisionId = $(this).val();\n    var $portFacility = $('#cboPortFacility');\n    \n    if (divisionId) {\n      $.get('/BoatStatus/GetPortFacilitiesByDivision', { divisionId: divisionId }, function(data) {\n        $portFacility.empty().append('<option value=\"\">-- Select Port Facility --</option>');\n        $.each(data, function(i, item) {\n          $portFacility.append($('<option>', { value: item.value, text: item.text }));\n        });\n        $portFacility.trigger('change.select2');\n      });\n    } else {\n      $portFacility.empty().append('<option value=\"\">-- Select Port Facility --</option>').trigger('change.select2');\n    }\n  });\n  \n  // Form submit handler\n  $('#detailForm').on('submit', function(e) {\n    e.preventDefault();\n    \n    // Combine date and time\n    var combined = combineDateTime('dtStartDate', 'dtStartTime');\n    if (combined) $('#dtStartDate').val(combined);\n    \n    // Clear unused fields based on maintenance type\n    clearUnusedFields();\n    \n    $.post($(this).attr('action'), $(this).serialize(), function() {\n      $('#detailSection').hide();\n      dataTable.ajax.reload();\n      clearForm();\n    });\n  });\n  \n  // Initialize on load\n  var startDateTime = $('#StartDateTime').val();\n  if (startDateTime) {\n    splitDateTime(startDateTime, 'dtStartDate', 'dtStartTime');\n  }\n  enableDisableFields();\n});\n\nfunction splitDateTime(dateTimeValue, dateFieldId, timeFieldId) {\n  if (dateTimeValue) {\n    var date = new Date(dateTimeValue);\n    if (!isNaN(date.getTime())) {\n      $('#' + dateFieldId).val(date.toISOString().split('T')[0]);\n      var hours = ('0' + date.getHours()).slice(-2);\n      var minutes = ('0' + date.getMinutes()).slice(-2);\n      $('#' + timeFieldId).val(hours + ':' + minutes);\n    }\n  }\n}\n\nfunction combineDateTime(dateFieldId, timeFieldId) {\n  var date = $('#' + dateFieldId).val();\n  var time = $('#' + timeFieldId).val();\n  return (date && time) ? date + 'T' + time + ':00' : (date ? date + 'T00:00:00' : '');\n}\n\nfunction enableDisableFields() {\n  var selectedType = $('input[name=\"MaintenanceType\"]:checked').val();\n  \n  $('#statusSection, #divisionSection, #facilitySection, #boatRoleSection').hide();\n  $('#cboStatus, #cboDivision, #cboPortFacility, #cboBoatRole').prop('disabled', true);\n  \n  if (selectedType === 'Boat Status') {\n    $('#statusSection').show();\n    $('#cboStatus').prop('disabled', false);\n  } else if (selectedType === 'Change Division/Facility') {\n    $('#divisionSection, #facilitySection').show();\n    $('#cboDivision, #cboPortFacility').prop('disabled', false);\n  } else if (selectedType === 'Change Boat Role') {\n    $('#boatRoleSection').show();\n    $('#cboBoatRole').prop('disabled', false);\n  }\n}\n\nfunction clearUnusedFields() {\n  var selectedType = $('input[name=\"MaintenanceType\"]:checked').val();\n  \n  if (selectedType !== 'Boat Status') {\n    $('#cboStatus').val('').trigger('change.select2');\n  }\n  if (selectedType !== 'Change Division/Facility') {\n    $('#cboDivision, #cboPortFacility').val('').trigger('change.select2');\n  }\n  if (selectedType !== 'Change Boat Role') {\n    $('#cboBoatRole').val('').trigger('change.select2');\n  }\n}\n\nfunction loadForm(data) {\n  $('#BoatMaintenanceLogId').val(data.boatMaintenanceLogId);\n  splitDateTime(data.startDateTime, 'dtStartDate', 'dtStartTime');\n  $('input[name=\"MaintenanceType\"][value=\"' + data.maintenanceType + '\"]').prop('checked', true);\n  $('#cboStatus').val(data.status).trigger('change.select2');\n  $('#cboDivision').val(data.divisionId).trigger('change');\n  $('#cboPortFacility').val(data.portFacilityId).trigger('change.select2');\n  $('#cboBoatRole').val(data.boatRoleId).trigger('change.select2');\n  $('#txtNote').val(data.note);\n  $('#IsNew').val(data.isNew);\n  enableDisableFields();\n}\n\nfunction clearForm() {\n  $('#detailForm')[0].reset();\n  $('#BoatMaintenanceLogId').val('');\n  $('#dtStartDate, #dtStartTime').val('');\n  $('input[name=\"MaintenanceType\"][value=\"Boat Status\"]').prop('checked', true);\n  $('#cboStatus, #cboDivision, #cboPortFacility, #cboBoatRole').val('').trigger('change.select2');\n  $('#txtNote').val('');\n  $('#IsNew').val('true');\n  enableDisableFields();\n}"
+  }
+}

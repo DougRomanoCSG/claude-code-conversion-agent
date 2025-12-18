@@ -1,0 +1,1033 @@
+{
+  "formName": "frmBargePositionHistory",
+  "formType": "DetailEditList",
+  "inheritanceChain": "frmBaseDetailEditList",
+  "businessObject": "FleetPositionHistory",
+  "description": "Manages historical barge positions within a fleet, allowing users to search, view, add, edit, and delete position records including tier locations and timestamps",
+
+  "primaryWorkflows": [
+    {
+      "name": "SearchAndViewHistory",
+      "description": "User searches for barge position history by date, tier group, and optional barge filter",
+      "steps": [
+        {
+          "step": 1,
+          "action": "EnterSearchCriteria",
+          "controls": [
+            "dtDateSearch (required)",
+            "cboTierGroupSearch (required)",
+            "txtBargeNumSearch (optional)",
+            "chkIncludeBlankTierPos"
+          ],
+          "defaultValues": {
+            "dtDateSearch": "Date.Today",
+            "includeBlankTierPos": false
+          }
+        },
+        {
+          "step": 2,
+          "action": "ClickFind",
+          "button": "btnFind",
+          "validation": "Date and Tier group are required",
+          "result": "Results displayed in grdDetailEditList"
+        },
+        {
+          "step": 3,
+          "action": "ViewResults",
+          "control": "grdDetailEditList",
+          "columns": [
+            "PositionStartDateTime",
+            "BargeNum",
+            "LeftFleet",
+            "TierName",
+            "TierPos"
+          ],
+          "sorting": "PositionStartDateTime ascending (default)"
+        }
+      ]
+    },
+    {
+      "name": "AddNewPosition",
+      "description": "User adds a new barge position history record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickAdd",
+          "toolbar": "Add",
+          "trigger": "ToolbarsManager_ToolClick",
+          "result": "Creates new FleetPositionHistory object, enters edit mode"
+        },
+        {
+          "step": 2,
+          "action": "PopulateDefaults",
+          "businessLogic": [
+            "FleetID set to _SelectedFleetID (passed from parent form)",
+            "PositionStartDateTime set to dtDateSearch + FleetingDayStartTime",
+            "TierID combo populated based on selected TierGroup"
+          ],
+          "initialFocus": "txtBargeNum"
+        },
+        {
+          "step": 3,
+          "action": "EnterBargeDetails",
+          "fields": [
+            {
+              "control": "txtBargeNum",
+              "required": true,
+              "validation": "Must match existing barge record",
+              "businessRule": "BargeID lookup via Barge.GetBargeID(value)"
+            },
+            {
+              "control": "dtPositionStartDate",
+              "required": true,
+              "bold": true
+            },
+            {
+              "control": "cboPositionStartTime",
+              "required": true,
+              "bold": true,
+              "validation": "Time format"
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "action": "EnterPositionDetails",
+          "conditionalLogic": {
+            "condition": "chkLeftFleet.Checked = false",
+            "enabled": [
+              "cboTierID",
+              "txtTierX (Int16)",
+              "txtTierY (Int16)"
+            ],
+            "disabled": []
+          },
+          "alternateCondition": {
+            "condition": "chkLeftFleet.Checked = true",
+            "enabled": [],
+            "disabled": [
+              "cboTierID",
+              "txtTierX",
+              "txtTierY"
+            ],
+            "clearFields": [
+              "TierID",
+              "TierX",
+              "TierY"
+            ]
+          }
+        },
+        {
+          "step": 5,
+          "action": "ClickSubmit",
+          "button": "btnSubmit",
+          "businessLogic": [
+            "Calls ClearUnusedFields() - clears tier fields if LeftFleet=true",
+            "Calls SubmitClick() from base form",
+            "Validates business rules",
+            "Calls FleetPositionHistory.ApplyEdit()",
+            "Saves to database"
+          ],
+          "onSuccess": [
+            "ClearControls()",
+            "EnableDisableControls(false) - exit edit mode",
+            "RefreshList(false) - reload grid"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "EditExistingPosition",
+      "description": "User modifies an existing barge position record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRow",
+          "control": "grdDetailEditList",
+          "trigger": "DoubleClick or toolbar Modify button"
+        },
+        {
+          "step": 2,
+          "action": "LoadForEdit",
+          "businessLogic": [
+            "Fetch FleetPositionHistory.GetFleetPositionHistory(FleetPositionHistoryID)",
+            "Call BeginEdit() on business object",
+            "Populate TierID combo based on selected TierGroup",
+            "Load all controls via LoadControlsForFleetPositionHistory()"
+          ],
+          "initialFocus": "dtPositionStartDate"
+        },
+        {
+          "step": 3,
+          "action": "ModifyFields",
+          "editableFields": [
+            "dtPositionStartDate",
+            "cboPositionStartTime",
+            "txtBargeNum",
+            "chkLeftFleet",
+            "cboTierID",
+            "txtTierX",
+            "txtTierY"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "SubmitOrCancel",
+          "options": [
+            "btnSubmit - same as Add workflow",
+            "btnCancel - calls CancelEdit(), refreshes list, exits edit mode"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DeletePosition",
+      "description": "User removes a barge position history record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRow",
+          "control": "grdDetailEditList"
+        },
+        {
+          "step": 2,
+          "action": "ClickRemove",
+          "toolbar": "Remove",
+          "trigger": "ToolbarsManager_ToolClick"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDeletion",
+          "dialog": "Main.ItemRemoveDialog('Barge Position')",
+          "dialogType": "Yes/No confirmation"
+        },
+        {
+          "step": 4,
+          "action": "DeleteRecord",
+          "condition": "DialogResult.Yes",
+          "businessLogic": [
+            "FleetPositionHistory.DeleteFleetPositionHistory(FleetPositionHistoryID)",
+            "Immediate delete (not BeginEdit/CancelEdit pattern)"
+          ],
+          "result": [
+            "RefreshList(false)",
+            "SetToolState(grdDetailEditList)"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ExportResults",
+      "description": "User exports grid data to external format",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickExport",
+          "toolbar": "Export",
+          "condition": "At least one row in grid"
+        },
+        {
+          "step": 2,
+          "action": "ExportGrid",
+          "method": "Main.ExportGrid(grdDetailEditList, staStatus, Me.Text)",
+          "result": "Grid data exported (format determined by Main utility)"
+        }
+      ]
+    },
+    {
+      "name": "ResetSearch",
+      "description": "User clears search criteria to start fresh",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickReset",
+          "button": "btnReset"
+        },
+        {
+          "step": 2,
+          "action": "ClearSearchFields",
+          "resetValues": {
+            "cboTierGroupSearch": "Empty",
+            "dtDateSearch": "Date.Today",
+            "txtBargeNumSearch": "Empty"
+          }
+        }
+      ]
+    }
+  ],
+
+  "formStates": [
+    {
+      "state": "Initial",
+      "description": "Form first loaded with search criteria panel",
+      "searchPanelState": "Enabled",
+      "gridState": "Empty",
+      "detailEditState": "Disabled",
+      "enabledButtons": [
+        "btnFind",
+        "btnReset",
+        "btnClose"
+      ],
+      "disabledButtons": [
+        "btnSubmit",
+        "btnCancel"
+      ],
+      "toolbarState": {
+        "Add": "Enabled",
+        "Modify": "Disabled (no selection)",
+        "Remove": "Disabled (no selection)",
+        "Export": "Disabled (no rows)"
+      }
+    },
+    {
+      "state": "SearchResultsDisplayed",
+      "description": "Search executed, results shown in grid",
+      "searchPanelState": "Enabled",
+      "gridState": "Populated with FleetPositionHistorySearch results",
+      "detailEditState": "Disabled",
+      "enabledButtons": [
+        "btnFind",
+        "btnReset",
+        "btnClose"
+      ],
+      "toolbarState": {
+        "Add": "Enabled",
+        "Modify": "Enabled (if row selected)",
+        "Remove": "Enabled (if row selected)",
+        "Export": "Enabled"
+      }
+    },
+    {
+      "state": "AddingNewRecord",
+      "description": "User adding new position, detail panel enabled",
+      "searchPanelState": "Disabled",
+      "gridState": "Visible but interaction disabled",
+      "detailEditState": "Enabled (grpDetailEditChild)",
+      "isEditingChild": true,
+      "enabledButtons": [
+        "btnSubmit",
+        "btnCancel",
+        "btnClose (with unsaved changes warning)"
+      ],
+      "disabledButtons": [
+        "btnFind",
+        "btnReset"
+      ],
+      "toolbarState": {
+        "Add": "Disabled",
+        "Modify": "Disabled",
+        "Remove": "Disabled",
+        "Export": "Disabled"
+      },
+      "businessObjectState": "BeginEdit() called on new FleetPositionHistory"
+    },
+    {
+      "state": "EditingExistingRecord",
+      "description": "User editing selected position, detail panel enabled",
+      "searchPanelState": "Disabled",
+      "gridState": "Visible but interaction disabled",
+      "detailEditState": "Enabled (grpDetailEditChild)",
+      "isEditingChild": true,
+      "enabledButtons": [
+        "btnSubmit",
+        "btnCancel",
+        "btnClose (with unsaved changes warning)"
+      ],
+      "disabledButtons": [
+        "btnFind",
+        "btnReset"
+      ],
+      "toolbarState": {
+        "Add": "Disabled",
+        "Modify": "Disabled",
+        "Remove": "Disabled",
+        "Export": "Disabled"
+      },
+      "businessObjectState": "BeginEdit() called on existing FleetPositionHistory"
+    },
+    {
+      "state": "ConditionalTierFields",
+      "description": "Tier position fields enabled/disabled based on LeftFleet checkbox",
+      "subStates": [
+        {
+          "condition": "chkLeftFleet.Checked = false",
+          "enabled": [
+            "cboTierID",
+            "txtTierX",
+            "txtTierY",
+            "lblTierID",
+            "lblTierX",
+            "lblTierY"
+          ]
+        },
+        {
+          "condition": "chkLeftFleet.Checked = true",
+          "disabled": [
+            "cboTierID",
+            "txtTierX",
+            "txtTierY",
+            "lblTierID",
+            "lblTierX",
+            "lblTierY"
+          ],
+          "cleared": [
+            "TierID",
+            "TierX",
+            "TierY"
+          ]
+        }
+      ]
+    }
+  ],
+
+  "eventHandlerChains": [
+    {
+      "event": "Form Load",
+      "handler": "frmDetailEdit_Load",
+      "sequence": [
+        "Set cursor to WaitCursor",
+        "Call FormatControls()",
+        "Call ResetControls()",
+        "Exception handling with form close on error",
+        "Reset cursor"
+      ]
+    },
+    {
+      "event": "Form Closed",
+      "handler": "frmDetailEdit_FormClosed",
+      "sequence": [
+        "Save grid settings via MyAppSettingHelper.SaveGrid(Me, grdDetailEditList, True)"
+      ],
+      "persistence": "Grid column widths, sort order, position"
+    },
+    {
+      "event": "Toolbar Button Click",
+      "handler": "ToolbarsManager_ToolClick",
+      "sequence": [
+        "Force validation on current control",
+        "Exit if validation fails",
+        "Switch on e.Tool.Key",
+        "Route to: ItemAdd(), ItemModify(), ItemRemove(), or ExportGrid()"
+      ]
+    },
+    {
+      "event": "Grid Selection Changed",
+      "handler": "Inherited from base, calls SetToolState()",
+      "sequence": [
+        "Check if item is selected",
+        "Check if at least one row exists",
+        "Update toolbar button enabled states based on selection and IsEditingChild flag",
+        "Check security via ControlAuthorization.ToolbarButtonCanBeEnabled()"
+      ]
+    },
+    {
+      "event": "Grid Double Click",
+      "handler": "Inherited from base, calls ItemModify()",
+      "sequence": [
+        "Exit if IsEditingChild = true",
+        "Check if row is selected",
+        "Fetch FleetPositionHistory object",
+        "Populate controls",
+        "Enter edit mode"
+      ]
+    },
+    {
+      "event": "Field Validation",
+      "handlers": [
+        "txtBargeNum_Validated - sets BargeNum property",
+        "cboTierID_Validated - sets TierID via InfragisticsHelper",
+        "txtTierX_Validated - sets TierX property",
+        "txtTierY_Validated - sets TierY property",
+        "dtPositionStartDate_Validated - sets combined DateTime",
+        "cboPositionStartTime_Validated - sets combined DateTime"
+      ],
+      "pattern": "Each validated event updates business object property and echoes back formatted value"
+    },
+    {
+      "event": "chkLeftFleet Changed",
+      "handler": "chkLeftFleet_CheckedChanged",
+      "sequence": [
+        "Update _FleetPositionHistory.LeftFleet property",
+        "Call EnableDisableTierPos() to update control states"
+      ],
+      "conditionalLogic": "Dynamically enables/disables tier position fields"
+    },
+    {
+      "event": "Status Bar Update",
+      "handler": "frmBargePositionHistory_StatusBarTextChanged",
+      "sequence": [
+        "Update staStatus.Text with validation or status messages"
+      ]
+    }
+  ],
+
+  "lifecycleMethods": [
+    {
+      "method": "Initialize(selectedFleetID As Int32)",
+      "phase": "FormInitialization",
+      "caller": "Parent form (likely frmBargePositions or Fleet form)",
+      "sequence": [
+        "Store _SelectedFleetID",
+        "Call overloaded Initialize(FleetPositionHistory.NewFleetPositionHistory())",
+        "Call inherited Initialize(businessObject)",
+        "Set business object to _FleetPositionHistory",
+        "Call BeginEdit() on business object",
+        "Call InitializeBase(businessObject, SubSystem.None)"
+      ]
+    },
+    {
+      "method": "SetButtonTypes()",
+      "phase": "SecurityInitialization",
+      "interface": "IBaseDetailEdit",
+      "sequence": [
+        "Set button types for Security DLL",
+        "Configure standard buttons: btnFind=Action, btnReset=Action, btnSubmit=Submit, btnClose=Cancel, btnCancel=CancelEdit",
+        "Create _ToolbarButtonTypes hashtable for toolbar buttons",
+        "Map toolbar buttons: Add=Add, Modify=Open, Remove=Remove, Export=Open"
+      ]
+    },
+    {
+      "method": "FormatControls()",
+      "phase": "ControlInitialization",
+      "sequence": [
+        "Populate cboTierGroupSearch with TierGroupSearch.GetList(_SelectedFleetID)",
+        "Populate cboPositionStartTime with time values via InfragisticsHelper",
+        "Set grid unique identifier column to 'FleetPositionHistoryID'",
+        "Set initial sort order: PositionStartDateTime Ascending",
+        "Call SetValidatorExtenderForFleetPositionHistory()",
+        "Call SetMaxLengthsForFleetPositionHistory()",
+        "Call EnableDisableControls(false)"
+      ]
+    },
+    {
+      "method": "FormatGridColumns()",
+      "phase": "GridInitialization",
+      "override": true,
+      "sequence": [
+        "Define visible columns with headings, widths, alignment",
+        "Columns: PositionStartDateTime (105px), BargeNum (146px), LeftFleet (62px), TierName (195px), TierPos (57px)",
+        "Set AutoFitStyle to ExtendLastColumn"
+      ]
+    },
+    {
+      "method": "FormatGridCustomComparers()",
+      "phase": "GridInitialization",
+      "override": true,
+      "sequence": [
+        "Set custom comparer for PositionStartDateTime column using DateTimeSortComparer"
+      ]
+    },
+    {
+      "method": "BeginEdit/CancelEdit/ApplyEdit",
+      "phase": "DataManagement",
+      "pattern": "CSLA-style business object lifecycle",
+      "sequence": [
+        "BeginEdit() - called when entering edit mode (Add or Modify)",
+        "ApplyEdit() - called on Submit to commit changes",
+        "CancelEdit() - called on Cancel to rollback changes"
+      ]
+    }
+  ],
+
+  "statePersistence": [
+    {
+      "pattern": "GridSettings",
+      "savePoint": "Form Closed",
+      "method": "MyAppSettingHelper.SaveGrid(Me, grdDetailEditList, True)",
+      "persisted": [
+        "Column widths",
+        "Column order",
+        "Sort column and direction",
+        "Grid position/scroll"
+      ],
+      "storage": "UserAppSettings (per-user preferences)"
+    },
+    {
+      "pattern": "SelectedFleetID",
+      "scope": "Form-level private variable",
+      "lifecycle": "Set in Initialize(), used throughout form",
+      "usage": [
+        "Filter TierGroupSearch list",
+        "Set FleetID on new records",
+        "Filter FleetPositionHistorySearch"
+      ]
+    },
+    {
+      "pattern": "BusinessObjectState",
+      "object": "_FleetPositionHistory",
+      "stateTracking": "CSLA framework",
+      "properties": [
+        "IsNew",
+        "IsDirty",
+        "IsValid",
+        "IsEditing (via BeginEdit)"
+      ],
+      "validation": "CheckBusinessRules() called on property changes"
+    },
+    {
+      "pattern": "IsEditingChild",
+      "scope": "Inherited from base form",
+      "purpose": "Prevent concurrent edits",
+      "effects": [
+        "Disables toolbar buttons",
+        "Prevents double-click grid editing",
+        "Disables search panel"
+      ]
+    },
+    {
+      "pattern": "ToolbarButtonTypes",
+      "scope": "Private hashtable",
+      "purpose": "Map toolbar buttons to security button types",
+      "usage": "ControlAuthorization.ToolbarButtonCanBeEnabled() uses this for permission checking"
+    }
+  ],
+
+  "modalDialogPatterns": [
+    {
+      "pattern": "ConfirmDelete",
+      "trigger": "ItemRemove()",
+      "dialog": "Main.ItemRemoveDialog('Barge Position')",
+      "returns": "DialogResult.Yes or DialogResult.No",
+      "onYes": "Delete record and refresh grid",
+      "onNo": "No action"
+    },
+    {
+      "pattern": "UnsavedChangesWarning",
+      "trigger": "btnClose_Click when IsEditing = true",
+      "method": "CancelClick() override",
+      "dialog": "Base form checks IsDirty and prompts user",
+      "returns": "DialogResult from base form",
+      "closeOnSuccess": true
+    },
+    {
+      "pattern": "ValidationMessage",
+      "trigger": "Search without required fields",
+      "dialog": "MessageBox.Show('Date and Tier group are required.', 'Unable to Search', MessageBoxButtons.OK)",
+      "blocking": true
+    },
+    {
+      "pattern": "ExceptionDialog",
+      "trigger": "Any unhandled exception in event handlers",
+      "method": "ExceptionManager.Publish(ex)",
+      "result": "Error logged and displayed to user via exception framework"
+    }
+  ],
+
+  "refreshUpdateTriggers": [
+    {
+      "trigger": "btnFind_Click",
+      "method": "RefreshList(true)",
+      "selectFirstRow": true,
+      "conditions": [
+        "dtDateSearch.Value IsNot Nothing",
+        "cboTierGroupSearch.ValueOrNull IsNot Nothing"
+      ],
+      "dataSource": "Lists.FleetPositionHistorySearch.GetList()",
+      "parameters": [
+        "_SelectedFleetID.ToString",
+        "dtDateSearch.Value.ToString",
+        "cboTierGroupSearch.ValueOrNull",
+        "txtBargeNumSearch.Text",
+        "chkIncludeBlankTierPos.Checked"
+      ]
+    },
+    {
+      "trigger": "SubmitClick Success",
+      "method": "RefreshList(false)",
+      "selectFirstRow": false,
+      "purpose": "Reload grid to show saved changes",
+      "maintainsSelection": "Uses GridControlUniqueIdentifierCol to reselect"
+    },
+    {
+      "trigger": "CancelClick Success",
+      "method": "RefreshList(false)",
+      "selectFirstRow": false,
+      "purpose": "Reload grid to clear any displayed unsaved changes from bound collection"
+    },
+    {
+      "trigger": "ItemRemove Success",
+      "method": "RefreshList(false)",
+      "selectFirstRow": false,
+      "followUp": "SetToolState(grdDetailEditList)"
+    },
+    {
+      "trigger": "Grid Selection Changed",
+      "method": "SetToolState(grdDetailEditList)",
+      "purpose": "Update toolbar button states based on selection",
+      "checks": [
+        "itemIsSelected",
+        "atLeastOneRow",
+        "IsEditingChild",
+        "Security permissions"
+      ]
+    },
+    {
+      "trigger": "chkLeftFleet Changed",
+      "method": "EnableDisableTierPos()",
+      "purpose": "Conditionally enable/disable tier position fields"
+    },
+    {
+      "trigger": "cboTierGroupSearch Changed (during edit setup)",
+      "method": "PopulateListCombo for cboTierID",
+      "dataSource": "Lists.TierList.GetList(cboTierGroupSearch.ValueOrNull)",
+      "context": "ItemAdd() and ItemModify()"
+    }
+  ],
+
+  "navigationPatterns": [
+    {
+      "from": "Parent form (frmBargePositions or Fleet form)",
+      "to": "frmBargePositionHistory",
+      "method": "Initialize(selectedFleetID)",
+      "dataPassed": "FleetID of the selected fleet",
+      "modalBehavior": "ShowDialog (modal)",
+      "formState": "MinimizeBox=false, ShowInTaskbar=false, StartPosition=CenterParent"
+    },
+    {
+      "from": "frmBargePositionHistory",
+      "to": "Close",
+      "triggers": [
+        "btnClose_Click",
+        "Alt+F4",
+        "Window close button"
+      ],
+      "method": "CancelClick()",
+      "checks": "Unsaved changes warning if IsDirty"
+    }
+  ],
+
+  "securityIntegration": [
+    {
+      "framework": "Csg.Windows.Forms.Security.ControlAuthorizationBase",
+      "implementation": "ControlAuthorization property",
+      "buttonTypes": {
+        "btnFind": "Action",
+        "btnReset": "Action",
+        "btnSubmit": "Submit",
+        "btnClose": "Cancel",
+        "btnCancel": "CancelEdit",
+        "toolbarAdd": "Add",
+        "toolbarModify": "Open",
+        "toolbarRemove": "Remove",
+        "toolbarExport": "Open"
+      },
+      "checkMethod": "ToolbarButtonCanBeEnabled(tool, form, toolbarButtonTypes)",
+      "enforcement": "Buttons disabled if user lacks permission"
+    }
+  ],
+
+  "dataBindingPatterns": [
+    {
+      "pattern": "ManualBinding",
+      "approach": "Validated event handlers update business object",
+      "flowDirection": "UI → Business Object → Database",
+      "validation": "ValidatorExtender checks field types before property assignment",
+      "feedback": "Echo formatted value back to control"
+    },
+    {
+      "pattern": "GridBinding",
+      "gridControl": "grdDetailEditList",
+      "dataSource": "RefreshListBase() binds DataTable from FleetPositionHistorySearch.List",
+      "bindingMode": "ReadOnly for display",
+      "selectionTracking": "GridControlUniqueIdentifierCol = FleetPositionHistoryID"
+    }
+  ],
+
+  "validationRules": [
+    {
+      "field": "Date (search)",
+      "required": true,
+      "errorMessage": "Date and Tier group are required."
+    },
+    {
+      "field": "Tier group (search)",
+      "required": true,
+      "errorMessage": "Date and Tier group are required."
+    },
+    {
+      "field": "BargeNum",
+      "businessRule": "BargeNumberNotFound",
+      "description": "Barge number must match an existing barge record.",
+      "validation": "Barge.GetBargeID(value) must return valid ID > 0"
+    },
+    {
+      "field": "TierX",
+      "validationType": "Int16",
+      "validator": "ValidatorExtender"
+    },
+    {
+      "field": "TierY",
+      "validationType": "Int16",
+      "validator": "ValidatorExtender"
+    },
+    {
+      "field": "cboPositionStartTime",
+      "validationType": "Time",
+      "validator": "Main.SetTimeValidatorExtender"
+    },
+    {
+      "field": "PositionStartDateTime",
+      "required": true,
+      "bold": true,
+      "composite": "Combines dtPositionStartDate + cboPositionStartTime"
+    }
+  ],
+
+  "helperMethods": [
+    {
+      "method": "EnableDisableControls(isEditing As Boolean)",
+      "purpose": "Toggle between search mode and edit mode",
+      "logic": [
+        "If isEditing: Enable grpDetailEditChild, Disable pnlDetailEdit",
+        "If not isEditing: Disable grpDetailEditChild, Enable pnlDetailEdit",
+        "Call EnableDisableTierPos()",
+        "Set IsEditingChild property",
+        "Call SetToolState()"
+      ]
+    },
+    {
+      "method": "EnableDisableTierPos()",
+      "purpose": "Conditionally enable tier position fields based on LeftFleet checkbox",
+      "logic": [
+        "If chkLeftFleet.Checked: Disable cboTierID, txtTierX, txtTierY and labels",
+        "Else: Enable cboTierID, txtTierX, txtTierY and labels"
+      ]
+    },
+    {
+      "method": "ClearControls()",
+      "purpose": "Reset detail edit controls to empty state",
+      "fields": [
+        "dtPositionStartDate",
+        "cboPositionStartTime",
+        "txtBargeNum",
+        "chkLeftFleet",
+        "cboTierID",
+        "txtTierX",
+        "txtTierY"
+      ]
+    },
+    {
+      "method": "ClearUnusedFields()",
+      "purpose": "Clear tier fields if LeftFleet is checked before saving",
+      "businessLogic": "Ensures data integrity - can't have tier position if barge left fleet"
+    },
+    {
+      "method": "LoadControlsForFleetPositionHistory()",
+      "purpose": "Populate controls from business object for edit",
+      "mapping": [
+        "txtBargeNum ← BargeNum",
+        "cboTierID ← TierID",
+        "txtTierX ← TierX",
+        "txtTierY ← TierY",
+        "dtPositionStartDate ← PositionStartDateTime (date part)",
+        "cboPositionStartTime ← PositionStartDateTime (time part)",
+        "chkLeftFleet ← LeftFleet"
+      ]
+    },
+    {
+      "method": "ResetControls()",
+      "purpose": "Reset search criteria to default state",
+      "defaults": {
+        "cboTierGroupSearch": "Empty",
+        "dtDateSearch": "Date.Today",
+        "txtBargeNumSearch": "Empty"
+      }
+    }
+  ],
+
+  "keyboardShortcuts": [
+    {
+      "key": "Alt+I",
+      "action": "Click Find button",
+      "control": "btnFind (F&ind)"
+    },
+    {
+      "key": "Enter",
+      "action": "Click Find button",
+      "acceptButton": "btnFind"
+    },
+    {
+      "key": "Escape",
+      "action": "Close form",
+      "cancelButton": "btnClose"
+    },
+    {
+      "key": "Alt+C",
+      "action": "Click Cancel button",
+      "control": "btnCancel (C&ancel)"
+    }
+  ],
+
+  "uxBehaviors": [
+    {
+      "behavior": "DefaultFocus",
+      "onLoad": "Search panel (date field)",
+      "onAdd": "txtBargeNum",
+      "onEdit": "dtPositionStartDate"
+    },
+    {
+      "behavior": "RequiredFieldIndication",
+      "method": "Bold font on labels",
+      "fields": [
+        "Date/Time (PositionStartDateTime)",
+        "Barge (BargeNum)",
+        "Date (search)",
+        "Tier group (search)"
+      ]
+    },
+    {
+      "behavior": "StatusBarFeedback",
+      "control": "staStatus",
+      "messages": [
+        "Validation errors",
+        "Export progress",
+        "Record counts"
+      ]
+    },
+    {
+      "behavior": "CursorManagement",
+      "pattern": "WaitCursor during all operations",
+      "wrapPattern": "Try-Catch-Finally with cursor reset in Finally block"
+    },
+    {
+      "behavior": "ConditionalFieldVisibility",
+      "trigger": "chkLeftFleet",
+      "dynamicUI": "Real-time enable/disable of tier position fields"
+    },
+    {
+      "behavior": "GridAutoFit",
+      "lastColumn": "Extended to fill available space",
+      "sorting": "Click column headers, custom comparer for DateTime"
+    }
+  ],
+
+  "errorHandlingPatterns": [
+    {
+      "pattern": "Try-Catch-Finally",
+      "scope": "All event handlers",
+      "exceptionHandling": "ExceptionManager.Publish(ex)",
+      "cursorReset": "Finally block ensures cursor reset to Default"
+    },
+    {
+      "pattern": "FormLoadError",
+      "handler": "frmDetailEdit_Load",
+      "onError": "Attempt to close form via Me.Close()",
+      "fallback": "MessageBox if close also fails"
+    },
+    {
+      "pattern": "ValidationMessages",
+      "display": "StatusBar or MessageBox",
+      "validator": "ValidatorExtender with custom messages"
+    }
+  ],
+
+  "performanceConsiderations": [
+    {
+      "optimization": "ListCaching",
+      "note": "FleetPositionHistorySearch is NOT cached (search screen)",
+      "reason": "Search parameters vary, results change frequently"
+    },
+    {
+      "optimization": "SuspendLayout/ResumeLayout",
+      "usage": "SetToolState() method",
+      "purpose": "Batch UI updates to reduce flicker"
+    },
+    {
+      "optimization": "GridReselection",
+      "method": "RefreshListBase maintains selection via unique identifier",
+      "purpose": "User experience - keeps context after save"
+    }
+  ],
+
+  "dependencies": [
+    {
+      "type": "BusinessObject",
+      "class": "FleetPositionHistory",
+      "namespace": "BargeOps.Onshore.BusinessLogic",
+      "methods": [
+        "NewFleetPositionHistory()",
+        "GetFleetPositionHistory(id)",
+        "DeleteFleetPositionHistory(id)",
+        "BeginEdit()",
+        "ApplyEdit()",
+        "CancelEdit()"
+      ]
+    },
+    {
+      "type": "ListObject",
+      "class": "FleetPositionHistorySearch",
+      "namespace": "BargeOps.Onshore.BusinessLogic.Lists",
+      "method": "GetList(fleetID, positionStartDate, tierGroupID, bargeNum, includeBlankTierPos)"
+    },
+    {
+      "type": "ListObject",
+      "class": "TierGroupSearch",
+      "method": "GetList(fleetID)"
+    },
+    {
+      "type": "ListObject",
+      "class": "TierList",
+      "method": "GetList(tierGroupID)"
+    },
+    {
+      "type": "ListObject",
+      "class": "GlobalSettingList",
+      "property": "FleetingDayStartTime"
+    },
+    {
+      "type": "Utility",
+      "class": "InfragisticsHelper",
+      "methods": [
+        "FormatColumn()",
+        "SetGridCustomComparer()",
+        "PopulateTimeCombo()",
+        "SetTimeCombo()",
+        "SetComboValue()",
+        "SetObjectProperty()",
+        "SetCombinedDateTimeProp()",
+        "HasListObjectSelected()",
+        "HasRowSelected()",
+        "GetSelectedRowID()"
+      ]
+    },
+    {
+      "type": "Utility",
+      "class": "Main",
+      "methods": [
+        "ExportGrid()",
+        "ItemRemoveDialog()",
+        "SetTimeValidatorExtender()"
+      ]
+    },
+    {
+      "type": "Utility",
+      "class": "MyAppSettingHelper",
+      "method": "SaveGrid()"
+    },
+    {
+      "type": "Security",
+      "class": "ControlAuthorization",
+      "methods": [
+        "SetButtonType()",
+        "ToolbarButtonCanBeEnabled()"
+      ]
+    }
+  ],
+
+  "conversionNotes": {
+    "architecture": "Convert from WinForms DetailEditList to ASP.NET Core MVC/Razor Pages with MVVM pattern",
+    "searchPanel": "Implement as filter/search bar with responsive design",
+    "gridControl": "Convert Infragistics UltraGrid to modern data grid (DevExtreme, Telerik, or AG Grid)",
+    "detailEditPanel": "Implement as modal dialog or slide-out panel",
+    "stateManagement": "Use client-side state (React/Vue) or ViewModels in ASP.NET Core",
+    "validation": "Convert ValidatorExtender to client-side + server-side validation (FluentValidation)",
+    "toolbarButtons": "Implement as action buttons or dropdown menu",
+    "businessLogic": "Port CSLA business objects to service layer with DTOs",
+    "security": "Implement role-based authorization with [Authorize] attributes",
+    "gridPersistence": "Use browser localStorage or user preferences API for grid settings",
+    "modalDialogs": "Convert to modern modal components (Bootstrap Modal, Material Dialog, etc.)",
+    "dateTimePicker": "Use modern date/time picker components",
+    "statusBar": "Implement as toast notifications or status messages",
+    "exceptionHandling": "Implement centralized error handling middleware"
+  }
+}

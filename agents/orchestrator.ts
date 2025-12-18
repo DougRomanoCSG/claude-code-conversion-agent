@@ -16,6 +16,10 @@
  *   bun run agents/orchestrator.ts --entity "Facility"  (form names will be constructed)
  *   bun run agents/orchestrator.ts  (will prompt for form selection)
  *
+ * Resume/Rerun Options:
+ *   --resume              Resume from where conversion left off (runs pending and failed steps)
+ *   --rerun-failed        Rerun only the steps that previously failed
+ *
  * Note: This runs analysis steps only. Template generation should be run separately:
  *       bun run generate-template --entity "Facility"
  */
@@ -49,6 +53,8 @@ interface OrchestratorOptions {
 	skipSteps?: number[];
 	isSingleForm?: boolean;
 	childForms?: string[];
+	resume?: boolean;
+	rerunFailed?: boolean;
 }
 
 interface AgentStep {
@@ -58,6 +64,36 @@ interface AgentStep {
 	outputFile: string;
 	interactive: boolean;
 	extraArgs?: string[];
+}
+
+interface StepStatus {
+	stepNumber: number;
+	name: string;
+	script: string;
+	description: string;
+	status: "pending" | "running" | "completed" | "failed" | "skipped";
+	startTime?: string;
+	endTime?: string;
+	durationMs?: number;
+	exitCode?: number;
+	error?: string;
+	outputFile?: string;
+}
+
+interface ConversionStatus {
+	entity: string;
+	formName?: string;
+	overallStatus: "running" | "completed" | "failed";
+	startTime: string;
+	endTime?: string;
+	durationMs?: number;
+	totalSteps: number;
+	completedSteps: number;
+	failedSteps: number;
+	skippedSteps: number;
+	steps: StepStatus[];
+	childForms?: string[];
+	failedStepNumbers?: number[]; // Summary of failed step numbers for easy reference
 }
 
 /**
@@ -110,6 +146,8 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 	const outputDir = parsedArgs.values.output as string;
 	const skipStepsStr = parsedArgs.values["skip-steps"] as string;
 	const skipSteps = skipStepsStr ? skipStepsStr.split(",").map(Number) : [];
+	const resume = parsedArgs.values.resume as boolean;
+	const rerunFailed = parsedArgs.values["rerun-failed"] as boolean;
 
 	let finalEntity = entity;
 	let finalFormName = formName;
@@ -214,7 +252,75 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 		}
 	}
 
-	return { entity: finalEntity, formName: finalFormName, outputDir, skipSteps, isSingleForm, childForms };
+	return { entity: finalEntity, formName: finalFormName, outputDir, skipSteps, isSingleForm, childForms, resume, rerunFailed };
+}
+
+function getFailedSteps(status: ConversionStatus): number[] {
+	return status.steps
+		.filter(step => step.status === "failed")
+		.map(step => step.stepNumber)
+		.sort((a, b) => a - b);
+}
+
+function getPendingSteps(status: ConversionStatus, totalSteps: number): number[] {
+	const completedSteps = new Set(status.steps
+		.filter(step => step.status === "completed" || step.status === "skipped")
+		.map(step => step.stepNumber));
+	
+	const pending: number[] = [];
+	for (let i = 1; i <= totalSteps; i++) {
+		if (!completedSteps.has(i)) {
+			pending.push(i);
+		}
+	}
+	return pending;
+}
+
+async function readConversionStatus(outputPath: string): Promise<ConversionStatus | null> {
+	const statusPath = `${outputPath}/conversion-status.json`;
+	try {
+		if (existsSync(statusPath)) {
+			const content = await Bun.file(statusPath).text();
+			return JSON.parse(content) as ConversionStatus;
+		}
+	} catch (error) {
+		console.warn(`Warning: Could not read conversion-status.json: ${error}`);
+	}
+	return null;
+}
+
+async function writeConversionStatus(outputPath: string, status: ConversionStatus): Promise<void> {
+	const statusPath = `${outputPath}/conversion-status.json`;
+	try {
+		await Bun.write(statusPath, JSON.stringify(status, null, 2));
+	} catch (error) {
+		console.error(`Error writing conversion-status.json: ${error}`);
+	}
+}
+
+async function initializeConversionStatus(
+	outputPath: string,
+	entity: string,
+	formName: string | undefined,
+	totalSteps: number,
+	childForms: string[] | undefined,
+): Promise<ConversionStatus> {
+	const startTime = new Date().toISOString();
+	const status: ConversionStatus = {
+		entity,
+		formName,
+		overallStatus: "running",
+		startTime,
+		totalSteps,
+		completedSteps: 0,
+		failedSteps: 0,
+		skippedSteps: 0,
+		steps: [],
+		childForms,
+	};
+
+	await writeConversionStatus(outputPath, status);
+	return status;
 }
 
 function getAgentSteps(isSingleForm: boolean, formName?: string): AgentStep[] {
@@ -320,14 +426,39 @@ async function runAgentStep(
 	stepNumber: number,
 	options: OrchestratorOptions,
 	totalSteps: number,
+	status: ConversionStatus,
 ): Promise<number> {
+	const startTime = new Date().toISOString();
+	const stepStartTime = Date.now();
+
 	console.log(`\n${"=".repeat(80)}`);
 	console.log(`STEP ${stepNumber}/${totalSteps}: ${step.name}`);
 	console.log(`Description: ${step.description}`);
+	console.log(`Started at: ${startTime}`);
 	console.log(`${"=".repeat(80)}\n`);
 
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
 	const scriptPath = `${projectRoot}agents/${step.script}`;
+
+	// Update status to running
+	const stepStatus: StepStatus = {
+		stepNumber,
+		name: step.name,
+		script: step.script,
+		description: step.description,
+		status: "running",
+		startTime,
+		outputFile: step.outputFile,
+	};
+
+	// Find existing step or add new one
+	const existingStepIndex = status.steps.findIndex(s => s.stepNumber === stepNumber);
+	if (existingStepIndex >= 0) {
+		status.steps[existingStepIndex] = stepStatus;
+	} else {
+		status.steps.push(stepStatus);
+	}
+	await writeConversionStatus(outputPath, status);
 
 	const args = [
 		"run",
@@ -362,16 +493,37 @@ async function runAgentStep(
 
 	await child.exited;
 	const exitCode = child.exitCode ?? 0;
+	const endTime = new Date().toISOString();
+	const durationMs = Date.now() - stepStartTime;
+
+	// Update status with result
+	stepStatus.status = exitCode === 0 ? "completed" : "failed";
+	stepStatus.endTime = endTime;
+	stepStatus.durationMs = durationMs;
+	stepStatus.exitCode = exitCode;
 
 	if (exitCode !== 0) {
+		stepStatus.error = `Step failed with exit code ${exitCode}`;
+		status.failedSteps++;
 		console.error(`\n❌ Step ${stepNumber} failed with exit code ${exitCode}`);
-		return exitCode;
+		console.error(`   Duration: ${(durationMs / 1000).toFixed(2)}s`);
+	} else {
+		status.completedSteps++;
+		console.log(`\n✅ Step ${stepNumber} completed successfully`);
+		console.log(`   Duration: ${(durationMs / 1000).toFixed(2)}s`);
+		console.log(`   Output: ${outputPath}/${step.outputFile}\n`);
 	}
 
-	console.log(`\n✅ Step ${stepNumber} completed successfully`);
-	console.log(`   Output: ${outputPath}/${step.outputFile}\n`);
+	// Update the step in status array (recalculate index to ensure we update the correct entry)
+	const finalStepIndex = status.steps.findIndex(s => s.stepNumber === stepNumber);
+	if (finalStepIndex >= 0) {
+		status.steps[finalStepIndex] = stepStatus;
+	} else {
+		status.steps.push(stepStatus);
+	}
+	await writeConversionStatus(outputPath, status);
 
-	return 0;
+	return exitCode;
 }
 
 async function main() {
@@ -406,7 +558,16 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		console.log();
 	}
 
-	console.log(`This orchestrator will run ${totalSteps} analysis agents in sequence:`);
+	// Calculate which steps will actually run
+	const stepsToExecute = totalSteps - (options.skipSteps?.length || 0);
+	const skipStepsList = options.skipSteps && options.skipSteps.length > 0 
+		? options.skipSteps.sort((a, b) => a - b).join(", ")
+		: "none";
+	
+	console.log(`This orchestrator will run ${stepsToExecute} of ${totalSteps} analysis agents:`);
+	if (options.skipSteps && options.skipSteps.length > 0) {
+		console.log(`   Skipping steps: ${skipStepsList}`);
+	}
 	console.log(`\nSteps 1-${totalSteps}: Automatic analysis and data extraction`);
 	console.log(`\nNote: Step ${totalSteps + 1} (Template Generation) should be run separately:`);
 	console.log(`   bun run generate-template --entity "${options.entity}"`);
@@ -441,22 +602,166 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		throw error;
 	}
 
+	// Handle resume/rerun-failed scenarios
+	let conversionStatus: ConversionStatus;
+	let stepsToRun: Set<number> | null = null;
+	let mainStartTime: number;
+
+	if (options.resume || options.rerunFailed) {
+		// Try to load existing status
+		const existingStatus = await readConversionStatus(outputPath);
+		
+		if (!existingStatus) {
+			console.error(`\n❌ Error: No existing conversion-status.json found at ${outputPath}/conversion-status.json`);
+			console.error("Cannot resume or rerun failed steps without existing status.");
+			console.error("Run the orchestrator normally first to create the status file.\n");
+			process.exit(1);
+		}
+
+		// Validate entity matches
+		if (existingStatus.entity !== options.entity) {
+			console.error(`\n❌ Error: Entity mismatch. Status file is for "${existingStatus.entity}", but you specified "${options.entity}"`);
+			process.exit(1);
+		}
+
+		conversionStatus = existingStatus;
+		conversionStatus.overallStatus = "running";
+		conversionStatus.endTime = undefined;
+		conversionStatus.durationMs = undefined;
+
+		if (options.rerunFailed) {
+			// Rerun only failed steps
+			const failedSteps = getFailedSteps(conversionStatus);
+			if (failedSteps.length === 0) {
+				console.log("\n✅ No failed steps found. All steps completed successfully.");
+				process.exit(0);
+			}
+			stepsToRun = new Set(failedSteps);
+			console.log(`\n🔄 Rerunning ${failedSteps.length} failed step(s): ${failedSteps.join(", ")}`);
+			console.log(`   Failed steps: ${failedSteps.map(s => {
+				const step = conversionStatus.steps.find(st => st.stepNumber === s);
+				return `${s} (${step?.name || "unknown"})`;
+			}).join(", ")}\n`);
+		} else {
+			// Resume from where we left off (run pending and failed steps)
+			const pendingSteps = getPendingSteps(conversionStatus, totalSteps);
+			const failedSteps = getFailedSteps(conversionStatus);
+			stepsToRun = new Set([...pendingSteps, ...failedSteps]);
+			
+			if (stepsToRun.size === 0) {
+				console.log("\n✅ All steps already completed. Nothing to resume.");
+				process.exit(0);
+			}
+			
+			console.log(`\n🔄 Resuming conversion. Will run ${stepsToRun.size} step(s): ${Array.from(stepsToRun).sort((a, b) => a - b).join(", ")}`);
+			if (failedSteps.length > 0) {
+				console.log(`   Previously failed: ${failedSteps.map(s => {
+					const step = conversionStatus.steps.find(st => st.stepNumber === s);
+					return `${s} (${step?.name || "unknown"})`;
+				}).join(", ")}`);
+			}
+			console.log();
+		}
+
+		// Reset failed step counts for rerun
+		if (options.rerunFailed) {
+			conversionStatus.failedSteps = 0;
+			// Remove failed steps from status so they can be rerun
+			conversionStatus.steps = conversionStatus.steps.filter(s => s.status !== "failed");
+		}
+
+		mainStartTime = Date.now();
+		await writeConversionStatus(outputPath, conversionStatus);
+	} else {
+		// Initialize new conversion status tracking
+		conversionStatus = await initializeConversionStatus(
+			outputPath,
+			options.entity,
+			options.formName,
+			totalSteps,
+			options.childForms,
+		);
+		console.log(`✓ Conversion status tracking initialized: ${outputPath}/conversion-status.json\n`);
+		mainStartTime = Date.now();
+	}
+
 	let currentStep = 1;
 	for (const step of agentSteps) {
-		if (options.skipSteps?.includes(currentStep)) {
-			console.log(`\n⏭️  Skipping Step ${currentStep}: ${step.name}`);
+		// Skip if not in stepsToRun (for resume/rerun scenarios)
+		if (stepsToRun && !stepsToRun.has(currentStep)) {
 			currentStep++;
 			continue;
 		}
 
-		const exitCode = await runAgentStep(step, currentStep, options, totalSteps);
+		if (options.skipSteps?.includes(currentStep)) {
+			const skipTime = new Date().toISOString();
+			console.log(`\n⏭️  Skipping Step ${currentStep}: ${step.name}`);
+			
+			// Record skipped step in status (check if it already exists)
+			const existingSkipIndex = conversionStatus.steps.findIndex(s => s.stepNumber === currentStep);
+			const skippedStepStatus: StepStatus = {
+				stepNumber: currentStep,
+				name: step.name,
+				script: step.script,
+				description: step.description,
+				status: "skipped",
+				startTime: skipTime,
+				endTime: skipTime,
+				durationMs: 0,
+				outputFile: step.outputFile,
+			};
+			
+			if (existingSkipIndex >= 0) {
+				conversionStatus.steps[existingSkipIndex] = skippedStepStatus;
+			} else {
+				conversionStatus.steps.push(skippedStepStatus);
+				conversionStatus.skippedSteps++;
+			}
+			await writeConversionStatus(outputPath, conversionStatus);
+			
+			currentStep++;
+			continue;
+		}
+
+		const exitCode = await runAgentStep(step, currentStep, options, totalSteps, conversionStatus);
 		if (exitCode !== 0) {
+			const endTime = new Date().toISOString();
+			const durationMs = Date.now() - mainStartTime;
+			const failedSteps = getFailedSteps(conversionStatus);
+			conversionStatus.overallStatus = "failed";
+			conversionStatus.endTime = endTime;
+			conversionStatus.durationMs = durationMs;
+			conversionStatus.failedStepNumbers = failedSteps;
+			await writeConversionStatus(outputPath, conversionStatus);
+			
 			console.error(`\n💥 Orchestrator stopped at step ${currentStep} due to error`);
+			console.error(`Total duration: ${(durationMs / 1000).toFixed(2)}s`);
+			console.error(`\nFailed steps: ${failedSteps.join(", ")}`);
+			console.error(`\nTo rerun failed steps:`);
+			console.error(`   bun run agents/orchestrator.ts --entity "${options.entity}" --rerun-failed`);
+			console.error(`\nStatus saved to: ${outputPath}/conversion-status.json\n`);
 			process.exit(exitCode);
 		}
 
 		currentStep++;
 	}
+
+	// Check for failed steps before finalizing
+	const failedSteps = getFailedSteps(conversionStatus);
+	const endTime = new Date().toISOString();
+	const durationMs = Date.now() - mainStartTime;
+	
+	// Only mark as completed if there are no failed steps
+	if (failedSteps.length === 0) {
+		conversionStatus.overallStatus = "completed";
+	} else {
+		conversionStatus.overallStatus = "failed";
+		conversionStatus.failedStepNumbers = failedSteps;
+	}
+	
+	conversionStatus.endTime = endTime;
+	conversionStatus.durationMs = durationMs;
+	await writeConversionStatus(outputPath, conversionStatus);
 
 	let childFormsMessage = "";
 	if (childFormsCount > 0) {
@@ -465,15 +770,42 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 `;
 	}
 
+	const totalDuration = conversionStatus.durationMs ? (conversionStatus.durationMs / 1000).toFixed(2) : "0.00";
+	const durationDisplay = `Total duration: ${totalDuration}s`;
+	
+	let failedStepsMessage = "";
+	if (failedSteps.length > 0) {
+		const failedStepsList = failedSteps.map(s => {
+			const step = conversionStatus.steps.find(st => st.stepNumber === s);
+			return `Step ${s}: ${step?.name || "unknown"}`;
+		}).join("\n     ");
+		
+		failedStepsMessage = `║                                                                            ║
+║  ⚠️  ${failedSteps.length} step(s) failed:${" ".padEnd(60, " ")}║
+║     ${failedStepsList.padEnd(75, " ")}║
+║                                                                            ║
+║  To rerun failed steps:                                                    ║
+║     bun run agents/orchestrator.ts --entity "${options.entity}" --rerun-failed${" ".padEnd(Math.max(0, 25 - options.entity.length), " ")}║
+║                                                                            ║
+`;
+	}
+	
+	const statusIcon = failedSteps.length === 0 ? "✅" : "⚠️";
+	const statusText = failedSteps.length === 0 ? "ANALYSIS COMPLETE" : "ANALYSIS COMPLETE (WITH FAILURES)";
+	const completionText = failedSteps.length === 0 
+		? `All ${totalSteps} analysis steps completed successfully for ${options.entity}`
+		: `${conversionStatus.completedSteps} of ${totalSteps} steps completed for ${options.entity}`;
+	
 	console.log(`
 ╔════════════════════════════════════════════════════════════════════════════╗
-║                    ANALYSIS COMPLETE ✅                                     ║
+║                    ${statusText} ${statusIcon}${" ".padEnd(78 - statusText.length - 2, " ")}║
 ║                                                                            ║
-║  All ${totalSteps} analysis steps completed successfully for ${options.entity.padEnd(28 - totalSteps.toString().length, " ")}║
+║  ${completionText.padEnd(78, " ")}║
+║  ${durationDisplay.padEnd(78, " ")}║
 ║                                                                            ║
 ║  Output directory: ${outputPath.padEnd(55, " ")}║
-${childFormsMessage}║                                                                            ║
-║  NEXT STEPS:                                                               ║
+║  Status file: ${`${outputPath}/conversion-status.json`.padEnd(56, " ")}║
+${childFormsMessage}${failedStepsMessage}║  NEXT STEPS:                                                               ║
 ║                                                                            ║
 ║  1. Generate conversion templates (interactive):                           ║
 ║     bun run generate-template --entity "${options.entity}"${" ".padEnd(Math.max(0, 33 - options.entity.length), " ")}║

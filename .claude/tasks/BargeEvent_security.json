@@ -1,0 +1,790 @@
+{
+  "entity": "BargeEvent",
+  "legacy": {
+    "searchForm": "frmBargeEventSearch",
+    "detailForm": "frmBargeEvent",
+    "subsystem": "frmBargeEventSearch",
+    "detailSubsystem": "frmTicketSearch",
+    "securityButtons": {
+      "search": [
+        {
+          "button": "btnFind",
+          "type": "Open",
+          "legacyPermission": "CanRead",
+          "description": "Search for barge events"
+        },
+        {
+          "button": "btnReset",
+          "type": "Open",
+          "legacyPermission": "CanRead",
+          "description": "Reset search criteria"
+        }
+      ],
+      "detail": [
+        {
+          "button": "btnSubmit",
+          "type": "Submit",
+          "legacyPermission": "CanCreate/CanUpdate",
+          "description": "Save barge event changes"
+        },
+        {
+          "button": "btnCancel",
+          "type": "Cancel",
+          "legacyPermission": "CanRead",
+          "description": "Cancel editing"
+        },
+        {
+          "button": "btnDetailSet",
+          "type": "Submit",
+          "legacyPermission": "CanUpdate",
+          "description": "Save detail panel changes"
+        },
+        {
+          "button": "btnDetailCancel",
+          "type": "Cancel",
+          "legacyPermission": "CanRead",
+          "description": "Cancel detail panel editing"
+        },
+        {
+          "button": "btnDelays",
+          "type": "Action",
+          "legacyPermission": "CanRead",
+          "description": "View/manage event delays"
+        },
+        {
+          "button": "btnDraftDetail",
+          "type": "Open",
+          "legacyPermission": "CanRead",
+          "description": "View draft details for single barge"
+        },
+        {
+          "button": "btnSurveyDraftDetail",
+          "type": "Open",
+          "legacyPermission": "CanRead",
+          "description": "View survey draft details"
+        },
+        {
+          "button": "btnEventBillingDetail",
+          "type": "Open",
+          "legacyPermission": "CanRead",
+          "description": "View event billing details"
+        },
+        {
+          "button": "btnAddToList",
+          "type": "Add",
+          "legacyPermission": "CanCreate",
+          "description": "Add barge to event list"
+        }
+      ],
+      "toolbar": [
+        {
+          "button": "c_BtnKeyAddToList",
+          "type": "Add",
+          "legacyPermission": "CanCreate",
+          "description": "Add barge to event (toolbar)"
+        },
+        {
+          "button": "c_BtnKeyModifyDetails",
+          "type": "Open",
+          "legacyPermission": "CanUpdate",
+          "description": "Modify barge details in event"
+        },
+        {
+          "button": "c_BtnKeyRemoveFromList",
+          "type": "Remove",
+          "legacyPermission": "CanDelete",
+          "description": "Remove barge from event list"
+        },
+        {
+          "button": "c_BtnKeyModifyBarge",
+          "type": "Open",
+          "legacyPermission": "CanUpdate",
+          "description": "Open barge master record for editing"
+        },
+        {
+          "button": "c_BtnKeyBargePositions",
+          "type": "Open",
+          "legacyPermission": "CanRead",
+          "description": "View barge position history"
+        },
+        {
+          "button": "c_BtnKeyNewBarge",
+          "type": "Add",
+          "legacyPermission": "CanCreate",
+          "description": "Create new barge record"
+        },
+        {
+          "button": "c_BtnKeyEnterTonnages",
+          "type": "Modify",
+          "legacyPermission": "CanUpdate",
+          "description": "Enter tonnage/quantity information"
+        },
+        {
+          "button": "c_BtnKeyManageBoats",
+          "type": "Open",
+          "legacyPermission": "CanRead",
+          "description": "Open boat management dialog"
+        },
+        {
+          "button": "c_BtnKeyExport",
+          "type": "Open",
+          "legacyPermission": "CanRead",
+          "description": "Export barge list to Excel"
+        }
+      ]
+    },
+    "crudOperations": {
+      "create": {
+        "method": "ItemAdd (implied from frmMain)",
+        "businessLogicCall": "BargeEvent.NewBargeEvent(...)",
+        "requiredPermission": "CanCreate"
+      },
+      "read": {
+        "method": "ItemModify",
+        "businessLogicCall": "BargeEvent.GetBargeEvent(...)",
+        "requiredPermission": "CanRead"
+      },
+      "update": {
+        "method": "btnSubmit_Click",
+        "businessLogicCall": "BargeEvent.ApplyEdit()",
+        "requiredPermission": "CanUpdate"
+      },
+      "search": {
+        "method": "RefreshList",
+        "businessLogicCall": "BargeEventSearch.GetList(...)",
+        "requiredPermission": "CanRead"
+      }
+    },
+    "contextMenuOperations": [
+      {
+        "operation": "MarkForRebill",
+        "method": "MarkForRebill",
+        "requiredPermission": "CanUpdate",
+        "description": "Mark selected events for rebilling"
+      },
+      {
+        "operation": "UnMarkForRebill",
+        "method": "UnMarkForRebill",
+        "requiredPermission": "CanUpdate",
+        "description": "Unmark selected events from rebilling"
+      }
+    ],
+    "accessLevelProperties": [
+      {
+        "property": "AccessLevelNonBilling",
+        "functionalArea": "tpgBargeDetails",
+        "description": "Access level for non-billing tab operations"
+      },
+      {
+        "property": "AccessLevelBilling",
+        "functionalArea": "tpgBilling",
+        "description": "Access level for billing tab operations"
+      }
+    ]
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/BargeEvent",
+          "action": "GetList",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeEventView",
+          "description": "Search barge events by criteria including event type, customer, location, dates"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeEvent/{ticketEventId}",
+          "action": "GetById",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeEventView",
+          "description": "Get barge event by TicketEventID with all barges and details"
+        },
+        {
+          "method": "POST",
+          "route": "api/BargeEvent",
+          "action": "Create",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeEventModify",
+          "description": "Create new barge event with one or more barges"
+        },
+        {
+          "method": "PUT",
+          "route": "api/BargeEvent/{ticketEventId}",
+          "action": "Update",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeEventModify",
+          "description": "Update existing barge event and associated barges"
+        },
+        {
+          "method": "PATCH",
+          "route": "api/BargeEvent/{ticketEventId}/rebill",
+          "action": "SetRebill",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeEventModify",
+          "description": "Mark or unmark events for rebilling"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeEvent/{ticketEventId}/billing",
+          "action": "GetBillingDetails",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeEventBillingView",
+          "description": "Get event billing details including freight and demurrage"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "permissions": [
+        {
+          "name": "BargeEventView",
+          "enumValue": "AuthPermissions.BargeEventView",
+          "description": "View barge events and search records",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "Search",
+            "Details"
+          ],
+          "uiElements": [
+            "Search form access",
+            "Grid display",
+            "Find button",
+            "Reset button",
+            "Export toolbar button",
+            "Detail form view (read-only)",
+            "View delays",
+            "View draft details",
+            "View billing details",
+            "View barge positions"
+          ]
+        },
+        {
+          "name": "BargeEventModify",
+          "enumValue": "AuthPermissions.BargeEventModify",
+          "description": "Create, update, and manage barge events and associated barges",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Create",
+            "Edit",
+            "SetRebill"
+          ],
+          "uiElements": [
+            "New button in main grid",
+            "Edit button in main grid",
+            "Submit button in detail form",
+            "All input fields enabled",
+            "Add barge to event",
+            "Remove barge from event",
+            "Modify barge details",
+            "Enter tonnages",
+            "Manage boats",
+            "Mark/Unmark for rebill",
+            "Event billing detail modifications"
+          ]
+        },
+        {
+          "name": "BargeEventBillingView",
+          "enumValue": "AuthPermissions.BargeEventBillingView",
+          "description": "View event billing information including freight and demurrage",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "ViewBilling"
+          ],
+          "uiElements": [
+            "Billing tab access",
+            "Freight billing tab access",
+            "Demurrage billing tab access",
+            "Billing audit tab access",
+            "Event billing detail button"
+          ]
+        },
+        {
+          "name": "BargeEventBillingModify",
+          "enumValue": "AuthPermissions.BargeEventBillingModify",
+          "description": "Modify event billing information",
+          "granularity": "Modify",
+          "requiredFor": [
+            "EditBilling"
+          ],
+          "uiElements": [
+            "Billing tab editable fields",
+            "Invoice note editing",
+            "Freight billing modifications",
+            "Demurrage billing modifications"
+          ]
+        }
+      ],
+      "buttonSecurity": [
+        {
+          "button": "btnNew",
+          "location": "Main search toolbar",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        },
+        {
+          "button": "btnEdit",
+          "location": "Main search toolbar",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        },
+        {
+          "button": "btnFind",
+          "location": "Search form",
+          "requiredPermission": "BargeEventView",
+          "hideWhenNoPermission": false
+        },
+        {
+          "button": "btnReset",
+          "location": "Search form",
+          "requiredPermission": "BargeEventView",
+          "hideWhenNoPermission": false
+        },
+        {
+          "button": "btnSubmit",
+          "location": "Detail form",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        },
+        {
+          "button": "btnCancel",
+          "location": "Detail form",
+          "requiredPermission": "BargeEventView",
+          "hideWhenNoPermission": false
+        },
+        {
+          "button": "btnDelays",
+          "location": "Detail form",
+          "requiredPermission": "BargeEventView",
+          "hideWhenNoPermission": false
+        },
+        {
+          "button": "btnDraftDetail",
+          "location": "Detail form",
+          "requiredPermission": "BargeEventView",
+          "hideWhenNoPermission": false,
+          "conditionalDisplay": "Only enabled when single barge selected and not Draft Survey event type"
+        },
+        {
+          "button": "btnSurveyDraftDetail",
+          "location": "Detail form",
+          "requiredPermission": "BargeEventView",
+          "hideWhenNoPermission": false
+        },
+        {
+          "button": "btnEventBillingDetail",
+          "location": "Detail form",
+          "requiredPermission": "BargeEventBillingView",
+          "hideWhenNoPermission": false
+        },
+        {
+          "button": "btnAddToList",
+          "location": "Detail form",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        },
+        {
+          "button": "toolbarAddToList",
+          "location": "Detail form toolbar",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        },
+        {
+          "button": "toolbarModifyDetails",
+          "location": "Detail form toolbar",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        },
+        {
+          "button": "toolbarRemoveFromList",
+          "location": "Detail form toolbar",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        },
+        {
+          "button": "toolbarModifyBarge",
+          "location": "Detail form toolbar",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true,
+          "notes": "Requires Barge modification permission as well"
+        },
+        {
+          "button": "toolbarBargePositions",
+          "location": "Detail form toolbar",
+          "requiredPermission": "BargeEventView",
+          "hideWhenNoPermission": false
+        },
+        {
+          "button": "toolbarNewBarge",
+          "location": "Detail form toolbar",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true,
+          "notes": "Requires Barge creation permission as well"
+        },
+        {
+          "button": "toolbarEnterTonnages",
+          "location": "Detail form toolbar",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        },
+        {
+          "button": "toolbarManageBoats",
+          "location": "Detail form toolbar",
+          "requiredPermission": "BargeEventView",
+          "hideWhenNoPermission": false,
+          "notes": "Opens Boat Search modal, requires Boat permissions"
+        },
+        {
+          "button": "toolbarExport",
+          "location": "Detail form toolbar",
+          "requiredPermission": "BargeEventView",
+          "hideWhenNoPermission": false
+        },
+        {
+          "button": "contextMenuMarkForRebill",
+          "location": "Search grid context menu",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        },
+        {
+          "button": "contextMenuUnMarkForRebill",
+          "location": "Search grid context menu",
+          "requiredPermission": "BargeEventModify",
+          "hideWhenNoPermission": true
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BargeEventView",
+          "value": "auto-assigned",
+          "description": "View barge events and search records"
+        },
+        {
+          "name": "BargeEventModify",
+          "value": "auto-assigned",
+          "description": "Create, update, and manage barge events and associated barges"
+        },
+        {
+          "name": "BargeEventBillingView",
+          "value": "auto-assigned",
+          "description": "View event billing information including freight and demurrage"
+        },
+        {
+          "name": "BargeEventBillingModify",
+          "value": "auto-assigned",
+          "description": "Modify event billing information"
+        }
+      ]
+    }
+  },
+  "implementation": {
+    "controllers": [
+      {
+        "name": "BargeEventController",
+        "type": "API",
+        "authentication": "[ApiKey]",
+        "baseClass": "ApiControllerBase",
+        "actions": [
+          "GetList",
+          "GetById",
+          "Create",
+          "Update",
+          "SetRebill",
+          "GetBillingDetails"
+        ]
+      },
+      {
+        "name": "BargeEventSearchController",
+        "type": "UI",
+        "authentication": "[Authorize]",
+        "baseClass": "AppController",
+        "actions": [
+          "Index",
+          "Search"
+        ],
+        "permissions": [
+          {
+            "action": "Index",
+            "policy": "BargeEventView"
+          },
+          {
+            "action": "Search",
+            "policy": "BargeEventView"
+          }
+        ]
+      },
+      {
+        "name": "BargeEventDetailController",
+        "type": "UI",
+        "authentication": "[Authorize]",
+        "baseClass": "AppController",
+        "actions": [
+          "Create",
+          "Edit",
+          "Details",
+          "SetRebill",
+          "ViewBilling",
+          "EditBilling"
+        ],
+        "permissions": [
+          {
+            "action": "Details",
+            "policy": "BargeEventView"
+          },
+          {
+            "action": "Create",
+            "policy": "BargeEventModify"
+          },
+          {
+            "action": "Edit",
+            "policy": "BargeEventModify"
+          },
+          {
+            "action": "SetRebill",
+            "policy": "BargeEventModify"
+          },
+          {
+            "action": "ViewBilling",
+            "policy": "BargeEventBillingView"
+          },
+          {
+            "action": "EditBilling",
+            "policy": "BargeEventBillingModify"
+          }
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "name": "BargeEventSearchViewModel",
+        "permissions": [
+          {
+            "property": "CanModify",
+            "permission": "BargeEventModify",
+            "description": "Controls visibility of New, Edit buttons and context menu operations"
+          },
+          {
+            "property": "CanViewBilling",
+            "permission": "BargeEventBillingView",
+            "description": "Controls visibility of billing-related columns and tabs"
+          }
+        ]
+      },
+      {
+        "name": "BargeEventDetailViewModel",
+        "permissions": [
+          {
+            "property": "CanModify",
+            "permission": "BargeEventModify",
+            "description": "Controls edit mode and submit button visibility"
+          },
+          {
+            "property": "IsReadOnly",
+            "permission": "!BargeEventModify",
+            "description": "Disables all input fields when user lacks modify permission"
+          },
+          {
+            "property": "CanModifyBilling",
+            "permission": "BargeEventBillingModify",
+            "description": "Controls billing tab edit capabilities"
+          },
+          {
+            "property": "CanViewBilling",
+            "permission": "BargeEventBillingView",
+            "description": "Controls billing tab visibility"
+          }
+        ]
+      }
+    ]
+  },
+  "specialFeatures": {
+    "multiBargeManagement": {
+      "description": "BargeEvent can manage multiple barges within a single event",
+      "securityNotes": "Add/Remove barge operations require BargeEventModify permission",
+      "operations": [
+        {
+          "operation": "Add barge to event",
+          "permission": "BargeEventModify"
+        },
+        {
+          "operation": "Remove barge from event",
+          "permission": "BargeEventModify"
+        },
+        {
+          "operation": "Modify barge details in event",
+          "permission": "BargeEventModify"
+        },
+        {
+          "operation": "View barge list",
+          "permission": "BargeEventView"
+        }
+      ]
+    },
+    "billingTabs": {
+      "description": "Separate tab control for billing operations with distinct access levels",
+      "securityNotes": "Billing operations can have different permissions than non-billing operations",
+      "tabs": [
+        {
+          "tab": "c_TabBilling",
+          "permission": "BargeEventBillingView",
+          "modifyPermission": "BargeEventBillingModify"
+        },
+        {
+          "tab": "c_TabFreightBilling",
+          "permission": "BargeEventBillingView",
+          "modifyPermission": "BargeEventBillingModify",
+          "licenseRequired": "Freight"
+        },
+        {
+          "tab": "c_TabDemurrageBilling",
+          "permission": "BargeEventBillingView",
+          "modifyPermission": "BargeEventBillingModify"
+        },
+        {
+          "tab": "c_TabBillingAudit",
+          "permission": "BargeEventBillingView"
+        }
+      ]
+    },
+    "licenseBasedFeatures": {
+      "description": "Features that are only available when specific licenses are active",
+      "licenses": [
+        {
+          "license": "Freight",
+          "variable": "_IsFreightActive",
+          "features": [
+            "Freight billing tab",
+            "Freight customer search field",
+            "Contract number search field",
+            "Freight-related grid columns (C/P Time, Release Time, Quantity, etc.)",
+            "Freight rate modifications",
+            "Minimum quantity/default tonnage settings"
+          ]
+        },
+        {
+          "license": "Terminal",
+          "variable": "_IsTerminalActive",
+          "features": [
+            "Terminal-specific operations"
+          ]
+        },
+        {
+          "license": "Onboard",
+          "variable": "_IsOnboardActive",
+          "features": [
+            "Onboard order integration",
+            "Create onboard order checkbox and dialog"
+          ]
+        },
+        {
+          "license": "Towing",
+          "variable": "_IsTowingActive",
+          "features": [
+            "Towing-specific operations"
+          ]
+        }
+      ]
+    },
+    "rebillingOperations": {
+      "description": "Mark/Unmark events for rebilling with multi-row selection support",
+      "securityNotes": "Rebilling operations require BargeEventModify permission",
+      "operations": [
+        {
+          "operation": "Mark for rebill",
+          "method": "MarkForRebill",
+          "permission": "BargeEventModify",
+          "description": "Mark selected events for rebilling, updates Ticket.UpdateRebillForTicketEvents"
+        },
+        {
+          "operation": "Unmark for rebill",
+          "method": "UnMarkForRebill",
+          "permission": "BargeEventModify",
+          "description": "Unmark selected events from rebilling"
+        }
+      ]
+    },
+    "draftManagement": {
+      "description": "Draft detail viewing and editing for barge drafts",
+      "securityNotes": "Draft viewing requires BargeEventView, editing requires BargeEventModify",
+      "operations": [
+        {
+          "operation": "View draft detail",
+          "permission": "BargeEventView",
+          "button": "btnDraftDetail",
+          "conditionalDisplay": "Only when single barge selected and not Draft Survey event"
+        },
+        {
+          "operation": "View survey draft detail",
+          "permission": "BargeEventView",
+          "button": "btnSurveyDraftDetail"
+        }
+      ]
+    },
+    "crossEntityIntegration": {
+      "description": "BargeEvent integrates with multiple other entities",
+      "integrations": [
+        {
+          "entity": "Barge",
+          "operations": [
+            "Modify existing barge (toolbarModifyBarge)",
+            "Create new barge (toolbarNewBarge)",
+            "View barge positions (toolbarBargePositions)"
+          ],
+          "notes": "Requires corresponding Barge permissions"
+        },
+        {
+          "entity": "Boat",
+          "operations": [
+            "Manage boats dialog (toolbarManageBoats)"
+          ],
+          "notes": "Opens frmModalSearch with SubSystem.frmBoatSearch, requires Boat permissions"
+        },
+        {
+          "entity": "Ticket",
+          "operations": [
+            "Event is part of Ticket hierarchy",
+            "Rebilling operations update Ticket"
+          ],
+          "notes": "Detail form uses SubSystem.frmTicketSearch for notifications"
+        }
+      ]
+    },
+    "notificationSystem": {
+      "description": "Form raises update notifications to multiple subsystems on save",
+      "subsystems": [
+        "SubSystem.frmTicketSearch",
+        "SubSystem.frmBargeSearch",
+        "SubSystem.frmBargeEventSearch"
+      ],
+      "notes": "Main.Notifier.Updated() is called for all three subsystems to refresh their lists"
+    }
+  },
+  "notes": [
+    "BargeEvent uses SubSystem.frmBargeEventSearch for the search form",
+    "BargeEvent detail form uses SubSystem.frmTicketSearch as its primary subsystem identifier",
+    "Search form implements IBaseSearch interface, detail form implements IBaseDetailEdit interface",
+    "Detail form manages complex state with separate access levels for non-billing (tpgBargeDetails) and billing (tpgBilling) tabs",
+    "BargeEvent is a complex multi-entity form managing tickets, events, and multiple barges",
+    "Special handling for isEditingReadonlyOperationsWithWritableBilling: allows billing modifications even when operations are read-only",
+    "Freight license controls visibility of multiple search fields and grid columns",
+    "Search requires at least one search criterion to prevent overly broad queries",
+    "Grid displays voided events with strikethrough formatting",
+    "Rebilling operations work on multi-row selections and update Ticket.UpdateRebillForTicketEvents",
+    "Export functionality uses Main.ExportGrid for Excel export",
+    "ControlAuthorization.GetAccessLevelForFunctionalArea is used for text editor dialogs",
+    "Both API and UI require authentication, but use different methods (ApiKey vs OIDC)",
+    "CSG Authorization framework will be implemented in the future for fine-grained permission control",
+    "Four distinct permission types: View, Modify, BillingView, BillingModify for granular access control",
+    "Toolbar buttons are tracked in _ToolbarButtonTypes hashtable for permission checking",
+    "Draft detail button has conditional logic based on barge count and event type"
+  ]
+}

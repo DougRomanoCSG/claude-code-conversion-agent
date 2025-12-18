@@ -1,0 +1,103 @@
+{
+  "parentEntity": "RiverArea",
+  "relationships": [
+    {
+      "relatedEntity": "RiverAreaSegment",
+      "relationshipType": "OneToMany",
+      "parentProperty": "RiverAreaSegments",
+      "childProperty": "RiverArea",
+      "foreignKey": "RiverAreaID",
+      "cascadeDelete": true,
+      "gridName": "grdList",
+      "gridColumns": [
+        {
+          "key": "River",
+          "header": "River",
+          "type": "String",
+          "width": 50,
+          "alignment": "Left"
+        },
+        {
+          "key": "StartMile",
+          "header": "Start Mile",
+          "type": "Decimal",
+          "width": 55,
+          "alignment": "Right"
+        },
+        {
+          "key": "EndMile",
+          "header": "End Mile",
+          "type": "Decimal",
+          "width": 55,
+          "alignment": "Right"
+        }
+      ],
+      "operations": {
+        "add": "ItemAdd",
+        "edit": "ItemModify",
+        "delete": "ItemRemove"
+      },
+      "collectionType": "RiverAreaSegments",
+      "notes": "Child entity segments are loaded via RiverAreaSegmentsBase.GetRiverAreaSegments(). The parent form manages CRUD operations for segments through Add/Modify/Remove buttons. Cascade delete is implemented in the database stored procedure RiverAreaDelete."
+    }
+  ],
+  "lookupRelationships": [
+    {
+      "property": "CustomerID",
+      "lookupEntity": "Customer",
+      "displayProperty": "CustomerName",
+      "required": false,
+      "notes": "Conditionally visible and enabled only when IsHighWaterArea is checked. Cleared automatically when IsHighWaterArea is unchecked."
+    }
+  ],
+  "childEntityDetails": {
+    "RiverAreaSegment": {
+      "foreignKeyProperty": "RiverAreaID",
+      "foreignKeyType": "Int32",
+      "childLookups": [
+        {
+          "property": "River",
+          "lookupEntity": "River",
+          "displayProperty": "RiverName",
+          "required": true,
+          "maxLength": 3
+        }
+      ],
+      "validationRules": [
+        "StartMile must be within the river's mile range",
+        "EndMile must be within the river's mile range",
+        "StartMile must not be greater than EndMile",
+        "River is required"
+      ]
+    }
+  },
+  "cascadeBehavior": {
+    "deleteParent": "DeletesAllChildSegments",
+    "deleteImplementation": "StoredProcedure",
+    "storedProcedure": "RiverAreaDelete",
+    "notes": "When a RiverArea is deleted, all associated RiverAreaSegments are deleted first via the RiverAreaDelete stored procedure, which explicitly deletes child records before deleting the parent."
+  },
+  "specialBusinessRules": [
+    {
+      "rule": "OverlappingPricingZones",
+      "description": "When IsPriceZone is true, validates that river segments don't overlap with other pricing zones on the same river",
+      "triggeredBy": "Save operation",
+      "relatedEntities": ["RiverAreaSegment", "River"]
+    },
+    {
+      "rule": "MutuallyExclusiveFlags",
+      "description": "Only one of these flags can be checked: IsPriceZone, IsPortalArea, or IsHighWaterArea",
+      "triggeredBy": "Flag changes"
+    },
+    {
+      "rule": "ConditionalCustomerID",
+      "description": "CustomerID must be blank if IsHighWaterArea is not checked",
+      "triggeredBy": "IsHighWaterArea or CustomerID changes"
+    }
+  ],
+  "repositoryPattern": {
+    "loadingStrategy": "ServiceLayer",
+    "childLoadingMethod": "GetRiverAreaSegments",
+    "notes": "Child collections are NOT included as properties in the entity class. They are loaded separately via repository methods and composed in the service layer."
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "parentEntity": "River",
+  "relationships": [
+    {
+      "relatedEntity": "RiverArea",
+      "relationshipType": "OneToMany",
+      "parentProperty": null,
+      "childProperty": "River",
+      "foreignKey": "RiverID",
+      "cascadeDelete": false,
+      "gridName": null,
+      "gridColumns": [],
+      "operations": {
+        "add": null,
+        "edit": null,
+        "delete": null
+      },
+      "notes": "RiverArea entities may reference River, but River does not have a child collection property for RiverAreas. Relationship is lookup-based (RiverAreaSegment.River references River.Code as char(3))."
+    },
+    {
+      "relatedEntity": "RiverSegmentDraft",
+      "relationshipType": "OneToMany",
+      "parentProperty": null,
+      "childProperty": "River",
+      "foreignKey": "RiverID",
+      "cascadeDelete": false,
+      "gridName": null,
+      "gridColumns": [],
+      "operations": {
+        "add": null,
+        "edit": null,
+        "delete": null
+      },
+      "notes": "RiverSegmentDraft has RiverID foreign key but River does not maintain a collection of draft segments. This is managed through separate search/list forms."
+    }
+  ],
+  "lookupRelationships": [],
+  "modernImplementationNotes": {
+    "pattern": "Simple reference entity with no child collections",
+    "entityDesign": "River is a pure entity class with NO navigation properties or child collections",
+    "repositoryMethods": [
+      "Task<River> GetByIdAsync(int id)",
+      "Task<IEnumerable<River>> GetAllAsync()",
+      "Task<River> CreateAsync(River river)",
+      "Task<River> UpdateAsync(River river)",
+      "Task DeleteAsync(int id)"
+    ],
+    "serviceLayer": "No related entity loading needed - River is a standalone master data entity",
+    "relatedEntityQueries": "Other entities query River by ID for lookup purposes, but River does not load related entities",
+    "cascadeBehavior": "Database-level foreign key constraints handle referential integrity",
+    "dapperPattern": "Standard CRUD operations without JOIN queries for child entities"
+  },
+  "analysisDetails": {
+    "formType": "Single panel detail form (frmRiverDetail)",
+    "hasChildGrids": false,
+    "childCollectionsInCode": false,
+    "entityPattern": "Master data / lookup entity",
+    "businessObjectPath": "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore.BusinessLogic/Business Objects/River.vb",
+    "baseClassPath": "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore.BusinessLogic/Business Objects/Base Classes/RiverBase.vb",
+    "formPath": "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore/Forms/frmRiverDetail.vb",
+    "childCollectionsFound": "None - Only p_Alert property for audit alerts",
+    "referencedBy": [
+      "RiverArea (via RiverAreaSegment.River as char(3) code)",
+      "RiverSegmentDraft (via RiverID as Int32)"
+    ]
+  },
+  "databaseSchema": {
+    "primaryKey": "RiverID (Int32)",
+    "uniqueConstraints": [
+      "Code (char(3)) - 3-character waterway code"
+    ],
+    "indexes": [],
+    "properties": {
+      "RiverID": "Int32 (PK)",
+      "Name": "String (varchar(40)) - Required",
+      "Code": "String (char(3)) - Required, exactly 3 characters",
+      "BargeExCode": "String (varchar(10)) - Optional",
+      "StartMile": "Decimal - Optional, must be >= 0",
+      "EndMile": "Decimal - Optional, must be >= StartMile",
+      "IsLowToHighDirection": "Boolean - Default true",
+      "IsActive": "Boolean - Default true",
+      "ConvFmsRiverID": "String (Int32) - Optional, legacy conversion field",
+      "UpLabel": "String (varchar(20)) - Required, custom upstream label",
+      "DownLabel": "String (varchar(20)) - Required, custom downstream label"
+    },
+    "auditFields": [
+      "CreateDateTime",
+      "CreateUser",
+      "ModifyDateTime",
+      "ModifyUser"
+    ],
+    "storedProcedures": {
+      "select": "RiverSelect",
+      "insert": "RiverInsert",
+      "update": "RiverUpdate",
+      "delete": "RiverDelete"
+    }
+  }
+}

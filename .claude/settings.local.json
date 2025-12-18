@@ -4,7 +4,12 @@
       "Bash(mkdir:*)",
       "Bash(test:*)",
       "Bash(bun run:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(IBoatFuelPriceRepository.cs)",
+      "Bash(BoatFuelPriceRepository.cs)",
+      "Bash(\"C:/source/agents/ClaudeOnshoreConversionAgent/output/BoatFuelPrices/templates/ui/wwwroot/js/boatFuelPriceSearch.js\")",
+      "Bash(\"C:/source/agents/ClaudeOnshoreConversionAgent/output/BoatFuelPrices/README.md\")",
+      "Bash(xargs basename:*)"
     ],
     "deny": [],
     "ask": [],

@@ -9,6 +9,7 @@ import type { ClaudeFlags } from "../lib/claude-flags.types";
 import { getProjectRoot, getListPathForPrompt, getAdminApiExamples, getCrewingApiExamples, getSharedExamples } from "../lib/paths";
 import dataAccessSettings from "../settings/data-access.settings.json" with { type: "json" };
 import dataAccessMcp from "../settings/data-access.mcp.json" with { type: "json" };
+import dataAccessAnalyzerPrompt from "../system-prompts/data-access-analyzer-prompt.md" with { type: "text" };
 
 const projectRoot = getProjectRoot(import.meta.url);
 const settingsJson = JSON.stringify(dataAccessSettings);
@@ -26,64 +27,47 @@ async function main() {
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
 
-	const systemPrompt = `
-You are a Data Access Pattern Analyzer agent.
-
+	// Build context-specific prompt with entity details and paths
+	const contextPrompt = `
 TASK: Extract data access patterns for ${entity}.
 
 TARGET FILES:
 - List class: ${getListPathForPrompt(entity)}
 - Business object CRUD methods
 
-GOALS:
-1. Extract stored procedure name and parameters
-2. Parse AddFetchParameters for search criteria
-3. Extract result column mapping from ReadRow
-4. Identify CRUD operations (Insert, Update, Delete, GetByID)
-5. Extract data formatting logic
-6. Identify child entity operations (if any)
+OUTPUT:
+Generate a JSON file at: ${outputPath}/data-access.json
 
-ARCHITECTURE NOTE:
-⭐ The target project uses a MONO SHARED structure:
-- DTOs and Models are in BargeOps.Shared (${getSharedExamples().dtos})
-- Repositories use Dapper with DIRECT SQL QUERIES (NOT stored procedures)
-- Results are mapped to DTOs from the shared project
-- Legacy VB.NET code uses stored procedures, but modern C# uses parameterized SQL queries
-
-REFERENCE EXAMPLES:
-For data access patterns, reference:
-- BargeOps.Shared DTOs: ${getSharedExamples().dtos}
+ARCHITECTURE REFERENCES:
+- Shared DTOs: ${getSharedExamples().dtos}
   Example: FacilityDto.cs, BoatLocationDto.cs - Target DTOs for query results
-- BargeOps.Admin.API Repositories: ${getAdminApiExamples().repositories}
-  Primary reference: IFacilityRepository.cs, FacilityRepository.cs - Dapper with DIRECT SQL QUERIES
-  Primary reference: IBoatLocationRepository.cs, BoatLocationRepository.cs - Complete CRUD patterns with parameterized SQL
-- BargeOps.Crewing.API Repositories: ${getCrewingApiExamples().repositories}
-  Examples: ICrewingRepository.cs, CrewingRepository.cs - Additional Dapper query patterns
+- Admin API Repositories: ${getAdminApiExamples().repositories}
+  Primary reference: IFacilityRepository.cs, FacilityRepository.cs - Dapper with SQL files
+  Primary reference: IBoatLocationRepository.cs, BoatLocationRepository.cs - Complete CRUD patterns
+- Crewing API Repositories: ${getCrewingApiExamples().repositories}
+  Examples: ICrewingRepository.cs, CrewingRepository.cs - Additional Dapper patterns
 
-KEY PATTERNS TO IDENTIFY (Legacy VB.NET Stored Procedures):
-⭐ IMPORTANT: Extract these SP patterns from legacy VB.NET code, but document that they will be CONVERTED to Dapper SQL queries:
-- Search operations: sp_{Entity}Search stored procedure → Convert to dynamic SQL query with WHERE clause
-- GetByID: sp_{Entity}_GetByID → Convert to SELECT with parameter
-- Insert: sp_{Entity}_Insert → Convert to INSERT with OUTPUT clause
-- Update: sp_{Entity}_Update → Convert to UPDATE with parameters
-- Delete: sp_{Entity}_Delete → Convert to soft delete UPDATE (IsActive = 0)
-- Child entities: sp_{Entity}{Child}_GetByParentID → Convert to SELECT with JOIN
-
-CONVERSION NOTE: All extracted SP names and parameters should be documented in data-access.json with a note that they will be implemented as Dapper queries, NOT database stored procedures.
-
-OUTPUT: ${outputPath}/data-access.json
+KEY PATTERNS TO IDENTIFY:
+Extract stored procedure patterns from legacy VB.NET code, documenting that they will be converted to embedded SQL files:
+- Search operations: sp_{Entity}Search → {Entity}_Search.sql
+- GetByID: sp_{Entity}_GetByID → {Entity}_GetById.sql
+- Insert: sp_{Entity}_Insert → {Entity}_Insert.sql
+- Update: sp_{Entity}_Update → {Entity}_Update.sql
+- Delete: sp_{Entity}_Delete → {Entity}_SetActive.sql (soft delete with IsActive)
+- Child entities: sp_{Entity}{Child}_GetByParentID → {Entity}_GetRelated.sql
 
 Begin extraction.
 `;
 
 	const baseFlags = {
+		"append-system-prompt": dataAccessAnalyzerPrompt,
 		settings: settingsJson,
 		"mcp-config": mcpJson,
 		...(interactive ? {} : { print: true, "output-format": "json" }),
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
-	const child = spawn(["claude", ...flags, systemPrompt], {
+	const child = spawn(["claude", ...flags, contextPrompt], {
 		stdin: "inherit",
 		stdout: interactive ? "inherit" : "pipe",
 		stderr: "inherit",

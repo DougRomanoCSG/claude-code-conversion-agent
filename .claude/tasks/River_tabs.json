@@ -1,0 +1,183 @@
+{
+  "formName": "frmRiverDetail",
+  "hasTabControl": false,
+  "formType": "Single Panel Detail Form",
+  "purpose": "Edit River/Waterway master data",
+  "mainPanel": "pnlRiverDetail",
+  "sections": [
+    {
+      "name": "Basic Information",
+      "order": 1,
+      "purpose": "Core river/waterway identification",
+      "controls": [
+        {
+          "name": "txtName",
+          "type": "UltraTextEditor",
+          "label": "Waterway name",
+          "required": false,
+          "validation": "String",
+          "maxLength": "River.MaxLength.Name",
+          "tabIndex": 1,
+          "binding": "_River.Name"
+        },
+        {
+          "name": "txtCode",
+          "type": "UltraTextEditor",
+          "label": "Code",
+          "required": false,
+          "validation": "Custom - Must be exact length",
+          "customRegex": "\\w{River.MaxLength.Code}",
+          "errorMessage": "Abbreviation must be exactly N characters long",
+          "maxLength": "River.MaxLength.Code",
+          "tabIndex": 3,
+          "binding": "_River.Code",
+          "notes": "Converted to uppercase on validation"
+        },
+        {
+          "name": "txtBargeExCode",
+          "type": "UltraTextEditor",
+          "label": "BargeEx Code",
+          "required": false,
+          "validation": "String",
+          "maxLength": "River.MaxLength.BargeExCode",
+          "tabIndex": 9,
+          "binding": "_River.BargeExCode"
+        }
+      ]
+    },
+    {
+      "name": "Mileage Information",
+      "order": 2,
+      "purpose": "Define river mile range",
+      "controls": [
+        {
+          "name": "txtStartMile",
+          "type": "UltraTextEditor",
+          "label": "Start mile",
+          "required": false,
+          "validation": "Decimal",
+          "tabIndex": 5,
+          "binding": "_River.StartMile"
+        },
+        {
+          "name": "txtEndMile",
+          "type": "UltraTextEditor",
+          "label": "End mile",
+          "required": false,
+          "validation": "Decimal",
+          "tabIndex": 7,
+          "binding": "_River.EndMile"
+        }
+      ]
+    },
+    {
+      "name": "Direction Labels",
+      "order": 3,
+      "purpose": "Custom labels for upstream/downstream",
+      "controls": [
+        {
+          "name": "txtUpLabel",
+          "type": "UltraTextEditor",
+          "label": "Upstream",
+          "required": false,
+          "validation": "String",
+          "maxLength": "River.MaxLength.UpLabel",
+          "tabIndex": 11,
+          "binding": "_River.UpLabel"
+        },
+        {
+          "name": "txtDownLabel",
+          "type": "UltraTextEditor",
+          "label": "Downstream",
+          "required": false,
+          "validation": "String",
+          "maxLength": "River.MaxLength.DownLabel",
+          "tabIndex": 13,
+          "binding": "_River.DownLabel"
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "order": 4,
+      "purpose": "River configuration options",
+      "controls": [
+        {
+          "name": "chkIsLowToHighDirection",
+          "type": "UltraCheckEditor",
+          "label": "Direction is low to high (like Mississippi)",
+          "defaultValue": true,
+          "tabIndex": 15,
+          "binding": "_River.IsLowToHighDirection"
+        }
+      ]
+    }
+  ],
+  "sharedControls": {
+    "location": "Bottom of form in grpSubmitCancel",
+    "containerControl": "grpSubmitCancel",
+    "dockStyle": "Bottom",
+    "controls": [
+      {
+        "name": "chkIsActive",
+        "type": "UltraCheckEditor",
+        "text": "Active",
+        "defaultValue": true,
+        "tabIndex": 1,
+        "binding": "_River.IsActive",
+        "location": "Left side of submit/cancel group"
+      },
+      {
+        "name": "btnSubmit",
+        "type": "UltraButton",
+        "text": "&Submit",
+        "action": "Save river data",
+        "dialogResult": "OK",
+        "tabIndex": 3,
+        "anchor": "Top, Right",
+        "security": "ButtonType.Submit"
+      },
+      {
+        "name": "btnCancel",
+        "type": "UltraButton",
+        "text": "&Cancel",
+        "action": "Cancel changes",
+        "dialogResult": "Cancel",
+        "tabIndex": 5,
+        "anchor": "Top, Right",
+        "security": "ButtonType.Cancel",
+        "causesValidation": false
+      }
+    ]
+  },
+  "statusBar": {
+    "name": "staStatus",
+    "location": "Bottom of form",
+    "purpose": "Display validation errors via ValidatorExtender"
+  },
+  "formProperties": {
+    "title": "<New or River Name> - River/Waterway Detail",
+    "titlePattern": "Shows 'New' for new records or river name for existing",
+    "formBorderStyle": "Fixed3D",
+    "maximizeBox": false,
+    "minimizeBox": false,
+    "showInTaskbar": false,
+    "startPosition": "CenterParent",
+    "baseClass": "frmBaseDetailEdit",
+    "interface": "IBaseDetailEdit"
+  },
+  "businessObject": {
+    "type": "BusinessLogic.River",
+    "variable": "_River",
+    "editMode": "BeginEdit() called in Initialize()",
+    "parentSearchForm": "SubSystem.frmRiverSearch"
+  },
+  "noTabsReason": "Simple master data form with minimal fields - no need for tabs",
+  "modernImplementationNotes": {
+    "layout": "Single Bootstrap card with logical field grouping",
+    "sections": "Use Bootstrap row/col grid for responsive layout",
+    "submitCancelGroup": "Bootstrap button group in card footer",
+    "validation": "Client-side validation with server-side backup",
+    "pattern": "Simple CRUD form - no complex tab navigation required"
+  }
+}

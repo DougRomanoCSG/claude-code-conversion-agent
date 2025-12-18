@@ -1,0 +1,707 @@
+{
+  "entity": "BargeEvent",
+  "extractedFrom": [
+    "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\BargeEvent.vb",
+    "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\TicketEvent.vb"
+  ],
+  "formValidation": {
+    "method": "N/A - BargeEvent is a business object, not a form",
+    "rules": []
+  },
+  "businessValidation": {
+    "method": "CheckBusinessRules",
+    "sourceLocation": "BargeEvent.vb:5314-5363",
+    "rules": [
+      {
+        "ruleName": "BargeDraftInchesRange",
+        "property": "BargeDraftInches",
+        "propertyConstant": "cPropBargeDraftInches",
+        "condition": "(_BargeDraftInches <> String.Empty AndAlso (CInt(_BargeDraftInches) < 0 OrElse CInt(_BargeDraftInches) > 11))",
+        "message": "Draft Inches must be between 0 and 11.",
+        "severity": "Error",
+        "alwaysApplies": false,
+        "appliesWhen": "BargeDraftInches property is set",
+        "validationType": "Range",
+        "minimumValue": 0,
+        "maximumValue": 11
+      },
+      {
+        "ruleName": "BargeIsActiveForNewEvent",
+        "property": "BargeIsActiveForNewEvent",
+        "propertyConstant": "cPropBargeIsActiveForNewEvent",
+        "condition": "(Me.AtLeastOneTicketEventIsNew AndAlso Me.AtLeastOneBargeIsInactive)",
+        "message": "A new event cannot be added for an inactive barge.",
+        "severity": "Error",
+        "alwaysApplies": false,
+        "appliesWhen": "Adding a new event for barges",
+        "validationType": "Business Rule"
+      },
+      {
+        "ruleName": "LoadedBargeOnLoadComplete",
+        "property": "LoadedBargeOnLoadComplete",
+        "propertyConstant": "cPropLoadedBargeOnLoadComplete",
+        "condition": "(Me.EventTypeEnumVal = Lists.EventTypeList.EventTypes.Load) AndAlso (Me.StatusEnumVal = Lists.EventTypeList.EventStatus.Complete) AndAlso Me.IsCompleting AndAlso (Not String.IsNullOrEmpty(Me.BargesPreviouslyLoaded))",
+        "message": "One or more barges have a current load status of \"Load\".",
+        "severity": "Error",
+        "alwaysApplies": false,
+        "appliesWhen": "Freight license is active AND completing a Load event",
+        "validationType": "Business Rule",
+        "licenseRequired": "Freight",
+        "relatedProperties": ["EventType", "Status", "CompleteDateTime"]
+      },
+      {
+        "ruleName": "NoLoadOnUnloadComplete",
+        "property": "NoLoadOnUnloadComplete",
+        "propertyConstant": "cPropNoLoadOnUnloadComplete",
+        "condition": "(Me.EventTypeEnumVal = Lists.EventTypeList.EventTypes.Unload) AndAlso (Me.StatusEnumVal = Lists.EventTypeList.EventStatus.Complete) AndAlso (Not String.IsNullOrEmpty(Me.NoLoadEvent))",
+        "message": "One or more barges do not have a prior Load event.",
+        "severity": "Error",
+        "alwaysApplies": false,
+        "appliesWhen": "Freight license is active AND completing an Unload event",
+        "validationType": "Business Rule",
+        "licenseRequired": "Freight"
+      }
+    ]
+  },
+  "ticketEventValidation": {
+    "method": "CheckBusinessRules (TicketEvent)",
+    "sourceLocation": "TicketEvent.vb:7768-8567+",
+    "importantRules": [
+      {
+        "ruleName": "IsReadyToInvoiceRateMissing",
+        "property": "IsReadyToInvoice",
+        "condition": "(_IsReadyToInvoice AndAlso Me.IsRateMissing)",
+        "message": "If the ticket event has a missing rate, it cannot be marked as ready to invoice.",
+        "severity": "Error",
+        "validationType": "Business Rule"
+      },
+      {
+        "ruleName": "BillingCustomerRequired",
+        "property": "BillingCustomerID",
+        "condition": "(_EventTypeEnumVal = EventTypes.CharterOut) AndAlso String.IsNullOrEmpty(p_BillingCustomerID)",
+        "message": "Billing customer is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is Charter-Out OR (Fleeting-only application AND billable event)",
+        "validationType": "Required"
+      },
+      {
+        "ruleName": "RateTypeRequiredForManual",
+        "property": "RateType",
+        "condition": "(String.IsNullOrEmpty(p_RateType) AndAlso (p_ChargeType.Equals(CStr(Rate.BillingChargeType.Manual))))",
+        "message": "Rate type is required if Charge is \"Manual\".",
+        "severity": "Error",
+        "appliesWhen": "ChargeType is Manual",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "BaseRateRequiredForManual",
+        "property": "BaseRate",
+        "condition": "(String.IsNullOrEmpty(p_BaseRate) AndAlso (p_ChargeType.Equals(CStr(Rate.BillingChargeType.Manual))))",
+        "message": "Base rate is required if Charge is \"Manual\".",
+        "severity": "Error",
+        "appliesWhen": "ChargeType is Manual",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "BaseRateNonNegative",
+        "property": "BaseRate",
+        "condition": "((Not String.IsNullOrEmpty(p_BaseRate)) AndAlso (CDec(Me.BaseRate) < 0) AndAlso (Not Lists.GlobalSettingList.EnableNegativeBargeEventRates))",
+        "message": "Base rate must be non-negative.",
+        "severity": "Error",
+        "appliesWhen": "EnableNegativeBargeEventRates global setting is False",
+        "validationType": "Range",
+        "minimumValue": 0
+      },
+      {
+        "ruleName": "MinimumNonNegative",
+        "property": "Minimum",
+        "condition": "(Int32.TryParse(p_Minimum, New Int32) AndAlso (CInt(p_Minimum) < 0))",
+        "message": "Minimum must be non-negative.",
+        "severity": "Error",
+        "validationType": "Range",
+        "minimumValue": 0
+      },
+      {
+        "ruleName": "InvoiceNoteRequiredForManualOrNoCharge",
+        "property": "InvoiceNote",
+        "condition": "(String.IsNullOrEmpty(p_InvoiceNote) AndAlso (p_ChargeType.Equals(CStr(Rate.BillingChargeType.Manual)) OrElse p_ChargeType.Equals(CStr(Rate.BillingChargeType.NoCharge))))",
+        "message": "Invoice note is required if Charge is \"Manual\" or \"No Charge\".",
+        "severity": "Error",
+        "appliesWhen": "ChargeType is Manual or No Charge",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "LoadStatusRequiredForDefaultCharge",
+        "property": "LoadStatus",
+        "condition": "(String.IsNullOrEmpty(p_LoadStatus) AndAlso p_ChargeType.Equals(CStr(Rate.BillingChargeType.Default)) AndAlso _IsBillable)",
+        "message": "Load status is required if Charge is \"Default\" and the event is billable.",
+        "severity": "Error",
+        "appliesWhen": "ChargeType is Default AND event is billable",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "LoadStatusRequiredForShift",
+        "property": "LoadStatus",
+        "condition": "(String.IsNullOrEmpty(p_LoadStatus) AndAlso (Me.EventTypeEnumVal = EventTypes.Shift))",
+        "message": "Load status is required if the event type is \"Shift\".",
+        "severity": "Error",
+        "appliesWhen": "Event type is Shift",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "LoadStatusRequiredForFleeting",
+        "property": "LoadStatus",
+        "condition": "(String.IsNullOrEmpty(p_LoadStatus) AndAlso (Me.EventTypeEnumVal = EventTypes.Fleeting))",
+        "message": "Load status is required if the event type is \"Fleeting\".",
+        "severity": "Error",
+        "appliesWhen": "Event type is Fleeting",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "FromLocationRequired",
+        "property": "FromLocationID",
+        "condition": "Event type specific - see appliesWhen",
+        "message": "From facility/boat/location is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is: CallForPickup, MidstreamIn, MidstreamOut, ScheduleIn, Shift, BreakTow, MakeTow, Tow, Turn, Load, Unload, Fleeting, TankLoad, TankDischarge",
+        "validationType": "Conditional Required",
+        "fieldNameVariations": {
+          "default": "From facility",
+          "MidstreamIn": "From boat",
+          "ScheduleIn": "From boat",
+          "Turn": "From boat",
+          "BreakTow": "Boat",
+          "MakeTow": "Boat",
+          "Shift": "From facility/From boat",
+          "Tow": "From facility/From boat",
+          "Load": "At facility",
+          "PartialLoad": "At facility",
+          "Unload": "At facility",
+          "Fleeting": "Port facility",
+          "TankLoad": "Transfer facility",
+          "TankDischarge": "Transfer facility"
+        }
+      },
+      {
+        "ruleName": "ToLocationRequired",
+        "property": "ToLocationID",
+        "condition": "Event type specific - see appliesWhen",
+        "message": "To facility/boat/location is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is: MidstreamIn, MidstreamOut, ScheduleOut, Shift, Turn, ScheduleIn, Tow (when Complete), PlaceOnOrderToFacilityShip, ConsignToFacilityShip",
+        "validationType": "Conditional Required",
+        "fieldNameVariations": {
+          "default": "To facility",
+          "MidstreamOut": "To boat",
+          "ScheduleOut": "To boat",
+          "Turn": "To boat",
+          "Shift": "To facility/To boat",
+          "Tow": "To facility/To boat",
+          "PlaceOnOrderToFacilityShip": "Consign facility",
+          "ConsignToFacilityShip": "Consign facility"
+        }
+      },
+      {
+        "ruleName": "WaitDateTimeBeforeStart",
+        "property": "WaitDateTime",
+        "condition": "((Not String.IsNullOrEmpty(Me.WaitDateTime)) AndAlso (Not String.IsNullOrEmpty(Me.StartDateTime)) AndAlso (CType(Me.StartDateTime, Date) < CType(Me.WaitDateTime, Date)))",
+        "message": "Wait date/time must be earlier than Start date/time.",
+        "severity": "Error",
+        "validationType": "Date Ordering"
+      },
+      {
+        "ruleName": "CpDateTimeBeforeStart",
+        "property": "CpDateTime",
+        "condition": "((Not String.IsNullOrEmpty(Me.CpDateTime)) AndAlso (Not String.IsNullOrEmpty(Me.StartDateTime)) AndAlso (CType(Me.StartDateTime, Date) < CType(Me.CpDateTime, Date)))",
+        "message": "C/P date/time must be earlier than Start date/time.",
+        "severity": "Error",
+        "validationType": "Date Ordering"
+      },
+      {
+        "ruleName": "CompleteDateTimeAfterRelease",
+        "property": "ReleaseDateTime",
+        "condition": "((Not String.IsNullOrEmpty(Me.CompleteDateTime)) AndAlso (Not String.IsNullOrEmpty(Me.ReleaseDateTime)) AndAlso (CType(Me.ReleaseDateTime, Date) < CType(Me.CompleteDateTime, Date)))",
+        "message": "Complete date/time must be earlier than Release date/time.",
+        "severity": "Error",
+        "validationType": "Date Ordering"
+      },
+      {
+        "ruleName": "StartDateTimeRequired",
+        "property": "StartDateTime",
+        "condition": "Event type and status specific",
+        "message": "Start date/time is required.",
+        "severity": "Error",
+        "appliesWhen": "Various event types including: CharterOut, Clean (Start/Complete), Fleeting, LockDelay, MidstreamIn, MidstreamOut, BreakTow, MakeTow, Other, UserDefined1-10, Standby, WaitSale, Pumping (Complete), CoverHandling (Complete), Repair (Complete), Shift (not Order), TankDischarge, TankLoad, Tow (Start/Complete), Turn, Load (Complete when Freight active), PartialLoad (Complete when Freight active), Unload (Complete when Freight active)",
+        "validationType": "Conditional Required",
+        "fieldNameVariations": {
+          "TankDischarge": "Arrive time",
+          "TankLoad": "Arrive time"
+        }
+      },
+      {
+        "ruleName": "CompleteDateTimeRequired",
+        "property": "CompleteDateTime",
+        "condition": "Event type and status specific",
+        "message": "Complete date/time is required.",
+        "severity": "Error",
+        "appliesWhen": "Various event types when Complete status including: AssignToTrain, Comment, BreakTow, DraftSurvey, MakeTow, Clean, CharterOut, CoverHandling, Load, LockDelay, MidstreamIn, MidstreamOut, Other, UserDefined1-10, PartialLoad, Pumping, Repair, Shift, Standby, Tow, TankDischarge, TankLoad, Turn, Unload, WaitSale",
+        "validationType": "Conditional Required",
+        "fieldNameVariations": {
+          "Comment": "Comment time",
+          "AssignToTrain": "Event time",
+          "TankDischarge": "Depart time",
+          "TankLoad": "Depart time"
+        }
+      },
+      {
+        "ruleName": "StartBeforeComplete",
+        "property": "StartDateTime",
+        "condition": "((Not String.IsNullOrEmpty(Me.StartDateTime)) AndAlso (Not String.IsNullOrEmpty(Me.CompleteDateTime)) AndAlso (CType(Me.StartDateTime, Date) > CType(Me.CompleteDateTime, Date)))",
+        "message": "Start date/time must be earlier than Complete date/time.",
+        "severity": "Error",
+        "appliesWhen": "All event types except TankDischarge and TankLoad",
+        "validationType": "Date Ordering"
+      },
+      {
+        "ruleName": "CpDateTimeNotInFuture",
+        "property": "CpDateTime",
+        "condition": "Date is more than MaxFutureIntervalHours in the future",
+        "message": "C/P date/time may not be set to a time in the future more than the global setting value.",
+        "severity": "Error",
+        "validationType": "Date Range"
+      },
+      {
+        "ruleName": "WaitDateTimeNotInFuture",
+        "property": "WaitDateTime",
+        "condition": "Date is more than MaxFutureIntervalHours in the future",
+        "message": "Wait date/time may not be set to a time in the future more than the global setting value.",
+        "severity": "Error",
+        "validationType": "Date Range"
+      },
+      {
+        "ruleName": "StartDateTimeNotInFuture",
+        "property": "StartDateTime",
+        "condition": "Date is more than MaxFutureIntervalHours in the future",
+        "message": "Start date/time may not be set to a time in the future more than the global setting value.",
+        "severity": "Error",
+        "validationType": "Date Range"
+      },
+      {
+        "ruleName": "CompleteDateTimeNotInFuture",
+        "property": "CompleteDateTime",
+        "condition": "Date is more than MaxFutureIntervalHours in the future",
+        "message": "Complete date/time may not be set to a time in the future more than the global setting value.",
+        "severity": "Error",
+        "validationType": "Date Range"
+      },
+      {
+        "ruleName": "ReleaseDateTimeNotInFuture",
+        "property": "ReleaseDateTime",
+        "condition": "Date is more than MaxFutureIntervalHours in the future",
+        "message": "Release date/time may not be set to a time in the future more than the global setting value.",
+        "severity": "Error",
+        "validationType": "Date Range"
+      },
+      {
+        "ruleName": "ScheduledStartBeforeComplete",
+        "property": "SchedStartDateTime",
+        "condition": "((Not String.IsNullOrEmpty(Me.SchedStartDateTime)) AndAlso (Not String.IsNullOrEmpty(Me.SchedCompleteDateTime)) AndAlso (CType(Me.SchedStartDateTime, Date) > CType(Me.SchedCompleteDateTime, Date)))",
+        "message": "Scheduled start date/time must be earlier than Scheduled complete date/time.",
+        "severity": "Error",
+        "validationType": "Date Ordering"
+      },
+      {
+        "ruleName": "ScheduledCompleteDateTimeRequired",
+        "property": "SchedCompleteDateTime",
+        "condition": "(p_SchedCompleteDateTime.IsEmpty AndAlso (Me.EventTypeEnumVal = EventTypes.PlaceOnOrderToFacilityShip))",
+        "message": "Scheduled date/time is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is PlaceOnOrderToFacilityShip",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "CommentRequired",
+        "property": "Note",
+        "condition": "(String.IsNullOrEmpty(p_Note) AndAlso (Me.EventTypeEnumVal = EventTypes.Comment))",
+        "message": "Comment is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is Comment",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "CleanTypeRequired",
+        "property": "CleanType",
+        "condition": "(String.IsNullOrEmpty(p_CleanType) AndAlso (Me.EventTypeEnumVal = EventTypes.Clean))",
+        "message": "Clean Type is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is Clean",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "CoverHandlingTypeRequired",
+        "property": "CoverHandlingType",
+        "condition": "(String.IsNullOrEmpty(p_CoverHandlingType) AndAlso (Me.EventTypeEnumVal = EventTypes.CoverHandling))",
+        "message": "Cover Handling is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is CoverHandling",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "PumpTypeRequired",
+        "property": "PumpType",
+        "condition": "(String.IsNullOrEmpty(p_PumpType) AndAlso (Me.EventTypeEnumVal = EventTypes.Pumping))",
+        "message": "Pump type is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is Pumping",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "RepairTypeRequired",
+        "property": "RepairType",
+        "condition": "(String.IsNullOrEmpty(p_RepairType) AndAlso (Me.EventTypeEnumVal = EventTypes.Repair))",
+        "message": "Repair type is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is Repair",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "TankDockedDateTimeRequired",
+        "property": "TankDockedDateTime",
+        "condition": "Event type is TankDischarge or TankLoad and field is empty",
+        "message": "TankDocked date/time is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "TankCargoHoseOnDateTimeRequired",
+        "property": "TankCargoHoseOnDateTime",
+        "condition": "Event type is TankDischarge or TankLoad and field is empty",
+        "message": "TankCargoHoseOn date/time is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "TankStartTransferDateTimeRequired",
+        "property": "TankStartTransferDateTime",
+        "condition": "Event type is TankDischarge or TankLoad and field is empty",
+        "message": "TankStartTransfer date/time is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "TankFinishedTransferDateTimeRequired",
+        "property": "TankFinishedTransferDateTime",
+        "condition": "Event type is TankDischarge or TankLoad and field is empty",
+        "message": "TankFinishedTransfer date/time is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "TankCargoHoseOffDateTimeRequired",
+        "property": "TankCargoHoseOffDateTime",
+        "condition": "Event type is TankDischarge or TankLoad and field is empty",
+        "message": "TankCargoHoseOff date/time is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "TankBargeReleasedDateTimeRequired",
+        "property": "TankBargeReleasedDateTime",
+        "condition": "Event type is TankDischarge or TankLoad and field is empty",
+        "message": "TankBargeReleased date/time is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "TankDateTimeOrdering",
+        "property": "Multiple Tank DateTime fields",
+        "condition": "Sequential date/time validation",
+        "message": "Tank event date/times must be in correct order: Start < TankDocked < TankCargoHoseOn < TankStartTransfer < TankFinishedTransfer < TankCargoHoseOff < TankBargeReleased < Complete",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Date Ordering",
+        "dateSequence": [
+          "StartDateTime (Arrive time)",
+          "TankDockedDateTime",
+          "TankCargoHoseOnDateTime",
+          "TankStartTransferDateTime",
+          "TankFinishedTransferDateTime",
+          "TankCargoHoseOffDateTime",
+          "TankBargeReleasedDateTime",
+          "CompleteDateTime (Depart time)"
+        ]
+      },
+      {
+        "ruleName": "TankQuantityTransferredRange",
+        "property": "TankQuantityTransferred",
+        "condition": "((CType(Me.TankQuantityTransferred, Decimal) < 0) OrElse (CType(Me.TankQuantityTransferred, Decimal) > 99999999.99))",
+        "message": "TankQuantityTransferred must be between 0 and 99,999,999.99.",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Range",
+        "minimumValue": 0,
+        "maximumValue": 99999999.99
+      },
+      {
+        "ruleName": "TankQuantityTransferredRequired",
+        "property": "TankQuantityTransferred",
+        "condition": "Event type is TankDischarge or TankLoad and field is empty",
+        "message": "TankQuantityTransferred is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "TankQuantityUnitsRequired",
+        "property": "TankQuantityUnits",
+        "condition": "Event type is TankDischarge or TankLoad and field is empty",
+        "message": "TankQuantityUnits is required.",
+        "severity": "Error",
+        "appliesWhen": "Event type is TankDischarge or TankLoad",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "ReleaseDateTimeRequiredWhenDemurrageInvoiced",
+        "property": "ReleaseDateTime",
+        "condition": "p_ReleaseDateTime.IsEmpty AndAlso DemurrageRatesApply(_IsFreightActive, _EventTypeEnumVal, _ChargeDemurrage) AndAlso (Me.TicketEventDemurrage.BillableStatus = CStr(Lists.ValidationList.BillableStatuses.Invoiced))",
+        "message": "Release date/time is required when demurrage has been invoiced.",
+        "severity": "Error",
+        "appliesWhen": "Demurrage has been invoiced",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "CommodityRequired",
+        "property": "CommodityID",
+        "condition": "IsRequiredCommodity(evntTypeEnumVal, evntStatus)",
+        "message": "Commodity is required.",
+        "severity": "Error",
+        "appliesWhen": "Event is Complete status AND event type is Load or Unload AND CommodityIsRequiredForLoadUnload global setting is True",
+        "validationType": "Conditional Required"
+      },
+      {
+        "ruleName": "CoverConfigRequiredForMidstreamIn",
+        "property": "CoverConfig",
+        "condition": "IsRequiredCoverConfigForMidInCustomization(eventTypeEnumVal)",
+        "message": "Cover Config is required.",
+        "severity": "Error",
+        "appliesWhen": "EnableMidstreamInCoverConfigCustomization is enabled AND event type is MidstreamIn",
+        "validationType": "Conditional Required"
+      }
+    ]
+  },
+  "modernValidationMapping": {
+    "dataAnnotations": {
+      "examples": [
+        {
+          "property": "BargeDraftInches",
+          "annotation": "[Range(0, 11, ErrorMessage = \"Draft Inches must be between 0 and 11.\")]"
+        },
+        {
+          "property": "BaseRate",
+          "annotation": "[Range(0, double.MaxValue, ErrorMessage = \"Base rate must be non-negative.\")]",
+          "conditionalLogic": "Apply when EnableNegativeBargeEventRates is false"
+        },
+        {
+          "property": "TankQuantityTransferred",
+          "annotation": "[Range(0, 99999999.99, ErrorMessage = \"TankQuantityTransferred must be between 0 and 99,999,999.99.\")]"
+        }
+      ]
+    },
+    "fluentValidation": {
+      "examples": [
+        {
+          "property": "BargeDraftInches",
+          "rule": "RuleFor(x => x.BargeDraftInches)\n    .InclusiveBetween(0, 11)\n    .WithMessage(\"Draft Inches must be between 0 and 11.\")\n    .When(x => !string.IsNullOrEmpty(x.BargeDraftInches));"
+        },
+        {
+          "property": "BargeIsActiveForNewEvent",
+          "rule": "RuleFor(x => x)\n    .Must(x => !(x.AtLeastOneTicketEventIsNew && x.AtLeastOneBargeIsInactive))\n    .WithMessage(\"A new event cannot be added for an inactive barge.\")\n    .WithName(\"BargeIsActiveForNewEvent\");"
+        },
+        {
+          "property": "LoadedBargeOnLoadComplete",
+          "rule": "RuleFor(x => x.BargesPreviouslyLoaded)\n    .Must(barges => string.IsNullOrEmpty(barges))\n    .When(x => x.IsFreightActive && \n               x.EventTypeEnumVal == EventTypes.Load && \n               x.StatusEnumVal == EventStatus.Complete && \n               x.IsCompleting)\n    .WithMessage(\"One or more barges have a current load status of \\\"Load\\\".\");"
+        },
+        {
+          "property": "NoLoadOnUnloadComplete",
+          "rule": "RuleFor(x => x.NoLoadEvent)\n    .Must(noLoadEvent => string.IsNullOrEmpty(noLoadEvent))\n    .When(x => x.IsFreightActive && \n               x.EventTypeEnumVal == EventTypes.Unload && \n               x.StatusEnumVal == EventStatus.Complete)\n    .WithMessage(\"One or more barges do not have a prior Load event.\");"
+        },
+        {
+          "property": "BillingCustomerID",
+          "rule": "RuleFor(x => x.BillingCustomerID)\n    .NotEmpty()\n    .When(x => x.EventTypeEnumVal == EventTypes.CharterOut || \n               (!x.IsTerminalActive && x.IsBillable))\n    .WithMessage(\"Billing customer is required.\");"
+        },
+        {
+          "property": "RateType",
+          "rule": "RuleFor(x => x.RateType)\n    .NotEmpty()\n    .When(x => x.ChargeType == \"Manual\")\n    .WithMessage(\"Rate type is required if Charge is \\\"Manual\\\".\");"
+        },
+        {
+          "property": "InvoiceNote",
+          "rule": "RuleFor(x => x.InvoiceNote)\n    .NotEmpty()\n    .When(x => x.ChargeType == \"Manual\" || x.ChargeType == \"No Charge\")\n    .WithMessage(\"Invoice note is required if Charge is \\\"Manual\\\" or \\\"No Charge\\\".\");"
+        },
+        {
+          "property": "FromLocationID",
+          "rule": "RuleFor(x => x.FromLocationID)\n    .NotEmpty()\n    .When(x => new[] { EventTypes.CallForPickup, EventTypes.MidstreamIn, EventTypes.MidstreamOut, \n                       EventTypes.ScheduleIn, EventTypes.Shift, EventTypes.BreakTow, EventTypes.MakeTow, \n                       EventTypes.Tow, EventTypes.Turn, EventTypes.Load, EventTypes.Unload, \n                       EventTypes.Fleeting, EventTypes.TankLoad, EventTypes.TankDischarge }\n                      .Contains(x.EventTypeEnumVal))\n    .WithMessage(x => GetFromLocationFieldName(x.EventTypeEnumVal) + \" is required.\");"
+        },
+        {
+          "property": "StartDateTime/CompleteDateTime ordering",
+          "rule": "RuleFor(x => x.StartDateTime)\n    .LessThan(x => x.CompleteDateTime)\n    .When(x => !string.IsNullOrEmpty(x.StartDateTime) && \n               !string.IsNullOrEmpty(x.CompleteDateTime) &&\n               x.EventTypeEnumVal != EventTypes.TankDischarge &&\n               x.EventTypeEnumVal != EventTypes.TankLoad)\n    .WithMessage(\"Start date/time must be earlier than Complete date/time.\");"
+        },
+        {
+          "property": "WaitDateTime/StartDateTime ordering",
+          "rule": "RuleFor(x => x.WaitDateTime)\n    .LessThan(x => x.StartDateTime)\n    .When(x => !string.IsNullOrEmpty(x.WaitDateTime) && \n               !string.IsNullOrEmpty(x.StartDateTime))\n    .WithMessage(\"Wait date/time must be earlier than Start date/time.\");"
+        },
+        {
+          "property": "CleanType",
+          "rule": "RuleFor(x => x.CleanType)\n    .NotEmpty()\n    .When(x => x.EventTypeEnumVal == EventTypes.Clean)\n    .WithMessage(\"Clean Type is required.\");"
+        },
+        {
+          "property": "TankQuantityTransferred",
+          "rule": "RuleFor(x => x.TankQuantityTransferred)\n    .NotEmpty()\n    .InclusiveBetween(0m, 99999999.99m)\n    .When(x => x.EventTypeEnumVal == EventTypes.TankDischarge || \n               x.EventTypeEnumVal == EventTypes.TankLoad)\n    .WithMessage(\"TankQuantityTransferred is required and must be between 0 and 99,999,999.99.\");"
+        }
+      ],
+      "complexValidators": [
+        {
+          "name": "TankEventDateTimeSequenceValidator",
+          "description": "Validates the sequential ordering of Tank event date/times",
+          "pseudocode": "Ensure: StartDateTime < TankDockedDateTime < TankCargoHoseOnDateTime < TankStartTransferDateTime < TankFinishedTransferDateTime < TankCargoHoseOffDateTime < TankBargeReleasedDateTime < CompleteDateTime"
+        },
+        {
+          "name": "EventTypeSpecificRequiredFieldsValidator",
+          "description": "Validates required fields based on event type and status",
+          "pseudocode": "Different event types require different fields (e.g., StartDateTime required for specific event types, CompleteDateTime required for Complete status events)"
+        },
+        {
+          "name": "FutureDateValidator",
+          "description": "Validates that dates are not too far in the future",
+          "pseudocode": "Check that date fields (CpDateTime, WaitDateTime, StartDateTime, CompleteDateTime, ReleaseDateTime) are not more than MaxFutureIntervalHours in the future"
+        }
+      ]
+    },
+    "clientSideValidation": {
+      "jqueryValidate": {
+        "notes": "Most validation should be performed server-side. Client-side validation can include basic required field checks and range validation.",
+        "examples": [
+          {
+            "field": "BargeDraftInches",
+            "validation": "{ required: false, range: [0, 11] }"
+          },
+          {
+            "field": "TankQuantityTransferred",
+            "validation": "{ required: function() { return isTankEvent(); }, range: [0, 99999999.99] }"
+          }
+        ]
+      }
+    }
+  },
+  "validationTriggers": {
+    "propertyChange": [
+      "BargeDraftInches",
+      "CompleteDateTime",
+      "EventType",
+      "Status",
+      "ChargeType",
+      "RateType",
+      "BaseRate",
+      "FromLocationID",
+      "ToLocationID",
+      "StartDateTime",
+      "WaitDateTime",
+      "CpDateTime",
+      "ReleaseDateTime",
+      "All Tank DateTime fields"
+    ],
+    "onSave": [
+      "All validation rules are checked before save",
+      "IsValid property must return true for save to succeed"
+    ],
+    "onStatusChange": [
+      "Event type change triggers validation",
+      "Status change (Start to Complete) triggers validation"
+    ]
+  },
+  "relatedEntities": {
+    "Barge": {
+      "validation": "Individual Barge objects have their own CheckBusinessRules",
+      "notes": "BargeEvent validates collection of barges via isCollectionValid loop"
+    },
+    "Ticket": {
+      "validation": "Ticket objects have their own validation",
+      "notes": "Accessed through Barge.BargeEventTicket"
+    },
+    "TicketEvent": {
+      "validation": "Primary validation source for event-specific rules",
+      "notes": "Most detailed validation rules; BargeEvent wraps TicketEvent objects"
+    },
+    "OnboardOrder": {
+      "validation": "Collection validated via isOrdersValid loop",
+      "notes": "Generic collection without built-in IsValid property"
+    },
+    "BoatDelays": {
+      "validation": "Validated in IsValid property",
+      "notes": "Optional object, validated when not null"
+    },
+    "BoatTraffic": {
+      "validation": "Validated in IsValid property",
+      "notes": "Optional object, validated when not null"
+    },
+    "BoatPosition": {
+      "validation": "Validated in IsValid property",
+      "notes": "Optional object, validated when not null"
+    },
+    "DeckLogActivity": {
+      "validation": "Validated when EnableBoatTowingDelays is true",
+      "notes": "Optional object, validated when not null"
+    }
+  },
+  "globalSettings": {
+    "CommodityIsRequiredForLoadUnload": {
+      "affects": "Commodity field requirement",
+      "description": "When true, Commodity is required for Load and Unload Complete events"
+    },
+    "EnableNegativeBargeEventRates": {
+      "affects": "BaseRate validation",
+      "description": "When false, BaseRate must be non-negative"
+    },
+    "EnableMidstreamInCoverConfigCustomization": {
+      "affects": "CoverConfig field requirement",
+      "description": "When true, CoverConfig is required for MidstreamIn events"
+    },
+    "MaxFutureIntervalHours": {
+      "affects": "Future date validation",
+      "description": "Maximum hours in the future that date/time fields can be set"
+    }
+  },
+  "licenseFlags": {
+    "IsFreightActive": {
+      "affects": [
+        "LoadedBargeOnLoadComplete validation",
+        "NoLoadOnUnloadComplete validation",
+        "StartDateTime requirement for Load/Unload Complete"
+      ]
+    },
+    "IsTerminalActive": {
+      "affects": [
+        "BillingCustomerID requirement",
+        "StartDateTime requirement for Load/Unload Complete"
+      ]
+    }
+  },
+  "notes": [
+    "BargeEvent is a complex composite object that wraps multiple Barge objects, each containing Ticket and TicketEvent objects",
+    "Most validation rules are in TicketEvent.CheckBusinessRules, not BargeEvent itself",
+    "BargeEvent has only 4 direct validation rules; most validation comes from child objects",
+    "Event type determines which fields are required and which validation rules apply",
+    "Many validation rules are conditional based on EventType, Status, ChargeType, and license flags",
+    "Tank events (TankLoad, TankDischarge) have extensive sequential date/time validation",
+    "Date/time ordering is critical and extensively validated",
+    "Future date validation uses a global setting (MaxFutureIntervalHours)",
+    "Freight and Terminal license flags significantly affect validation behavior",
+    "The IsValid property aggregates validation from all child objects",
+    "BrokenRules.Assert is used throughout for validation - condition is TRUE when rule is BROKEN"
+  ]
+}

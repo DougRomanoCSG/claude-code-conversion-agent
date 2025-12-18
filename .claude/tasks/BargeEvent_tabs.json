@@ -1,0 +1,1135 @@
+{
+  "formName": "frmBargeEvent",
+  "tabControl": "tabBargeDetail",
+  "tabs": [
+    {
+      "tabName": "tpgBargeDetails",
+      "tabText": "&1 - Barge Details",
+      "order": 1,
+      "defaultActive": true,
+      "purpose": "Barge-specific details including cargo, draft, load status, damage, and consignment information",
+      "controls": [
+        {
+          "name": "txtBargeDraftFeet",
+          "type": "UltraTextEditor",
+          "label": "Draft (feet)",
+          "required": false,
+          "section": "Basic Information"
+        },
+        {
+          "name": "txtBargeDraftInches",
+          "type": "UltraTextEditor",
+          "label": "Draft (inches)",
+          "required": false,
+          "section": "Basic Information"
+        },
+        {
+          "name": "btnDraftDetail",
+          "type": "UltraButton",
+          "label": "Draft Detail",
+          "required": false,
+          "section": "Basic Information"
+        },
+        {
+          "name": "cboCustomerID",
+          "type": "UltraCombo",
+          "label": "Customer",
+          "required": false,
+          "section": "Customer Information"
+        },
+        {
+          "name": "cboCargoCustomerID",
+          "type": "UltraCombo",
+          "label": "Cargo Customer",
+          "required": false,
+          "section": "Customer Information"
+        },
+        {
+          "name": "cboDestinationInID",
+          "type": "UltraCombo",
+          "label": "Destination in",
+          "required": false,
+          "section": "Destination"
+        },
+        {
+          "name": "cboDestinationOutID",
+          "type": "UltraCombo",
+          "label": "Destination out",
+          "required": false,
+          "section": "Destination"
+        },
+        {
+          "name": "cboRigID",
+          "type": "UltraCombo",
+          "label": "Rig",
+          "required": false,
+          "section": "Equipment"
+        },
+        {
+          "name": "cboCommodityID",
+          "type": "UltraCombo",
+          "label": "Commodity",
+          "required": false,
+          "section": "Cargo Details"
+        },
+        {
+          "name": "cboCargoID",
+          "type": "UltraCombo",
+          "label": "Cargo",
+          "required": false,
+          "section": "Cargo Details"
+        },
+        {
+          "name": "cboCargoHandlingStatus",
+          "type": "UltraCombo",
+          "label": "Cargo Handling Status",
+          "required": false,
+          "section": "Cargo Details"
+        },
+        {
+          "name": "txtSurveyTons",
+          "type": "UltraTextEditor",
+          "label": "Survey Tons",
+          "required": false,
+          "section": "Cargo Details"
+        },
+        {
+          "name": "chkIsCommercialBarge",
+          "type": "UltraCheckEditor",
+          "label": "Is Commercial Barge",
+          "required": false,
+          "section": "Cargo Details"
+        },
+        {
+          "name": "chkBargeMeasureDraft",
+          "type": "UltraCheckEditor",
+          "label": "Measure Draft",
+          "required": false,
+          "section": "Cargo Details"
+        },
+        {
+          "name": "chkBargeSampleCargo",
+          "type": "UltraCheckEditor",
+          "label": "Sample Cargo",
+          "required": false,
+          "section": "Cargo Details"
+        },
+        {
+          "name": "txtTicketDraftRequestedFeet",
+          "type": "UltraTextEditor",
+          "label": "Ticket Draft Requested (feet)",
+          "required": false,
+          "section": "Ticket Information"
+        },
+        {
+          "name": "txtTicketDraftRequestedInches",
+          "type": "UltraTextEditor",
+          "label": "Ticket Draft Requested (inches)",
+          "required": false,
+          "section": "Ticket Information"
+        },
+        {
+          "name": "cboBargeConsignLocationID",
+          "type": "UltraCombo",
+          "label": "Barge Consign Location",
+          "required": false,
+          "section": "Consignment"
+        },
+        {
+          "name": "cboBargeConsignToType",
+          "type": "UltraCombo",
+          "label": "Consign To Type",
+          "required": false,
+          "section": "Consignment"
+        },
+        {
+          "name": "cboBargeConsignShipID",
+          "type": "UltraCombo",
+          "label": "Consign Ship",
+          "required": false,
+          "section": "Consignment"
+        },
+        {
+          "name": "cboBargeConsignStockpileID",
+          "type": "UltraCombo",
+          "label": "Consign Stockpile",
+          "required": false,
+          "section": "Consignment"
+        },
+        {
+          "name": "txtBargeConsignBargeNum",
+          "type": "UltraTextEditor",
+          "label": "Consign Barge Number",
+          "required": false,
+          "section": "Consignment"
+        },
+        {
+          "name": "cboBargeConsignTruckTicketID",
+          "type": "UltraCombo",
+          "label": "Consign Truck Ticket",
+          "required": false,
+          "section": "Consignment"
+        },
+        {
+          "name": "cboBargeConsignTrainTicketID",
+          "type": "UltraCombo",
+          "label": "Consign Train Ticket",
+          "required": false,
+          "section": "Consignment"
+        },
+        {
+          "name": "cboLoadStatus",
+          "type": "UltraCombo",
+          "label": "Load status",
+          "required": false,
+          "section": "Load/Cover Details"
+        },
+        {
+          "name": "cboCoverType",
+          "type": "UltraCombo",
+          "label": "Cover type",
+          "required": false,
+          "section": "Load/Cover Details"
+        },
+        {
+          "name": "cboCoverSubTypeID",
+          "type": "UltraCombo",
+          "label": "Cover sub-type",
+          "required": false,
+          "section": "Load/Cover Details"
+        },
+        {
+          "name": "cboCoverConfig",
+          "type": "UltraCombo",
+          "label": "Cover config",
+          "required": false,
+          "section": "Load/Cover Details"
+        },
+        {
+          "name": "cboCleanStatus",
+          "type": "UltraCombo",
+          "label": "Clean status",
+          "required": false,
+          "section": "Load/Cover Details"
+        },
+        {
+          "name": "chkLoadFirst",
+          "type": "UltraCheckEditor",
+          "label": "Load first",
+          "required": false,
+          "section": "Load/Cover Details"
+        },
+        {
+          "name": "chkLoadLast",
+          "type": "UltraCheckEditor",
+          "label": "Load last",
+          "required": false,
+          "section": "Load/Cover Details"
+        },
+        {
+          "name": "chkLoadMultipleLots",
+          "type": "UltraCheckEditor",
+          "label": "Load in multiple lots",
+          "required": false,
+          "section": "Load/Cover Details"
+        },
+        {
+          "name": "chkIsDamaged",
+          "type": "UltraCheckEditor",
+          "label": "Is Damaged",
+          "required": false,
+          "section": "Damage/Repair"
+        },
+        {
+          "name": "cboDamageLevel",
+          "type": "UltraCombo",
+          "label": "Damage Level",
+          "required": false,
+          "section": "Damage/Repair"
+        },
+        {
+          "name": "cboRepairStatus",
+          "type": "UltraCombo",
+          "label": "Repair Status",
+          "required": false,
+          "section": "Damage/Repair"
+        },
+        {
+          "name": "txtDamageNote",
+          "type": "UltraTextEditor",
+          "label": "Damage Note",
+          "required": false,
+          "section": "Damage/Repair"
+        },
+        {
+          "name": "chkHasInsufficientFreeboard",
+          "type": "UltraCheckEditor",
+          "label": "Insufficient freeboard",
+          "required": false,
+          "section": "Damage/Repair"
+        },
+        {
+          "name": "cboFreeboardRange",
+          "type": "UltraCombo",
+          "label": "Freeboard Range",
+          "required": false,
+          "section": "Damage/Repair"
+        },
+        {
+          "name": "chkIsLeaker",
+          "type": "UltraCheckEditor",
+          "label": "Leaker",
+          "required": false,
+          "section": "Damage/Repair"
+        },
+        {
+          "name": "txtBargeNote",
+          "type": "UltraTextEditor",
+          "label": "Barge Note",
+          "required": false,
+          "section": "Notes"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Basic Information",
+          "groupBox": "grpBargeDetailsTop",
+          "controls": ["txtBargeDraftFeet", "txtBargeDraftInches", "btnDraftDetail"]
+        },
+        {
+          "name": "Customer Information",
+          "groupBox": "grpBargeDetailsTop",
+          "controls": ["cboCustomerID", "cboCargoCustomerID"]
+        },
+        {
+          "name": "Destination",
+          "groupBox": "grpBargeDetailsTop",
+          "controls": ["cboDestinationInID", "cboDestinationOutID"]
+        },
+        {
+          "name": "Equipment",
+          "groupBox": "grpBargeDetailsTop",
+          "controls": ["cboRigID"]
+        },
+        {
+          "name": "Cargo Details",
+          "groupBox": "grpBargeDetailsTop",
+          "controls": ["cboCommodityID", "cboCargoID", "cboCargoHandlingStatus", "txtSurveyTons", "chkIsCommercialBarge", "chkBargeMeasureDraft", "chkBargeSampleCargo"]
+        },
+        {
+          "name": "Ticket Information",
+          "groupBox": "grpBargeDetailsTop",
+          "controls": ["txtTicketDraftRequestedFeet", "txtTicketDraftRequestedInches"]
+        },
+        {
+          "name": "Consignment",
+          "groupBox": "grpBargeDetailsTop",
+          "controls": ["cboBargeConsignLocationID", "cboBargeConsignToType", "cboBargeConsignShipID", "cboBargeConsignStockpileID", "txtBargeConsignBargeNum", "cboBargeConsignTruckTicketID", "cboBargeConsignTrainTicketID"]
+        },
+        {
+          "name": "Load/Cover Details",
+          "groupBox": "grpBargeDetailsSeparator",
+          "controls": ["cboLoadStatus", "cboCoverType", "cboCoverSubTypeID", "cboCoverConfig", "cboCleanStatus", "chkLoadFirst", "chkLoadLast", "chkLoadMultipleLots"]
+        },
+        {
+          "name": "Damage/Repair",
+          "groupBox": "grpBargeDetailsSeparator",
+          "controls": ["chkIsDamaged", "cboDamageLevel", "cboRepairStatus", "txtDamageNote", "chkHasInsufficientFreeboard", "cboFreeboardRange", "chkIsLeaker"]
+        },
+        {
+          "name": "Notes",
+          "groupBox": "grpBargeDetailsSeparator",
+          "controls": ["txtBargeNote"]
+        }
+      ]
+    },
+    {
+      "tabName": "tpgBilling",
+      "tabText": "&2 - Billing",
+      "order": 2,
+      "defaultActive": false,
+      "purpose": "Billing information including customer, base amount, surcharges, allowances, and totals",
+      "controls": [
+        {
+          "name": "cboBillingCustomerID",
+          "type": "UltraCombo",
+          "label": "Billing Customer",
+          "required": false,
+          "section": "Customer"
+        },
+        {
+          "name": "cboRateType",
+          "type": "UltraCombo",
+          "label": "Rate Type",
+          "required": false,
+          "section": "Base Amount"
+        },
+        {
+          "name": "txtBaseRate",
+          "type": "UltraTextEditor",
+          "label": "Rate Amount",
+          "required": false,
+          "section": "Base Amount"
+        },
+        {
+          "name": "txtBaseAmount",
+          "type": "UltraTextEditor",
+          "label": "Amount",
+          "required": false,
+          "section": "Base Amount"
+        },
+        {
+          "name": "txtMinimum",
+          "type": "UltraTextEditor",
+          "label": "Minimum",
+          "required": false,
+          "section": "Base Amount"
+        },
+        {
+          "name": "txtSizeCategory",
+          "type": "UltraTextEditor",
+          "label": "Barge Size",
+          "required": false,
+          "section": "Base Amount"
+        },
+        {
+          "name": "txtProrateUnits",
+          "type": "UltraTextEditor",
+          "label": "Prorate Units",
+          "required": false,
+          "section": "Base Amount"
+        },
+        {
+          "name": "optChargeType",
+          "type": "UltraOptionSet",
+          "label": "Charge Type",
+          "required": false,
+          "section": "Base Amount"
+        },
+        {
+          "name": "chkIncludeHighWater",
+          "type": "UltraCheckEditor",
+          "label": "Include High Water",
+          "required": false,
+          "section": "Surcharges"
+        },
+        {
+          "name": "txtHighWaterRate",
+          "type": "UltraTextEditor",
+          "label": "High Water Rate",
+          "required": false,
+          "section": "Surcharges"
+        },
+        {
+          "name": "txtHighWaterAmount",
+          "type": "UltraTextEditor",
+          "label": "High Water Amount",
+          "required": false,
+          "section": "Surcharges"
+        },
+        {
+          "name": "chkIncludeFuelAndLaborEscalation",
+          "type": "UltraCheckEditor",
+          "label": "Include Fuel and Labor Escalation",
+          "required": false,
+          "section": "Surcharges"
+        },
+        {
+          "name": "txtFuelEscalationRate",
+          "type": "UltraTextEditor",
+          "label": "Fuel Escalation Rate",
+          "required": false,
+          "section": "Surcharges"
+        },
+        {
+          "name": "txtFuelEscalationAmount",
+          "type": "UltraTextEditor",
+          "label": "Fuel Escalation Amount",
+          "required": false,
+          "section": "Surcharges"
+        },
+        {
+          "name": "txtLaborEscalationRate",
+          "type": "UltraTextEditor",
+          "label": "Labor Escalation Rate",
+          "required": false,
+          "section": "Surcharges"
+        },
+        {
+          "name": "txtLaborEscalationAmount",
+          "type": "UltraTextEditor",
+          "label": "Labor Escalation Amount",
+          "required": false,
+          "section": "Surcharges"
+        },
+        {
+          "name": "txtTotalAmount",
+          "type": "UltraTextEditor",
+          "label": "Total Amount",
+          "required": false,
+          "section": "Total"
+        },
+        {
+          "name": "txtInvoiceNote",
+          "type": "UltraTextEditor",
+          "label": "Invoice Note",
+          "required": false,
+          "section": "Total"
+        },
+        {
+          "name": "txtBillableStatus",
+          "type": "UltraTextEditor",
+          "label": "Billable Status",
+          "required": false,
+          "section": "Total"
+        },
+        {
+          "name": "chkRebill",
+          "type": "UltraCheckEditor",
+          "label": "Rebill",
+          "required": false,
+          "section": "Total"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Customer",
+          "groupBox": "grpCustomer",
+          "controls": ["cboBillingCustomerID"]
+        },
+        {
+          "name": "Base Amount",
+          "groupBox": "grpBaseAmount",
+          "controls": ["cboRateType", "txtBaseRate", "txtBaseAmount", "txtMinimum", "txtSizeCategory", "txtProrateUnits", "optChargeType"]
+        },
+        {
+          "name": "Surcharges",
+          "groupBox": "grpSurcharges",
+          "controls": ["chkIncludeHighWater", "txtHighWaterRate", "txtHighWaterAmount", "chkIncludeFuelAndLaborEscalation", "txtFuelEscalationRate", "txtFuelEscalationAmount", "txtLaborEscalationRate", "txtLaborEscalationAmount"]
+        },
+        {
+          "name": "Allowances",
+          "groupBox": "grpAllowances",
+          "controls": []
+        },
+        {
+          "name": "Total",
+          "groupBox": "grpTotal",
+          "controls": ["txtTotalAmount", "txtInvoiceNote", "txtBillableStatus", "chkRebill"]
+        }
+      ]
+    },
+    {
+      "tabName": "tpgFreightBilling",
+      "tabText": "&3 - Freight Billing",
+      "order": 3,
+      "defaultActive": false,
+      "purpose": "Freight-specific billing information including contract, rates, tonnage, and escalation",
+      "conditionalVisibility": {
+        "condition": "_IsFreightActive = True",
+        "reason": "Freight Billing tab only visible when Freight license is active"
+      },
+      "controls": [
+        {
+          "name": "txtFreightCustomer",
+          "type": "UltraTextEditor",
+          "label": "Freight Customer",
+          "required": false,
+          "section": "Customer Information"
+        },
+        {
+          "name": "txtFreightOriginName",
+          "type": "UltraTextEditor",
+          "label": "Freight Origin Name",
+          "required": false,
+          "section": "Route Information"
+        },
+        {
+          "name": "txtFreightDestinationName",
+          "type": "UltraTextEditor",
+          "label": "Freight Destination Name",
+          "required": false,
+          "section": "Route Information"
+        },
+        {
+          "name": "txtFreightContractNumber",
+          "type": "UltraTextEditor",
+          "label": "Contract Number",
+          "required": false,
+          "section": "Contract Information"
+        },
+        {
+          "name": "txtFreightRateEffectiveDate",
+          "type": "UltraTextEditor",
+          "label": "Rate Effective Date",
+          "required": false,
+          "section": "Rate Information"
+        },
+        {
+          "name": "txtFreightBillableTons",
+          "type": "UltraTextEditor",
+          "label": "Freight Billable Tons",
+          "required": false,
+          "section": "Tonnage"
+        },
+        {
+          "name": "txtFreightMinQuantity",
+          "type": "UltraTextEditor",
+          "label": "Minimum Quantity",
+          "required": false,
+          "section": "Tonnage"
+        },
+        {
+          "name": "txtFreightBaseRate",
+          "type": "UltraTextEditor",
+          "label": "Freight Base Rate",
+          "required": false,
+          "section": "Rate Information"
+        },
+        {
+          "name": "txtFreightRateEscalation",
+          "type": "UltraTextEditor",
+          "label": "Freight Rate Escalation",
+          "required": false,
+          "section": "Rate Information"
+        },
+        {
+          "name": "chkIsManualFreightRate",
+          "type": "UltraCheckEditor",
+          "label": "Is Manual Freight Rate",
+          "required": false,
+          "section": "Rate Information"
+        },
+        {
+          "name": "txtFreightEffectiveRate",
+          "type": "UltraTextEditor",
+          "label": "Freight Effective Rate",
+          "required": false,
+          "section": "Rate Information"
+        },
+        {
+          "name": "txtFreightTotalAmount",
+          "type": "UltraTextEditor",
+          "label": "Freight Total Amount",
+          "required": false,
+          "section": "Total"
+        },
+        {
+          "name": "txtFreightInvoiceNote",
+          "type": "UltraTextEditor",
+          "label": "Freight Invoice Note",
+          "required": false,
+          "section": "Total"
+        },
+        {
+          "name": "txtFreightBillableStatus",
+          "type": "UltraTextEditor",
+          "label": "Freight Billable Status",
+          "required": false,
+          "section": "Status"
+        },
+        {
+          "name": "txtFreightBillingDivision",
+          "type": "UltraTextEditor",
+          "label": "Freight Billing Division",
+          "required": false,
+          "section": "Status"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Customer Information",
+          "controls": ["txtFreightCustomer"]
+        },
+        {
+          "name": "Route Information",
+          "controls": ["txtFreightOriginName", "txtFreightDestinationName"]
+        },
+        {
+          "name": "Contract Information",
+          "controls": ["txtFreightContractNumber"]
+        },
+        {
+          "name": "Rate Information",
+          "controls": ["txtFreightRateEffectiveDate", "txtFreightBaseRate", "txtFreightRateEscalation", "chkIsManualFreightRate", "txtFreightEffectiveRate"]
+        },
+        {
+          "name": "Tonnage",
+          "controls": ["txtFreightBillableTons", "txtFreightMinQuantity"]
+        },
+        {
+          "name": "Total",
+          "controls": ["txtFreightTotalAmount", "txtFreightInvoiceNote"]
+        },
+        {
+          "name": "Status",
+          "controls": ["txtFreightBillableStatus", "txtFreightBillingDivision"]
+        }
+      ]
+    },
+    {
+      "tabName": "tpgDemurrageBilling",
+      "tabText": "&4 - Demurrage Billing",
+      "order": 4,
+      "defaultActive": false,
+      "purpose": "Demurrage billing calculations including free time, load/unload time, and charges",
+      "conditionalVisibility": {
+        "condition": "_IsFreightActive = True",
+        "reason": "Demurrage Billing tab only visible when Freight license is active"
+      },
+      "controls": [
+        {
+          "name": "cboDemurrageCustomerID",
+          "type": "UltraCombo",
+          "label": "Demurrage Customer",
+          "required": false,
+          "section": "Customer Information"
+        },
+        {
+          "name": "txtDemFreightContractNumber",
+          "type": "UltraTextEditor",
+          "label": "Freight Contract Number",
+          "required": false,
+          "section": "Contract Information"
+        },
+        {
+          "name": "txtDemNetTimeCalculation",
+          "type": "UltraTextEditor",
+          "label": "Net Time Calculation",
+          "required": false,
+          "section": "Time Calculations"
+        },
+        {
+          "name": "txtDemFreeTimeType",
+          "type": "UltraTextEditor",
+          "label": "Free Time Type",
+          "required": false,
+          "section": "Time Calculations"
+        },
+        {
+          "name": "txtDemLoadTime",
+          "type": "UltraTextEditor",
+          "label": "Load Time",
+          "required": false,
+          "section": "Time Calculations"
+        },
+        {
+          "name": "txtDemUnloadTime",
+          "type": "UltraTextEditor",
+          "label": "Unload Time",
+          "required": false,
+          "section": "Time Calculations"
+        },
+        {
+          "name": "txtDemFreeTime",
+          "type": "UltraTextEditor",
+          "label": "Free Time",
+          "required": false,
+          "section": "Time Calculations"
+        },
+        {
+          "name": "txtDemNetTime",
+          "type": "UltraTextEditor",
+          "label": "Net Time",
+          "required": false,
+          "section": "Time Calculations"
+        },
+        {
+          "name": "txtDemSizeCategory",
+          "type": "UltraTextEditor",
+          "label": "Size Category",
+          "required": false,
+          "section": "Rate Information"
+        },
+        {
+          "name": "txtDemRateEffectiveDate",
+          "type": "UltraTextEditor",
+          "label": "Rate Effective Date",
+          "required": false,
+          "section": "Rate Information"
+        },
+        {
+          "name": "txtDemRate",
+          "type": "UltraTextEditor",
+          "label": "Demurrage Rate",
+          "required": false,
+          "section": "Rate Information"
+        },
+        {
+          "name": "chkDemOverride",
+          "type": "UltraCheckEditor",
+          "label": "Override",
+          "required": false,
+          "section": "Rate Information"
+        },
+        {
+          "name": "txtDemAmount",
+          "type": "UltraTextEditor",
+          "label": "Demurrage Amount",
+          "required": false,
+          "section": "Total"
+        },
+        {
+          "name": "txtDemInvoiceNote",
+          "type": "UltraTextEditor",
+          "label": "Invoice Note",
+          "required": false,
+          "section": "Total"
+        },
+        {
+          "name": "txtDemBillableStatus",
+          "type": "UltraTextEditor",
+          "label": "Billable Status",
+          "required": false,
+          "section": "Status"
+        },
+        {
+          "name": "txtDemBillingDivision",
+          "type": "UltraTextEditor",
+          "label": "Billing Division",
+          "required": false,
+          "section": "Status"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Customer Information",
+          "controls": ["cboDemurrageCustomerID"]
+        },
+        {
+          "name": "Contract Information",
+          "controls": ["txtDemFreightContractNumber"]
+        },
+        {
+          "name": "Time Calculations",
+          "controls": ["txtDemNetTimeCalculation", "txtDemFreeTimeType", "txtDemLoadTime", "txtDemUnloadTime", "txtDemFreeTime", "txtDemNetTime"]
+        },
+        {
+          "name": "Rate Information",
+          "controls": ["txtDemSizeCategory", "txtDemRateEffectiveDate", "txtDemRate", "chkDemOverride"]
+        },
+        {
+          "name": "Total",
+          "controls": ["txtDemAmount", "txtDemInvoiceNote"]
+        },
+        {
+          "name": "Status",
+          "controls": ["txtDemBillableStatus", "txtDemBillingDivision"]
+        }
+      ]
+    },
+    {
+      "tabName": "tpgBillingAudit",
+      "tabText": "&5 - Billing Audit",
+      "order": 5,
+      "defaultActive": false,
+      "purpose": "Billing audit trail showing historical changes to billing records",
+      "hasGrid": true,
+      "grid": {
+        "name": "grdBillingAudit",
+        "childEntity": "BillingAudit",
+        "parentKey": "BargeEventID",
+        "operations": ["View"],
+        "columns": [],
+        "description": "Grid displaying billing audit history for the barge event"
+      },
+      "controls": [
+        {
+          "name": "grdBillingAudit",
+          "type": "UltraGrid",
+          "label": "Billing Audit Grid",
+          "required": false,
+          "section": "Audit Trail"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Audit Trail",
+          "controls": ["grdBillingAudit"]
+        }
+      ]
+    }
+  ],
+  "mainGrid": {
+    "name": "grdBargeList",
+    "childEntity": "Barge",
+    "parentKey": "BargeEventID",
+    "operations": ["Add", "Modify", "Remove"],
+    "location": "Main form area within grpBarges",
+    "columns": [],
+    "description": "Primary grid listing all barges associated with this event"
+  },
+  "toolbarButtons": [
+    {
+      "key": "Add to List",
+      "caption": "&Add to List",
+      "action": "ItemAdd",
+      "displayStyle": "ImageAndText",
+      "visible": false,
+      "description": "Add selected barge to the event"
+    },
+    {
+      "key": "Modify Details",
+      "caption": "&Modify Details",
+      "action": "ItemModify",
+      "displayStyle": "ImageAndText",
+      "description": "Modify details for selected barge in grid"
+    },
+    {
+      "key": "Remove from List",
+      "caption": "&Remove from List",
+      "action": "ItemRemove",
+      "displayStyle": "ImageAndText",
+      "description": "Remove selected barge from event"
+    },
+    {
+      "key": "New Barge",
+      "caption": "&New Barge",
+      "action": "EditNewBarge",
+      "displayStyle": "ImageAndText",
+      "description": "Create a new barge record"
+    },
+    {
+      "key": "Modify Barge",
+      "caption": "Modify &Barge",
+      "action": "ModifyBarge",
+      "displayStyle": "ImageAndText",
+      "description": "Modify the barge master record"
+    },
+    {
+      "key": "Barge Positions",
+      "caption": "View Fleet",
+      "action": "SetBargePositions",
+      "displayStyle": "ImageAndText",
+      "description": "View fleet and barge positions"
+    },
+    {
+      "key": "Enter Tonnages",
+      "caption": "Enter &Tonnages",
+      "action": "EnterTonnages",
+      "displayStyle": "ImageAndText",
+      "description": "Enter tonnage information for barges"
+    },
+    {
+      "key": "Manage Boats",
+      "caption": "Manage B&oats",
+      "action": "ManageBoats",
+      "displayStyle": "ImageAndText",
+      "description": "Manage boats associated with the event"
+    },
+    {
+      "key": "Export",
+      "caption": "Export",
+      "action": "ExportGrid",
+      "displayStyle": "ImageAndText",
+      "description": "Export barge list grid to file"
+    }
+  ],
+  "sharedControls": {
+    "location": "grpSubmitCancel group box",
+    "controls": [
+      {
+        "name": "btnSubmit",
+        "type": "UltraButton",
+        "text": "Submit",
+        "action": "Save all tabs and close form"
+      },
+      {
+        "name": "btnCancel",
+        "type": "UltraButton",
+        "text": "Cancel",
+        "action": "Cancel changes and close form"
+      },
+      {
+        "name": "txtVoidNote",
+        "type": "UltraTextEditor",
+        "text": "Void Note",
+        "action": "Note for voiding the event"
+      }
+    ]
+  },
+  "tabLogic": {
+    "conditionalVisibility": [
+      {
+        "tabs": ["tpgFreightBilling", "tpgDemurrageBilling"],
+        "condition": "_IsFreightActive = True",
+        "reason": "Freight and Demurrage Billing tabs only visible when Freight license is active",
+        "effect": "When hidden, Billing Audit tab text changes from '&5 - Billing Audit' to '&3 - Billing Audit'"
+      }
+    ],
+    "conditionalEnabled": [
+      {
+        "tab": "tpgFreightBilling",
+        "condition": "_BargeEvent.IsFreightBillable() = True",
+        "reason": "Freight Billing tab only enabled when event is freight billable"
+      },
+      {
+        "tab": "tpgDemurrageBilling",
+        "condition": "_IsFreightActive AndAlso (condition check)",
+        "reason": "Demurrage Billing tab enabled when freight is active and specific conditions are met"
+      },
+      {
+        "tab": "tpgBilling",
+        "condition": "Based on event type and billable status",
+        "reason": "Billing tab can be disabled for certain event types"
+      },
+      {
+        "tab": "tpgBillingAudit",
+        "condition": "Enabled when billing exists",
+        "reason": "Billing Audit only enabled when there is billing to audit"
+      }
+    ],
+    "loadSequence": [
+      {
+        "order": 1,
+        "tab": "tpgBargeDetails",
+        "action": "Load primary barge event data and populate grid"
+      },
+      {
+        "order": 2,
+        "tab": "tpgBilling",
+        "action": "Load billing calculations and rates"
+      },
+      {
+        "order": 3,
+        "tab": "tpgFreightBilling",
+        "action": "Load freight billing data if freight active"
+      },
+      {
+        "order": 4,
+        "tab": "tpgDemurrageBilling",
+        "action": "Load demurrage calculations if freight active"
+      },
+      {
+        "order": 5,
+        "tab": "tpgBillingAudit",
+        "action": "Load billing audit history"
+      }
+    ],
+    "defaultSelectedTab": "tpgBargeDetails"
+  },
+  "additionalFormControls": {
+    "eventControls": [
+      {
+        "name": "cboFleetBoatID",
+        "type": "UltraCombo",
+        "label": "Fleet Boat",
+        "location": "Main event details area"
+      },
+      {
+        "name": "dtStartDate",
+        "type": "UltraDateTimeEditor",
+        "label": "Start Date",
+        "location": "Main event details area"
+      },
+      {
+        "name": "cboStartTime",
+        "type": "UltraCombo",
+        "label": "Start Time",
+        "location": "Main event details area"
+      },
+      {
+        "name": "dtCompleteDate",
+        "type": "UltraDateTimeEditor",
+        "label": "Complete Date",
+        "location": "Main event details area"
+      },
+      {
+        "name": "cboCompleteTime",
+        "type": "UltraCombo",
+        "label": "Complete Time",
+        "location": "Main event details area"
+      },
+      {
+        "name": "dtSchedStartDate",
+        "type": "UltraDateTimeEditor",
+        "label": "Scheduled Start Date",
+        "location": "Main event details area"
+      },
+      {
+        "name": "cboSchedStartTime",
+        "type": "UltraCombo",
+        "label": "Scheduled Start Time",
+        "location": "Main event details area"
+      },
+      {
+        "name": "dtSchedCompleteDate",
+        "type": "UltraDateTimeEditor",
+        "label": "Scheduled Complete Date",
+        "location": "Main event details area"
+      },
+      {
+        "name": "cboSchedCompleteTime",
+        "type": "UltraCombo",
+        "label": "Scheduled Complete Time",
+        "location": "Main event details area"
+      },
+      {
+        "name": "cboFromLocationID",
+        "type": "UltraCombo",
+        "label": "From Location",
+        "location": "Main event details area"
+      },
+      {
+        "name": "cboToLocationID",
+        "type": "UltraCombo",
+        "label": "To Location",
+        "location": "Main event details area"
+      },
+      {
+        "name": "cboRiver",
+        "type": "UltraCombo",
+        "label": "River",
+        "location": "Main event details area"
+      },
+      {
+        "name": "txtMile",
+        "type": "UltraTextEditor",
+        "label": "Mile",
+        "location": "Main event details area"
+      },
+      {
+        "name": "txtNote",
+        "type": "UltraTextEditor",
+        "label": "Note",
+        "location": "Main event details area"
+      },
+      {
+        "name": "btnDelays",
+        "type": "UltraButton",
+        "label": "Delays",
+        "location": "Main event details area"
+      },
+      {
+        "name": "chkMeasureDraft",
+        "type": "UltraCheckEditor",
+        "label": "Measure Draft",
+        "location": "Main event details area"
+      },
+      {
+        "name": "chkSampleCargo",
+        "type": "UltraCheckEditor",
+        "label": "Sample Cargo",
+        "location": "Main event details area"
+      },
+      {
+        "name": "chkIsReleased",
+        "type": "UltraCheckEditor",
+        "label": "Is Released",
+        "location": "Main event details area"
+      },
+      {
+        "name": "chkCloseTicket",
+        "type": "UltraCheckEditor",
+        "label": "Close Ticket",
+        "location": "Main event details area"
+      },
+      {
+        "name": "chkPickupWhenEmpty",
+        "type": "UltraCheckEditor",
+        "label": "Pickup When Empty",
+        "location": "Main event details area"
+      }
+    ]
+  }
+}

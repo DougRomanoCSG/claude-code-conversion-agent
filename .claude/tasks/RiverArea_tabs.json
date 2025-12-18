@@ -1,0 +1,332 @@
+{
+  "formName": "frmRiverAreaDetail",
+  "hasTabControl": false,
+  "formType": "detail-with-child-grid",
+  "sections": [
+    {
+      "sectionName": "pnlDetail",
+      "sectionText": "River Area Details",
+      "order": 1,
+      "defaultActive": true,
+      "purpose": "Primary river area information and configuration flags",
+      "controls": [
+        {
+          "name": "txtName",
+          "type": "UltraTextEditor",
+          "label": "River area name",
+          "required": false,
+          "validationType": "String",
+          "maxLength": "RiverArea.MaxLength.Name",
+          "section": "Basic Information"
+        },
+        {
+          "name": "chkIsPriceZone",
+          "type": "UltraCheckEditor",
+          "label": "Pricing zone for Shift/Tow barge event rates",
+          "section": "Configuration Flags"
+        },
+        {
+          "name": "chkIsPortalArea",
+          "type": "UltraCheckEditor",
+          "label": "Portal area",
+          "section": "Configuration Flags",
+          "conditionalVisibility": "LicenseList(Licenses.LicenseComponent.Portal).Active"
+        },
+        {
+          "name": "chkIsHighWaterArea",
+          "type": "UltraCheckEditor",
+          "label": "High water area",
+          "section": "High Water Configuration",
+          "conditionalVisibility": "Lists.GlobalSettingList.EnableRiverSegmentHighWaterModel"
+        },
+        {
+          "name": "cboCustomerID",
+          "type": "UltraCombo",
+          "label": "High water customer",
+          "dataSource": "Lists.CustomerList.GetList",
+          "section": "High Water Configuration",
+          "conditionalVisibility": "Lists.GlobalSettingList.EnableRiverSegmentHighWaterModel",
+          "conditionalEnabled": "chkIsHighWaterArea.Checked"
+        },
+        {
+          "name": "chkIsFuelTaxArea",
+          "type": "UltraCheckEditor",
+          "label": "Fuel tax area",
+          "section": "Configuration Flags"
+        },
+        {
+          "name": "chkIsLiquidRateArea",
+          "type": "UltraCheckEditor",
+          "label": "Liquid rate area",
+          "section": "Configuration Flags",
+          "conditionalVisibility": "LicenseList(Licenses.LicenseComponent.UnitTow).Active"
+        }
+      ],
+      "logicalSections": [
+        {
+          "name": "Basic Information",
+          "controls": ["txtName"]
+        },
+        {
+          "name": "Configuration Flags",
+          "controls": ["chkIsPriceZone", "chkIsPortalArea", "chkIsFuelTaxArea", "chkIsLiquidRateArea"]
+        },
+        {
+          "name": "High Water Configuration",
+          "controls": ["chkIsHighWaterArea", "cboCustomerID"],
+          "conditionalVisibility": "Lists.GlobalSettingList.EnableRiverSegmentHighWaterModel"
+        }
+      ]
+    },
+    {
+      "sectionName": "grpRivers",
+      "sectionText": "River segments",
+      "order": 2,
+      "purpose": "Manage river segment associations for the river area",
+      "hasGrid": true,
+      "grid": {
+        "name": "grdList",
+        "childEntity": "RiverAreaSegment",
+        "parentKey": "RiverAreaID",
+        "operations": ["Add", "Edit", "Delete", "Export"],
+        "columns": [
+          {
+            "key": "River",
+            "header": "River",
+            "type": "String",
+            "width": 50,
+            "alignment": "Left"
+          },
+          {
+            "key": "StartMile",
+            "header": "Start Mile",
+            "type": "Decimal",
+            "width": 55,
+            "alignment": "Right",
+            "customComparer": "NumericSortComparer"
+          },
+          {
+            "key": "EndMile",
+            "header": "End Mile",
+            "type": "Decimal",
+            "width": 55,
+            "alignment": "Right",
+            "customComparer": "NumericSortComparer"
+          }
+        ],
+        "uniqueIdentifier": "RiverAreaSegmentID",
+        "defaultSort": [
+          {
+            "column": "River",
+            "direction": "Ascending"
+          }
+        ]
+      },
+      "editDetailSection": {
+        "name": "grpEditDetail",
+        "label": "Detail",
+        "controls": [
+          {
+            "name": "cboRiver",
+            "type": "UltraCombo",
+            "label": "River",
+            "required": false,
+            "dataSource": "PopulateRiverCombo"
+          },
+          {
+            "name": "txtStartMile",
+            "type": "UltraTextEditor",
+            "label": "Start mile",
+            "validationType": "Decimal"
+          },
+          {
+            "name": "txtEndMile",
+            "type": "UltraTextEditor",
+            "label": "End mile",
+            "validationType": "Decimal"
+          },
+          {
+            "name": "btnSet",
+            "type": "Button",
+            "text": "S&et",
+            "action": "Save segment changes"
+          },
+          {
+            "name": "btnCancelEdit",
+            "type": "Button",
+            "text": "Ca&ncel",
+            "action": "Cancel segment changes"
+          }
+        ]
+      },
+      "toolbar": {
+        "name": "tbmList",
+        "toolbarKey": "tbFacilities",
+        "buttons": [
+          {
+            "key": "Add",
+            "caption": "&Add",
+            "displayStyle": "ImageAndText",
+            "image": "Resources.Add",
+            "enabled": "ControlAuthorization",
+            "action": "ItemAdd()"
+          },
+          {
+            "key": "Modify",
+            "caption": "&Modify",
+            "displayStyle": "ImageAndText",
+            "image": "Resources.Modify",
+            "enabled": "ControlAuthorization",
+            "action": "ItemModify(grdList)"
+          },
+          {
+            "key": "Remove",
+            "caption": "&Remove",
+            "displayStyle": "ImageAndText",
+            "image": "Resources.Remove",
+            "enabled": "itemIsSelected && ControlAuthorization",
+            "action": "ItemRemove()"
+          },
+          {
+            "key": "Export",
+            "caption": "Export",
+            "displayStyle": "ImageAndText",
+            "image": "Resources.ExportResults",
+            "enabled": "atLeastOneRow && !IsEditingChild && ControlAuthorization",
+            "action": "Main.ExportGrid(grdList, staStatus, Me.Text)",
+            "isFirstInGroup": true
+          }
+        ]
+      }
+    }
+  ],
+  "sharedControls": {
+    "location": "Bottom of form (grpSubmitCancel)",
+    "controls": [
+      {
+        "name": "chkIsActive",
+        "type": "UltraCheckEditor",
+        "label": "Active",
+        "defaultValue": true
+      },
+      {
+        "name": "btnSubmit",
+        "type": "Button",
+        "text": "&Submit",
+        "action": "Save all changes and close",
+        "dialogResult": "OK"
+      },
+      {
+        "name": "btnCancel",
+        "type": "Button",
+        "text": "&Cancel",
+        "action": "Cancel all changes and close",
+        "dialogResult": "Cancel"
+      }
+    ]
+  },
+  "formLogic": {
+    "conditionalVisibility": [
+      {
+        "control": "chkIsPortalArea",
+        "condition": "LicenseList(Licenses.LicenseComponent.Portal).Active",
+        "reason": "Portal area flag only applicable when Portal license is active"
+      },
+      {
+        "control": "chkIsLiquidRateArea",
+        "condition": "LicenseList(Licenses.LicenseComponent.UnitTow).Active",
+        "reason": "Liquid rate area flag only applicable when UnitTow license is active"
+      },
+      {
+        "section": "High Water Configuration",
+        "controls": ["lblCustomerID", "cboCustomerID", "chkIsHighWaterArea"],
+        "condition": "Lists.GlobalSettingList.EnableRiverSegmentHighWaterModel",
+        "reason": "High water model controls only visible when global setting is enabled",
+        "layoutAdjustment": "pnlDetail.Height reduced by 24px when hidden"
+      }
+    ],
+    "conditionalEnabled": [
+      {
+        "control": "cboCustomerID",
+        "condition": "chkIsHighWaterArea.Checked || chkIsFuelTaxArea.Checked",
+        "reason": "Customer dropdown enabled only when high water or fuel tax area is checked"
+      },
+      {
+        "section": "grpEditDetail",
+        "condition": "IsEditingChild == true",
+        "reason": "Edit detail section enabled when adding or editing a segment"
+      },
+      {
+        "section": "pnlDetail",
+        "condition": "IsEditingChild == false",
+        "reason": "Main detail panel disabled when editing child segment"
+      },
+      {
+        "control": "btnSubmit",
+        "condition": "IsEditingChild == false",
+        "reason": "Submit button disabled when editing child segment"
+      },
+      {
+        "control": "chkIsActive",
+        "condition": "IsEditingChild == false",
+        "reason": "Active checkbox disabled when editing child segment"
+      },
+      {
+        "control": "tbmList",
+        "condition": "IsEditingChild == false",
+        "reason": "Toolbar disabled when editing child segment"
+      }
+    ],
+    "loadSequence": [
+      {
+        "order": 1,
+        "action": "FormatControls()",
+        "description": "Configure control visibility based on licenses and global settings"
+      },
+      {
+        "order": 2,
+        "action": "FormatAndLoadRiverArea()",
+        "description": "Load primary RiverArea entity data into main controls"
+      },
+      {
+        "order": 3,
+        "action": "EnableDisableControls(False)",
+        "description": "Set initial form state (not editing child)"
+      },
+      {
+        "order": 4,
+        "action": "RefreshList(True)",
+        "description": "Load RiverAreaSegments into grid and select first row"
+      }
+    ],
+    "dataFlowOnSubmit": [
+      {
+        "step": 1,
+        "action": "ClearUnusedFields()",
+        "description": "Clear CustomerID if IsHighWaterArea is unchecked"
+      },
+      {
+        "step": 2,
+        "action": "MyBase.SubmitNoRefreshClick()",
+        "description": "Validate and save RiverArea and child RiverAreaSegments"
+      }
+    ]
+  },
+  "businessObjects": {
+    "primary": "RiverArea",
+    "child": "RiverAreaSegment",
+    "childCollection": "RiverAreaSegments"
+  },
+  "modernizationNotes": {
+    "formPattern": "This is a detail form with embedded child grid, not a traditional tabbed interface",
+    "recommendedLayout": "Use a two-panel layout: top panel for RiverArea details, bottom panel for RiverAreaSegments grid",
+    "bootstrapComponents": [
+      "Use card component for main detail section",
+      "Use card component for river segments section with embedded data table",
+      "Use collapse/expand for edit detail section",
+      "Use toolbar buttons with icons from Bootstrap Icons or Font Awesome"
+    ],
+    "validationApproach": "Use FluentValidation for RiverArea and RiverAreaSegment; client-side validation with JavaScript",
+    "stateManagement": "Manage IsEditingChild state to toggle between form and grid edit modes"
+  }
+}

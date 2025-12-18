@@ -8,6 +8,7 @@ import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
 import tabSettings from "../settings/tab-analyzer.settings.json" with { type: "json" };
 import tabMcp from "../settings/tab-analyzer.mcp.json" with { type: "json" };
+import detailTabAnalyzerPrompt from "../system-prompts/detail-tab-analyzer-prompt.md" with { type: "text" };
 
 function resolvePath(relativeFromThisFile: string): string {
 	const url = new URL(relativeFromThisFile, import.meta.url);
@@ -30,31 +31,32 @@ async function main() {
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
 
-	const systemPrompt = `
-You are a Detail Form Tab Analyzer agent.
-
+	// Build context-specific prompt with entity details and paths
+	const contextPrompt = `
 TASK: Extract tab structure for ${entity}Detail form.
 
-GOALS:
+EXTRACTION GOALS:
 1. Parse tab definitions from Designer file
 2. Extract controls per tab
 3. Identify related entity grids
 4. Extract toolbar button configurations
 5. Identify shared controls (submit/cancel)
 
-OUTPUT: ${outputPath}/tabs.json
+OUTPUT:
+Generate a JSON file at: ${outputPath}/tabs.json
 
 Begin analysis.
 `;
 
 	const baseFlags = {
+		"append-system-prompt": detailTabAnalyzerPrompt,
 		settings: settingsJson,
 		"mcp-config": mcpJson,
 		...(interactive ? {} : { print: true, "output-format": "json" }),
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
-	const child = spawn(["claude", ...flags, systemPrompt], {
+	const child = spawn(["claude", ...flags, contextPrompt], {
 		stdin: "inherit",
 		stdout: interactive ? "inherit" : "pipe",
 		stderr: "inherit",

@@ -18,7 +18,7 @@
     "monorepo": "C:\\Dev\\BargeOps.Admin.Mono",
     "adminApi": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.API",
     "adminUi": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI",
-    "shared": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.Shared\\BargeOps.Shared",
+    "shared": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.Shared",
     "description": "Target projects where generated code will be placed (BargeOps.Admin.Mono monorepo structure)"
   },
   "notes": [

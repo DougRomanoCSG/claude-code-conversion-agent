@@ -8,6 +8,7 @@ import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
 import securitySettings from "../settings/security.settings.json" with { type: "json" };
 import securityMcp from "../settings/security.mcp.json" with { type: "json" };
+import securityExtractorPrompt from "../system-prompts/security-extractor-prompt.md" with { type: "text" };
 
 function resolvePath(relativeFromThisFile: string): string {
 	const url = new URL(relativeFromThisFile, import.meta.url);
@@ -30,31 +31,38 @@ async function main() {
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
 
-	const systemPrompt = `
-You are a Security & Authorization Extractor agent.
-
+	// Build context-specific prompt with entity details and paths
+	const contextPrompt = `
 TASK: Extract security patterns for ${entity}.
 
-GOALS:
+EXTRACTION GOALS:
 1. Extract SubSystem identifier from InitializeBase
 2. Parse SetButtonTypes for button security
 3. Extract ControlAuthorization.SetButtonType calls
 4. Identify permission requirements
 5. Map button types to modern permission attributes
+6. Document API authentication (ApiKey) and UI authentication (OIDC)
 
-OUTPUT: ${outputPath}/security.json
+OUTPUT:
+Generate a JSON file at: ${outputPath}/security.json
+
+MODERN AUTHENTICATION PATTERNS:
+- API: Use [ApiKey] attribute (NOT Windows Auth)
+- UI: Use [Authorize] attribute with OIDC (prod) or DevelopmentAutoSignInMiddleware (dev)
+- Permissions: Define in Enums/AuthPermissions.cs
 
 Begin extraction.
 `;
 
 	const baseFlags = {
+		"append-system-prompt": securityExtractorPrompt,
 		settings: settingsJson,
 		"mcp-config": mcpJson,
 		...(interactive ? {} : { print: true, "output-format": "json" }),
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
-	const child = spawn(["claude", ...flags, systemPrompt], {
+	const child = spawn(["claude", ...flags, contextPrompt], {
 		stdin: "inherit",
 		stdout: interactive ? "inherit" : "pipe",
 		stderr: "inherit",

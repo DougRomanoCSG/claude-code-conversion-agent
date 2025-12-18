@@ -1,0 +1,494 @@
+{
+  "formName": "frmBargeSeriesDetail",
+  "formType": "DetailWithChildGrid",
+  "tabControl": null,
+  "notes": "This form uses a panel-based layout rather than tabs. The top section contains barge series details, and the bottom section contains a child entity grid for draft tonnage data.",
+  "sections": [
+    {
+      "name": "pnlDetailEdit",
+      "displayName": "Barge Series Details",
+      "order": 1,
+      "dockStyle": "Top",
+      "purpose": "Primary barge series information including dimensions and specifications",
+      "controls": [
+        {
+          "name": "txtName",
+          "type": "UltraTextEditor",
+          "label": "Series",
+          "required": false,
+          "validationType": "String",
+          "maxLength": "BargeSeries.MaxLength.Name",
+          "tabIndex": 1,
+          "section": "Basic Information"
+        },
+        {
+          "name": "cboHullType",
+          "type": "UltraCombo",
+          "label": "Hull type",
+          "required": false,
+          "validationList": "HullType",
+          "tabIndex": 2,
+          "section": "Basic Information"
+        },
+        {
+          "name": "cboCustomerID",
+          "type": "UltraCombo",
+          "label": "Owner",
+          "required": false,
+          "dataSource": "CustomerList",
+          "tabIndex": 3,
+          "section": "Basic Information"
+        },
+        {
+          "name": "cboCoverType",
+          "type": "UltraCombo",
+          "label": "Cover type",
+          "required": false,
+          "validationList": "CoverType",
+          "tabIndex": 4,
+          "section": "Basic Information"
+        },
+        {
+          "name": "txtLength",
+          "type": "UltraTextEditor",
+          "label": "Length",
+          "required": false,
+          "validationType": "Decimal",
+          "tabIndex": 5,
+          "section": "Dimensions"
+        },
+        {
+          "name": "txtWidth",
+          "type": "UltraTextEditor",
+          "label": "Width",
+          "required": false,
+          "validationType": "Decimal",
+          "tabIndex": 6,
+          "section": "Dimensions"
+        },
+        {
+          "name": "txtDepth",
+          "type": "UltraTextEditor",
+          "label": "Depth",
+          "required": false,
+          "validationType": "Decimal",
+          "tabIndex": 7,
+          "section": "Dimensions"
+        },
+        {
+          "name": "txtTonsPerInch",
+          "type": "UltraTextEditor",
+          "label": "Tons/inch",
+          "required": false,
+          "validationType": "Decimal",
+          "tabIndex": 8,
+          "section": "Draft Information"
+        },
+        {
+          "name": "txtDraftLightFeet",
+          "type": "UltraTextEditor",
+          "label": "Light draft (ft/in)",
+          "required": false,
+          "validationType": "Int32",
+          "tabIndex": 9,
+          "section": "Draft Information"
+        },
+        {
+          "name": "txtDraftLightInches",
+          "type": "UltraTextEditor",
+          "label": "Light draft (ft/in)",
+          "required": false,
+          "validationType": "Int32",
+          "tabIndex": 10,
+          "section": "Draft Information"
+        }
+      ],
+      "logicalSections": [
+        {
+          "name": "Basic Information",
+          "controls": ["txtName", "cboHullType", "cboCustomerID", "cboCoverType"]
+        },
+        {
+          "name": "Dimensions",
+          "controls": ["txtLength", "txtWidth", "txtDepth"]
+        },
+        {
+          "name": "Draft Information",
+          "controls": ["txtTonsPerInch", "txtDraftLightFeet", "txtDraftLightInches"]
+        }
+      ]
+    },
+    {
+      "name": "grpDetailEditList",
+      "displayName": "Draft tonnage",
+      "order": 2,
+      "dockStyle": "Fill",
+      "purpose": "Editable grid for entering barge series draft tonnage data by depth increments",
+      "hasGrid": true,
+      "grid": {
+        "name": "grdBargeSeriesDraft",
+        "childEntity": "BargeSeriesDraft",
+        "parentKey": "BargeSeriesID",
+        "gridType": "InlineEdit",
+        "notes": "Fixed 14-row grid (0-13 feet) with 12 tonnage columns representing inches (0-11). Grid is pre-populated and allows inline editing. No Add/Remove operations - data entry only.",
+        "operations": [],
+        "toolbar": {
+          "name": "ToolbarsManager",
+          "toolbarName": "ChildEditToolbar",
+          "buttons": [
+            {
+              "key": "Paste",
+              "caption": "&Paste from Clipboard",
+              "type": "ButtonTool",
+              "buttonType": "Action",
+              "displayStyle": "ImageAndText",
+              "icon": "Paste",
+              "action": "PasteFromClipboard"
+            },
+            {
+              "key": "Export",
+              "caption": "Export",
+              "type": "ButtonTool",
+              "buttonType": "Open",
+              "displayStyle": "ImageAndText",
+              "icon": "ExportResults",
+              "action": "ExportGrid"
+            }
+          ]
+        },
+        "columns": [
+          {
+            "key": "BargeSeriesDraftID",
+            "header": "ID",
+            "type": "Int32",
+            "visible": false,
+            "primaryKey": true
+          },
+          {
+            "key": "DraftFeet",
+            "header": "Feet",
+            "type": "Int32",
+            "width": 50,
+            "alignment": "Right",
+            "editable": false,
+            "order": 0
+          },
+          {
+            "key": "Tons00",
+            "header": "0\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 1,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons01",
+            "header": "1\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 2,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons02",
+            "header": "2\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 3,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons03",
+            "header": "3\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 4,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons04",
+            "header": "4\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 5,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons05",
+            "header": "5\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 6,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons06",
+            "header": "6\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 7,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons07",
+            "header": "7\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 8,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons08",
+            "header": "8\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 9,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons09",
+            "header": "9\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 10,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons10",
+            "header": "10\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 11,
+            "nullText": "xxx"
+          },
+          {
+            "key": "Tons11",
+            "header": "11\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "order": 12,
+            "nullText": "xxx"
+          }
+        ],
+        "gridSettings": {
+          "updateMode": "OnCellChangeOrLostFocus",
+          "allowAddNew": false,
+          "allowUpdate": true,
+          "allowDelete": false,
+          "allowColMoving": false,
+          "allowColSizing": false,
+          "cellClickAction": "EditAndSelectText",
+          "tabNavigation": "NextControlOnLastCell",
+          "sortingEnabled": false,
+          "defaultSortColumn": "DraftFeet",
+          "defaultSortOrder": "Ascending",
+          "selectTypeCell": "Single",
+          "selectTypeRow": "None",
+          "selectTypeCol": "None"
+        },
+        "specialBehaviors": [
+          {
+            "behavior": "AfterCellUpdate",
+            "description": "Validates numeric input and replaces invalid entries with 'xxx'"
+          },
+          {
+            "behavior": "KeyDown",
+            "description": "Arrow key navigation moves between cells while maintaining edit mode"
+          },
+          {
+            "behavior": "PasteFromClipboard",
+            "description": "Supports pasting comma-separated or tab-delimited data from Excel starting at the Tons00 column"
+          },
+          {
+            "behavior": "ProcessBargeSeriesDraft",
+            "description": "On submit, converts grid data to BargeSeriesDraft child objects. Creates new children for new records, updates existing for edit mode"
+          }
+        ],
+        "dataInitialization": {
+          "method": "BuildBargeSeriesDraftTable",
+          "description": "Creates a 14-row DataTable (DraftFeet 0-13) with all tonnage cells initialized to 'xxx'. Populates existing BargeSeriesDraft data if editing existing record.",
+          "rowCount": 14,
+          "fixedRows": true
+        }
+      }
+    }
+  ],
+  "sharedControls": {
+    "location": "Bottom of form",
+    "groupBox": "grpSubmitCancel",
+    "controls": [
+      {
+        "name": "chkIsActive",
+        "type": "UltraCheckEditor",
+        "text": "Active",
+        "defaultValue": true,
+        "anchor": "Bottom Left",
+        "tabIndex": 12
+      },
+      {
+        "name": "btnSubmit",
+        "type": "UltraButton",
+        "text": "&Submit",
+        "dialogResult": "OK",
+        "buttonType": "Submit",
+        "anchor": "Bottom Right",
+        "tabIndex": 13
+      },
+      {
+        "name": "btnCancel",
+        "type": "UltraButton",
+        "text": "&Cancel",
+        "dialogResult": "Cancel",
+        "buttonType": "Cancel",
+        "causesValidation": false,
+        "anchor": "Bottom Right",
+        "tabIndex": 14
+      }
+    ]
+  },
+  "formLogic": {
+    "loadSequence": [
+      {
+        "order": 1,
+        "method": "FormatControls",
+        "action": "Initialize grid settings, populate validation list combos (HullType, CoverType), populate customer list, set validator extender, set max lengths"
+      },
+      {
+        "order": 2,
+        "method": "LoadControlsForBargeSeries",
+        "action": "Bind BargeSeries business object properties to form controls"
+      },
+      {
+        "order": 3,
+        "method": "RefreshList",
+        "action": "Build and bind BargeSeriesDraft data table to grid"
+      }
+    ],
+    "submitSequence": [
+      {
+        "order": 1,
+        "method": "ProcessBargeSeriesDraft",
+        "action": "Convert grid data to BargeSeriesDraft child objects and update BargeSeries.BargeSeriesDrafts collection"
+      },
+      {
+        "order": 2,
+        "method": "SubmitNoRefreshClick",
+        "action": "Validate and save BargeSeries business object (inherited from base form)"
+      }
+    ],
+    "validatedEvents": [
+      {
+        "control": "cboCustomerID",
+        "property": "CustomerID",
+        "updateMethod": "InfragisticsHelper.SetObjectProperty"
+      },
+      {
+        "control": "txtName",
+        "property": "Name",
+        "updateMethod": "Direct assignment"
+      },
+      {
+        "control": "cboHullType",
+        "property": "HullType",
+        "updateMethod": "InfragisticsHelper.SetObjectProperty"
+      },
+      {
+        "control": "cboCoverType",
+        "property": "CoverType",
+        "updateMethod": "InfragisticsHelper.SetObjectProperty"
+      },
+      {
+        "control": "txtLength",
+        "property": "Length",
+        "updateMethod": "Direct assignment"
+      },
+      {
+        "control": "txtWidth",
+        "property": "Width",
+        "updateMethod": "Direct assignment"
+      },
+      {
+        "control": "txtDepth",
+        "property": "Depth",
+        "updateMethod": "Direct assignment"
+      },
+      {
+        "control": "txtTonsPerInch",
+        "property": "TonsPerInch",
+        "updateMethod": "Direct assignment"
+      },
+      {
+        "control": "txtDraftLightFeet",
+        "property": "DraftLightFeet",
+        "updateMethod": "Direct assignment"
+      },
+      {
+        "control": "txtDraftLightInches",
+        "property": "DraftLightInches",
+        "updateMethod": "Direct assignment"
+      },
+      {
+        "control": "chkIsActive",
+        "property": "IsActive",
+        "updateMethod": "Direct assignment"
+      }
+    ]
+  },
+  "modernImplementationGuidance": {
+    "layoutPattern": "VerticalSplit",
+    "topSection": {
+      "component": "Form or Card component",
+      "layout": "Grid layout with logical groupings",
+      "sections": ["Basic Information", "Dimensions", "Draft Information"]
+    },
+    "bottomSection": {
+      "component": "DataGrid with inline editing",
+      "features": [
+        "Fixed 14 rows (non-expandable)",
+        "Inline cell editing",
+        "Paste from clipboard support",
+        "Export to Excel functionality",
+        "Custom validation on cell update",
+        "Arrow key navigation in edit mode"
+      ]
+    },
+    "recommendedComponents": {
+      "framework": "ASP.NET Core MVC/Razor Pages",
+      "gridLibrary": "Ag-Grid or Telerik Kendo Grid",
+      "validation": "FluentValidation + client-side validation",
+      "clipboard": "JavaScript Clipboard API"
+    },
+    "uiLibrary": "Bootstrap 5 or Tailwind CSS",
+    "specialConsiderations": [
+      "The draft tonnage grid is a specialized data entry component requiring Excel-like behavior",
+      "Consider using a spreadsheet-style component for the tonnage grid",
+      "Paste functionality is critical for user workflow - ensure robust clipboard handling",
+      "The 'xxx' placeholder pattern should be replaced with proper null/empty state in modern UI",
+      "Consider real-time validation feedback instead of ValidatorExtender pattern"
+    ]
+  }
+}

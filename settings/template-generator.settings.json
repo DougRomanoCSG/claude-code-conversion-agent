@@ -1,7 +1,7 @@
 {
 	"permissions": {
 		"defaultMode": "default",
-		"allow": ["Read", "Glob", "Grep", "Write", "Edit"],
+		"allow": ["Read", "Glob", "Grep", "Write", "Edit", "Bash(cat)", "Bash(echo)"],
 		"deny": ["Bash(rm)", "Bash(del)"]
 	},
 	"hooks": {

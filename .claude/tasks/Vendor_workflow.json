@@ -1,0 +1,702 @@
+{
+  "formName": "frmVendorSearch / frmVendorDetail",
+  "formType": "Search and Detail",
+  "primaryWorkflows": [
+    {
+      "name": "SearchAndEditVendor",
+      "description": "User searches for vendors and edits one",
+      "steps": [
+        {
+          "step": 1,
+          "action": "EnterSearchCriteria",
+          "controls": [
+            "txtSearchName",
+            "txtSearchAccountingCode",
+            "chkIsActiveOnly",
+            "chkFuelSuppliersOnly",
+            "chkInternalVendorOnly",
+            "chkIsBargeExEnabledOnly",
+            "chkEnablePortalOnly",
+            "chkLiquidBrokerOnly",
+            "chkTankermanOnly"
+          ],
+          "defaultValues": {
+            "chkIsActiveOnly": true
+          }
+        },
+        {
+          "step": 2,
+          "action": "ClickSearch",
+          "button": "btnFind",
+          "result": "Results displayed in grdSearch, first row selected"
+        },
+        {
+          "step": 3,
+          "action": "SelectVendor",
+          "control": "grdSearch",
+          "trigger": "DoubleClick or Edit button from main form"
+        },
+        {
+          "step": 4,
+          "action": "OpenDetailForm",
+          "navigation": "Opens frmVendorDetail modal",
+          "mode": "Edit",
+          "businessObject": "Vendor.GetVendor(VendorID)"
+        },
+        {
+          "step": 5,
+          "action": "EditVendorDetails",
+          "controls": [
+            "txtName",
+            "txtLongName",
+            "txtAccountingCode",
+            "chkIsActive",
+            "txtAddress",
+            "txtCity",
+            "cboState",
+            "txtZip",
+            "txtPhoneNumber",
+            "txtFaxNumber",
+            "txtEmailAddress",
+            "chkEnablePortal",
+            "chkIsLiquidBroker",
+            "chkIsInternalVendor",
+            "cboTermsCode",
+            "chkIsTankerman"
+          ],
+          "tabs": [
+            "Details",
+            "Portal",
+            "VendorBusinessUnits",
+            "BargeExSettings"
+          ]
+        },
+        {
+          "step": 6,
+          "action": "SubmitChanges",
+          "button": "btnSubmit",
+          "validation": "Vendor.IsValid",
+          "result": "Vendor.ApplyEdit called, form closes"
+        }
+      ]
+    },
+    {
+      "name": "CreateNewVendor",
+      "description": "User creates a new vendor record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickNew",
+          "trigger": "New button from main form",
+          "navigation": "Opens frmVendorDetail modal"
+        },
+        {
+          "step": 2,
+          "action": "EnterVendorDetails",
+          "requiredFields": [
+            "txtName"
+          ],
+          "controls": [
+            "txtName",
+            "txtLongName",
+            "txtAccountingCode",
+            "txtAddress",
+            "txtCity",
+            "cboState",
+            "txtZip",
+            "txtPhoneNumber",
+            "txtFaxNumber",
+            "txtEmailAddress"
+          ],
+          "defaultFocus": "txtName"
+        },
+        {
+          "step": 3,
+          "action": "SubmitNewVendor",
+          "button": "btnSubmit",
+          "validation": "Vendor.IsValid",
+          "result": "Vendor saved, form closes, search refreshed"
+        }
+      ]
+    },
+    {
+      "name": "DeleteVendor",
+      "description": "User deletes a vendor record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectVendor",
+          "control": "grdSearch"
+        },
+        {
+          "step": 2,
+          "action": "ClickDelete",
+          "trigger": "Delete button from main form"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDelete",
+          "dialog": "ItemRemoveDialog with message 'Vendor'",
+          "buttons": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "ExecuteDelete",
+          "method": "Vendor.DeleteVendor(VendorID)",
+          "result": "Search list refreshed without selecting row"
+        }
+      ]
+    },
+    {
+      "name": "ManageVendorContacts",
+      "description": "User manages contacts for a vendor",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenVendorDetail",
+          "navigation": "frmVendorDetail Details tab"
+        },
+        {
+          "step": 2,
+          "action": "AddOrEditContact",
+          "toolbar": "ContactsToolbarManager",
+          "buttons": [
+            "Add",
+            "Modify",
+            "Remove",
+            "ExportContacts"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "EditContactInline",
+          "mode": "List-detail editing pattern",
+          "controls": [
+            "txtContactName",
+            "txtContactPhoneNumber",
+            "txtContactPhoneExt",
+            "txtContactEmailAddress",
+            "txtContactFaxNumber",
+            "chkIsPrimary",
+            "chkContactIsDispatcher",
+            "chkContactIsLiquidBroker"
+          ],
+          "enabledState": "grpContact enabled, pnlVendor disabled"
+        },
+        {
+          "step": 4,
+          "action": "SetOrCancelContact",
+          "buttons": [
+            "btnSet",
+            "btnCancelEdit"
+          ],
+          "result": "Contact added to VendorContacts collection, grid refreshed"
+        },
+        {
+          "step": 5,
+          "action": "SubmitVendor",
+          "button": "btnSubmit",
+          "result": "Vendor and all contacts saved"
+        }
+      ]
+    },
+    {
+      "name": "ManagePortalGroups",
+      "description": "User manages portal groups for a vendor",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenVendorDetail",
+          "navigation": "frmVendorDetail Portal tab"
+        },
+        {
+          "step": 2,
+          "action": "EnablePortal",
+          "control": "chkEnablePortal",
+          "result": "PortalToolbarManager enabled"
+        },
+        {
+          "step": 3,
+          "action": "AddOrEditPortalGroup",
+          "toolbar": "PortalToolbarManager",
+          "buttons": [
+            "AddPortalGroup",
+            "ModifyPortalGroup",
+            "RemovePortalGroup",
+            "CopyPortalGroup",
+            "ExportPortalGroup"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "OpenPortalGroupForm",
+          "navigation": "Opens frmVendorPortalGroup modal",
+          "saveRequirement": "Must save unsaved Vendor changes first"
+        },
+        {
+          "step": 5,
+          "action": "ConfigurePortalGroup",
+          "result": "Form closes, Vendor reloaded, grid refreshed"
+        }
+      ]
+    },
+    {
+      "name": "ManageVendorBusinessUnits",
+      "description": "User manages business units for a vendor",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenVendorDetail",
+          "navigation": "frmVendorDetail VendorBusinessUnits tab"
+        },
+        {
+          "step": 2,
+          "action": "AddOrEditBusinessUnit",
+          "toolbar": "VendorBusinessUnitsToolbarManager",
+          "buttons": [
+            "AddVbu",
+            "ModifyVbu",
+            "RemoveVbu",
+            "ExportVbu"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "EditBusinessUnitInline",
+          "mode": "List-detail editing pattern",
+          "controls": [
+            "txtVbuName",
+            "txtVbuAccountingCode",
+            "chkVbuIsActive",
+            "chkIsFuelSupplier",
+            "chkIsBoatAssistSupplier",
+            "chkIsDefaultFuelSupplier",
+            "cboRiver",
+            "txtMile",
+            "cboBank",
+            "txtMinDiscountQty",
+            "cboMinDiscountFrequency"
+          ],
+          "enabledState": "grpVendorBusinessUnit enabled, btnSubmit disabled"
+        },
+        {
+          "step": 4,
+          "action": "SetOrCancelBusinessUnit",
+          "buttons": [
+            "btnVbuSet",
+            "btnVbuCancel"
+          ],
+          "businessLogic": "CheckDefaultFuelSuppliers - ensures only one default",
+          "result": "VBU added to VendorBusinessUnits collection, grid refreshed"
+        },
+        {
+          "step": 5,
+          "action": "SubmitVendor",
+          "button": "btnSubmit",
+          "result": "Vendor and all business units saved, VendorBusinessUnitList cache marked dirty"
+        }
+      ]
+    },
+    {
+      "name": "ConfigureBargeExSettings",
+      "description": "User configures BargeEx integration settings",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenVendorDetail",
+          "navigation": "frmVendorDetail BargeExSettings tab",
+          "visibility": "Only if GlobalSettingList.EnableBargeExBargeLineSupport = True"
+        },
+        {
+          "step": 2,
+          "action": "EnableBargeEx",
+          "control": "chkIsBargeExEnabled",
+          "result": "txtBargeExTradingPartnerNum and cboBargeExConfigID enabled"
+        },
+        {
+          "step": 3,
+          "action": "EnterBargeExDetails",
+          "controls": [
+            "txtBargeExTradingPartnerNum",
+            "cboBargeExConfigID"
+          ],
+          "validation": "TradingPartnerNum padded to 8 characters"
+        },
+        {
+          "step": 4,
+          "action": "SubmitVendor",
+          "button": "btnSubmit",
+          "result": "BargeEx settings saved with Vendor"
+        }
+      ]
+    },
+    {
+      "name": "ResetSearch",
+      "description": "User resets search criteria to defaults",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickReset",
+          "button": "btnReset"
+        },
+        {
+          "step": 2,
+          "action": "ClearFields",
+          "result": "All text fields cleared, chkIsActiveOnly set to true, focus to txtSearchName"
+        }
+      ]
+    }
+  ],
+  "formStates": [
+    {
+      "state": "SearchInitial",
+      "description": "Form first loaded in main explorer panel",
+      "gridState": "Empty",
+      "defaultValues": {
+        "chkIsActiveOnly": true
+      },
+      "enabledButtons": [
+        "btnFind",
+        "btnReset"
+      ],
+      "defaultFocus": "txtSearchName"
+    },
+    {
+      "state": "SearchResultsDisplayed",
+      "description": "Search results shown after btnFind clicked",
+      "gridState": "Populated with vendors",
+      "enabledButtons": [
+        "btnFind",
+        "btnReset",
+        "Main form Add/Edit/Delete"
+      ],
+      "sorting": "Name ascending (default)"
+    },
+    {
+      "state": "DetailFormNew",
+      "description": "Detail form opened for new vendor",
+      "formTitle": "New - Vendor Detail",
+      "businessObject": "Vendor.NewVendor in BeginEdit",
+      "tabsEnabled": [
+        "Details"
+      ],
+      "tabsDisabled": [
+        "Portal",
+        "VendorBusinessUnits",
+        "BargeExSettings"
+      ],
+      "defaultFocus": "txtName"
+    },
+    {
+      "state": "DetailFormEdit",
+      "description": "Detail form opened for existing vendor",
+      "formTitle": "{VendorName} - Vendor Detail",
+      "businessObject": "Vendor.GetVendor(VendorID) in BeginEdit",
+      "tabsEnabled": [
+        "Details",
+        "Portal (if license active)",
+        "VendorBusinessUnits",
+        "BargeExSettings (if global setting enabled)"
+      ],
+      "defaultFocus": "txtName"
+    },
+    {
+      "state": "DetailFormEditingContact",
+      "description": "Inline editing contact in Details tab",
+      "IsEditingChild": true,
+      "grpContactEnabled": true,
+      "pnlVendorDisabled": true,
+      "btnSubmitDisabled": true,
+      "toolbarsDisabled": [
+        "ContactsToolbarManager",
+        "PortalToolbarManager",
+        "VendorBusinessUnitsToolbarManager"
+      ],
+      "tabsDisabled": [
+        "Portal",
+        "VendorBusinessUnits",
+        "BargeExSettings"
+      ]
+    },
+    {
+      "state": "DetailFormEditingBusinessUnit",
+      "description": "Inline editing business unit in VendorBusinessUnits tab",
+      "IsEditingChild": true,
+      "grpVendorBusinessUnitEnabled": true,
+      "btnSubmitDisabled": true,
+      "toolbarsDisabled": [
+        "ContactsToolbarManager",
+        "PortalToolbarManager",
+        "VendorBusinessUnitsToolbarManager"
+      ],
+      "tabsDisabled": [
+        "Details",
+        "Portal"
+      ]
+    },
+    {
+      "state": "PortalTabActive",
+      "description": "Portal tab selected",
+      "toolbarsEnabled": [
+        "PortalToolbarManager (if chkEnablePortal checked)"
+      ],
+      "toolbarsDisabled": [
+        "ContactsToolbarManager",
+        "VendorBusinessUnitsToolbarManager"
+      ],
+      "grpPortalGroupsState": "Enabled if chkEnablePortal checked, otherwise disabled"
+    }
+  ],
+  "navigationPatterns": [
+    {
+      "from": "frmVendorSearch",
+      "to": "frmVendorDetail",
+      "trigger": "ItemAdd (New button) or ItemModify (Edit/DoubleClick)",
+      "dataPassedId": "VendorID (for edit) or null (for new)",
+      "modalDialog": true,
+      "returnBehavior": "Search list refreshed on DialogResult.OK"
+    },
+    {
+      "from": "frmVendorDetail",
+      "to": "frmVendorPortalGroup",
+      "trigger": "PortalToolbarManager Add/Modify/Copy buttons",
+      "dataPassedId": "Vendor object and VendorPortalGroupID (if editing/copying)",
+      "modalDialog": true,
+      "prerequisite": "Must save unsaved Vendor changes first",
+      "returnBehavior": "Vendor reloaded if DialogResult.OK"
+    }
+  ],
+  "stateTransitions": [
+    {
+      "from": "SearchInitial",
+      "to": "SearchResultsDisplayed",
+      "trigger": "btnFind.Click",
+      "action": "RefreshList(True) - select first row"
+    },
+    {
+      "from": "SearchResultsDisplayed",
+      "to": "SearchInitial",
+      "trigger": "btnReset.Click",
+      "action": "ResetControls() - clear fields, set defaults"
+    },
+    {
+      "from": "SearchResultsDisplayed",
+      "to": "DetailFormNew",
+      "trigger": "ItemAdd() called",
+      "action": "Open frmVendorDetail with Vendor.NewVendor"
+    },
+    {
+      "from": "SearchResultsDisplayed",
+      "to": "DetailFormEdit",
+      "trigger": "ItemModify() called",
+      "action": "Open frmVendorDetail with Vendor.GetVendor(GridControlIndex)"
+    },
+    {
+      "from": "DetailFormEdit",
+      "to": "DetailFormEditingContact",
+      "trigger": "ContactsToolbarManager Add or Modify button",
+      "action": "EnableDisableControls(True) for contact editing"
+    },
+    {
+      "from": "DetailFormEditingContact",
+      "to": "DetailFormEdit",
+      "trigger": "btnSet.Click or btnCancelEdit.Click",
+      "action": "SetClickListAndDetail or CancelClickListAndDetail, EnableDisableControls(False)"
+    },
+    {
+      "from": "DetailFormEdit",
+      "to": "DetailFormEditingBusinessUnit",
+      "trigger": "VendorBusinessUnitsToolbarManager Add or Modify button",
+      "action": "EnableDisableControls(True) for VBU editing"
+    },
+    {
+      "from": "DetailFormEditingBusinessUnit",
+      "to": "DetailFormEdit",
+      "trigger": "btnVbuSet.Click or btnVbuCancel.Click",
+      "action": "SetClickListAndDetail or CancelClickListAndDetail, EnableDisableControls(False)"
+    }
+  ],
+  "sessionManagement": {
+    "gridSettings": {
+      "save": "MyAppSettingHelper.SaveGrid on pnlSearch_HandleDestroyed",
+      "restore": "MyAppSettingHelper.RestoreGrid on pnlSearch_HandleCreated"
+    },
+    "businessObjectState": {
+      "pattern": "BeginEdit/ApplyEdit/CancelEdit",
+      "parentObject": "Vendor",
+      "childCollections": [
+        "VendorContacts",
+        "VendorBusinessUnits"
+      ],
+      "inMemoryEditing": true
+    },
+    "dirtyTracking": {
+      "VendorBusinessUnits": "VendorBusinessUnitList.GetList.MarkCacheDirty() on save if dirty"
+    }
+  },
+  "userExperience": {
+    "defaultFocus": {
+      "search": "txtSearchName",
+      "detailNew": "txtName",
+      "detailEdit": "txtName",
+      "contactEdit": "txtContactName",
+      "businessUnitEdit": "txtVbuName"
+    },
+    "enterKeyBehavior": "Triggers search (AcceptButton = btnFind)",
+    "doubleClickBehavior": "Opens detail form for editing",
+    "cursorManagement": "WaitCursor during operations",
+    "validationDisplay": "staStatus (status bar)",
+    "contextualEnabling": {
+      "chkIsBargeExEnabled": "Enables/disables BargeEx fields",
+      "chkIsFuelSupplier": "Enables/disables fuel supplier fields",
+      "chkEnablePortal": "Enables/disables portal toolbar and group",
+      "tabSelection": "Affects which toolbars are enabled"
+    }
+  },
+  "errorHandling": {
+    "exceptionManagement": "ExceptionManager.Publish(ex) in all catch blocks",
+    "formClosingOnError": "Me.Close() in frmVendorDetail_Load if exception",
+    "validationErrors": "Displayed on staStatus via ValidatorExtender"
+  },
+  "businessLogic": {
+    "uniqueConstraints": {
+      "IsPrimary": "Only one VendorContact can be primary per Vendor",
+      "IsDefaultFuelSupplier": "Only one VendorBusinessUnit can be default fuel supplier per Vendor"
+    },
+    "specialValidations": {
+      "PortalAccountDeletion": "Warning if clearing email address would delete portal account",
+      "ContactRemoval": "Warning if removing contact with portal account",
+      "DefaultFuelSupplier": "Message when checking/unchecking default fuel supplier"
+    },
+    "dataTransformations": {
+      "BargeExTradingPartnerNum": "Padded to 8 characters on validation"
+    },
+    "conditionalFields": {
+      "FuelSupplierFields": "Cleared if IsFuelSupplier = false",
+      "BargeExFields": "Cleared if IsBargeExEnabled = false"
+    }
+  },
+  "securityAndAuthorization": {
+    "subsystem": "SubSystem.frmVendorSearch",
+    "buttonTypes": {
+      "btnFind": "ButtonType.Open",
+      "btnReset": "ButtonType.Open",
+      "btnSubmit": "ButtonType.Submit",
+      "btnCancel": "ButtonType.Cancel",
+      "Add": "ButtonType.Add",
+      "Modify": "ButtonType.Open",
+      "Remove": "ButtonType.Remove",
+      "Export": "ButtonType.Open"
+    },
+    "controlAuthorization": "ControlAuthorization.SetButtonType for all buttons"
+  },
+  "formLifecycle": {
+    "searchPanel": {
+      "load": "pnlSearch_HandleCreated - FormatControls, RestoreGrid",
+      "unload": "pnlSearch_HandleDestroyed - SaveGrid"
+    },
+    "detailForm": {
+      "load": "frmVendorDetail_Load - FormatControls, LoadControlsForVendor, RefreshList all grids, EnableDisableControls(False)",
+      "initialize": "Initialize(Vendor) - set _Vendor, BeginEdit, set form title, InitializeBase",
+      "submit": "SubmitNoRefreshClick - ClearUnusedFields, mark cache dirty if needed, MyBase.SubmitNoRefreshClick",
+      "cancel": "CancelClick - ClearUnusedFields, MyBase.CancelClick"
+    }
+  },
+  "refreshTriggers": [
+    {
+      "event": "btnFind.Click",
+      "method": "RefreshList(True)",
+      "result": "Search grid refreshed, first row selected"
+    },
+    {
+      "event": "ItemRemove (Delete)",
+      "method": "RefreshList(False)",
+      "result": "Search grid refreshed, no row selected"
+    },
+    {
+      "event": "frmVendorDetail closes after save",
+      "method": "Main form refreshes search automatically",
+      "result": "Search grid updated with changes"
+    },
+    {
+      "event": "Contact Set/Cancel",
+      "method": "RefreshList(grdContacts, False)",
+      "result": "Contacts grid refreshed"
+    },
+    {
+      "event": "Business Unit Set/Cancel",
+      "method": "RefreshList(grdVendorBusinessUnits, False)",
+      "result": "Business units grid refreshed"
+    },
+    {
+      "event": "Portal Group saved",
+      "method": "ReloadVendor() - gets fresh data, reloads all",
+      "result": "Vendor reloaded, all grids refreshed"
+    }
+  ],
+  "gridConfigurations": {
+    "grdSearch": {
+      "columns": [
+        "Name",
+        "LongName",
+        "AccountingCode",
+        "IsActive",
+        "IsFuelSupplier",
+        "IsBoatAssistSupplier",
+        "IsInternalVendor",
+        "IsBargeExEnabled (conditional)",
+        "EnablePortal (conditional)",
+        "IsLiquidBroker (conditional)",
+        "IsTankerman (conditional)"
+      ],
+      "uniqueIdentifier": "VendorID",
+      "defaultSort": "Name ascending"
+    },
+    "grdContacts": {
+      "columns": [
+        "Name",
+        "IsPrimary",
+        "IsDispatcher",
+        "IsLiquidBroker (conditional)",
+        "PhoneNumber",
+        "PhoneExt",
+        "EmailAddress"
+      ],
+      "uniqueIdentifier": "VendorContactID",
+      "defaultSort": "Name ascending",
+      "autoFitStyle": "ExtendLastColumn"
+    },
+    "grdPortalGroups": {
+      "columns": [
+        "Name",
+        "EventHistoryDays",
+        "LimitBargeEvents",
+        "LimitDestinations",
+        "LimitCustomers",
+        "IsActive"
+      ],
+      "uniqueIdentifier": "VendorPortalGroupID",
+      "defaultSort": "Name ascending",
+      "autoFitStyle": "ResizeAllColumns"
+    },
+    "grdVendorBusinessUnits": {
+      "columns": [
+        "Name",
+        "AccountingCode",
+        "River",
+        "Mile",
+        "Bank",
+        "IsFuelSupplier",
+        "IsDefaultFuelSupplier",
+        "IsBoatAssistSupplier",
+        "IsActive"
+      ],
+      "uniqueIdentifier": "VendorBusinessUnitID",
+      "defaultSort": "Name ascending",
+      "autoFitStyle": "ResizeAllColumns"
+    }
+  }
+}

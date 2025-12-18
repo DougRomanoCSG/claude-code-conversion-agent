@@ -1,0 +1,965 @@
+{
+  "formName": "frmBargeDetail",
+  "organizationPattern": "GroupBox",
+  "note": "This form uses group boxes instead of tabs. Each group box represents a logical section that could be converted to a tab in the modern UI.",
+  "sections": [
+    {
+      "name": "Basic Information",
+      "displayName": "Basic Information",
+      "order": 1,
+      "container": "pnlBargeDetail",
+      "defaultActive": true,
+      "purpose": "Primary barge identification and basic data",
+      "controls": [
+        {
+          "name": "txtBargeNum",
+          "type": "UltraTextEditor",
+          "label": "Barge #:",
+          "required": true,
+          "section": "Identification",
+          "notes": "Read-only for existing barges, editable for new records"
+        },
+        {
+          "name": "btnEditBargeNumber",
+          "type": "Button",
+          "label": "&Edit",
+          "action": "Enable editing of barge number",
+          "section": "Identification"
+        },
+        {
+          "name": "txtUscgNum",
+          "type": "UltraTextEditor",
+          "label": "USCG #:",
+          "required": false,
+          "section": "Identification"
+        },
+        {
+          "name": "llblLookup",
+          "type": "UltraFormattedLinkLabel",
+          "label": "USCG Lookup Link",
+          "action": "Opens USCG lookup website",
+          "section": "Identification"
+        },
+        {
+          "name": "txtHullNumber",
+          "type": "UltraTextEditor",
+          "label": "Hull #:",
+          "required": false,
+          "section": "Identification"
+        },
+        {
+          "name": "txtGlAccountNum",
+          "type": "UltraTextEditor",
+          "label": "G/L code:",
+          "required": false,
+          "section": "Identification"
+        },
+        {
+          "name": "chkIsActive",
+          "type": "UltraCheckEditor",
+          "label": "Active",
+          "required": false,
+          "section": "Identification"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Identification",
+          "controls": ["txtBargeNum", "btnEditBargeNumber", "txtUscgNum", "llblLookup", "txtHullNumber", "txtGlAccountNum", "chkIsActive"]
+        }
+      ]
+    },
+    {
+      "name": "grpPhysical",
+      "displayName": "Physical",
+      "order": 2,
+      "container": "UltraGroupBox",
+      "purpose": "Physical characteristics and specifications of the barge",
+      "controls": [
+        {
+          "name": "cboHullType",
+          "type": "UltraCombo",
+          "label": "Hull type:",
+          "required": false,
+          "validationList": "HullType",
+          "section": "Specifications"
+        },
+        {
+          "name": "txtExternalLength",
+          "type": "UltraTextEditor",
+          "label": "Length:",
+          "required": false,
+          "dataType": "Decimal",
+          "section": "Dimensions"
+        },
+        {
+          "name": "txtExternalWidth",
+          "type": "UltraTextEditor",
+          "label": "Width:",
+          "required": false,
+          "dataType": "Decimal",
+          "section": "Dimensions"
+        },
+        {
+          "name": "txtExternalDepth",
+          "type": "UltraTextEditor",
+          "label": "Depth:",
+          "required": false,
+          "dataType": "Decimal",
+          "section": "Dimensions"
+        },
+        {
+          "name": "cboBargeSeriesID",
+          "type": "UltraCombo",
+          "label": "Barge series:",
+          "required": false,
+          "list": "BargeSeriesList",
+          "section": "Specifications",
+          "notes": "Conditional visibility based on customization setting"
+        },
+        {
+          "name": "cboSizeCategory",
+          "type": "UltraCombo",
+          "label": "Size category:",
+          "required": false,
+          "validationList": "BargeSizeCategory",
+          "section": "Specifications",
+          "notes": "Auto-calculated from length and width"
+        },
+        {
+          "name": "cboCoverType",
+          "type": "UltraCombo",
+          "label": "Cover:",
+          "required": false,
+          "validationList": "CoverType",
+          "section": "Cover",
+          "notes": "Special formatting displays both Value and Description"
+        },
+        {
+          "name": "cboCoverSubTypeID",
+          "type": "UltraCombo",
+          "label": "Sub type:",
+          "required": false,
+          "list": "CoverSubTypeList",
+          "section": "Cover",
+          "notes": "Enabled only if Cover type is not OT"
+        },
+        {
+          "name": "cboBargeType",
+          "type": "UltraCombo",
+          "label": "Barge type:",
+          "required": false,
+          "validationList": "BargeType",
+          "section": "Specifications"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Specifications",
+          "controls": ["cboHullType", "cboBargeSeriesID", "cboSizeCategory", "cboBargeType"]
+        },
+        {
+          "name": "Dimensions",
+          "controls": ["txtExternalLength", "txtExternalWidth", "txtExternalDepth"]
+        },
+        {
+          "name": "Cover",
+          "controls": ["cboCoverType", "cboCoverSubTypeID"]
+        }
+      ]
+    },
+    {
+      "name": "grpStatus",
+      "displayName": "Status",
+      "order": 3,
+      "container": "UltraGroupBox",
+      "purpose": "Current status, location, and operational details",
+      "controls": [
+        {
+          "name": "cboOwnerID",
+          "type": "UltraCombo",
+          "label": "Owner:",
+          "required": false,
+          "list": "CustomerList",
+          "section": "Ownership"
+        },
+        {
+          "name": "txtStatus",
+          "type": "UltraTextEditor",
+          "label": "Barge status:",
+          "required": false,
+          "readOnly": true,
+          "section": "Status"
+        },
+        {
+          "name": "cboCustomerID",
+          "type": "UltraCombo",
+          "label": "Operator:",
+          "required": false,
+          "list": "CustomerList",
+          "section": "Ownership",
+          "notes": "Required for non-fleet-owned non-terminal barges"
+        },
+        {
+          "name": "txtFleetBoatName",
+          "type": "UltraTextEditor",
+          "label": "Latest servicing boat:",
+          "required": false,
+          "readOnly": true,
+          "section": "Status"
+        },
+        {
+          "name": "txtFleetBoatActivityDateTime",
+          "type": "UltraTextEditor",
+          "label": "Latest servicing boat datetime:",
+          "required": false,
+          "readOnly": true,
+          "section": "Status"
+        },
+        {
+          "name": "cboLocationID",
+          "type": "UltraCombo",
+          "label": "Location:",
+          "required": false,
+          "list": "BargeLocationList",
+          "section": "Location"
+        },
+        {
+          "name": "txtLocationDateTime",
+          "type": "UltraTextEditor",
+          "label": "Location update time:",
+          "required": false,
+          "readOnly": true,
+          "section": "Location"
+        },
+        {
+          "name": "btnClearLocationDateTime",
+          "type": "Button",
+          "label": "C&lear",
+          "action": "Clear location date/time",
+          "section": "Location"
+        },
+        {
+          "name": "cboLoadStatus",
+          "type": "UltraCombo",
+          "label": "Load status:",
+          "required": false,
+          "validationList": "LoadStatus",
+          "section": "Status"
+        },
+        {
+          "name": "cboCoverConfig",
+          "type": "UltraCombo",
+          "label": "Cover configuration:",
+          "required": false,
+          "validationList": "CoverConfiguration",
+          "section": "Status",
+          "notes": "Conditional requirement based on CoverType and operator"
+        },
+        {
+          "name": "cboEquipmentType",
+          "type": "UltraCombo",
+          "label": "Equipment type:",
+          "required": false,
+          "validationList": "BargeEquipmentType",
+          "section": "Equipment"
+        },
+        {
+          "name": "cboCleanStatus",
+          "type": "UltraCombo",
+          "label": "Clean status:",
+          "required": false,
+          "validationList": "CleanStatus",
+          "section": "Status",
+          "notes": "Disabled for fleet-owned equipment"
+        },
+        {
+          "name": "cboFleetID",
+          "type": "UltraCombo",
+          "label": "Business unit:",
+          "required": false,
+          "list": "FleetList",
+          "section": "Equipment",
+          "notes": "Enabled only for fleet-owned equipment"
+        },
+        {
+          "name": "cboCommodityID",
+          "type": "UltraCombo",
+          "label": "Commodity:",
+          "required": false,
+          "list": "CommodityList",
+          "section": "Cargo",
+          "notes": "Disabled for fleet-owned equipment"
+        },
+        {
+          "name": "cboColorPairID",
+          "type": "UltraCombo",
+          "label": "Color:",
+          "required": false,
+          "list": "ColorPairList",
+          "section": "Equipment",
+          "notes": "Enabled for fleet-owned and customer-owned only"
+        },
+        {
+          "name": "chkHasInsufficientFreeboard",
+          "type": "UltraCheckEditor",
+          "label": "Insufficient freeboard:",
+          "required": false,
+          "readOnly": true,
+          "section": "Status"
+        },
+        {
+          "name": "cboFreeboardRange",
+          "type": "UltraCombo",
+          "label": "Freeboard Range:",
+          "required": false,
+          "validationList": "FreeboardRange",
+          "section": "Status",
+          "notes": "Enabled only when HasInsufficientFreeboard is checked"
+        },
+        {
+          "name": "dtInServiceDate",
+          "type": "UltraDateTimeEditor",
+          "label": "In service:",
+          "required": false,
+          "section": "Service Dates"
+        },
+        {
+          "name": "lblDraft",
+          "type": "Label",
+          "label": "Deepest draft (ft/in):",
+          "section": "Draft"
+        },
+        {
+          "name": "txtDraftFeet",
+          "type": "UltraTextEditor",
+          "label": "Draft Feet",
+          "required": false,
+          "dataType": "Int32",
+          "section": "Draft"
+        },
+        {
+          "name": "txtDraftInches",
+          "type": "UltraTextEditor",
+          "label": "Draft Inches",
+          "required": false,
+          "dataType": "Int16",
+          "section": "Draft"
+        },
+        {
+          "name": "btnDraftDetail",
+          "type": "Button",
+          "label": "&Draft Detail",
+          "action": "Open draft detail form (frmBargeDraft)",
+          "section": "Draft"
+        },
+        {
+          "name": "dtOutOfServiceDate",
+          "type": "UltraDateTimeEditor",
+          "label": "Out of service:",
+          "required": false,
+          "section": "Service Dates"
+        },
+        {
+          "name": "btnBargeCharters",
+          "type": "Button",
+          "label": "Cha&rters",
+          "action": "Open barge charters form (frmBargeCharters)",
+          "section": "Equipment",
+          "notes": "Visible only if BargeCharterSupportCustomization is enabled"
+        },
+        {
+          "name": "lblDraftCalculated",
+          "type": "Label",
+          "label": "Calculated draft (ft/in):",
+          "section": "Draft",
+          "notes": "Visible only if Freight license is active"
+        },
+        {
+          "name": "txtDraftCalculatedFeet",
+          "type": "UltraTextEditor",
+          "label": "Calculated Draft Feet",
+          "required": false,
+          "readOnly": true,
+          "section": "Draft",
+          "notes": "Visible only if Freight license is active"
+        },
+        {
+          "name": "txtDraftCalculatedInches",
+          "type": "UltraTextEditor",
+          "label": "Calculated Draft Inches",
+          "required": false,
+          "readOnly": true,
+          "section": "Draft",
+          "notes": "Visible only if Freight license is active"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Ownership",
+          "controls": ["cboOwnerID", "cboCustomerID"]
+        },
+        {
+          "name": "Status",
+          "controls": ["txtStatus", "txtFleetBoatName", "txtFleetBoatActivityDateTime", "cboLoadStatus", "cboCoverConfig", "cboCleanStatus", "chkHasInsufficientFreeboard", "cboFreeboardRange"]
+        },
+        {
+          "name": "Location",
+          "controls": ["cboLocationID", "txtLocationDateTime", "btnClearLocationDateTime"]
+        },
+        {
+          "name": "Equipment",
+          "controls": ["cboEquipmentType", "cboFleetID", "cboColorPairID", "btnBargeCharters"]
+        },
+        {
+          "name": "Cargo",
+          "controls": ["cboCommodityID"]
+        },
+        {
+          "name": "Service Dates",
+          "controls": ["dtInServiceDate", "dtOutOfServiceDate"]
+        },
+        {
+          "name": "Draft",
+          "controls": ["lblDraft", "txtDraftFeet", "txtDraftInches", "btnDraftDetail", "lblDraftCalculated", "txtDraftCalculatedFeet", "txtDraftCalculatedInches"]
+        }
+      ]
+    },
+    {
+      "name": "grpDamageRepair",
+      "displayName": "Damage / Repair",
+      "order": 4,
+      "container": "UltraGroupBox",
+      "purpose": "Track damage and repair status",
+      "controls": [
+        {
+          "name": "cboRepairStatus",
+          "type": "UltraCombo",
+          "label": "Repair status:",
+          "required": false,
+          "validationList": "RepairStatus",
+          "section": "Repair"
+        },
+        {
+          "name": "chkIsCargoDamaged",
+          "type": "UltraCheckEditor",
+          "label": "Damaged cargo",
+          "required": false,
+          "section": "Damage"
+        },
+        {
+          "name": "chkIsDryDocked",
+          "type": "UltraCheckEditor",
+          "label": "Dry dock",
+          "required": false,
+          "section": "Repair"
+        },
+        {
+          "name": "cboDamageLevel",
+          "type": "UltraCombo",
+          "label": "Damage level:",
+          "required": false,
+          "validationList": "BargeDamageLevel",
+          "section": "Damage"
+        },
+        {
+          "name": "btnMapColors",
+          "type": "Button",
+          "label": "&Map Colors",
+          "action": "Open damage level to color mapping (frmBargeTokenMap)",
+          "section": "Damage"
+        },
+        {
+          "name": "chkIsLeaker",
+          "type": "UltraCheckEditor",
+          "label": "Leaker",
+          "required": false,
+          "section": "Damage"
+        },
+        {
+          "name": "chkIsRepairScheduled",
+          "type": "UltraCheckEditor",
+          "label": "Scheduled for repair",
+          "required": false,
+          "section": "Repair"
+        },
+        {
+          "name": "chkIsDamaged",
+          "type": "UltraCheckEditor",
+          "label": "Damaged:",
+          "required": false,
+          "section": "Damage"
+        },
+        {
+          "name": "txtDamageNote",
+          "type": "UltraTextEditor",
+          "label": "Damage Note:",
+          "required": false,
+          "maxLength": "MaxLength.DamageNote",
+          "section": "Damage",
+          "notes": "Enabled only when IsDamaged is checked"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Damage",
+          "controls": ["chkIsCargoDamaged", "cboDamageLevel", "btnMapColors", "chkIsLeaker", "chkIsDamaged", "txtDamageNote"]
+        },
+        {
+          "name": "Repair",
+          "controls": ["cboRepairStatus", "chkIsDryDocked", "chkIsRepairScheduled"]
+        }
+      ],
+      "notes": "Entire group box is disabled for fleet-owned equipment"
+    },
+    {
+      "name": "grpTicketDetails",
+      "displayName": "Ticket details",
+      "order": 5,
+      "container": "UltraGroupBox",
+      "purpose": "Track ticket-related information and scheduling",
+      "controls": [
+        {
+          "name": "txtInspectionStatus",
+          "type": "UltraTextEditor",
+          "label": "Inspection status:",
+          "required": false,
+          "readOnly": true,
+          "section": "Inspection"
+        },
+        {
+          "name": "chkIsOnHold",
+          "type": "UltraCheckEditor",
+          "label": "Hold - Do not release barge to boat",
+          "required": false,
+          "readOnly": true,
+          "section": "Status"
+        },
+        {
+          "name": "txtDestinationInName",
+          "type": "UltraTextEditor",
+          "label": "Destination in:",
+          "required": false,
+          "readOnly": true,
+          "section": "Destinations"
+        },
+        {
+          "name": "chkLoadFirst",
+          "type": "UltraCheckEditor",
+          "label": "Load first",
+          "required": false,
+          "readOnly": true,
+          "section": "Loading"
+        },
+        {
+          "name": "chkLoadLast",
+          "type": "UltraCheckEditor",
+          "label": "Load last",
+          "required": false,
+          "readOnly": true,
+          "section": "Loading"
+        },
+        {
+          "name": "chkLoadMultipleLots",
+          "type": "UltraCheckEditor",
+          "label": "Load in multiple lots",
+          "required": false,
+          "readOnly": true,
+          "section": "Loading"
+        },
+        {
+          "name": "txtDestinationOutName",
+          "type": "UltraTextEditor",
+          "label": "Destination out:",
+          "required": false,
+          "readOnly": true,
+          "section": "Destinations"
+        },
+        {
+          "name": "chkIsOnOrder",
+          "type": "UltraCheckEditor",
+          "label": "On order:",
+          "required": false,
+          "readOnly": true,
+          "section": "Scheduling"
+        },
+        {
+          "name": "txtOnOrderScheduleDateTime",
+          "type": "UltraTextEditor",
+          "label": "On Order Schedule:",
+          "required": false,
+          "readOnly": true,
+          "section": "Scheduling",
+          "notes": "Displays schedule datetime and trip number"
+        },
+        {
+          "name": "txtScheduleInName",
+          "type": "UltraTextEditor",
+          "label": "Scheduled in:",
+          "required": false,
+          "readOnly": true,
+          "section": "Scheduling"
+        },
+        {
+          "name": "chkIsAwaitingPickup",
+          "type": "UltraCheckEditor",
+          "label": "Pickup:",
+          "required": false,
+          "readOnly": true,
+          "section": "Scheduling"
+        },
+        {
+          "name": "txtAwaitingPickupReadyDateTime",
+          "type": "UltraTextEditor",
+          "label": "Pickup Ready Time:",
+          "required": false,
+          "readOnly": true,
+          "section": "Scheduling"
+        },
+        {
+          "name": "txtScheduleOutName",
+          "type": "UltraTextEditor",
+          "label": "Scheduled out:",
+          "required": false,
+          "readOnly": true,
+          "section": "Scheduling"
+        },
+        {
+          "name": "txtConsignLocationName",
+          "type": "UltraTextEditor",
+          "label": "Consigned to:",
+          "required": false,
+          "readOnly": true,
+          "section": "Consignment",
+          "notes": "Combines consigned facility and ship name"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Inspection",
+          "controls": ["txtInspectionStatus"]
+        },
+        {
+          "name": "Status",
+          "controls": ["chkIsOnHold"]
+        },
+        {
+          "name": "Destinations",
+          "controls": ["txtDestinationInName", "txtDestinationOutName"]
+        },
+        {
+          "name": "Loading",
+          "controls": ["chkLoadFirst", "chkLoadLast", "chkLoadMultipleLots"]
+        },
+        {
+          "name": "Scheduling",
+          "controls": ["chkIsOnOrder", "txtOnOrderScheduleDateTime", "txtScheduleInName", "chkIsAwaitingPickup", "txtAwaitingPickupReadyDateTime", "txtScheduleOutName"]
+        },
+        {
+          "name": "Consignment",
+          "controls": ["txtConsignLocationName"]
+        }
+      ],
+      "notes": "Entire group box is disabled for fleet-owned equipment"
+    }
+  ],
+  "sharedControls": {
+    "location": "grpSubmitCancel (Bottom of form)",
+    "container": "UltraGroupBox",
+    "controls": [
+      {
+        "name": "chkIsActive",
+        "type": "UltraCheckEditor",
+        "text": "Active",
+        "action": "Toggle active status"
+      },
+      {
+        "name": "btnDefineColors",
+        "type": "Button",
+        "text": "Define C&olors",
+        "action": "Open color definition form (frmBargeTokenColors)"
+      },
+      {
+        "name": "btnSubmit",
+        "type": "Button",
+        "text": "&Submit",
+        "action": "Validate and save all changes"
+      },
+      {
+        "name": "btnCancel",
+        "type": "Button",
+        "text": "&Cancel",
+        "action": "Cancel changes and close form"
+      },
+      {
+        "name": "btnViewPhotos",
+        "type": "Button",
+        "text": "View &Photos",
+        "action": "Open barge conditions/photos form (frmBargeConditions)"
+      }
+    ]
+  },
+  "businessLogic": {
+    "conditionalVisibility": [
+      {
+        "control": "cboBargeSeriesID",
+        "condition": "CustomizationList.BargeSeriesSupportCustomization is enabled",
+        "reason": "Barge series support is optional customization"
+      },
+      {
+        "control": "btnBargeCharters",
+        "condition": "CustomizationList.BargeCharterSupportCustomization is enabled",
+        "reason": "Charter support is optional customization"
+      },
+      {
+        "control": "lblDraftCalculated",
+        "condition": "Freight license is active",
+        "reason": "Calculated draft feature requires Freight license"
+      },
+      {
+        "control": "txtDraftCalculatedFeet",
+        "condition": "Freight license is active",
+        "reason": "Calculated draft feature requires Freight license"
+      },
+      {
+        "control": "txtDraftCalculatedInches",
+        "condition": "Freight license is active",
+        "reason": "Calculated draft feature requires Freight license"
+      }
+    ],
+    "conditionalEnable": [
+      {
+        "groupBox": "grpStatus",
+        "condition": "EquipmentType != 'fleet-owned'",
+        "reason": "Most status fields are disabled for fleet-owned equipment"
+      },
+      {
+        "groupBox": "grpDamageRepair",
+        "condition": "EquipmentType != 'fleet-owned'",
+        "reason": "Damage/repair tracking not applicable to fleet-owned equipment"
+      },
+      {
+        "groupBox": "grpTicketDetails",
+        "condition": "EquipmentType != 'fleet-owned'",
+        "reason": "Ticket details not applicable to fleet-owned equipment"
+      },
+      {
+        "control": "cboFleetID",
+        "condition": "EquipmentType == 'fleet-owned'",
+        "reason": "Fleet selection only for fleet-owned equipment"
+      },
+      {
+        "control": "cboColorPairID",
+        "condition": "EquipmentType == 'fleet-owned' OR EquipmentType == 'customer-owned'",
+        "reason": "Color tracking for fleet and customer-owned only"
+      },
+      {
+        "control": "cboFreeboardRange",
+        "condition": "chkHasInsufficientFreeboard.Checked == true",
+        "reason": "Freeboard range only relevant when insufficient freeboard"
+      },
+      {
+        "control": "txtDamageNote",
+        "condition": "chkIsDamaged.Checked == true",
+        "reason": "Damage note only when damaged"
+      },
+      {
+        "control": "cboCoverSubTypeID",
+        "condition": "cboCoverType != null AND cboCoverType != 'OT'",
+        "reason": "Cover sub-type depends on cover type selection"
+      },
+      {
+        "control": "cboCoverConfig",
+        "condition": "EnableCoverTypeSpecialLogic == true AND IsCompanyOperated AND CoverType not null and CoverType != 'OT'",
+        "reason": "Cover config conditionally required based on cover type and operator"
+      },
+      {
+        "control": "txtBargeNum",
+        "condition": "IsNew == true",
+        "reason": "Barge number editable only for new barges"
+      },
+      {
+        "control": "txtDraftFeet",
+        "condition": "No corner draft information entered",
+        "reason": "Draft is read-only when corner drafts are provided"
+      },
+      {
+        "control": "txtDraftInches",
+        "condition": "No corner draft information entered",
+        "reason": "Draft is read-only when corner drafts are provided"
+      }
+    ],
+    "conditionalRequired": [
+      {
+        "control": "lblSizeCategory",
+        "condition": "EquipmentType != 'fleet-owned' AND Terminal license is not active",
+        "reason": "Size category required for non-fleet-owned when no Terminal license"
+      },
+      {
+        "control": "lblCustomerID",
+        "condition": "EquipmentType != 'fleet-owned' AND Terminal license is not active",
+        "reason": "Operator required for non-fleet-owned when no Terminal license"
+      },
+      {
+        "control": "lblCoverType",
+        "condition": "RequireBargeCoverType == true OR (CommodityRequiresCover AND IsCompanyOperated)",
+        "reason": "Cover type conditionally required based on settings or commodity"
+      },
+      {
+        "control": "lblCoverSubTypeID",
+        "condition": "CommodityRequiresCover AND IsCompanyOperated",
+        "reason": "Cover sub-type required when commodity requires cover"
+      },
+      {
+        "control": "lblCoverConfig",
+        "condition": "EnableCoverTypeSpecialLogic == true AND IsCompanyOperated AND CoverType not null and CoverType != 'OT'",
+        "reason": "Cover config conditionally required based on special logic"
+      }
+    ],
+    "cascadingUpdates": [
+      {
+        "trigger": "cboEquipmentType",
+        "action": "Sets cboFleetID to selected fleet when 'fleet-owned' selected"
+      },
+      {
+        "trigger": "cboEquipmentType",
+        "action": "Enables/disables grpStatus, grpDamageRepair, grpTicketDetails based on type"
+      },
+      {
+        "trigger": "cboLocationID",
+        "action": "Updates txtStatus when location changes"
+      },
+      {
+        "trigger": "txtExternalLength OR txtExternalWidth",
+        "action": "Auto-calculates cboSizeCategory"
+      },
+      {
+        "trigger": "cboCoverType",
+        "action": "Clears cboCoverSubTypeID and updates state of cboCoverConfig"
+      },
+      {
+        "trigger": "cboCoverType",
+        "action": "Repopulates cboCoverSubTypeID list based on new cover type"
+      },
+      {
+        "trigger": "cboCustomerID OR cboCommodityID",
+        "action": "Updates state/requirement of cover-related fields"
+      },
+      {
+        "trigger": "cboBargeSeriesID",
+        "action": "Auto-populates Owner, Operator, Hull Type, Dimensions, Size Category, and Cover fields"
+      },
+      {
+        "trigger": "chkHasInsufficientFreeboard",
+        "action": "Enables/disables cboFreeboardRange"
+      },
+      {
+        "trigger": "chkIsDamaged",
+        "action": "Enables/disables txtDamageNote"
+      }
+    ],
+    "formSubmit": [
+      {
+        "action": "ClearUnusedFields",
+        "description": "Clears fields based on equipment type and other conditions before save"
+      },
+      {
+        "action": "UpdateBargePositions",
+        "description": "Saves fleet-owned equipment positions if set via Barge Positions form"
+      },
+      {
+        "action": "ValidateAndSave",
+        "description": "Calls base form SubmitNoRefreshClick to validate and save"
+      }
+    ]
+  },
+  "relatedForms": [
+    {
+      "form": "frmBargeDraft",
+      "button": "btnDraftDetail",
+      "purpose": "Manage detailed draft information (corner drafts)",
+      "returnAction": "Refreshes draft controls on parent form"
+    },
+    {
+      "form": "frmBargeTokenColors",
+      "button": "btnDefineColors",
+      "purpose": "Define color pairs for barge tokens",
+      "returnAction": "Refreshes color pair list"
+    },
+    {
+      "form": "frmBargeCharters",
+      "button": "btnBargeCharters",
+      "purpose": "Manage barge charter information",
+      "returnAction": "No refresh needed"
+    },
+    {
+      "form": "frmBargeTokenMap",
+      "button": "btnMapColors",
+      "purpose": "Map damage levels to colors",
+      "returnAction": "No refresh needed"
+    },
+    {
+      "form": "frmBargeConditions",
+      "button": "btnViewPhotos",
+      "purpose": "View barge condition photos",
+      "returnAction": "No refresh needed"
+    },
+    {
+      "form": "frmBargeSearch",
+      "relationship": "Parent search form",
+      "purpose": "Search and select barges to edit"
+    }
+  ],
+  "modernizationRecommendations": {
+    "tabConversion": "Convert group boxes to Bootstrap Nav Tabs with following structure:",
+    "suggestedTabs": [
+      {
+        "tabName": "tabBasicInfo",
+        "tabText": "Basic Information",
+        "order": 1,
+        "includesSections": ["Basic Information"]
+      },
+      {
+        "tabName": "tabPhysical",
+        "tabText": "Physical",
+        "order": 2,
+        "includesSections": ["grpPhysical"]
+      },
+      {
+        "tabName": "tabStatus",
+        "tabText": "Status & Location",
+        "order": 3,
+        "includesSections": ["grpStatus"]
+      },
+      {
+        "tabName": "tabDamageRepair",
+        "tabText": "Damage & Repair",
+        "order": 4,
+        "includesSections": ["grpDamageRepair"],
+        "conditionalVisibility": "EquipmentType != 'fleet-owned'"
+      },
+      {
+        "tabName": "tabTicketDetails",
+        "tabText": "Ticket Details",
+        "order": 5,
+        "includesSections": ["grpTicketDetails"],
+        "conditionalVisibility": "EquipmentType != 'fleet-owned'"
+      }
+    ],
+    "validationStrategy": "Implement client-side validation with ASP.NET Core ModelState",
+    "uiComponents": {
+      "dropdowns": "Use Select2 or Bootstrap dropdowns for combo boxes",
+      "dates": "Use Bootstrap datepicker for date fields",
+      "checkboxes": "Use Bootstrap custom checkboxes",
+      "buttons": "Use Bootstrap button styling with appropriate colors (primary, secondary, danger)"
+    },
+    "notes": [
+      "Consider lazy-loading tabs for performance",
+      "Implement AJAX save to avoid full page reloads",
+      "Add confirmation dialog for cancel action",
+      "Implement real-time validation feedback",
+      "Consider using a toast notification for save success/failure",
+      "Group related fields within tabs using Bootstrap cards or fieldsets"
+    ]
+  }
+}

@@ -8,6 +8,7 @@ import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
 import validationSettings from "../settings/validation.settings.json" with { type: "json" };
 import validationMcp from "../settings/validation.mcp.json" with { type: "json" };
+import validationExtractorPrompt from "../system-prompts/validation-extractor-prompt.md" with { type: "text" };
 
 function resolvePath(relativeFromThisFile: string): string {
 	const url = new URL(relativeFromThisFile, import.meta.url);
@@ -30,31 +31,32 @@ async function main() {
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
 
-	const systemPrompt = `
-You are a Validation Rule Extractor agent.
-
+	// Build context-specific prompt with entity details and paths
+	const contextPrompt = `
 TASK: Extract all validation rules for ${entity}.
 
-GOALS:
+EXTRACTION GOALS:
 1. Parse validation methods in forms (AreFieldsValid)
 2. Extract business rules from CheckBusinessRules
 3. Identify field-level constraints
 4. Extract error messages
 5. Identify validation triggers
 
-OUTPUT: ${outputPath}/validation.json
+OUTPUT:
+Generate a JSON file at: ${outputPath}/validation.json
 
 Begin extraction.
 `;
 
 	const baseFlags = {
+		"append-system-prompt": validationExtractorPrompt,
 		settings: settingsJson,
 		"mcp-config": mcpJson,
 		...(interactive ? {} : { print: true, "output-format": "json" }),
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
-	const child = spawn(["claude", ...flags, systemPrompt], {
+	const child = spawn(["claude", ...flags, contextPrompt], {
 		stdin: "inherit",
 		stdout: interactive ? "inherit" : "pipe",
 		stderr: "inherit",

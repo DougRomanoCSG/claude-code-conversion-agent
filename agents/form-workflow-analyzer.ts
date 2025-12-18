@@ -8,6 +8,7 @@ import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
 import workflowSettings from "../settings/workflow.settings.json" with { type: "json" };
 import workflowMcp from "../settings/workflow.mcp.json" with { type: "json" };
+import formWorkflowAnalyzerPrompt from "../system-prompts/form-workflow-analyzer-prompt.md" with { type: "text" };
 
 function resolvePath(relativeFromThisFile: string): string {
 	const url = new URL(relativeFromThisFile, import.meta.url);
@@ -30,31 +31,32 @@ async function main() {
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
 
-	const systemPrompt = `
-You are a Form Workflow Analyzer agent.
-
+	// Build context-specific prompt with entity details and paths
+	const contextPrompt = `
 TASK: Extract user flows and state management for ${entity}.
 
-GOALS:
+ANALYSIS GOALS:
 1. Trace event handler chains
 2. Identify form lifecycle methods
 3. Extract state persistence patterns
 4. Identify modal dialog patterns
 5. Extract refresh/update triggers
 
-OUTPUT: ${outputPath}/workflow.json
+OUTPUT:
+Generate a JSON file at: ${outputPath}/workflow.json
 
 Begin analysis.
 `;
 
 	const baseFlags = {
+		"append-system-prompt": formWorkflowAnalyzerPrompt,
 		settings: settingsJson,
 		"mcp-config": mcpJson,
 		...(interactive ? {} : { print: true, "output-format": "json" }),
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
-	const child = spawn(["claude", ...flags, systemPrompt], {
+	const child = spawn(["claude", ...flags, contextPrompt], {
 		stdin: "inherit",
 		stdout: interactive ? "inherit" : "pipe",
 		stderr: "inherit",

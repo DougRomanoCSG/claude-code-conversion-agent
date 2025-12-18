@@ -1,0 +1,264 @@
+{
+  "entity": "Barge",
+  "legacy": {
+    "searchForm": "frmBargeSearch",
+    "detailForm": "frmBargeDetail",
+    "subsystem": "frmBargeSearch",
+    "securityButtons": [
+      {
+        "form": "frmBargeSearch",
+        "button": "btnFind",
+        "type": "Open",
+        "legacyPermission": "CanOpen",
+        "description": "Execute barge search"
+      },
+      {
+        "form": "frmBargeSearch",
+        "button": "btnReset",
+        "type": "Open",
+        "legacyPermission": "CanOpen",
+        "description": "Reset search criteria"
+      },
+      {
+        "form": "frmBargeDetail",
+        "button": "btnSubmit",
+        "type": "Submit",
+        "legacyPermission": "CanModify",
+        "description": "Save barge changes"
+      },
+      {
+        "form": "frmBargeDetail",
+        "button": "btnCancel",
+        "type": "Cancel",
+        "legacyPermission": "CanOpen",
+        "description": "Cancel barge changes"
+      },
+      {
+        "form": "frmBargeDetail",
+        "button": "btnDraftDetail",
+        "type": "Open",
+        "legacyPermission": "CanOpen",
+        "description": "View/modify barge draft details"
+      },
+      {
+        "form": "frmBargeDetail",
+        "button": "btnDefineColors",
+        "type": "Open",
+        "legacyPermission": "CanOpen",
+        "description": "Define token colors"
+      },
+      {
+        "form": "frmBargeDetail",
+        "button": "btnBargeCharters",
+        "type": "Open",
+        "legacyPermission": "CanOpen",
+        "description": "View/modify barge charters"
+      },
+      {
+        "form": "frmBargeDetail",
+        "button": "btnEditBargeNumber",
+        "type": "Action",
+        "legacyPermission": "CanModify",
+        "description": "Enable editing of barge number"
+      },
+      {
+        "form": "frmBargeDetail",
+        "button": "btnClearLocationDateTime",
+        "type": "Action",
+        "legacyPermission": "CanModify",
+        "description": "Clear location date/time"
+      },
+      {
+        "form": "frmBargeDetail",
+        "button": "btnMapColors",
+        "type": "Open",
+        "legacyPermission": "CanOpen",
+        "description": "Map damage level colors"
+      },
+      {
+        "form": "frmBargeDetail",
+        "button": "btnViewPhotos",
+        "type": "Open",
+        "legacyPermission": "CanOpen",
+        "description": "View barge condition photos"
+      }
+    ],
+    "interfaceMethods": {
+      "IBaseSearch": [
+        "ItemAdd - Creates new barge (requires CanCreate)",
+        "ItemModify - Modifies existing barge (requires CanModify)",
+        "ItemRemove - Deletes barge (requires CanDelete)"
+      ]
+    }
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/Barge",
+          "action": "GetList",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeView",
+          "description": "Retrieve list of barges with search criteria"
+        },
+        {
+          "method": "GET",
+          "route": "api/Barge/{id}",
+          "action": "Get",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeView",
+          "description": "Retrieve single barge by ID"
+        },
+        {
+          "method": "POST",
+          "route": "api/Barge",
+          "action": "Create",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeModify",
+          "description": "Create new barge"
+        },
+        {
+          "method": "PUT",
+          "route": "api/Barge/{id}",
+          "action": "Update",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeModify",
+          "description": "Update existing barge"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/Barge/{id}",
+          "action": "Delete",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeModify",
+          "description": "Delete barge (soft delete via IsActive flag)"
+        },
+        {
+          "method": "POST",
+          "route": "api/Barge/{id}/close-ticket",
+          "action": "CloseTicket",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeModify",
+          "description": "Close barge ticket"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "permissions": [
+        {
+          "name": "BargeView",
+          "enumValue": "AuthPermissions.BargeView",
+          "description": "View barges and search results",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "Search",
+            "Details"
+          ]
+        },
+        {
+          "name": "BargeModify",
+          "enumValue": "AuthPermissions.BargeModify",
+          "description": "Create, update, and deactivate barges",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Create",
+            "Edit",
+            "SetActive",
+            "Delete",
+            "CloseTicket",
+            "EditBargeNumber",
+            "ClearLocationDateTime"
+          ]
+        }
+      ],
+      "licenseBasedFeatures": [
+        {
+          "feature": "Terminal",
+          "affectedFields": [
+            "CargoHandlingStatus",
+            "Cargo",
+            "CargoCustomer",
+            "SurveyTons",
+            "IsHeadBarge",
+            "HasWaterInCargoBox",
+            "IsRakeDown",
+            "IsHeavy",
+            "EstimatedArrivalDateTime",
+            "PositionUpdatedDateTime"
+          ],
+          "description": "Terminal license enables cargo tracking and terminal operations fields"
+        },
+        {
+          "feature": "Freight",
+          "affectedFields": [
+            "FreightCustomer",
+            "ContractNumber",
+            "PurchaseOrderNum",
+            "FreightStatus",
+            "FreightOrigin",
+            "FreightDestination",
+            "DraftCalculatedFeet",
+            "DraftCalculatedInches",
+            "IsDefaultTons"
+          ],
+          "description": "Freight license enables freight contract and billing fields"
+        }
+      ],
+      "customizationFeatures": [
+        {
+          "customization": "BargeCharterSupportCustomization",
+          "affectedUI": [
+            "btnBargeCharters button visibility"
+          ],
+          "description": "Shows barge charter management button when enabled"
+        },
+        {
+          "customization": "BargeSeriesSupportCustomization",
+          "affectedUI": [
+            "cboBargeSeriesID combo visibility"
+          ],
+          "description": "Shows barge series field when enabled"
+        },
+        {
+          "customization": "ShowCommodityInfoCustomization",
+          "affectedUI": [
+            "Quantity column in grid"
+          ],
+          "description": "Shows quantity field instead of tonnage"
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BargeView",
+          "description": "View barges"
+        },
+        {
+          "name": "BargeModify",
+          "description": "Modify barges"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "softDelete": "Barge uses IsActive flag for soft delete, so Delete permission maps to BargeModify (not a separate BargeDelete)",
+    "subsystemIdentifier": "frmBargeSearch - used for CSG Authorization subsystem mapping",
+    "searchPermissions": "Search form buttons (Find, Reset) use ButtonType.Open which maps to read-only access",
+    "modifyPermissions": "Detail form Submit button uses ButtonType.Submit which requires modify permission",
+    "actionButtons": "Action buttons (EditBargeNumber, ClearLocationDateTime) require modify permission",
+    "multiSelectOperations": "CloseTickets method supports multi-select operation on grid rows",
+    "licenseGating": "Terminal and Freight licenses control visibility of specific field groups",
+    "customizationFlags": "Multiple customization flags control feature visibility",
+    "equipmentTypeLogic": "Fleet-owned equipment has different field enablement than customer-owned",
+    "draftAccess": "Draft fields have conditional read-only state based on _OperationsAccessLevel and corner draft values"
+  }
+}

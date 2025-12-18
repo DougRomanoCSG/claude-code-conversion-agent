@@ -1,0 +1,654 @@
+{
+  "entity": "River",
+  "legacyForms": {
+    "searchForm": "frmRiverSearch",
+    "detailForm": "frmRiverDetail"
+  },
+  "modernArchitecture": {
+    "controller": "RiverController",
+    "viewModels": {
+      "search": "RiverSearchViewModel",
+      "detail": "RiverEditViewModel"
+    },
+    "views": {
+      "index": "Views/River/Index.cshtml",
+      "search": "Views/River/_Search.cshtml",
+      "searchResults": "Views/River/_SearchResults.cshtml",
+      "edit": "Views/River/Edit.cshtml"
+    },
+    "javascript": {
+      "search": "wwwroot/js/riverSearch.js",
+      "edit": "wwwroot/js/riverEdit.js"
+    }
+  },
+  "controlMappings": [
+    {
+      "legacyControl": "UltraTextEditor",
+      "modernEquivalent": "Bootstrap Text Input",
+      "description": "Standard text input with form-control styling",
+      "html": "<input type=\"text\" class=\"form-control\" />",
+      "examples": [
+        {
+          "field": "txtCode",
+          "html": "<input asp-for=\"Code\" class=\"form-control\" placeholder=\"Enter code...\" />",
+          "validation": "Custom regex for exact length, uppercase transformation",
+          "notes": "Uses uppercase transformation on validated event"
+        },
+        {
+          "field": "txtName",
+          "html": "<input asp-for=\"Name\" class=\"form-control\" placeholder=\"Enter river/waterway name...\" />",
+          "validation": "String with max length",
+          "notes": "Primary search field"
+        },
+        {
+          "field": "txtStartMile",
+          "html": "<input asp-for=\"StartMile\" type=\"number\" step=\"0.01\" class=\"form-control\" />",
+          "validation": "Decimal type",
+          "notes": "Numeric input for mile markers"
+        },
+        {
+          "field": "txtEndMile",
+          "html": "<input asp-for=\"EndMile\" type=\"number\" step=\"0.01\" class=\"form-control\" />",
+          "validation": "Decimal type",
+          "notes": "Numeric input for mile markers"
+        },
+        {
+          "field": "txtBargeExCode",
+          "html": "<input asp-for=\"BargeExCode\" class=\"form-control\" />",
+          "validation": "String with max length",
+          "notes": "Integration code for BargeEx system"
+        },
+        {
+          "field": "txtUpLabel",
+          "html": "<input asp-for=\"UpLabel\" class=\"form-control\" placeholder=\"Upstream label...\" />",
+          "validation": "String with max length",
+          "notes": "Custom label for upstream direction"
+        },
+        {
+          "field": "txtDownLabel",
+          "html": "<input asp-for=\"DownLabel\" class=\"form-control\" placeholder=\"Downstream label...\" />",
+          "validation": "String with max length",
+          "notes": "Custom label for downstream direction"
+        }
+      ]
+    },
+    {
+      "legacyControl": "UltraCheckEditor",
+      "modernEquivalent": "Bootstrap Checkbox",
+      "description": "Checkbox input with form-check styling",
+      "html": "<input type=\"checkbox\" class=\"form-check-input\" />",
+      "examples": [
+        {
+          "field": "chkIsActive",
+          "html": "<div class=\"form-check\">\n  <input asp-for=\"IsActive\" class=\"form-check-input\" />\n  <label asp-for=\"IsActive\" class=\"form-check-label\"></label>\n</div>",
+          "defaultValue": true,
+          "notes": "Used in both search and detail forms"
+        },
+        {
+          "field": "chkIsLowToHighDirection",
+          "html": "<div class=\"form-check\">\n  <input asp-for=\"IsLowToHighDirection\" class=\"form-check-input\" />\n  <label asp-for=\"IsLowToHighDirection\" class=\"form-check-label\">Direction is low to high (like Mississippi)</label>\n</div>",
+          "defaultValue": true,
+          "notes": "Determines if river mile markers increase or decrease downstream"
+        }
+      ]
+    },
+    {
+      "legacyControl": "UltraGrid",
+      "modernEquivalent": "DataTables",
+      "description": "Server-side DataTables with Bootstrap styling",
+      "html": "<table id=\"riverTable\" class=\"table table-striped table-bordered\"></table>",
+      "javascript": "See riverSearch.js pattern below",
+      "configuration": {
+        "serverSide": true,
+        "ajax": {
+          "url": "/River/RiverTable",
+          "type": "POST",
+          "data": "function(d) { d.code = $('#Code').val(); d.name = $('#Name').val(); d.isActive = $('#IsActive').is(':checked'); }"
+        },
+        "columns": [
+          {
+            "legacy": "Code",
+            "data": "code",
+            "name": "code",
+            "header": "Code",
+            "width": "80px",
+            "sortable": true,
+            "defaultSort": "asc"
+          },
+          {
+            "legacy": "Name",
+            "data": "name",
+            "name": "name",
+            "header": "River/Waterway",
+            "width": "250px",
+            "sortable": true
+          },
+          {
+            "legacy": "StartMile",
+            "data": "startMile",
+            "name": "startMile",
+            "header": "Start Mile",
+            "width": "100px",
+            "alignment": "right",
+            "sortable": true,
+            "render": "function(data) { return data != null ? parseFloat(data).toFixed(2) : ''; }"
+          },
+          {
+            "legacy": "EndMile",
+            "data": "endMile",
+            "name": "endMile",
+            "header": "End Mile",
+            "width": "100px",
+            "alignment": "right",
+            "sortable": true,
+            "render": "function(data) { return data != null ? parseFloat(data).toFixed(2) : ''; }"
+          },
+          {
+            "legacy": "IsLowToHighDirection",
+            "data": "isLowToHighDirection",
+            "name": "isLowToHighDirection",
+            "header": "Low to High",
+            "width": "120px",
+            "alignment": "center",
+            "sortable": true,
+            "render": "function(data) { return '<input type=\"checkbox\" ' + (data ? 'checked' : '') + ' disabled />'; }"
+          },
+          {
+            "legacy": "IsActive",
+            "data": "isActive",
+            "name": "isActive",
+            "header": "Active",
+            "width": "80px",
+            "alignment": "center",
+            "sortable": true,
+            "render": "function(data) { return '<input type=\"checkbox\" ' + (data ? 'checked' : '') + ' disabled />'; }"
+          },
+          {
+            "legacy": "UpLabel",
+            "data": "upLabel",
+            "name": "upLabel",
+            "header": "Upstream",
+            "width": "120px",
+            "sortable": true
+          },
+          {
+            "legacy": "DownLabel",
+            "data": "downLabel",
+            "name": "downLabel",
+            "header": "Downstream",
+            "width": "120px",
+            "sortable": true
+          },
+          {
+            "legacy": "Actions",
+            "data": null,
+            "name": "actions",
+            "header": "Actions",
+            "width": "100px",
+            "orderable": false,
+            "searchable": false,
+            "className": "text-center",
+            "render": "function(data, type, row) { return '<div class=\"btn-group btn-group-sm\" role=\"group\"><a href=\"/River/Edit/' + row.riverId + '\" class=\"btn btn-sm btn-primary\" title=\"Edit\"><i class=\"fas fa-edit\"></i></a></div>'; }"
+          }
+        ],
+        "order": "[[0, 'asc']]",
+        "pageLength": 25,
+        "lengthMenu": "[[10, 25, 50, 100], [10, 25, 50, 100]]"
+      },
+      "features": [
+        "Server-side processing for large datasets",
+        "State persistence using localStorage",
+        "Custom numeric sorting for decimal columns",
+        "Row selection for edit operations",
+        "Bootstrap 5 styling",
+        "Responsive design",
+        "Column visibility toggle",
+        "Export capabilities (optional)"
+      ]
+    },
+    {
+      "legacyControl": "UltraPanel",
+      "modernEquivalent": "Bootstrap Card",
+      "description": "Card component for organizing form sections",
+      "html": "<div class=\"card\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">Title</h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- Content -->\n  </div>\n</div>",
+      "examples": [
+        {
+          "legacy": "pnlContextTitle",
+          "modern": "card-header with title",
+          "html": "<div class=\"card-header\">\n  <h5 class=\"card-title mb-0\"><i class=\"fas fa-water\"></i> Rivers/Waterways</h5>\n</div>"
+        },
+        {
+          "legacy": "pnlCriteria",
+          "modern": "card-body with form",
+          "html": "<div class=\"card-body\">\n  <form id=\"searchForm\">\n    <!-- Search criteria controls -->\n  </form>\n</div>"
+        }
+      ]
+    },
+    {
+      "legacyControl": "UltraGroupBox",
+      "modernEquivalent": "Bootstrap Card Footer",
+      "description": "Card footer for action buttons at bottom of detail forms",
+      "html": "<div class=\"card-footer d-flex justify-content-between align-items-center\">\n  <!-- Left side: Status checkboxes -->\n  <div>\n    <div class=\"form-check form-check-inline\">\n      <input asp-for=\"IsActive\" class=\"form-check-input\" />\n      <label asp-for=\"IsActive\" class=\"form-check-label\"></label>\n    </div>\n  </div>\n  <!-- Right side: Action buttons -->\n  <div>\n    <button type=\"submit\" class=\"btn btn-primary\"><i class=\"fas fa-save\"></i> Submit</button>\n    <a href=\"@Url.Action(\"Index\")\" class=\"btn btn-secondary\"><i class=\"fas fa-times\"></i> Cancel</a>\n  </div>\n</div>",
+      "notes": "Replaces grpSubmitCancel from legacy form"
+    },
+    {
+      "legacyControl": "UltraButton",
+      "modernEquivalent": "Bootstrap Button",
+      "description": "Button with appropriate styling based on action type",
+      "examples": [
+        {
+          "legacy": "btnFind",
+          "type": "Search/Submit",
+          "html": "<button type=\"button\" id=\"btnSearch\" class=\"btn btn-primary\">\n  <i class=\"fas fa-search\"></i> Find\n</button>",
+          "notes": "Primary action button for search"
+        },
+        {
+          "legacy": "btnSubmit",
+          "type": "Submit",
+          "html": "<button type=\"submit\" class=\"btn btn-primary\">\n  <i class=\"fas fa-save\"></i> Submit\n</button>",
+          "notes": "Primary action button for form submission"
+        },
+        {
+          "legacy": "btnCancel",
+          "type": "Cancel",
+          "html": "<a href=\"@Url.Action(\"Index\")\" class=\"btn btn-secondary\">\n  <i class=\"fas fa-times\"></i> Cancel\n</a>",
+          "notes": "Secondary action to return without saving"
+        },
+        {
+          "legacy": "btnReset",
+          "type": "Reset",
+          "html": "<button type=\"button\" id=\"btnReset\" class=\"btn btn-secondary\">\n  <i class=\"fas fa-undo\"></i> Reset\n</button>",
+          "notes": "Clears search form"
+        },
+        {
+          "legacy": "btnAdd",
+          "type": "Add/Create",
+          "html": "<a href=\"@Url.Action(\"Create\")\" class=\"btn btn-success\">\n  <i class=\"fas fa-plus\"></i> Add New River\n</a>",
+          "notes": "Create new record button"
+        }
+      ]
+    },
+    {
+      "legacyControl": "UltraStatusBar",
+      "modernEquivalent": "ASP.NET Validation Summary",
+      "description": "Displays validation errors and messages",
+      "html": "<div asp-validation-summary=\"All\" class=\"alert alert-danger\" role=\"alert\"></div>",
+      "notes": "Uses ASP.NET Core built-in validation summary with Bootstrap styling"
+    }
+  ],
+  "formPatterns": {
+    "searchForm": {
+      "layout": "Bootstrap grid with row/col system",
+      "structure": [
+        {
+          "section": "Header",
+          "component": "card-header",
+          "content": "Form title with icon"
+        },
+        {
+          "section": "Search Criteria",
+          "component": "card-body with form",
+          "layout": "row mb-3 with col-md-* columns",
+          "controls": [
+            "Code text input (col-md-2)",
+            "Name text input (col-md-4)",
+            "IsActive checkbox (col-md-3)"
+          ]
+        },
+        {
+          "section": "Action Buttons",
+          "layout": "row with button group",
+          "controls": [
+            "Find button (btn btn-primary)",
+            "Reset button (btn btn-secondary)",
+            "Add New button (btn btn-success float-end)"
+          ]
+        },
+        {
+          "section": "Results Grid",
+          "component": "DataTables",
+          "html": "<table id=\"riverTable\" class=\"table table-striped table-bordered\"></table>"
+        }
+      ],
+      "cssClasses": {
+        "container": "card mb-3",
+        "header": "card-header",
+        "body": "card-body",
+        "form": "needs-validation",
+        "row": "row mb-3",
+        "column": "col-md-*",
+        "input": "form-control",
+        "checkbox": "form-check-input",
+        "label": "form-label",
+        "button": "btn btn-primary"
+      }
+    },
+    "detailForm": {
+      "layout": "Bootstrap grid with vertical form layout",
+      "structure": [
+        {
+          "section": "Form Header",
+          "component": "card-header",
+          "content": "River/Waterway Detail with icon"
+        },
+        {
+          "section": "Basic Information",
+          "component": "card-body",
+          "layout": "Vertical form with label above input",
+          "controls": [
+            {
+              "field": "Name",
+              "row": 1,
+              "html": "<div class=\"mb-3\">\n  <label asp-for=\"Name\" class=\"form-label\"></label>\n  <input asp-for=\"Name\" class=\"form-control\" />\n  <span asp-validation-for=\"Name\" class=\"text-danger\"></span>\n</div>"
+            },
+            {
+              "field": "Code",
+              "row": 2,
+              "html": "<div class=\"mb-3\">\n  <label asp-for=\"Code\" class=\"form-label\"></label>\n  <input asp-for=\"Code\" class=\"form-control\" />\n  <span asp-validation-for=\"Code\" class=\"text-danger\"></span>\n</div>"
+            },
+            {
+              "field": "StartMile / EndMile",
+              "row": 3,
+              "layout": "Two column row",
+              "html": "<div class=\"row mb-3\">\n  <div class=\"col-md-6\">\n    <label asp-for=\"StartMile\" class=\"form-label\"></label>\n    <input asp-for=\"StartMile\" type=\"number\" step=\"0.01\" class=\"form-control\" />\n    <span asp-validation-for=\"StartMile\" class=\"text-danger\"></span>\n  </div>\n  <div class=\"col-md-6\">\n    <label asp-for=\"EndMile\" class=\"form-label\"></label>\n    <input asp-for=\"EndMile\" type=\"number\" step=\"0.01\" class=\"form-control\" />\n    <span asp-validation-for=\"EndMile\" class=\"text-danger\"></span>\n  </div>\n</div>"
+            },
+            {
+              "field": "BargeExCode",
+              "row": 4,
+              "html": "<div class=\"mb-3\">\n  <label asp-for=\"BargeExCode\" class=\"form-label\"></label>\n  <input asp-for=\"BargeExCode\" class=\"form-control\" />\n  <span asp-validation-for=\"BargeExCode\" class=\"text-danger\"></span>\n</div>"
+            },
+            {
+              "field": "UpLabel / DownLabel",
+              "row": 5,
+              "layout": "Two column row",
+              "html": "<div class=\"row mb-3\">\n  <div class=\"col-md-6\">\n    <label asp-for=\"UpLabel\" class=\"form-label\"></label>\n    <input asp-for=\"UpLabel\" class=\"form-control\" />\n    <span asp-validation-for=\"UpLabel\" class=\"text-danger\"></span>\n  </div>\n  <div class=\"col-md-6\">\n    <label asp-for=\"DownLabel\" class=\"form-label\"></label>\n    <input asp-for=\"DownLabel\" class=\"form-control\" />\n    <span asp-validation-for=\"DownLabel\" class=\"text-danger\"></span>\n  </div>\n</div>"
+            },
+            {
+              "field": "IsLowToHighDirection",
+              "row": 6,
+              "html": "<div class=\"mb-3\">\n  <div class=\"form-check\">\n    <input asp-for=\"IsLowToHighDirection\" class=\"form-check-input\" />\n    <label asp-for=\"IsLowToHighDirection\" class=\"form-check-label\">Direction is low to high (like Mississippi)</label>\n  </div>\n</div>"
+            }
+          ]
+        },
+        {
+          "section": "Form Actions",
+          "component": "card-footer",
+          "layout": "Flexbox with space-between",
+          "html": "<div class=\"card-footer d-flex justify-content-between align-items-center\">\n  <div class=\"form-check\">\n    <input asp-for=\"IsActive\" class=\"form-check-input\" />\n    <label asp-for=\"IsActive\" class=\"form-check-label\"></label>\n  </div>\n  <div>\n    <button type=\"submit\" class=\"btn btn-primary\"><i class=\"fas fa-save\"></i> Submit</button>\n    <a href=\"@Url.Action(\"Index\")\" class=\"btn btn-secondary\"><i class=\"fas fa-times\"></i> Cancel</a>\n  </div>\n</div>"
+        }
+      ],
+      "cssClasses": {
+        "container": "card",
+        "header": "card-header",
+        "body": "card-body",
+        "footer": "card-footer d-flex justify-content-between",
+        "form": "needs-validation",
+        "formGroup": "mb-3",
+        "label": "form-label",
+        "input": "form-control",
+        "checkbox": "form-check-input",
+        "checkboxWrapper": "form-check",
+        "validation": "text-danger",
+        "submitButton": "btn btn-primary",
+        "cancelButton": "btn btn-secondary"
+      }
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "version": "1.13+",
+      "serverSide": true,
+      "features": [
+        "Server-side processing",
+        "State persistence (localStorage)",
+        "Sorting",
+        "Pagination",
+        "Filtering",
+        "Responsive design",
+        "Bootstrap 5 styling"
+      ],
+      "initialization": "See riverSearch.js pattern",
+      "ajaxPattern": {
+        "url": "/River/RiverTable",
+        "method": "POST",
+        "dataFunction": "Passes search criteria from form fields"
+      }
+    }
+  },
+  "javascriptPatterns": {
+    "searchPage": {
+      "file": "wwwroot/js/riverSearch.js",
+      "pattern": "See boatLocationSearch.js reference",
+      "responsibilities": [
+        "Initialize DataTables with server-side processing",
+        "Handle search button click",
+        "Handle reset button click",
+        "Pass search criteria to AJAX request",
+        "Handle Enter key in text fields",
+        "State persistence using localStorage",
+        "Auto-search on checkbox change (optional)"
+      ],
+      "key_code_sections": {
+        "initialization": "$(document).ready() with DataTables setup",
+        "dataTableConfig": "Server-side processing with columns definition",
+        "searchButton": "$('#btnSearch').click() to reload DataTables",
+        "resetButton": "$('#btnReset').click() to clear form and reload",
+        "enterKeyHandler": "Trigger search on Enter in text fields",
+        "stateManagement": "localStorage keys for table state"
+      }
+    },
+    "detailPage": {
+      "file": "wwwroot/js/riverEdit.js",
+      "pattern": "jQuery validation and form handling",
+      "responsibilities": [
+        "Client-side validation using jQuery Validate",
+        "Form submission handling",
+        "Field transformations (e.g., uppercase for Code)",
+        "Dynamic field interactions"
+      ],
+      "key_features": [
+        "Uppercase transformation for Code field on blur",
+        "Decimal validation for StartMile and EndMile",
+        "Custom validation for exact length Code field"
+      ]
+    }
+  },
+  "validationPatterns": {
+    "clientSide": {
+      "library": "jQuery Validation Unobtrusive",
+      "integration": "ASP.NET Core Tag Helpers with data-val-* attributes",
+      "examples": [
+        {
+          "field": "Code",
+          "validationType": "Custom Regex",
+          "html": "<input asp-for=\"Code\" class=\"form-control\" />",
+          "dataAttributes": "data-val=\"true\" data-val-regex=\"Abbreviation must be exactly N characters long.\" data-val-regex-pattern=\"\\w{N}\""
+        },
+        {
+          "field": "StartMile",
+          "validationType": "Decimal",
+          "html": "<input asp-for=\"StartMile\" type=\"number\" step=\"0.01\" class=\"form-control\" />",
+          "dataAttributes": "data-val=\"true\" data-val-number=\"Must be a number\""
+        },
+        {
+          "field": "Name",
+          "validationType": "String Max Length",
+          "html": "<input asp-for=\"Name\" class=\"form-control\" />",
+          "dataAttributes": "data-val=\"true\" data-val-maxlength=\"Maximum length is N\""
+        }
+      ]
+    },
+    "serverSide": {
+      "framework": "FluentValidation or Data Annotations",
+      "location": "ViewModel or separate Validator class",
+      "examples": [
+        {
+          "field": "Code",
+          "validation": "[RegularExpression(@\"\\w{N}\", ErrorMessage = \"Abbreviation must be exactly N characters long.\")]"
+        },
+        {
+          "field": "StartMile",
+          "validation": "[Range(0, 9999.99, ErrorMessage = \"Mile must be between 0 and 9999.99\")]"
+        },
+        {
+          "field": "Name",
+          "validation": "[StringLength(100, ErrorMessage = \"Name cannot exceed 100 characters\")]"
+        }
+      ]
+    },
+    "displayPattern": {
+      "component": "ASP.NET Validation Summary",
+      "html": "<div asp-validation-summary=\"All\" class=\"alert alert-danger\"></div>",
+      "fieldLevel": "<span asp-validation-for=\"FieldName\" class=\"text-danger\"></span>"
+    }
+  },
+  "accessibilityFeatures": {
+    "labels": {
+      "pattern": "asp-for tag helper automatically creates for attribute",
+      "example": "<label asp-for=\"Name\" class=\"form-label\"></label>"
+    },
+    "ariaAttributes": {
+      "required": "aria-required=\"true\" for required fields",
+      "invalid": "aria-invalid=\"true\" for fields with errors",
+      "describedBy": "aria-describedby for validation messages"
+    },
+    "keyboardNavigation": {
+      "tabIndex": "Logical tab order maintained",
+      "enterKey": "Triggers search or form submission",
+      "escapeKey": "Optional: Cancel/close dialogs"
+    },
+    "screenReader": {
+      "labels": "All inputs have associated labels",
+      "errorMessages": "Validation errors announced",
+      "statusUpdates": "ARIA live regions for dynamic content"
+    }
+  },
+  "responsiveDesign": {
+    "breakpoints": {
+      "mobile": "col-12 (stack vertically)",
+      "tablet": "col-md-6 or col-md-4",
+      "desktop": "col-md-3 or col-lg-2"
+    },
+    "dataTables": {
+      "responsive": true,
+      "mobileDisplay": "Collapse columns on small screens",
+      "touchOptimization": "Larger click targets for mobile"
+    },
+    "forms": {
+      "searchForm": "Responsive grid with stacking on mobile",
+      "detailForm": "Single column on mobile, multi-column on desktop"
+    }
+  },
+  "modernizationChecklist": {
+    "controls": {
+      "UltraTextEditor_to_input": "Complete - Use Bootstrap form-control",
+      "UltraCheckEditor_to_checkbox": "Complete - Use Bootstrap form-check-input",
+      "UltraGrid_to_DataTables": "Complete - Server-side DataTables",
+      "UltraPanel_to_card": "Complete - Bootstrap card components",
+      "UltraGroupBox_to_card_footer": "Complete - Card footer with flexbox",
+      "UltraButton_to_button": "Complete - Bootstrap button classes",
+      "UltraStatusBar_to_validation_summary": "Complete - ASP.NET validation summary"
+    },
+    "libraries": {
+      "bootstrap": "v5.x for styling and layout",
+      "dataTables": "v1.13+ for grids with server-side processing",
+      "jQueryValidate": "For client-side validation",
+      "fontAwesome": "v6.x for icons"
+    },
+    "patterns": {
+      "mvc": "ASP.NET Core MVC with Razor views",
+      "viewModels": "Strongly-typed ViewModels for all views",
+      "tagHelpers": "asp-for, asp-validation-for, asp-items",
+      "partialViews": "_Search.cshtml, _SearchResults.cshtml patterns",
+      "ajax": "Server-side DataTables with POST requests",
+      "stateManagement": "localStorage for grid state, TempData for messages"
+    },
+    "validation": {
+      "clientSide": "jQuery Validation Unobtrusive",
+      "serverSide": "FluentValidation or Data Annotations",
+      "display": "ASP.NET validation summary and field-level messages"
+    },
+    "security": {
+      "authentication": "IdentityConstants.ApplicationScheme",
+      "authorization": "Policy-based authorization on actions",
+      "csrf": "AntiForgeryToken on forms",
+      "inputValidation": "Server-side validation always enforced"
+    }
+  },
+  "implementationNotes": {
+    "searchForm": {
+      "file": "Views/River/Index.cshtml",
+      "structure": "Main view includes _Search and _SearchResults partials",
+      "javascript": "riverSearch.js handles DataTables and search interactions",
+      "features": [
+        "Search criteria in Bootstrap card",
+        "DataTables grid with server-side processing",
+        "State persistence using localStorage",
+        "Auto-search on checkbox changes",
+        "Enter key triggers search",
+        "Reset button clears form and reloads grid"
+      ]
+    },
+    "detailForm": {
+      "file": "Views/River/Edit.cshtml",
+      "structure": "Single card with header, body, and footer",
+      "javascript": "riverEdit.js handles validation and transformations",
+      "features": [
+        "Client-side validation with jQuery Validate",
+        "Server-side validation with FluentValidation",
+        "Uppercase transformation for Code field",
+        "Decimal inputs for mile markers",
+        "Checkbox for IsActive and IsLowToHighDirection",
+        "Submit and Cancel buttons in card footer"
+      ]
+    },
+    "controller": {
+      "file": "Controllers/RiverController.cs",
+      "actions": [
+        "Index (GET) - Returns search view",
+        "RiverTable (POST) - DataTables server-side processing endpoint",
+        "Create (GET) - Returns create view with new ViewModel",
+        "Create (POST) - Validates and saves new river",
+        "Edit (GET) - Returns edit view with populated ViewModel",
+        "Edit (POST) - Validates and updates existing river",
+        "Delete (POST) - Soft delete or hard delete river"
+      ]
+    },
+    "viewModels": {
+      "RiverSearchViewModel": {
+        "properties": [
+          "Code (string)",
+          "Name (string)",
+          "IsActive (bool, default true)"
+        ]
+      },
+      "RiverEditViewModel": {
+        "properties": [
+          "RiverId (int)",
+          "Code (string, required, exact length, uppercase)",
+          "Name (string, required, max length)",
+          "StartMile (decimal?, nullable)",
+          "EndMile (decimal?, nullable)",
+          "BargeExCode (string, max length)",
+          "UpLabel (string, max length)",
+          "DownLabel (string, max length)",
+          "IsLowToHighDirection (bool, default true)",
+          "IsActive (bool, default true)"
+        ]
+      }
+    }
+  },
+  "commonMistakes": {
+    "mistakes": [
+      "NOT using DataTables for grids (custom jQuery tables instead)",
+      "NOT using server-side processing for large datasets",
+      "Using inline styles instead of Bootstrap classes",
+      "NOT using asp-for tag helpers for labels and inputs",
+      "NOT using validation tag helpers (asp-validation-for)",
+      "Forgetting to include jquery.validate and jquery.validate.unobtrusive",
+      "NOT using form-control class on inputs",
+      "NOT using form-check-input class on checkboxes",
+      "Forgetting to add state persistence for DataTables",
+      "NOT handling Enter key in search fields"
+    ]
+  }
+}

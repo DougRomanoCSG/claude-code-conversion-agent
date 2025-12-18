@@ -21,6 +21,7 @@ import type { ClaudeFlags } from "../lib/claude-flags.types";
 import { getProjectRoot, getBusinessObjectPathForPrompt, getBusinessObjectBasePathForPrompt, getLocationBasePathForPrompt, getAdminApiPath, getAdminApiExamples, getCrewingApiExamples } from "../lib/paths";
 import businessLogicSettings from "../settings/business-logic.settings.json" with { type: "json" };
 import businessLogicMcp from "../settings/business-logic.mcp.json" with { type: "json" };
+import businessLogicExtractorPrompt from "../system-prompts/business-logic-extractor-prompt.md" with { type: "text" };
 
 const projectRoot = getProjectRoot(import.meta.url);
 const settingsJson = JSON.stringify(businessLogicSettings);
@@ -48,9 +49,8 @@ function parseOptions(): ExtractorOptions {
 async function runBusinessLogicExtractor(options: ExtractorOptions): Promise<number> {
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
 
-	const systemPrompt = `
-You are a specialized Business Logic Extractor agent.
-
+	// Build context-specific prompt with entity details and paths
+	const contextPrompt = `
 TASK: Extract complete business logic from legacy VB.NET business objects for ${options.entity}.
 
 TARGET FILES:
@@ -58,43 +58,14 @@ TARGET FILES:
 - Base Class: ${getBusinessObjectBasePathForPrompt(options.entity)}
 - Location Base: ${getLocationBasePathForPrompt()}
 
-EXTRACTION GOALS:
-1. Extract ALL properties from base and derived classes
-2. Parse CheckBusinessRules method for validation logic
-3. Extract BrokenRules.Assert calls to identify business rules
-4. Extract initialization logic from Initialize method
-5. Identify factory methods (New*, Get*)
-6. Extract CRUD operation patterns
-7. Document conditional validation (e.g., Lock/Gauge fields)
-
-OUTPUT FORMAT:
+OUTPUT:
 Generate a JSON file at: ${outputPath}/business-logic.json
 
-JSON STRUCTURE:
-{
-  "businessObject": "${options.entity}Location",
-  "baseClass": "${options.entity}LocationBase",
-  "properties": [
-    {
-      "name": "LocationID",
-      "type": "Int32",
-      "access": "ReadOnly",
-      "isPrimaryKey": true
-    }
-  ],
-  "businessRules": [
-    {
-      "ruleName": "MustBeBlank",
-      "property": "LockUsaceName",
-      "condition": "BargeExLocationType is not 'Lock' or 'Gauge Location'",
-      "message": "USACE name must be blank..."
-    }
-  ],
-  "methods": [...],
-  "initialization": {...}
-}
+Expected business object structure:
+- Business Object: "${options.entity}Location"
+- Base Class: "${options.entity}LocationBase"
 
-REFERENCE EXAMPLES:
+ARCHITECTURE REFERENCES:
 For business logic patterns, reference:
 - BargeOps.Admin.API Domain Models: ${getAdminApiExamples().domainModels}
   Primary reference: BoatLocation.cs - Canonical Admin domain model pattern
@@ -109,13 +80,14 @@ Begin extraction now.
 `;
 
 	const baseFlags = {
+		"append-system-prompt": businessLogicExtractorPrompt,
 		settings: settingsJson,
 		"mcp-config": mcpJson,
 		...(options.interactive ? {} : { print: true, "output-format": "json" }),
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
-	const args = [...flags, systemPrompt];
+	const args = [...flags, contextPrompt];
 
 	const child = spawn(["claude", ...args], {
 		stdin: "inherit",

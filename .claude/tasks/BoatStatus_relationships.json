@@ -1,0 +1,177 @@
+{
+  "parentEntity": "BoatLocation",
+  "formName": "frmBoatStatus",
+  "description": "BoatStatus form manages BoatMaintenanceLog records for a BoatLocation. The form displays a grid of maintenance log entries with different types: Boat Status, Change Division/Facility, and Change Boat Role.",
+  "relationships": [
+    {
+      "relatedEntity": "BoatMaintenanceLog",
+      "relationshipType": "OneToMany",
+      "parentProperty": "BoatMaintenanceLogs",
+      "childProperty": "BoatLocation",
+      "foreignKey": "LocationID",
+      "cascadeDelete": true,
+      "gridName": "grdDetailEditList",
+      "gridColumns": [
+        {
+          "key": "StartDateTime",
+          "header": "Date",
+          "type": "DateTime",
+          "width": 103
+        },
+        {
+          "key": "MaintenanceType",
+          "header": "Type",
+          "type": "String",
+          "width": 142
+        },
+        {
+          "key": "Status",
+          "header": "Status",
+          "type": "String",
+          "width": 207
+        },
+        {
+          "key": "Division",
+          "header": "Division",
+          "type": "String",
+          "width": 94
+        },
+        {
+          "key": "PortFacility",
+          "header": "Port Facility",
+          "type": "String",
+          "width": 150
+        },
+        {
+          "key": "BoatRole",
+          "header": "Boat Role",
+          "type": "String",
+          "width": 125
+        },
+        {
+          "key": "Note",
+          "header": "Note",
+          "type": "String",
+          "width": 130
+        }
+      ],
+      "operations": {
+        "add": "ItemAdd",
+        "edit": "ItemModify",
+        "delete": "ItemRemove"
+      },
+      "notes": "Child records are managed through a detail edit panel. Maintenance type cannot be changed after creation."
+    }
+  ],
+  "lookupRelationships": [
+    {
+      "property": "Status",
+      "lookupEntity": "ValidationList",
+      "lookupType": "BoatStatus",
+      "displayProperty": "Status",
+      "required": true,
+      "conditionalRequired": "Required when MaintenanceType = 'Boat Status'"
+    },
+    {
+      "property": "Division",
+      "lookupEntity": "ValidationList",
+      "lookupType": "Division",
+      "displayProperty": "Division",
+      "required": true,
+      "conditionalRequired": "Required when MaintenanceType = 'Change Division/Facility'"
+    },
+    {
+      "property": "PortFacilityID",
+      "lookupEntity": "FacilityLocation or FleetFacility",
+      "displayProperty": "LocationName",
+      "required": false,
+      "notes": "Populated based on Division and whether boat is a Fleet boat. Uses FleetList.Facilities for fleet boats, FacilityLocationList otherwise."
+    },
+    {
+      "property": "BoatRoleID",
+      "lookupEntity": "BoatRole",
+      "displayProperty": "BoatRole",
+      "required": true,
+      "conditionalRequired": "Required when MaintenanceType = 'Change Boat Role'"
+    }
+  ],
+  "conditionalFieldLogic": [
+    {
+      "maintenanceType": "Boat Status",
+      "enabledFields": ["StartDateTime", "Status", "Note"],
+      "requiredFields": ["StartDateTime", "Status"],
+      "clearedFields": ["Division", "PortFacilityID", "BoatRoleID"]
+    },
+    {
+      "maintenanceType": "Change Division/Facility",
+      "enabledFields": ["StartDateTime", "Division", "PortFacilityID", "Note"],
+      "requiredFields": ["StartDateTime", "Division"],
+      "clearedFields": ["Status", "BoatRoleID"]
+    },
+    {
+      "maintenanceType": "Change Boat Role",
+      "enabledFields": ["StartDateTime", "BoatRoleID", "Note"],
+      "requiredFields": ["StartDateTime", "BoatRoleID"],
+      "clearedFields": ["Status", "Division", "PortFacilityID"]
+    }
+  ],
+  "businessRules": [
+    "MaintenanceType cannot be changed once record is created (IsNew = false)",
+    "Fields are conditionally enabled/disabled based on MaintenanceType selection",
+    "Unused fields are cleared before save based on MaintenanceType",
+    "Grid is sorted descending by StartDateTime by default",
+    "Division combo filters out 'Freight' division",
+    "PortFacility combo is dynamically populated based on Division and FleetID",
+    "Latest maintenance log of each type updates parent BoatLocation properties (CurrentStatus, Division, PortFacility, BoatRole)",
+    "Changes are propagated to parent BoatLocation via ChangesApplied event handler"
+  ],
+  "parentPropertyUpdates": {
+    "description": "The parent BoatLocation object maintains current status fields that are derived from the latest BoatMaintenanceLog records",
+    "updatedProperties": [
+      {
+        "property": "CurrentStatus",
+        "sourceType": "Boat Status",
+        "sourceField": "Status"
+      },
+      {
+        "property": "Division",
+        "sourceType": "Change Division/Facility",
+        "sourceField": "Division"
+      },
+      {
+        "property": "PortFacility",
+        "sourceType": "Change Division/Facility",
+        "sourceField": "PortFacility"
+      },
+      {
+        "property": "PortFacilityID",
+        "sourceType": "Change Division/Facility",
+        "sourceField": "PortFacilityID"
+      },
+      {
+        "property": "BoatRole",
+        "sourceType": "Change Boat Role",
+        "sourceField": "BoatRole"
+      },
+      {
+        "property": "BoatRoleID",
+        "sourceType": "Change Boat Role",
+        "sourceField": "BoatRoleID"
+      }
+    ],
+    "updateMechanism": "BoatLocation.ChangesApplied event calls BoatMaintenanceLogs.GetLatestBoatMaintenanceLogData()"
+  },
+  "dapperImplementationNotes": {
+    "entityStructure": "BoatMaintenanceLog should NOT include collection properties. Child collections are loaded separately via repository methods.",
+    "repositoryPattern": [
+      "Task<IEnumerable<BoatMaintenanceLog>> GetByLocationIdAsync(int locationId)",
+      "Task<BoatMaintenanceLog> GetLatestByTypeAsync(int locationId, string maintenanceType)",
+      "Task<BoatMaintenanceLog> GetByIdAsync(int boatMaintenanceLogId)",
+      "Task<int> InsertAsync(BoatMaintenanceLog log)",
+      "Task UpdateAsync(BoatMaintenanceLog log)",
+      "Task DeleteAsync(int boatMaintenanceLogId)"
+    ],
+    "serviceLayerComposition": "Service layer should load BoatLocation and related BoatMaintenanceLogs separately, then compose into DTO with Berths collection populated",
+    "parentPropertyCalculation": "Service layer should query for latest records of each type to populate parent BoatLocation current status fields"
+  }
+}
