@@ -17,7 +17,18 @@
 import { spawn } from "bun";
 import { buildClaudeFlags, parsedArgs } from "../lib/flags";
 import type { ClaudeFlags } from "../lib/claude-flags.types";
-import { getProjectRoot, getFormPathForPrompt, getFormDesignerPathForPrompt, getCrewingUiPath, getAdminUiPath, getCrewingUiExamples, getAdminUiExamples, getSharedExamples } from "../lib/paths";
+import {
+	getProjectRoot,
+	getFormDesignerPathByNameForPrompt,
+	getFormDesignerPathForPrompt,
+	getFormPathByNameForPrompt,
+	getFormPathForPrompt,
+	getCrewingUiPath,
+	getAdminUiPath,
+	getCrewingUiExamples,
+	getAdminUiExamples,
+	getSharedExamples,
+} from "../lib/paths";
 import formAnalyzerSettings from "../settings/form-analyzer.settings.json" with { type: "json" };
 import formAnalyzerMcp from "../settings/form-analyzer.mcp.json" with { type: "json" };
 import formStructureAnalyzerPrompt from "../system-prompts/form-structure-analyzer-prompt.md" with { type: "text" };
@@ -29,6 +40,7 @@ const mcpJson = JSON.stringify(formAnalyzerMcp);
 interface AnalyzerOptions {
 	entity: string;
 	formType: "Search" | "Detail";
+	formName?: string;
 	interactive: boolean;
 	outputDir?: string;
 }
@@ -36,6 +48,7 @@ interface AnalyzerOptions {
 function parseOptions(): AnalyzerOptions {
 	const entity = parsedArgs.values.entity as string;
 	const formType = (parsedArgs.values["form-type"] || "Search") as "Search" | "Detail";
+	const formName = parsedArgs.values["form-name"] as string;
 	const interactive = parsedArgs.values.interactive === true;
 	const outputDir = parsedArgs.values.output as string;
 
@@ -44,20 +57,29 @@ function parseOptions(): AnalyzerOptions {
 		process.exit(1);
 	}
 
-	return { entity, formType, interactive, outputDir };
+	return { entity, formType, formName, interactive, outputDir };
 }
 
 async function runFormAnalyzer(options: AnalyzerOptions): Promise<number> {
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
-	const outputFileName = `form-structure-${options.formType.toLowerCase()}.json`;
+	const isSingleForm = !!options.formName;
+	const outputFileName = isSingleForm ? "form-structure.json" : `form-structure-${options.formType.toLowerCase()}.json`;
 
 	// Build context-specific prompt with entity details and paths
+	const formLabel = isSingleForm ? options.formName! : `frm${options.entity}${options.formType}`;
+	const formPath = isSingleForm
+		? getFormPathByNameForPrompt(options.formName!)
+		: getFormPathForPrompt(options.entity, options.formType);
+	const designerPath = isSingleForm
+		? getFormDesignerPathByNameForPrompt(options.formName!)
+		: getFormDesignerPathForPrompt(options.entity, options.formType);
+
 	const contextPrompt = `
-TASK: Extract complete form structure from legacy VB.NET Windows Forms for ${options.entity}${options.formType}.
+TASK: Extract complete form structure from legacy VB.NET Windows Forms for ${formLabel}.
 
 TARGET FILES:
-- Form: ${getFormPathForPrompt(options.entity, options.formType)}
-- Designer: ${getFormDesignerPathForPrompt(options.entity, options.formType)}
+- Form: ${formPath}
+- Designer: ${designerPath}
 
 OUTPUT:
 Generate a JSON file at: ${outputPath}/${outputFileName}
@@ -106,7 +128,7 @@ Begin analysis now.
 			...process.env,
 			CLAUDE_PROJECT_DIR: projectRoot,
 			ENTITY_NAME: options.entity,
-			FORM_TYPE: options.formType,
+			FORM_TYPE: isSingleForm ? "Single" : options.formType,
 			OUTPUT_PATH: outputPath,
 		},
 	});
@@ -137,7 +159,11 @@ Begin analysis now.
 
 async function main() {
 	const options = parseOptions();
-	console.log(`[form-structure-analyzer] Analyzing ${options.entity} ${options.formType} form...`);
+	if (options.formName) {
+		console.log(`[form-structure-analyzer] Analyzing ${options.formName} (single form) ...`);
+	} else {
+		console.log(`[form-structure-analyzer] Analyzing ${options.entity} ${options.formType} form...`);
+	}
 
 	const code = await runFormAnalyzer(options);
 	process.exit(code);

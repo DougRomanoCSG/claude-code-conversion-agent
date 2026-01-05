@@ -89,6 +89,22 @@ export function getFormDesignerPathForPrompt(entity: string, formType: "Search" 
 	return `${getInputDirectory()}/${formsPath}/frm${entity}${formType}.Designer.vb`;
 }
 
+/**
+ * Get the full path to a form file by form name (e.g., frmBargePositions)
+ */
+export function getFormPathByNameForPrompt(formName: string): string {
+	const formsPath = config.paths.forms;
+	return `${getInputDirectory()}/${formsPath}/${formName}.vb`;
+}
+
+/**
+ * Get the full path to a form designer file by form name (e.g., frmBargePositions.Designer.vb)
+ */
+export function getFormDesignerPathByNameForPrompt(formName: string): string {
+	const formsPath = config.paths.forms;
+	return `${getInputDirectory()}/${formsPath}/${formName}.Designer.vb`;
+}
+
 export function getBusinessObjectPathForPrompt(entity: string): string {
 	const businessObjectsPath = config.paths.businessObjects;
 	return `${getInputDirectory()}/${businessObjectsPath}/${entity}Location.vb`;
@@ -167,8 +183,8 @@ export function getTargetProjectsForPrompt(): string {
 /**
  * Parse entity name from form name (e.g., "frmFacilitySearch" -> "Facility")
  */
-export function parseEntityFromFormName(formName: string | undefined): string | null {
-	if (!formName) {
+export function parseEntityFromFormName(formName: unknown): string | null {
+	if (typeof formName !== "string" || !formName) {
 		return null;
 	}
 	// Remove "frm" prefix and "Search"/"Detail" suffix

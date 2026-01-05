@@ -1,0 +1,302 @@
+{
+  "entity": "BargeConditions",
+  "legacy": {
+    "formName": "frmBargeConditions",
+    "subsystem": "frmBargeSearch",
+    "baseForm": "frmBaseDetailEditList",
+    "securityButtons": [
+      {
+        "button": "btnClose",
+        "type": "Cancel",
+        "legacyPermission": "None",
+        "description": "Close the form"
+      },
+      {
+        "button": "Remove",
+        "type": "Remove",
+        "legacyPermission": "CanDelete",
+        "description": "Delete barge condition and related photos",
+        "grid": "grdBargeConditions"
+      },
+      {
+        "button": "Export",
+        "type": "Open",
+        "legacyPermission": "CanExport",
+        "description": "Export barge conditions grid",
+        "grid": "grdBargeConditions"
+      },
+      {
+        "button": "ViewPhoto",
+        "type": "Open",
+        "legacyPermission": "CanView",
+        "description": "View barge condition photo",
+        "grid": "grdBargeConditionPhotos"
+      },
+      {
+        "button": "RemovePhoto",
+        "type": "Remove",
+        "legacyPermission": "CanDelete",
+        "description": "Delete barge condition photo",
+        "grid": "grdBargeConditionPhotos"
+      },
+      {
+        "button": "ExportPhoto",
+        "type": "Open",
+        "legacyPermission": "CanExport",
+        "description": "Export barge condition photos grid",
+        "grid": "grdBargeConditionPhotos"
+      }
+    ],
+    "operations": [
+      {
+        "action": "ViewBargeConditions",
+        "description": "View barge conditions list",
+        "requiredPermission": "CanView",
+        "location": "frmBargeConditions.vb:398"
+      },
+      {
+        "action": "DeleteBargeCondition",
+        "description": "Delete barge condition (soft delete via Delete() method)",
+        "requiredPermission": "CanDelete",
+        "location": "frmBargeConditions.vb:368-377"
+      },
+      {
+        "action": "ViewBargeConditionPhotos",
+        "description": "View photos associated with barge condition",
+        "requiredPermission": "CanView",
+        "location": "frmBargeConditions.vb:401-403"
+      },
+      {
+        "action": "DeleteBargeConditionPhoto",
+        "description": "Delete individual photo from barge condition",
+        "requiredPermission": "CanDelete",
+        "location": "frmBargeConditions.vb:381-391"
+      },
+      {
+        "action": "ViewPhoto",
+        "description": "Open photo file for viewing",
+        "requiredPermission": "CanView",
+        "location": "frmBargeConditions.vb:407-411"
+      }
+    ],
+    "notes": [
+      "Form is read-only - no Add/Modify operations (created from barge system)",
+      "Delete operations are soft deletes (bc.Delete() followed by SaveNoRefresh())",
+      "Photo viewing requires access to server file path from GlobalSettingList.DocumentsFilePath",
+      "txtNote is always readonly (line 96, 200)",
+      "Form inherits from frmBaseDetailEditList"
+    ]
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/BargeConditions",
+          "action": "GetList",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeConditionsView",
+          "description": "Retrieve barge conditions for a specific barge"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeConditions/{id}",
+          "action": "Get",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeConditionsView",
+          "description": "Retrieve single barge condition by ID"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/BargeConditions/{id}",
+          "action": "Delete",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeConditionsModify",
+          "description": "Soft delete barge condition and related photos"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeConditions/{id}/Photos",
+          "action": "GetPhotos",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeConditionsView",
+          "description": "Retrieve photos for a barge condition"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/BargeConditions/Photos/{photoId}",
+          "action": "DeletePhoto",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeConditionsModify",
+          "description": "Delete individual photo from barge condition"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeConditions/Photos/{photoId}/Download",
+          "action": "DownloadPhoto",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeConditionsView",
+          "description": "Download/view photo file"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "permissions": [
+        {
+          "name": "BargeConditionsView",
+          "enumValue": "AuthPermissions.BargeConditionsView",
+          "description": "View barge conditions and photos",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "List",
+            "Details",
+            "ViewPhoto"
+          ]
+        },
+        {
+          "name": "BargeConditionsModify",
+          "enumValue": "AuthPermissions.BargeConditionsModify",
+          "description": "Delete barge conditions and photos",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Delete",
+            "DeletePhoto"
+          ]
+        }
+      ],
+      "controllers": [
+        {
+          "name": "BargeConditionsController",
+          "baseController": "AppController",
+          "actions": [
+            {
+              "actionName": "Index",
+              "permission": "BargeConditionsView",
+              "description": "Main barge conditions view for a barge",
+              "viewModel": "BargeConditionsViewModel"
+            },
+            {
+              "actionName": "List",
+              "permission": "BargeConditionsView",
+              "description": "Get paginated list of barge conditions",
+              "returnType": "JsonResult"
+            },
+            {
+              "actionName": "Details",
+              "permission": "BargeConditionsView",
+              "description": "Get details of specific barge condition",
+              "returnType": "PartialViewResult"
+            },
+            {
+              "actionName": "Delete",
+              "permission": "BargeConditionsModify",
+              "description": "Soft delete barge condition and related photos",
+              "httpMethod": "POST",
+              "returnType": "JsonResult"
+            },
+            {
+              "actionName": "GetPhotos",
+              "permission": "BargeConditionsView",
+              "description": "Get photos for a barge condition",
+              "returnType": "JsonResult"
+            },
+            {
+              "actionName": "ViewPhoto",
+              "permission": "BargeConditionsView",
+              "description": "Download/view photo file",
+              "returnType": "FileResult"
+            },
+            {
+              "actionName": "DeletePhoto",
+              "permission": "BargeConditionsModify",
+              "description": "Delete individual photo",
+              "httpMethod": "POST",
+              "returnType": "JsonResult"
+            }
+          ]
+        }
+      ],
+      "uiElements": [
+        {
+          "element": "DeleteButton",
+          "permission": "BargeConditionsModify",
+          "description": "Show/enable delete button for barge conditions",
+          "implementationNote": "Use CSG Authorization to hide/disable if user lacks permission"
+        },
+        {
+          "element": "DeletePhotoButton",
+          "permission": "BargeConditionsModify",
+          "description": "Show/enable delete button for photos",
+          "implementationNote": "Use CSG Authorization to hide/disable if user lacks permission"
+        },
+        {
+          "element": "ExportButton",
+          "permission": "BargeConditionsView",
+          "description": "Export grid to Excel/CSV",
+          "implementationNote": "Available to users with view permission"
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BargeConditionsView",
+          "description": "View barge conditions and photos"
+        },
+        {
+          "name": "BargeConditionsModify",
+          "description": "Delete barge conditions and photos"
+        }
+      ]
+    }
+  },
+  "implementationNotes": [
+    "This is a read-only viewing form - barge conditions are created from the barge/vessel system, not directly by users",
+    "No Create/Edit permissions needed - only View and Delete (Modify)",
+    "Delete operations are soft deletes using entity.Delete() method",
+    "Photo management is integrated - deleting condition deletes all photos",
+    "Photo files stored on server path from GlobalSettingList.DocumentsFilePath",
+    "Modern implementation should use file storage service (Azure Blob, S3, etc.)",
+    "Export functionality should be available to all users with View permission",
+    "Consider adding email notification tracking (EmailSentDateTime field exists)",
+    "Grid columns: CreateDateTime, CreateUser, Note, EmailSentDateTime",
+    "Photo grid columns: DocumentName, DocumentExtension"
+  ],
+  "securityPatterns": {
+    "permissionGranularity": "TwoTier",
+    "tiers": [
+      {
+        "level": "ReadOnly",
+        "permission": "BargeConditionsView",
+        "actions": [
+          "View list",
+          "View details",
+          "View photos",
+          "Export data"
+        ]
+      },
+      {
+        "level": "Modify",
+        "permission": "BargeConditionsModify",
+        "actions": [
+          "Delete conditions",
+          "Delete photos"
+        ],
+        "note": "No Create/Edit - records created by barge system"
+      }
+    ]
+  },
+  "extractionMetadata": {
+    "sourceFile": "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore/Forms/frmBargeConditions.vb",
+    "extractedDate": "2025-12-19",
+    "subsystemIdentifier": "SubSystem.frmBargeSearch",
+    "legacySecurityFramework": "Csg.Windows.Forms.Security.ControlAuthorizationBase"
+  }
+}

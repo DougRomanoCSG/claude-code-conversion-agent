@@ -141,34 +141,36 @@ async function promptForForm(): Promise<string | null> {
 }
 
 async function parseOptions(): Promise<OrchestratorOptions> {
-	const entity = parsedArgs.values.entity as string;
-	const formName = parsedArgs.values["form-name"] as string;
+	const rawEntity = parsedArgs.values.entity;
+	const rawFormName = parsedArgs.values["form-name"];
 	const outputDir = parsedArgs.values.output as string;
 	const skipStepsStr = parsedArgs.values["skip-steps"] as string;
 	const skipSteps = skipStepsStr ? skipStepsStr.split(",").map(Number) : [];
 	const resume = parsedArgs.values.resume as boolean;
 	const rerunFailed = parsedArgs.values["rerun-failed"] as boolean;
 
-	let finalEntity = entity;
-	let finalFormName = formName;
+	// Node's parseArgs can return string[] if an option is repeated; normalize to a single string.
+	const entity = Array.isArray(rawEntity) ? rawEntity[0] : rawEntity;
+	const formName = Array.isArray(rawFormName) ? rawFormName[0] : rawFormName;
+
+	let finalEntity = typeof entity === "string" ? entity : undefined;
+	let finalFormName = typeof formName === "string" ? formName : undefined;
 	let isSingleForm = false;
 
 	// If form name is provided, try to extract entity from it
-	if (formName && !entity) {
-		const extractedEntity = parseEntityFromFormName(formName);
+	if (finalFormName && !finalEntity) {
+		const extractedEntity = parseEntityFromFormName(finalFormName);
 		if (extractedEntity) {
 			finalEntity = extractedEntity;
-			finalFormName = formName;
 		} else {
 			// Try to extract entity by removing "frm" prefix for non-standard forms
-			if (formName.toLowerCase().startsWith("frm")) {
-				finalEntity = formName.substring(3);
-				finalFormName = formName;
+			if (finalFormName.toLowerCase().startsWith("frm")) {
+				finalEntity = finalFormName.substring(3);
 				isSingleForm = true;
-				console.log(`Detected single form (non-Search/Detail): ${formName}`);
+				console.log(`Detected single form (non-Search/Detail): ${finalFormName}`);
 				console.log(`Extracted entity: ${finalEntity}`);
 			} else {
-				console.error(`Error: Could not parse entity name from form name "${formName}"`);
+				console.error(`Error: Could not parse entity name from form name "${finalFormName}"`);
 				console.error("Expected format: frm{Entity}Search, frm{Entity}Detail, or frm{Entity}");
 				process.exit(1);
 			}

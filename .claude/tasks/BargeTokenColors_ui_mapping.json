@@ -1,0 +1,657 @@
+{
+  "entity": "BargeTokenColors",
+  "actualTableName": "ColorPair",
+  "description": "UI component mapping for BargeTokenColors (ColorPair) - Master-detail form for managing barge token color pairs",
+  "formType": "Master-detail on single screen",
+  "targetArchitecture": {
+    "viewModels": "src/BargeOps.UI/Models/",
+    "viewModelNamespace": "BargeOpsAdmin.ViewModels",
+    "controllers": "src/BargeOps.UI/Controllers/",
+    "controllerNamespace": "BargeOpsAdmin.Controllers",
+    "baseController": "AppController",
+    "views": "src/BargeOps.UI/Views/BargeTokenColors/",
+    "javascript": "src/BargeOps.UI/wwwroot/js/",
+    "technologyStack": {
+      "framework": "ASP.NET Core 8 MVC",
+      "ui": "Bootstrap 5",
+      "grid": "DataTables (server-side processing)",
+      "dropdowns": "Select2",
+      "validation": "jQuery Validate + Unobtrusive Validation",
+      "colorPicker": "HTML5 color input + custom color name conversion"
+    }
+  },
+  "controlMappings": [
+    {
+      "legacyControl": "UltraGrid (grdColorPair)",
+      "controlType": "Master grid",
+      "modernEquivalent": "DataTables with server-side processing",
+      "html": "<table id=\"bargeTokenColorsTable\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\"></table>",
+      "javascript": {
+        "file": "bargeTokenColorsSearch.js",
+        "initialization": "DataTable with AJAX, server-side processing",
+        "pattern": "Similar to boatLocationSearch.js"
+      },
+      "columns": [
+        {
+          "binding": "Name",
+          "header": "Color Name",
+          "dataTablesColumn": "{ data: 'name', name: 'name', defaultContent: '' }",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "binding": "TextColor",
+          "header": "Text Color",
+          "dataTablesColumn": "{ data: 'textColor', name: 'textColor', defaultContent: '', render: function(data, type, row) { return '<span style=\"color:' + row.textColorHex + ';\">' + data + '</span>'; } }",
+          "sortable": true,
+          "searchable": true,
+          "notes": "Display color name with colored text preview"
+        },
+        {
+          "binding": "BackColor",
+          "header": "Back Color",
+          "dataTablesColumn": "{ data: 'backColor', name: 'backColor', defaultContent: '', render: function(data, type, row) { return '<span style=\"background-color:' + row.backColorHex + '; padding: 2px 8px; border-radius: 3px;\">' + data + '</span>'; } }",
+          "sortable": true,
+          "searchable": true,
+          "notes": "Display color name with background color preview"
+        },
+        {
+          "binding": "Actions",
+          "header": "Actions",
+          "dataTablesColumn": "{ data: null, name: 'actions', orderable: false, searchable: false, className: 'text-center', width: '100px', render: function(data, type, row) { return '<div class=\"btn-group btn-group-sm\"><a href=\"/BargeTokenColors/Edit/' + row.colorPairID + '\" class=\"btn btn-sm btn-primary\"><i class=\"fas fa-edit\"></i></a><button class=\"btn btn-sm btn-danger\" onclick=\"deleteColorPair(' + row.colorPairID + ')\"><i class=\"fas fa-trash\"></i></button></div>'; } }",
+          "sortable": false,
+          "searchable": false,
+          "notes": "Edit and Delete action buttons"
+        }
+      ],
+      "serverSideEndpoint": "/BargeTokenColors/ColorPairTable",
+      "features": [
+        "Server-side processing",
+        "Pagination (25 per page default)",
+        "Sorting by color name",
+        "Visual color preview in grid cells",
+        "State saving (localStorage)"
+      ]
+    },
+    {
+      "legacyControl": "UltraTextEditor (txtName)",
+      "controlType": "Text input",
+      "modernEquivalent": "Bootstrap Text Input",
+      "html": "<input asp-for=\"Name\" class=\"form-control\" maxlength=\"50\" placeholder=\"Enter color name...\" aria-required=\"true\" />",
+      "validation": {
+        "required": true,
+        "maxLength": 50,
+        "htmlAttributes": "data-val=\"true\" data-val-required=\"Name is required\" data-val-maxlength=\"Name cannot exceed 50 characters\""
+      }
+    },
+    {
+      "legacyControl": "ColorPicker (clrTextColor)",
+      "controlType": "Color picker",
+      "modernEquivalent": "HTML5 Color Input + Color Name Converter",
+      "html": "<div class=\"row\"><div class=\"col-md-6\"><label asp-for=\"TextColor\" class=\"form-label\">Text Color</label><input type=\"color\" id=\"txtTextColorPicker\" class=\"form-control form-control-color\" title=\"Choose text color\" /></div><div class=\"col-md-6\"><label class=\"form-label\">Color Name</label><input asp-for=\"TextColor\" class=\"form-control\" readonly placeholder=\"Color name...\" /></div></div>",
+      "javascript": {
+        "colorConversion": "Convert hex to color name for storage, color name to hex for display",
+        "eventHandler": "$('#txtTextColorPicker').on('change', function() { updateColorPreview(); convertHexToColorName($(this).val(), '#TextColor'); });",
+        "notes": "Store System.Drawing.Color names in database, convert to/from hex for web UI"
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 50,
+        "customValidation": "Prevent empty or '0' values"
+      },
+      "notes": "Legacy stores color names (e.g., 'Red', 'Blue'), modern UI uses hex but converts to color names for database compatibility"
+    },
+    {
+      "legacyControl": "ColorPicker (clrBackColor)",
+      "controlType": "Color picker",
+      "modernEquivalent": "HTML5 Color Input + Color Name Converter",
+      "html": "<div class=\"row\"><div class=\"col-md-6\"><label asp-for=\"BackColor\" class=\"form-label\">Background Color</label><input type=\"color\" id=\"txtBackColorPicker\" class=\"form-control form-control-color\" title=\"Choose background color\" /></div><div class=\"col-md-6\"><label class=\"form-label\">Color Name</label><input asp-for=\"BackColor\" class=\"form-control\" readonly placeholder=\"Color name...\" /></div></div>",
+      "javascript": {
+        "colorConversion": "Convert hex to color name for storage, color name to hex for display",
+        "eventHandler": "$('#txtBackColorPicker').on('change', function() { updateColorPreview(); convertHexToColorName($(this).val(), '#BackColor'); });",
+        "notes": "Store System.Drawing.Color names in database, convert to/from hex for web UI"
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 50,
+        "customValidation": "Prevent empty or '0' values"
+      },
+      "notes": "Legacy stores color names (e.g., 'Red', 'Blue'), modern UI uses hex but converts to color names for database compatibility"
+    },
+    {
+      "legacyControl": "Label (lblSample)",
+      "controlType": "Preview label",
+      "modernEquivalent": "Bootstrap Card with Live Preview",
+      "html": "<div class=\"card mt-3\"><div class=\"card-header\">Preview</div><div class=\"card-body text-center\" id=\"colorPreview\" style=\"min-height: 100px; font-size: 1.5rem; font-weight: bold;\">Sample Text</div></div>",
+      "javascript": {
+        "updateFunction": "function updateColorPreview() { var textColor = $('#txtTextColorPicker').val(); var backColor = $('#txtBackColorPicker').val(); $('#colorPreview').css({ 'color': textColor, 'background-color': backColor }); }",
+        "notes": "Live preview updates as user selects colors"
+      },
+      "purpose": "Real-time visual feedback of color combination"
+    },
+    {
+      "legacyControl": "UltraComboEditor (FleetID filter - implied)",
+      "controlType": "Dropdown",
+      "modernEquivalent": "Select2 Dropdown",
+      "html": "<select asp-for=\"FleetID\" asp-items=\"Model.Fleets\" class=\"form-select\" data-select2=\"true\"><option value=\"\">-- All Fleets --</option></select>",
+      "javascript": {
+        "initialization": "$('#FleetID').select2({ placeholder: 'Select fleet...', allowClear: true });",
+        "eventHandler": "$('#FleetID').on('change', function() { dataTable.ajax.reload(); });"
+      },
+      "notes": "Filter grid by fleet - multi-tenant support"
+    },
+    {
+      "legacyControl": "Toolbar Buttons (Add, Modify, Remove, Export)",
+      "controlType": "Action buttons",
+      "modernEquivalent": "Bootstrap Buttons with Icons",
+      "html": {
+        "addButton": "<a href=\"@Url.Action('Create', 'BargeTokenColors')\" class=\"btn btn-success\"><i class=\"fas fa-plus\"></i> Add New Color</a>",
+        "searchButton": "<button type=\"button\" id=\"btnSearch\" class=\"btn btn-primary\"><i class=\"fas fa-search\"></i> Find</button>",
+        "resetButton": "<button type=\"button\" id=\"btnReset\" class=\"btn btn-secondary\"><i class=\"fas fa-undo\"></i> Reset</button>",
+        "exportButton": "<button type=\"button\" id=\"btnExport\" class=\"btn btn-info\"><i class=\"fas fa-download\"></i> Export</button>",
+        "saveButton": "<button type=\"submit\" class=\"btn btn-primary\"><i class=\"fas fa-save\"></i> Save</button>",
+        "cancelButton": "<a href=\"@Url.Action('Index', 'BargeTokenColors')\" class=\"btn btn-secondary\"><i class=\"fas fa-times\"></i> Cancel</a>"
+      },
+      "security": {
+        "pattern": "ASP.NET Core Authorization",
+        "implementation": "Use [Authorize] attribute and role-based permissions",
+        "legacy": "ControlAuthorization.ToolbarButtonCanBeEnabled"
+      }
+    },
+    {
+      "legacyControl": "UltraPanel",
+      "controlType": "Container panel",
+      "modernEquivalent": "Bootstrap Card",
+      "html": "<div class=\"card mb-3\"><div class=\"card-header\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-palette\"></i> Search Criteria</h5></div><div class=\"card-body\"><!-- Content --></div></div>",
+      "usage": "Group search criteria, edit form, grid results"
+    }
+  ],
+  "formPatterns": {
+    "searchForm": {
+      "view": "Views/BargeTokenColors/Index.cshtml",
+      "partial": "Views/BargeTokenColors/_Search.cshtml",
+      "layout": "Bootstrap grid system (row/col)",
+      "controls": [
+        {
+          "control": "Name filter",
+          "type": "text input",
+          "html": "<input asp-for=\"Name\" class=\"form-control\" placeholder=\"Search by color name...\" />"
+        },
+        {
+          "control": "Fleet filter",
+          "type": "Select2 dropdown",
+          "html": "<select asp-for=\"FleetID\" asp-items=\"Model.Fleets\" class=\"form-select\" data-select2=\"true\"></select>"
+        }
+      ],
+      "submitButton": "btn btn-primary",
+      "resetButton": "btn btn-secondary"
+    },
+    "editForm": {
+      "view": "Views/BargeTokenColors/Edit.cshtml",
+      "viewModel": "BargeTokenColorsEditViewModel",
+      "layout": "Bootstrap card with form-label and form-control",
+      "controls": [
+        {
+          "field": "Name",
+          "type": "text input",
+          "required": true,
+          "maxLength": 50
+        },
+        {
+          "field": "FleetID",
+          "type": "Select2 dropdown",
+          "required": true
+        },
+        {
+          "field": "TextColor",
+          "type": "Color picker + name converter",
+          "required": true
+        },
+        {
+          "field": "BackColor",
+          "type": "Color picker + name converter",
+          "required": true
+        },
+        {
+          "field": "Preview",
+          "type": "Live preview card",
+          "readonly": true
+        }
+      ],
+      "validation": {
+        "client": "jquery.validate and unobtrusive validation",
+        "server": "FluentValidation or DataAnnotations",
+        "customRules": [
+          "Name required and max 50 chars",
+          "TextColor required and not '0'",
+          "BackColor required and not '0'",
+          "FleetID required"
+        ]
+      },
+      "concurrency": {
+        "pattern": "Optimistic concurrency via ModifyDateTime",
+        "implementation": "Include ModifyDateTime in hidden field, validate on update"
+      }
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "serverSide": true,
+      "endpoint": "/BargeTokenColors/ColorPairTable",
+      "javascript": "bargeTokenColorsSearch.js",
+      "features": [
+        "Server-side processing",
+        "Pagination",
+        "Sorting",
+        "Filtering by Name and FleetID",
+        "Visual color preview in cells",
+        "Action buttons (Edit/Delete)",
+        "State persistence (localStorage)"
+      ],
+      "defaultSort": "Name ASC",
+      "pageLength": 25
+    }
+  },
+  "javascriptPatterns": {
+    "colorConversion": {
+      "description": "Convert between hex colors (web) and System.Drawing.Color names (database)",
+      "functions": [
+        {
+          "name": "convertHexToColorName",
+          "purpose": "Convert hex color to closest named color for database storage",
+          "signature": "function convertHexToColorName(hexValue, targetInputId)",
+          "implementation": "Map common hex values to .NET color names (e.g., #FF0000 -> 'Red')",
+          "notes": "May need server-side helper for accurate conversion"
+        },
+        {
+          "name": "convertColorNameToHex",
+          "purpose": "Convert .NET color name to hex for color picker",
+          "signature": "function convertColorNameToHex(colorName)",
+          "implementation": "Map .NET color names to hex values (e.g., 'Red' -> #FF0000)",
+          "notes": "Server should send hex values in DTO for easy display"
+        },
+        {
+          "name": "updateColorPreview",
+          "purpose": "Update live preview with selected colors",
+          "signature": "function updateColorPreview()",
+          "implementation": "Read color pickers, apply to preview card",
+          "eventTrigger": "Color picker change event"
+        }
+      ]
+    },
+    "gridInitialization": {
+      "file": "wwwroot/js/bargeTokenColorsSearch.js",
+      "pattern": "$(document).ready with DataTable initialization",
+      "ajaxData": "function(d) { d.fleetId = $('#FleetID').val(); d.name = $('#Name').val(); }",
+      "columns": "See controlMappings[0].columns",
+      "features": "processing, serverSide, stateSave, responsive, autoWidth"
+    },
+    "formValidation": {
+      "file": "wwwroot/js/bargeTokenColorsEdit.js",
+      "pattern": "jquery.validate with custom rules",
+      "customValidation": [
+        "Color name not empty or '0'",
+        "Name max length 50"
+      ]
+    }
+  },
+  "viewModels": {
+    "search": {
+      "name": "BargeTokenColorsSearchViewModel",
+      "properties": [
+        {
+          "name": "Name",
+          "type": "string",
+          "display": "Color Name",
+          "purpose": "Search filter"
+        },
+        {
+          "name": "FleetID",
+          "type": "int?",
+          "display": "Fleet",
+          "purpose": "Search filter"
+        },
+        {
+          "name": "Fleets",
+          "type": "SelectList",
+          "purpose": "Fleet dropdown options"
+        }
+      ]
+    },
+    "edit": {
+      "name": "BargeTokenColorsEditViewModel",
+      "properties": [
+        {
+          "name": "ColorPairID",
+          "type": "int",
+          "display": "ID",
+          "hidden": true
+        },
+        {
+          "name": "FleetID",
+          "type": "int",
+          "display": "Fleet",
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "display": "Color Name",
+          "required": true,
+          "maxLength": 50
+        },
+        {
+          "name": "TextColor",
+          "type": "string",
+          "display": "Text Color",
+          "required": true,
+          "maxLength": 50,
+          "notes": "Store color name, display as hex"
+        },
+        {
+          "name": "TextColorHex",
+          "type": "string",
+          "display": "Text Color Hex",
+          "purpose": "For color picker initialization"
+        },
+        {
+          "name": "BackColor",
+          "type": "string",
+          "display": "Background Color",
+          "required": true,
+          "maxLength": 50,
+          "notes": "Store color name, display as hex"
+        },
+        {
+          "name": "BackColorHex",
+          "type": "string",
+          "display": "Background Color Hex",
+          "purpose": "For color picker initialization"
+        },
+        {
+          "name": "ModifyDateTime",
+          "type": "DateTime?",
+          "display": "Last Modified",
+          "purpose": "Optimistic concurrency"
+        },
+        {
+          "name": "Fleets",
+          "type": "SelectList",
+          "purpose": "Fleet dropdown options"
+        }
+      ]
+    },
+    "gridRow": {
+      "name": "BargeTokenColorsGridRowDto",
+      "properties": [
+        {
+          "name": "colorPairID",
+          "type": "int"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "textColor",
+          "type": "string",
+          "notes": "Color name for display"
+        },
+        {
+          "name": "textColorHex",
+          "type": "string",
+          "notes": "Hex value for styling"
+        },
+        {
+          "name": "backColor",
+          "type": "string",
+          "notes": "Color name for display"
+        },
+        {
+          "name": "backColorHex",
+          "type": "string",
+          "notes": "Hex value for styling"
+        }
+      ]
+    }
+  },
+  "cssPatterns": {
+    "customStyles": {
+      "file": "wwwroot/css/bargeTokenColors.css",
+      "classes": [
+        {
+          "selector": ".color-preview-cell",
+          "purpose": "Style color preview in grid cells",
+          "styles": "padding: 2px 8px; border-radius: 3px; display: inline-block;"
+        },
+        {
+          "selector": "#colorPreview",
+          "purpose": "Live preview card styling",
+          "styles": "transition: all 0.3s ease; border: 1px solid #dee2e6;"
+        }
+      ]
+    },
+    "bootstrapUtilities": [
+      "form-control",
+      "form-label",
+      "form-select",
+      "form-check-input",
+      "card",
+      "card-header",
+      "card-body",
+      "btn",
+      "btn-primary",
+      "btn-secondary",
+      "btn-success",
+      "btn-danger",
+      "table",
+      "table-striped",
+      "table-bordered"
+    ]
+  },
+  "accessibilityFeatures": [
+    {
+      "feature": "Form labels",
+      "implementation": "asp-for tag helper with associated input",
+      "aria": "Automatic for/id association"
+    },
+    {
+      "feature": "Required fields",
+      "implementation": "aria-required=\"true\" on required inputs",
+      "visual": "Asterisk or 'Required' text in label"
+    },
+    {
+      "feature": "Color picker",
+      "implementation": "title attribute with clear description",
+      "aria": "aria-label on color input"
+    },
+    {
+      "feature": "Validation errors",
+      "implementation": "asp-validation-for tag helper",
+      "aria": "aria-describedby linking error messages"
+    },
+    {
+      "feature": "Grid actions",
+      "implementation": "title attributes on action buttons",
+      "aria": "aria-label for icon-only buttons"
+    }
+  ],
+  "migrationConsiderations": [
+    {
+      "challenge": "Color storage format",
+      "legacy": "System.Drawing.Color names (e.g., 'Red', 'Blue')",
+      "modern": "HTML5 color input uses hex (#RRGGBB)",
+      "solution": "Bidirectional conversion: store names in DB, display/edit as hex in UI",
+      "implementation": "Server-side helper to convert color names <-> hex, DTO includes both values"
+    },
+    {
+      "challenge": "Master-detail single form",
+      "legacy": "Grid and edit controls on same form",
+      "modern": "Separate search/list and edit views",
+      "solution": "Index.cshtml with DataTables grid, Edit.cshtml for add/edit operations",
+      "implementation": "Standard MVC pattern with separate views"
+    },
+    {
+      "challenge": "Live color preview",
+      "legacy": "lblSample label updates on color change",
+      "modern": "Bootstrap card with dynamic styling",
+      "solution": "JavaScript updates card background/text color on picker change",
+      "implementation": "Event handlers on color pickers calling updateColorPreview()"
+    },
+    {
+      "challenge": "Fleet scoping",
+      "legacy": "FleetID set from context",
+      "modern": "User selects fleet from dropdown or default from context",
+      "solution": "FleetID in ViewModel, Select2 dropdown, default from user context",
+      "implementation": "Controller sets default FleetID based on user's business unit"
+    },
+    {
+      "challenge": "Grid visual preview",
+      "legacy": "Color names displayed as text only",
+      "modern": "Color names with visual color swatches",
+      "solution": "DataTables render functions apply inline styles for color preview",
+      "implementation": "Render functions use textColorHex/backColorHex from DTO"
+    },
+    {
+      "challenge": "Optimistic concurrency",
+      "legacy": "ModifyDateTime check in stored procedure",
+      "modern": "Same pattern with hidden field in form",
+      "solution": "Include ModifyDateTime in ViewModel, pass to update method",
+      "implementation": "Hidden input for ModifyDateTime, repository checks value"
+    },
+    {
+      "challenge": "Hard delete",
+      "legacy": "No IsActive column, hard DELETE",
+      "modern": "Same - hard delete with confirmation",
+      "solution": "JavaScript confirmation dialog before delete AJAX call",
+      "implementation": "onclick=\"return confirm('Delete this color pair?')\" or modal"
+    }
+  ],
+  "commonMistakes": [
+    "❌ Using single color input without color name conversion",
+    "❌ Not providing visual color preview in grid",
+    "❌ Not including both hex and color name in DTO",
+    "❌ Forgetting to set FleetID before save",
+    "❌ Not handling color name validation (preventing '0' or empty)",
+    "❌ Using inline styles instead of Bootstrap classes",
+    "❌ Not implementing live preview update on color change",
+    "❌ Missing optimistic concurrency check with ModifyDateTime"
+  ],
+  "implementationFiles": {
+    "views": [
+      {
+        "path": "src/BargeOps.UI/Views/BargeTokenColors/Index.cshtml",
+        "purpose": "Main search/list view with grid",
+        "sections": "Search criteria card, DataTables grid card"
+      },
+      {
+        "path": "src/BargeOps.UI/Views/BargeTokenColors/_Search.cshtml",
+        "purpose": "Search criteria partial",
+        "controls": "Name filter, Fleet dropdown, Search/Reset buttons"
+      },
+      {
+        "path": "src/BargeOps.UI/Views/BargeTokenColors/_SearchResults.cshtml",
+        "purpose": "DataTables grid partial",
+        "content": "Table element with thead, DataTables populates tbody"
+      },
+      {
+        "path": "src/BargeOps.UI/Views/BargeTokenColors/Edit.cshtml",
+        "purpose": "Create/Edit form",
+        "controls": "Name input, Fleet dropdown, TextColor picker, BackColor picker, Preview card"
+      }
+    ],
+    "javascript": [
+      {
+        "path": "src/BargeOps.UI/wwwroot/js/bargeTokenColorsSearch.js",
+        "purpose": "DataTables initialization and search logic",
+        "pattern": "Similar to boatLocationSearch.js"
+      },
+      {
+        "path": "src/BargeOps.UI/wwwroot/js/bargeTokenColorsEdit.js",
+        "purpose": "Edit form interactions and color preview",
+        "functions": "updateColorPreview, convertHexToColorName, convertColorNameToHex"
+      }
+    ],
+    "controllers": [
+      {
+        "path": "src/BargeOps.UI/Controllers/BargeTokenColorsController.cs",
+        "namespace": "BargeOpsAdmin.Controllers",
+        "baseClass": "AppController",
+        "actions": [
+          "Index (GET) - search view",
+          "ColorPairTable (POST) - DataTables AJAX",
+          "Create (GET) - new form",
+          "Create (POST) - save new",
+          "Edit (GET) - edit form",
+          "Edit (POST) - save edit",
+          "Delete (POST) - delete AJAX"
+        ]
+      }
+    ],
+    "viewModels": [
+      {
+        "path": "src/BargeOps.UI/Models/BargeTokenColorsSearchViewModel.cs",
+        "namespace": "BargeOpsAdmin.ViewModels",
+        "purpose": "Search criteria"
+      },
+      {
+        "path": "src/BargeOps.UI/Models/BargeTokenColorsEditViewModel.cs",
+        "namespace": "BargeOpsAdmin.ViewModels",
+        "purpose": "Create/Edit form"
+      }
+    ],
+    "css": [
+      {
+        "path": "src/BargeOps.UI/wwwroot/css/bargeTokenColors.css",
+        "purpose": "Custom styles for color preview",
+        "optional": true,
+        "note": "Most styling via Bootstrap classes"
+      }
+    ]
+  },
+  "testingConsiderations": [
+    {
+      "area": "Color conversion accuracy",
+      "test": "Verify hex-to-colorname and colorname-to-hex conversions match legacy behavior",
+      "validation": "Common colors (Red, Blue, Green, etc.) convert correctly"
+    },
+    {
+      "area": "Visual preview",
+      "test": "Live preview updates when color pickers change",
+      "validation": "Preview card shows selected text/background colors in real-time"
+    },
+    {
+      "area": "Grid color display",
+      "test": "DataTables grid shows color swatches correctly",
+      "validation": "TextColor and BackColor columns display with visual color preview"
+    },
+    {
+      "area": "Fleet filtering",
+      "test": "Grid filters by selected fleet",
+      "validation": "Only color pairs for selected fleet display"
+    },
+    {
+      "area": "Optimistic concurrency",
+      "test": "Concurrent updates detected and prevented",
+      "validation": "ModifyDateTime mismatch shows error message"
+    },
+    {
+      "area": "Validation",
+      "test": "Required fields enforced, max lengths respected",
+      "validation": "Cannot save with empty Name or invalid colors"
+    }
+  ],
+  "notes": [
+    "Entity named 'BargeTokenColors' in UI but table is 'ColorPair' in database",
+    "Color values stored as .NET color names, must convert to/from hex for web UI",
+    "Legacy form was master-detail on single screen, modern uses separate views",
+    "No soft delete - hard DELETE operation requires confirmation",
+    "FleetID required but not always set on new records - handle in controller",
+    "Live preview is key UX feature - must update on color change",
+    "Grid should show visual color swatches, not just text names",
+    "Optimistic concurrency via ModifyDateTime - include in edit form as hidden field",
+    "Use DataTables for grid with server-side processing for consistency",
+    "Select2 for Fleet dropdown for enhanced UX",
+    "Bootstrap 5 for all styling - no inline styles",
+    "Accessibility: proper labels, aria attributes, validation messages"
+  ]
+}

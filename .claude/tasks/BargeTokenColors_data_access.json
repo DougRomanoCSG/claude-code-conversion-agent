@@ -1,0 +1,815 @@
+{
+  "entity": "BargeTokenColors",
+  "actualTableName": "ColorPair",
+  "description": "Data access pattern extraction for BargeTokenColors (ColorPair table) - barge token color pair management",
+  "softDelete": false,
+  "hasIsActive": false,
+  "deletePattern": "Hard delete with confirmation",
+  "targetArchitecture": {
+    "dtoNamespace": "BargeOps.Shared.Dto",
+    "dtoPath": "src/BargeOps.Shared/BargeOps.Shared/Dto/",
+    "repositoryInterfaceNamespace": "Admin.Infrastructure.Abstractions",
+    "repositoryInterfacePath": "src/BargeOps.API/src/Admin.Infrastructure/Abstractions/",
+    "repositoryImplementationNamespace": "Admin.Infrastructure.Repositories",
+    "repositoryImplementationPath": "src/BargeOps.API/src/Admin.Infrastructure/Repositories/",
+    "sqlFilesPath": "src/BargeOps.API/src/Admin.Infrastructure/DataAccess/Sql/ColorPair/",
+    "sqlResourcePattern": "Embedded resources loaded via SqlText.GetSqlText()",
+    "dataAccessPattern": "Dapper with embedded SQL resources"
+  },
+  "legacyStoredProcedures": [
+    {
+      "name": "ColorPairList",
+      "modernSqlFile": "ColorPair_Search.sql",
+      "operation": "Search/List",
+      "description": "Search color pairs by FleetID",
+      "legacySource": "ColorPairList.vb:52-66",
+      "parameters": [
+        {
+          "name": "@FleetID",
+          "type": "int",
+          "sqlDbType": "SqlDbType.Int",
+          "required": true,
+          "description": "Filter color pairs by fleet",
+          "source": "ColorPairList.vb:63"
+        }
+      ],
+      "resultColumns": [
+        {
+          "column": "ColorPairID",
+          "property": "ColorPairID",
+          "type": "int",
+          "description": "Primary key",
+          "source": "ColorPairList.vb:80"
+        },
+        {
+          "column": "Name",
+          "property": "Name",
+          "type": "string",
+          "description": "Color pair display name",
+          "source": "ColorPairList.vb:81"
+        },
+        {
+          "column": "TextColor",
+          "property": "TextColor",
+          "type": "string",
+          "description": "Text color name (System.Drawing.Color name)",
+          "dataTransformation": "System.Drawing.Color.FromName(dr.GetStringValue('TextColor'))",
+          "source": "ColorPairList.vb:82"
+        },
+        {
+          "column": "BackColor",
+          "property": "BackColor",
+          "type": "string",
+          "description": "Background color name (System.Drawing.Color name)",
+          "dataTransformation": "System.Drawing.Color.FromName(dr.GetStringValue('BackColor'))",
+          "source": "ColorPairList.vb:83"
+        }
+      ],
+      "sortOrder": "Name ASC (implied from DisplayMember)",
+      "displayMember": "Name",
+      "valueMember": "ColorPairID",
+      "filterableFields": ["FleetID"]
+    },
+    {
+      "name": "ColorPairSelect",
+      "modernSqlFile": "ColorPair_GetById.sql",
+      "operation": "GetById",
+      "description": "Fetch single color pair by ID",
+      "legacySource": "ColorPairBase.vb:198, 373-383",
+      "parameters": [
+        {
+          "name": "@ColorPairID",
+          "type": "int",
+          "sqlDbType": "SqlDbType.Int",
+          "required": true,
+          "description": "Primary key",
+          "source": "ColorPairBase.vb:380"
+        }
+      ],
+      "resultColumns": [
+        {
+          "column": "ColorPairID",
+          "property": "ColorPairID",
+          "type": "int",
+          "description": "Primary key",
+          "source": "ColorPairBase.vb:496"
+        },
+        {
+          "column": "FleetID",
+          "property": "FleetID",
+          "type": "int",
+          "description": "Foreign key to Fleet table",
+          "source": "ColorPairBase.vb:497"
+        },
+        {
+          "column": "Name",
+          "property": "Name",
+          "type": "string",
+          "maxLength": 50,
+          "description": "Color pair display name",
+          "source": "ColorPairBase.vb:498"
+        },
+        {
+          "column": "TextColor",
+          "property": "TextColor",
+          "type": "string",
+          "maxLength": 50,
+          "description": "Text color name",
+          "source": "ColorPairBase.vb:499"
+        },
+        {
+          "column": "BackColor",
+          "property": "BackColor",
+          "type": "string",
+          "maxLength": 50,
+          "description": "Background color name",
+          "source": "ColorPairBase.vb:500"
+        },
+        {
+          "column": "ModifyDateTime",
+          "property": "ModifyDateTime",
+          "type": "DateTime?",
+          "description": "Last modified timestamp for optimistic concurrency",
+          "source": "ColorPairBase.vb:504 (base class)"
+        },
+        {
+          "column": "ModifyUser",
+          "property": "ModifyUser",
+          "type": "string",
+          "description": "User who last modified",
+          "source": "ColorPairBase.vb:504 (base class)"
+        },
+        {
+          "column": "CreateDateTime",
+          "property": "CreateDateTime",
+          "type": "DateTime?",
+          "description": "Created timestamp",
+          "source": "ColorPairBase.vb:504 (base class)"
+        },
+        {
+          "column": "CreateUser",
+          "property": "CreateUser",
+          "type": "string",
+          "description": "User who created",
+          "source": "ColorPairBase.vb:504 (base class)"
+        }
+      ]
+    },
+    {
+      "name": "ColorPairsSelect",
+      "modernSqlFile": "ColorPair_GetAll.sql",
+      "operation": "GetAll",
+      "description": "Fetch all color pairs (no filter)",
+      "legacySource": "ColorPairBase.vb:199",
+      "parameters": [],
+      "resultColumns": "Same as ColorPairSelect",
+      "notes": "Used for dropdown/lookup scenarios"
+    },
+    {
+      "name": "ColorPairInsert",
+      "modernSqlFile": "ColorPair_Insert.sql",
+      "operation": "Insert",
+      "description": "Create new color pair record",
+      "legacySource": "ColorPairBase.vb:200, 386-410",
+      "parameters": [
+        {
+          "name": "@ColorPairID",
+          "type": "int",
+          "sqlDbType": "SqlDbType.Int",
+          "direction": "InputOutput",
+          "description": "Primary key returned as output",
+          "source": "ColorPairBase.vb:389-390"
+        },
+        {
+          "name": "@FleetID",
+          "type": "int",
+          "sqlDbType": "SqlDbType.Int",
+          "required": true,
+          "description": "Fleet association",
+          "source": "ColorPairBase.vb:403"
+        },
+        {
+          "name": "@Name",
+          "type": "string",
+          "sqlDbType": "SqlDbType.VarChar",
+          "required": true,
+          "maxLength": 50,
+          "description": "Color pair name",
+          "source": "ColorPairBase.vb:404"
+        },
+        {
+          "name": "@TextColor",
+          "type": "string",
+          "sqlDbType": "SqlDbType.VarChar",
+          "required": true,
+          "maxLength": 50,
+          "description": "Text color name",
+          "validation": "Cannot be empty or '0'",
+          "source": "ColorPairBase.vb:405"
+        },
+        {
+          "name": "@BackColor",
+          "type": "string",
+          "sqlDbType": "SqlDbType.VarChar",
+          "required": true,
+          "maxLength": 50,
+          "description": "Background color name",
+          "validation": "Cannot be empty or '0'",
+          "source": "ColorPairBase.vb:406"
+        }
+      ],
+      "baseParameters": "@CreateUser, @CreateDateTime, @ModifyUser, @ModifyDateTime (added by base class)",
+      "returnsIdentity": true,
+      "outputParameters": [
+        {
+          "name": "@ColorPairID",
+          "description": "New identity value retrieved in GetInsertOutputParameters",
+          "source": "ColorPairBase.vb:461-468"
+        }
+      ],
+      "notes": "ColorPairID returned as output parameter with new identity value"
+    },
+    {
+      "name": "ColorPairUpdate",
+      "modernSqlFile": "ColorPair_Update.sql",
+      "operation": "Update",
+      "description": "Update existing color pair record",
+      "legacySource": "ColorPairBase.vb:201, 412-435",
+      "parameters": [
+        {
+          "name": "@ColorPairID",
+          "type": "int",
+          "sqlDbType": "SqlDbType.Int",
+          "required": true,
+          "description": "Primary key",
+          "source": "ColorPairBase.vb:415"
+        },
+        {
+          "name": "@FleetID",
+          "type": "int",
+          "sqlDbType": "SqlDbType.Int",
+          "required": true,
+          "description": "Fleet association",
+          "source": "ColorPairBase.vb:428"
+        },
+        {
+          "name": "@Name",
+          "type": "string",
+          "sqlDbType": "SqlDbType.VarChar",
+          "required": true,
+          "maxLength": 50,
+          "description": "Color pair name",
+          "source": "ColorPairBase.vb:429"
+        },
+        {
+          "name": "@TextColor",
+          "type": "string",
+          "sqlDbType": "SqlDbType.VarChar",
+          "required": true,
+          "maxLength": 50,
+          "description": "Text color name",
+          "validation": "Cannot be empty or '0'",
+          "source": "ColorPairBase.vb:430"
+        },
+        {
+          "name": "@BackColor",
+          "type": "string",
+          "sqlDbType": "SqlDbType.VarChar",
+          "required": true,
+          "maxLength": 50,
+          "description": "Background color name",
+          "validation": "Cannot be empty or '0'",
+          "source": "ColorPairBase.vb:431"
+        }
+      ],
+      "baseParameters": "@ModifyUser, @ModifyDateTime (added by base class)",
+      "concurrencyCheck": "ModifyDateTime optimistic concurrency in WHERE clause",
+      "notes": "Should return 0 rows if ModifyDateTime doesn't match (concurrent update detected)"
+    },
+    {
+      "name": "ColorPairDelete",
+      "modernSqlFile": "ColorPair_Delete.sql",
+      "operation": "Delete",
+      "description": "Hard delete color pair record",
+      "legacySource": "ColorPairBase.vb:202, 444-455",
+      "parameters": [
+        {
+          "name": "@ColorPairID",
+          "type": "int",
+          "sqlDbType": "SqlDbType.Int",
+          "required": true,
+          "description": "Primary key to delete",
+          "source": "ColorPairBase.vb:451"
+        }
+      ],
+      "deleteType": "Hard delete",
+      "notes": "No soft delete - actual DELETE statement. Requires confirmation in UI."
+    }
+  ],
+  "modernSqlFiles": [
+    {
+      "fileName": "ColorPair_Search.sql",
+      "operation": "Search",
+      "description": "Search color pairs with ListQuery support",
+      "baseQuery": "SELECT ColorPairID, FleetID, Name, TextColor, BackColor FROM ColorPair",
+      "filters": [
+        "FleetID = @FleetID (required)",
+        "Name LIKE @Name (optional for search)"
+      ],
+      "sortDefault": "Name ASC",
+      "listQuerySupport": true,
+      "notes": "Returns grid DTO with TextColorHex and BackColorHex for display. Must convert color names to hex in SELECT or in code."
+    },
+    {
+      "fileName": "ColorPair_GetById.sql",
+      "operation": "GetById",
+      "description": "Fetch single color pair by ID with all fields",
+      "baseQuery": "SELECT ColorPairID, FleetID, Name, TextColor, BackColor, CreateDateTime, CreateUser, ModifyDateTime, ModifyUser FROM ColorPair WHERE ColorPairID = @ColorPairID"
+    },
+    {
+      "fileName": "ColorPair_GetAll.sql",
+      "operation": "GetAll",
+      "description": "Fetch all color pairs for lookups",
+      "baseQuery": "SELECT ColorPairID, FleetID, Name, TextColor, BackColor FROM ColorPair ORDER BY Name",
+      "notes": "Optional - for dropdown scenarios"
+    },
+    {
+      "fileName": "ColorPair_Insert.sql",
+      "operation": "Insert",
+      "description": "Create new color pair and return identity",
+      "statement": "INSERT INTO ColorPair (FleetID, Name, TextColor, BackColor, CreateUser, CreateDateTime, ModifyUser, ModifyDateTime) VALUES (@FleetID, @Name, @TextColor, @BackColor, @CreateUser, @CreateDateTime, @ModifyUser, @ModifyDateTime); SELECT CAST(SCOPE_IDENTITY() AS int);"
+    },
+    {
+      "fileName": "ColorPair_Update.sql",
+      "operation": "Update",
+      "description": "Update existing color pair with optimistic concurrency",
+      "statement": "UPDATE ColorPair SET FleetID = @FleetID, Name = @Name, TextColor = @TextColor, BackColor = @BackColor, ModifyUser = @ModifyUser, ModifyDateTime = @ModifyDateTime WHERE ColorPairID = @ColorPairID AND (ModifyDateTime = @OriginalModifyDateTime OR ModifyDateTime IS NULL)",
+      "concurrency": "Check ModifyDateTime in WHERE clause, return affected rows"
+    },
+    {
+      "fileName": "ColorPair_Delete.sql",
+      "operation": "Delete",
+      "description": "Hard delete color pair",
+      "statement": "DELETE FROM ColorPair WHERE ColorPairID = @ColorPairID"
+    }
+  ],
+  "dataTransformations": {
+    "colorHandling": {
+      "description": "Color names stored as strings in database (e.g., 'Red', 'Blue'), must convert to/from hex for web UI",
+      "legacyPattern": "System.Drawing.Color.FromName() converts string to Color object",
+      "legacySource": "ColorPairList.vb:82-83",
+      "modernPattern": "Store color names in database, provide both name and hex in DTO",
+      "dtoFields": [
+        "TextColor (string, color name for database)",
+        "TextColorHex (string, hex value for HTML color picker)",
+        "BackColor (string, color name for database)",
+        "BackColorHex (string, hex value for HTML color picker)"
+      ],
+      "conversionNeeded": "Server-side helper to convert System.Drawing.Color names to/from hex",
+      "examples": [
+        "'Red' -> '#FF0000'",
+        "'Blue' -> '#0000FF'",
+        "'Green' -> '#008000'",
+        "'Yellow' -> '#FFFF00'"
+      ]
+    },
+    "validationRules": {
+      "textColorValidation": "Cannot be empty or '0' (special check in ColorPair.vb:46-49)",
+      "backColorValidation": "Cannot be empty or '0' (special check in ColorPair.vb:50-53)",
+      "nameValidation": "Required, max length 50 (ColorPairBase.vb:211-217)",
+      "fleetIdValidation": "Required"
+    }
+  },
+  "repositoryInterface": {
+    "name": "IColorPairRepository",
+    "namespace": "Admin.Infrastructure.Abstractions",
+    "path": "src/BargeOps.API/src/Admin.Infrastructure/Abstractions/IColorPairRepository.cs",
+    "methods": [
+      {
+        "name": "SearchAsync",
+        "returnType": "Task<IEnumerable<ColorPair>>",
+        "parameters": ["ColorPairSearchCriteria criteria"],
+        "description": "Search color pairs by criteria",
+        "sqlFile": "ColorPair_Search.sql"
+      },
+      {
+        "name": "GetColorPairListAsync",
+        "returnType": "Task<ListQueryResult<ColorPairDto>>",
+        "parameters": ["ListQueryDefinition queryDefinition"],
+        "description": "Get color pairs with ListQuery for DataTables server-side processing",
+        "sqlFile": "ColorPair_Search.sql",
+        "pattern": "Follow BoatLocationRepository.GetBoatLocationListAsync"
+      },
+      {
+        "name": "GetByIdAsync",
+        "returnType": "Task<ColorPair>",
+        "parameters": ["int colorPairId"],
+        "description": "Fetch single color pair by ID",
+        "sqlFile": "ColorPair_GetById.sql"
+      },
+      {
+        "name": "CreateAsync",
+        "returnType": "Task<int>",
+        "parameters": ["ColorPair colorPair"],
+        "description": "Create new color pair, returns new ColorPairID",
+        "sqlFile": "ColorPair_Insert.sql"
+      },
+      {
+        "name": "UpdateAsync",
+        "returnType": "Task",
+        "parameters": ["ColorPair colorPair"],
+        "description": "Update existing color pair with optimistic concurrency check",
+        "throws": "ConcurrencyException if ModifyDateTime doesn't match",
+        "sqlFile": "ColorPair_Update.sql"
+      },
+      {
+        "name": "DeleteAsync",
+        "returnType": "Task<bool>",
+        "parameters": ["int colorPairId"],
+        "description": "Hard delete color pair, returns true if deleted",
+        "sqlFile": "ColorPair_Delete.sql"
+      },
+      {
+        "name": "GetFleetsLookupAsync",
+        "returnType": "Task<IEnumerable<LookupItemDto>>",
+        "parameters": [],
+        "description": "Get fleets for dropdown"
+      }
+    ]
+  },
+  "repositoryImplementation": {
+    "name": "ColorPairRepository",
+    "namespace": "Admin.Infrastructure.Repositories",
+    "path": "src/BargeOps.API/src/Admin.Infrastructure/Repositories/ColorPairRepository.cs",
+    "dependencies": [
+      "IDbConnectionFactory",
+      "IDbHelper"
+    ],
+    "pattern": "Dapper with SqlText.Get{FileName} for embedded SQL resources",
+    "exampleMethod": "public async Task<ColorPair> GetByIdAsync(int colorPairId)\n{\n    using var connection = _connectionFactory.CreateConnection();\n    var sql = SqlText.ColorPair_GetById;\n    return await connection.QuerySingleOrDefaultAsync<ColorPair>(sql, new { ColorPairID = colorPairId });\n}",
+    "referenceImplementation": "BoatLocationRepository.cs",
+    "notes": "Follow BoatLocationRepository.cs pattern exactly"
+  },
+  "dtoDefinitions": {
+    "ColorPair": {
+      "name": "ColorPair",
+      "namespace": "BargeOps.Shared.Dto",
+      "path": "src/BargeOps.Shared/BargeOps.Shared/Dto/ColorPair.cs",
+      "description": "Main entity DTO for CRUD operations",
+      "properties": [
+        {
+          "name": "ColorPairID",
+          "type": "int",
+          "description": "Primary key"
+        },
+        {
+          "name": "FleetID",
+          "type": "int",
+          "description": "Foreign key to Fleet"
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "maxLength": 50,
+          "required": true,
+          "description": "Color pair display name"
+        },
+        {
+          "name": "TextColor",
+          "type": "string",
+          "maxLength": 50,
+          "required": true,
+          "description": "Text color name for storage"
+        },
+        {
+          "name": "BackColor",
+          "type": "string",
+          "maxLength": 50,
+          "required": true,
+          "description": "Background color name for storage"
+        },
+        {
+          "name": "ModifyDateTime",
+          "type": "DateTime?",
+          "description": "Optimistic concurrency timestamp"
+        },
+        {
+          "name": "ModifyUser",
+          "type": "string",
+          "description": "User who last modified"
+        },
+        {
+          "name": "CreateDateTime",
+          "type": "DateTime?",
+          "description": "Created timestamp"
+        },
+        {
+          "name": "CreateUser",
+          "type": "string",
+          "description": "User who created"
+        }
+      ]
+    },
+    "ColorPairDto": {
+      "name": "ColorPairDto",
+      "namespace": "BargeOps.Shared.Dto",
+      "path": "src/BargeOps.Shared/BargeOps.Shared/Dto/ColorPairDto.cs",
+      "description": "DTO for DataTables grid with color preview support",
+      "attributes": ["[Sortable]", "[Filterable]"],
+      "properties": [
+        {
+          "name": "ColorPairID",
+          "type": "int",
+          "description": "Primary key"
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "sortable": true,
+          "filterable": true,
+          "description": "Color pair display name"
+        },
+        {
+          "name": "TextColor",
+          "type": "string",
+          "sortable": true,
+          "filterable": true,
+          "description": "Text color name for display"
+        },
+        {
+          "name": "TextColorHex",
+          "type": "string",
+          "description": "Hex color value for HTML rendering (e.g., #FF0000)"
+        },
+        {
+          "name": "BackColor",
+          "type": "string",
+          "sortable": true,
+          "filterable": true,
+          "description": "Background color name for display"
+        },
+        {
+          "name": "BackColorHex",
+          "type": "string",
+          "description": "Hex color value for HTML rendering (e.g., #0000FF)"
+        }
+      ],
+      "notes": "Include both color name and hex for easy grid rendering"
+    },
+    "ColorPairSearchCriteria": {
+      "name": "ColorPairSearchCriteria",
+      "namespace": "BargeOps.Shared.Dto",
+      "path": "src/BargeOps.Shared/BargeOps.Shared/Dto/ColorPairSearchCriteria.cs",
+      "description": "Search criteria DTO",
+      "properties": [
+        {
+          "name": "FleetID",
+          "type": "int?",
+          "description": "Filter by fleet"
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "description": "Filter by color pair name (LIKE search)"
+        }
+      ]
+    }
+  },
+  "listQueryFields": {
+    "filterable": [
+      "Name",
+      "TextColor",
+      "BackColor",
+      "FleetID"
+    ],
+    "sortable": [
+      "Name",
+      "TextColor",
+      "BackColor"
+    ],
+    "defaultSort": "Name ASC",
+    "pageSize": 25,
+    "notes": "ColorPairList uses DisplayMember='Name' and ValueMember='ColorPairID' indicating Name is primary display field"
+  },
+  "businessRules": {
+    "validation": [
+      {
+        "field": "Name",
+        "rules": ["Required", "MaxLength 50"],
+        "source": "ColorPairBase.vb:211-217"
+      },
+      {
+        "field": "TextColor",
+        "rules": ["Required", "MaxLength 50", "Cannot be '0' or empty"],
+        "source": "ColorPairBase.vb:219-225 and ColorPair.vb:46-49"
+      },
+      {
+        "field": "BackColor",
+        "rules": ["Required", "MaxLength 50", "Cannot be '0' or empty"],
+        "source": "ColorPairBase.vb:227-233 and ColorPair.vb:50-53"
+      }
+    ],
+    "concurrency": {
+      "mechanism": "Optimistic concurrency via ModifyDateTime",
+      "implementation": "WHERE clause check on ModifyDateTime during update",
+      "errorHandling": "Return 0 rows if ModifyDateTime doesn't match, throw ConcurrencyException"
+    },
+    "auditFields": [
+      "CreateDateTime",
+      "CreateUser",
+      "ModifyDateTime",
+      "ModifyUser"
+    ]
+  },
+  "databaseSchema": {
+    "tableName": "ColorPair",
+    "primaryKey": "ColorPairID (int, identity)",
+    "foreignKeys": [
+      {
+        "column": "FleetID",
+        "references": "Fleet.FleetID",
+        "required": true
+      }
+    ],
+    "columns": [
+      {
+        "name": "ColorPairID",
+        "type": "int",
+        "identity": true,
+        "nullable": false
+      },
+      {
+        "name": "FleetID",
+        "type": "int",
+        "nullable": false
+      },
+      {
+        "name": "Name",
+        "type": "varchar(50)",
+        "nullable": false
+      },
+      {
+        "name": "TextColor",
+        "type": "varchar(50)",
+        "nullable": false,
+        "notes": "System.Drawing.Color name (e.g., 'Red', 'Blue')"
+      },
+      {
+        "name": "BackColor",
+        "type": "varchar(50)",
+        "nullable": false,
+        "notes": "System.Drawing.Color name (e.g., 'White', 'Black')"
+      },
+      {
+        "name": "CreateDateTime",
+        "type": "datetime",
+        "nullable": true
+      },
+      {
+        "name": "CreateUser",
+        "type": "varchar(50)",
+        "nullable": true
+      },
+      {
+        "name": "ModifyDateTime",
+        "type": "datetime",
+        "nullable": true
+      },
+      {
+        "name": "ModifyUser",
+        "type": "varchar(50)",
+        "nullable": true
+      }
+    ],
+    "indexes": [
+      "PK_ColorPair (ColorPairID)",
+      "FK to Fleet table on FleetID (assumed)"
+    ],
+    "noIsActiveColumn": true,
+    "hardDeleteSupported": true
+  },
+  "migrationNotes": {
+    "colorStorageFormat": {
+      "challenge": "Database stores System.Drawing.Color names, web UI uses hex values",
+      "solution": "Create helper utility to convert between color names and hex",
+      "implementation": "ColorConverter.ToHex('Red') -> '#FF0000', ColorConverter.ToColorName('#FF0000') -> 'Red'",
+      "dtoStrategy": "Include both values in DTO: TextColor (name), TextColorHex (hex)"
+    },
+    "listQueryIntegration": {
+      "challenge": "Legacy uses custom ListBase with DataTable, modern uses ListQuery with DTOs",
+      "solution": "Implement GetColorPairListAsync with ListQueryDefinition parameter",
+      "pattern": "Follow BoatLocationRepository.GetBoatLocationListAsync pattern with SqlText.ColorPair_Search"
+    },
+    "optimisticConcurrency": {
+      "challenge": "Legacy base class handles ModifyDateTime check automatically",
+      "solution": "Include ModifyDateTime in WHERE clause of UPDATE statement",
+      "errorHandling": "Check rowCount after ExecuteAsync, throw ConcurrencyException if 0"
+    },
+    "hardDeletePattern": {
+      "challenge": "No soft delete support, actual DELETE operation",
+      "solution": "Implement DeleteAsync with confirmation dialog in UI",
+      "notes": "Unlike entities with IsActive, ColorPair uses hard delete"
+    }
+  },
+  "sqlTextClass": {
+    "className": "SqlText",
+    "namespace": "Admin.Infrastructure.DataAccess",
+    "path": "src/BargeOps.API/src/Admin.Infrastructure/DataAccess/SqlText.cs",
+    "properties": [
+      {
+        "name": "ColorPair_GetById",
+        "fileName": "ColorPair_GetById.sql",
+        "operation": "GetById"
+      },
+      {
+        "name": "ColorPair_Search",
+        "fileName": "ColorPair_Search.sql",
+        "operation": "Search with ListQuery"
+      },
+      {
+        "name": "ColorPair_Insert",
+        "fileName": "ColorPair_Insert.sql",
+        "operation": "Insert"
+      },
+      {
+        "name": "ColorPair_Update",
+        "fileName": "ColorPair_Update.sql",
+        "operation": "Update"
+      },
+      {
+        "name": "ColorPair_Delete",
+        "fileName": "ColorPair_Delete.sql",
+        "operation": "Delete"
+      },
+      {
+        "name": "ColorPair_GetAll",
+        "fileName": "ColorPair_GetAll.sql",
+        "operation": "GetAll (optional, for lookups)"
+      }
+    ],
+    "pattern": "public static string ColorPair_GetById => GetSqlText(\"ColorPair_GetById\");",
+    "notes": "All SQL files MUST be marked as embedded resources in .csproj"
+  },
+  "csprojConfiguration": {
+    "file": "src/BargeOps.API/src/Admin.Infrastructure/Admin.Infrastructure.csproj",
+    "embeddedResources": [
+      "<EmbeddedResource Include=\"DataAccess\\Sql\\ColorPair\\ColorPair_GetById.sql\" />",
+      "<EmbeddedResource Include=\"DataAccess\\Sql\\ColorPair\\ColorPair_Search.sql\" />",
+      "<EmbeddedResource Include=\"DataAccess\\Sql\\ColorPair\\ColorPair_Insert.sql\" />",
+      "<EmbeddedResource Include=\"DataAccess\\Sql\\ColorPair\\ColorPair_Update.sql\" />",
+      "<EmbeddedResource Include=\"DataAccess\\Sql\\ColorPair\\ColorPair_Delete.sql\" />",
+      "<EmbeddedResource Include=\"DataAccess\\Sql\\ColorPair\\ColorPair_GetAll.sql\" />"
+    ],
+    "pattern": "All SQL files in DataAccess/Sql/ColorPair/ folder must be marked as EmbeddedResource"
+  },
+  "implementationOrder": [
+    "1. Create DTOs: ColorPair.cs, ColorPairDto.cs, ColorPairSearchCriteria.cs in BargeOps.Shared/Dto",
+    "2. Create SQL files in DataAccess/Sql/ColorPair/ and mark as embedded resources in .csproj",
+    "3. Add properties to SqlText.cs for all SQL files",
+    "4. Create IColorPairRepository.cs interface in Admin.Infrastructure/Abstractions",
+    "5. Create ColorPairRepository.cs implementation in Admin.Infrastructure/Repositories",
+    "6. Create ColorConverter utility for hex <-> color name conversion",
+    "7. Test repository methods with unit tests",
+    "8. Register IColorPairRepository in DI container"
+  ],
+  "commonMistakes": [
+    "❌ Using inline SQL strings instead of embedded resource SQL files",
+    "❌ Not marking SQL files as EmbeddedResource in .csproj",
+    "❌ Not adding SqlText properties for new SQL files",
+    "❌ Forgetting to include both color name and hex in grid DTO",
+    "❌ Not implementing optimistic concurrency check in Update SQL",
+    "❌ Using soft delete (SetActive) when entity uses hard delete",
+    "❌ Not converting between color names and hex values",
+    "❌ Missing validation for '0' color value",
+    "❌ Not following Dapper pattern with IDbConnectionFactory",
+    "❌ Not throwing ConcurrencyException when ModifyDateTime doesn't match"
+  ],
+  "referenceImplementations": {
+    "primary": "BoatLocationRepository.cs - Complete CRUD with Dapper, ListQuery, embedded SQL",
+    "sqlFiles": "DataAccess/Sql/BoatLocation/*.sql - SQL file patterns and structure",
+    "dtoExample": "BoatLocationDto.cs - ListQuery attributes and property patterns",
+    "interfaceExample": "IBoatLocationRepository.cs - Repository interface structure"
+  },
+  "legacyFileReferences": {
+    "businessObject": "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\ColorPair.vb",
+    "businessObjectBase": "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\Base Classes\\ColorPairBase.vb",
+    "listClass": "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Lists\\ColorPairList.vb"
+  },
+  "notes": [
+    "ColorPair table has NO IsActive column - uses hard delete, not soft delete",
+    "Color values stored as System.Drawing.Color names (strings), not hex or RGB",
+    "Legacy uses System.Drawing.Color.FromName() to convert string to Color object (ColorPairList.vb:82-83)",
+    "Modern web UI must convert between color names (storage) and hex (display)",
+    "FleetID is required and filters the color pairs list",
+    "Special validation prevents TextColor and BackColor from being '0' or empty (ColorPair.vb:46-53)",
+    "Optimistic concurrency via ModifyDateTime - include in UPDATE WHERE clause",
+    "ListQuery pattern for DataTables server-side processing - follow BoatLocation pattern",
+    "All SQL files MUST be embedded resources loaded via SqlText.GetSqlText()",
+    "Repository pattern uses IDbConnectionFactory and Dapper for data access",
+    "Grid DTO should include both color name and hex for easy rendering",
+    "Entity name is 'BargeTokenColors' in UI but table name is 'ColorPair' in database",
+    "DisplayMember='Name', ValueMember='ColorPairID' from ColorPairList.vb:50-51",
+    "Legacy stored procedures: ColorPairSelect, ColorPairList, ColorPairInsert, ColorPairUpdate, ColorPairDelete",
+    "Max lengths: Name=50, TextColor=50, BackColor=50 (ColorPairBase.vb:323-325)"
+  ]
+}

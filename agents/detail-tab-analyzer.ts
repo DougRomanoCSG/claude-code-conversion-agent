@@ -21,6 +21,7 @@ const mcpJson = JSON.stringify(tabMcp);
 
 async function main() {
 	const entity = parsedArgs.values.entity as string;
+	const formName = parsedArgs.values["form-name"] as string;
 	const interactive = parsedArgs.values.interactive === true;
 	const outputDir = parsedArgs.values.output as string;
 
@@ -32,11 +33,12 @@ async function main() {
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
 
 	// Build context-specific prompt with entity details and paths
+	const targetFormLabel = formName || `frm${entity}Detail`;
 	const contextPrompt = `
-TASK: Extract tab structure for ${entity}Detail form.
+TASK: Extract tab structure for ${targetFormLabel}.
 
 EXTRACTION GOALS:
-1. Parse tab definitions from Designer file
+1. Parse tab definitions from Designer file (if present)
 2. Extract controls per tab
 3. Identify related entity grids
 4. Extract toolbar button configurations
@@ -44,6 +46,9 @@ EXTRACTION GOALS:
 
 OUTPUT:
 Generate a JSON file at: ${outputPath}/tabs.json
+
+IMPORTANT:
+- If the form has no tabs, still generate tabs.json with an empty tab list and note that it is a single-screen (no-tab) layout.
 
 Begin analysis.
 `;

@@ -1,0 +1,453 @@
+{
+  "entity": "BargePositions",
+  "legacy": {
+    "formName": "frmBargePositions",
+    "subsystem": "frmBargeSearch",
+    "inheritsFrom": "frmBaseDetailEdit",
+    "securityButtons": [
+      {
+        "button": "btnRefresh",
+        "type": "Action",
+        "legacyPermission": "Action",
+        "description": "Refresh the barge positions display"
+      },
+      {
+        "button": "btnSet",
+        "type": "CancelEdit",
+        "legacyPermission": "CancelEdit",
+        "description": "Set/save barge positions"
+      },
+      {
+        "button": "btnClose",
+        "type": "CancelEdit",
+        "legacyPermission": "CancelEdit",
+        "description": "Close the form"
+      }
+    ],
+    "toolbarButtons": [
+      {
+        "button": "Define Color Legend",
+        "key": "c_BtnKeyDefineColorLegend",
+        "type": "Modify",
+        "legacyPermission": "Modify",
+        "description": "Define color legend for barge tokens",
+        "usesToolbarButtonCanBeEnabled": true
+      },
+      {
+        "button": "Set Color",
+        "key": "c_BtnKeySetColor",
+        "type": "Modify",
+        "legacyPermission": "Modify",
+        "description": "Set color for barge tokens",
+        "usesToolbarButtonCanBeEnabled": true,
+        "enabledConditions": [
+          "Not in event mode",
+          "Barge is selected",
+          "User has Modify permission"
+        ]
+      },
+      {
+        "button": "Set Note",
+        "key": "c_BtnKeySetNote",
+        "type": "Modify",
+        "legacyPermission": "Modify",
+        "description": "Set note for barge token",
+        "usesToolbarButtonCanBeEnabled": true,
+        "enabledConditions": [
+          "Not in event mode",
+          "Barge is selected",
+          "User has Modify permission"
+        ]
+      },
+      {
+        "button": "Flip Barge",
+        "key": "c_BtnKeyFlipBarge",
+        "type": "Modify",
+        "legacyPermission": "Modify",
+        "description": "Flip barge orientation"
+      },
+      {
+        "button": "Flip Tow",
+        "key": "c_BtnKeyFlipTow",
+        "type": "Modify",
+        "legacyPermission": "Modify",
+        "description": "Flip entire tow orientation"
+      },
+      {
+        "button": "Drop Tow",
+        "key": "c_BtnKeyDropTow",
+        "type": "Modify",
+        "legacyPermission": "Modify",
+        "description": "Drop tow at location"
+      },
+      {
+        "button": "Show Tow Diagram",
+        "key": "c_BtnKeyShowTowDiagram",
+        "type": "Action",
+        "legacyPermission": "View",
+        "description": "Display tow diagram"
+      },
+      {
+        "button": "Send Tow Diagram",
+        "key": "c_BtnKeySendTowDiagram",
+        "type": "Modify",
+        "legacyPermission": "Modify",
+        "description": "Send tow diagram to external system"
+      },
+      {
+        "button": "Arrive/Depart Ship",
+        "key": "c_BtnKeyArriveDepartShip",
+        "type": "Modify",
+        "legacyPermission": "Modify",
+        "description": "Record ship arrival or departure"
+      },
+      {
+        "button": "Set Anchor Wire",
+        "key": "c_BtnKeySetAnchorWire",
+        "type": "Modify",
+        "legacyPermission": "Modify",
+        "description": "Set anchor wire for barge"
+      },
+      {
+        "button": "View Conflicts",
+        "key": "c_BtnKeyViewConflicts",
+        "type": "Action",
+        "legacyPermission": "View",
+        "description": "View barge position conflicts"
+      },
+      {
+        "button": "History",
+        "key": "c_BtnKeyHistory",
+        "type": "Action",
+        "legacyPermission": "View",
+        "description": "View barge position history"
+      }
+    ],
+    "licenseFeatures": [
+      {
+        "license": "Onboard",
+        "component": "LicenseComponent.Onboard",
+        "description": "Enables onboard-specific features",
+        "variable": "isOnboardMode",
+        "affectedFeatures": ["Onboard mode functionality"]
+      },
+      {
+        "license": "Terminal",
+        "component": "LicenseComponent.Terminal",
+        "description": "Enables terminal-specific features and labels",
+        "affectedFeatures": ["Terminal mode", "Arrive/Depart ship terminology"]
+      }
+    ],
+    "modes": [
+      {
+        "mode": "Workspace",
+        "description": "Normal workspace mode - barges can be moved freely",
+        "features": ["Move barges", "Refresh display", "Set colors", "Set notes"]
+      },
+      {
+        "mode": "InFleet",
+        "description": "View barges in fleet",
+        "features": ["View positions", "Set colors", "Set notes", "Flip barges"]
+      },
+      {
+        "mode": "AtFacilityShip",
+        "description": "View barges at facility or ship",
+        "features": ["View positions", "Set colors", "Set notes", "Flip barges"]
+      },
+      {
+        "mode": "MidstreamInUpdate",
+        "description": "Midstream-in update mode",
+        "features": ["Move barges", "Tow diagram", "Drop tow", "Flip tow", "Set colors"]
+      },
+      {
+        "mode": "MidstreamOutUpdate",
+        "description": "Midstream-out update mode",
+        "features": ["Move barges", "Set colors", "Set notes", "Flip barges"]
+      },
+      {
+        "mode": "TowDiagram",
+        "description": "Tow diagram view mode",
+        "features": ["View tow diagram"]
+      },
+      {
+        "mode": "EventMode",
+        "description": "Called from Barge Event - deferred save mode",
+        "specialBehavior": "Some barge movements not saved to DB until form closed",
+        "features": ["Move barges", "Cannot set colors/notes in event mode"]
+      }
+    ]
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/BargePositions",
+          "action": "GetBargePositions",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsView",
+          "description": "Get current barge positions for a fleet/location"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargePositions/{id}",
+          "action": "GetBargePosition",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsView",
+          "description": "Get specific barge position details"
+        },
+        {
+          "method": "POST",
+          "route": "api/BargePositions/move",
+          "action": "MoveBarges",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsModify",
+          "description": "Move barges to new positions"
+        },
+        {
+          "method": "PUT",
+          "route": "api/BargePositions/{id}/color",
+          "action": "SetBargeColor",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsModify",
+          "description": "Set color for a barge token"
+        },
+        {
+          "method": "PUT",
+          "route": "api/BargePositions/{id}/note",
+          "action": "SetBargeNote",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsModify",
+          "description": "Set note for a barge"
+        },
+        {
+          "method": "PUT",
+          "route": "api/BargePositions/{id}/flip",
+          "action": "FlipBarge",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsModify",
+          "description": "Flip barge orientation"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargePositions/conflicts",
+          "action": "GetConflicts",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsView",
+          "description": "Get barge position conflicts"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargePositions/history",
+          "action": "GetHistory",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsView",
+          "description": "Get barge position history"
+        },
+        {
+          "method": "POST",
+          "route": "api/BargePositions/tow/drop",
+          "action": "DropTow",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsModify",
+          "description": "Drop tow at location"
+        },
+        {
+          "method": "PUT",
+          "route": "api/BargePositions/tow/flip",
+          "action": "FlipTow",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargePositionsModify",
+          "description": "Flip entire tow"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "permissions": [
+        {
+          "name": "BargePositionsView",
+          "enumValue": "AuthPermissions.BargePositionsView",
+          "description": "View barge positions, conflicts, and history",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "GetBargePositions",
+            "ViewConflicts",
+            "ViewHistory",
+            "ViewTowDiagram"
+          ]
+        },
+        {
+          "name": "BargePositionsModify",
+          "enumValue": "AuthPermissions.BargePositionsModify",
+          "description": "Move barges, set colors/notes, flip barges/tows, manage positions",
+          "granularity": "Modify",
+          "requiredFor": [
+            "MoveBarges",
+            "SetBargeColor",
+            "SetBargeNote",
+            "FlipBarge",
+            "FlipTow",
+            "DropTow",
+            "SetAnchorWire",
+            "SendTowDiagram",
+            "ArriveShip",
+            "DepartShip",
+            "DefineColorLegend"
+          ]
+        }
+      ],
+      "featureFlags": [
+        {
+          "flag": "OnboardMode",
+          "description": "Enable onboard-specific features",
+          "mappedFrom": "LicenseList(Onboard).Active",
+          "affectedViews": ["Onboard workspace features"]
+        },
+        {
+          "flag": "TerminalMode",
+          "description": "Enable terminal-specific features and labels",
+          "mappedFrom": "LicenseList(Terminal).Active",
+          "affectedViews": ["Terminal labels", "Ship arrival/departure"]
+        }
+      ],
+      "controllers": [
+        {
+          "name": "BargePositionsController",
+          "route": "BargePositions",
+          "actions": [
+            {
+              "name": "Index",
+              "permission": "BargePositionsView",
+              "description": "Display barge positions workspace"
+            },
+            {
+              "name": "GetBargePositions",
+              "permission": "BargePositionsView",
+              "description": "Get barge positions data"
+            },
+            {
+              "name": "MoveBarges",
+              "permission": "BargePositionsModify",
+              "description": "Move barges to new positions"
+            },
+            {
+              "name": "SetBargeColor",
+              "permission": "BargePositionsModify",
+              "description": "Set color for barge token"
+            },
+            {
+              "name": "SetBargeNote",
+              "permission": "BargePositionsModify",
+              "description": "Set note for barge"
+            },
+            {
+              "name": "FlipBarge",
+              "permission": "BargePositionsModify",
+              "description": "Flip barge orientation"
+            },
+            {
+              "name": "FlipTow",
+              "permission": "BargePositionsModify",
+              "description": "Flip entire tow"
+            },
+            {
+              "name": "DropTow",
+              "permission": "BargePositionsModify",
+              "description": "Drop tow at location"
+            },
+            {
+              "name": "ViewConflicts",
+              "permission": "BargePositionsView",
+              "description": "View barge position conflicts"
+            },
+            {
+              "name": "ViewHistory",
+              "permission": "BargePositionsView",
+              "description": "View barge position history"
+            },
+            {
+              "name": "DefineColorLegend",
+              "permission": "BargePositionsModify",
+              "description": "Define color legend for tokens"
+            },
+            {
+              "name": "SetAnchorWire",
+              "permission": "BargePositionsModify",
+              "description": "Set anchor wire for barge"
+            },
+            {
+              "name": "SendTowDiagram",
+              "permission": "BargePositionsModify",
+              "description": "Send tow diagram to external system"
+            },
+            {
+              "name": "ArriveShip",
+              "permission": "BargePositionsModify",
+              "description": "Record ship arrival"
+            },
+            {
+              "name": "DepartShip",
+              "permission": "BargePositionsModify",
+              "description": "Record ship departure"
+            }
+          ]
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BargePositionsView",
+          "description": "View barge positions, conflicts, and history"
+        },
+        {
+          "name": "BargePositionsModify",
+          "description": "Modify barge positions, colors, notes, and orientations"
+        }
+      ]
+    }
+  },
+  "implementationNotes": {
+    "complexSecurity": [
+      "Form has multiple modes (Workspace, InFleet, AtFacilityShip, MidstreamIn/Out, TowDiagram, EventMode) which affect button visibility and functionality",
+      "Event mode has special behavior where some changes are deferred and not saved to DB immediately",
+      "Toolbar buttons use custom security checking via ToolbarButtonCanBeEnabled method",
+      "Set Color and Set Note buttons are disabled in event mode even with proper permissions",
+      "License-based features control onboard vs terminal mode behavior"
+    ],
+    "specialBehavior": [
+      "Form can be called modally from frmBargeEvent with deferred save behavior",
+      "In event mode, movements of barges tied to the event are not saved until form closes",
+      "Non-event barge movements are saved immediately even in event mode",
+      "Conflict monitoring via timer (tmrBargeConflicts) every 60 seconds",
+      "Auto-refresh via timer (tmrBargePositions) every 30 seconds",
+      "Background workers for retrieving barge and workspace data asynchronously"
+    ],
+    "uiPermissionControl": [
+      "Buttons should be hidden/disabled based on permissions using ViewModels",
+      "JavaScript should check permissions before enabling drag-and-drop",
+      "Color/Note buttons require both permission AND not being in event mode",
+      "Define Color Legend button uses ToolbarButtonCanBeEnabled pattern"
+    ],
+    "apiSecurity": [
+      "All API endpoints must use [ApiKey] attribute",
+      "Future CSG Authorization integration will add permission checks",
+      "Move operations should validate permission before executing",
+      "Color/Note operations should check if in event mode context"
+    ],
+    "migrationConsiderations": [
+      "Complex UI with grid-based barge positioning may need modern canvas/grid component",
+      "Drag-and-drop functionality needs to respect permissions",
+      "Multiple toolbar managers (Main, TierGroup) should consolidate into single modern UI",
+      "Event mode deferred save pattern should be preserved",
+      "Background refresh and conflict checking should use SignalR or polling"
+    ]
+  }
+}

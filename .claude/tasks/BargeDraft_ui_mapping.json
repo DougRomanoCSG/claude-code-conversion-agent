@@ -1,0 +1,481 @@
+{
+  "entity": "BargeDraft",
+  "description": "UI component mapping for barge draft measurements and draft survey calculations",
+  "controlMappings": [
+    {
+      "legacyControl": "UltraTextEditor (Numeric)",
+      "modernEquivalent": "Bootstrap Number Input",
+      "html": "<input type=\"number\" class=\"form-control\" step=\"0.001\" min=\"0\" max=\"99.999\" />",
+      "usage": "Draft decimal values (feet), tonnage values",
+      "validation": "jquery.validate with range and step validation"
+    },
+    {
+      "legacyControl": "UltraTextEditor (Feet/Inches Split)",
+      "modernEquivalent": "Bootstrap Number Inputs (Separate)",
+      "html": "<div class=\"row\">\n  <div class=\"col-md-6\">\n    <label class=\"form-label\">Feet</label>\n    <input type=\"number\" class=\"form-control\" min=\"0\" max=\"99\" />\n  </div>\n  <div class=\"col-md-6\">\n    <label class=\"form-label\">Inches</label>\n    <input type=\"number\" class=\"form-control\" min=\"0\" max=\"11\" />\n  </div>\n</div>",
+      "usage": "Draft measurements with feet and inches display",
+      "validation": "Feet: 0-99, Inches: 0-11",
+      "javascript": "// Convert between decimal and feet/inches\nfunction convertToFeetInches(decimal) {\n  var feet = Math.floor(decimal);\n  var inches = Math.round((decimal - feet) * 12);\n  return { feet: feet, inches: inches };\n}\n\nfunction convertToDecimal(feet, inches) {\n  return parseFloat(feet) + (parseFloat(inches) / 12);\n}"
+    },
+    {
+      "legacyControl": "UltraCheckEditor",
+      "modernEquivalent": "Bootstrap Checkbox",
+      "html": "<div class=\"form-check\">\n  <input type=\"checkbox\" class=\"form-check-input\" id=\"cbActive\" />\n  <label class=\"form-check-label\" for=\"cbActive\">Active</label>\n</div>",
+      "usage": "IsVoidOnLoad, Active flags"
+    },
+    {
+      "legacyControl": "UltraComboEditor (BargeSeries)",
+      "modernEquivalent": "Select2 Dropdown",
+      "html": "<select class=\"form-select\" data-select2=\"true\" id=\"BargeSeriesId\">\n  <option value=\"\">-- Select Barge Series --</option>\n</select>",
+      "javascript": "$('#BargeSeriesId').select2({\n  placeholder: '-- Select Barge Series --',\n  allowClear: true,\n  ajax: {\n    url: '/api/bargeseries',\n    dataType: 'json'\n  }\n});",
+      "usage": "BargeSeries lookup for draft/tonnage tables"
+    },
+    {
+      "legacyControl": "UltraComboEditor (LoadStatus)",
+      "modernEquivalent": "Select2 Dropdown",
+      "html": "<select class=\"form-select\" data-select2=\"true\" id=\"LoadStatus\">\n  <option value=\"\">-- Select Load Status --</option>\n  <option value=\"Empty\">Empty</option>\n  <option value=\"Load\">Load</option>\n  <option value=\"PartLoad\">Part Load</option>\n</select>",
+      "javascript": "$('#LoadStatus').select2({\n  placeholder: '-- Select Load Status --',\n  allowClear: false\n});",
+      "usage": "Load status selection (affects tonnage calculations)"
+    },
+    {
+      "legacyControl": "UltraPanel (Four Corner Drafts)",
+      "modernEquivalent": "Bootstrap Card with Grid Layout",
+      "html": "<div class=\"card mb-3\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">\n      <i class=\"fas fa-ruler-combined\"></i> Draft Measurements\n    </h5>\n  </div>\n  <div class=\"card-body\">\n    <div class=\"row\">\n      <!-- Port Bow -->\n      <div class=\"col-md-6 mb-3\">\n        <label class=\"form-label\">Port Bow</label>\n        <div class=\"row\">\n          <div class=\"col-md-6\">\n            <input type=\"number\" id=\"draftPortBowFeet\" class=\"form-control\" placeholder=\"Feet\" min=\"0\" max=\"99\" />\n          </div>\n          <div class=\"col-md-6\">\n            <input type=\"number\" id=\"draftPortBowInches\" class=\"form-control\" placeholder=\"Inches\" min=\"0\" max=\"11\" />\n          </div>\n        </div>\n      </div>\n      <!-- Starboard Bow -->\n      <div class=\"col-md-6 mb-3\">\n        <label class=\"form-label\">Starboard Bow</label>\n        <div class=\"row\">\n          <div class=\"col-md-6\">\n            <input type=\"number\" id=\"draftStarboardBowFeet\" class=\"form-control\" placeholder=\"Feet\" min=\"0\" max=\"99\" />\n          </div>\n          <div class=\"col-md-6\">\n            <input type=\"number\" id=\"draftStarboardBowInches\" class=\"form-control\" placeholder=\"Inches\" min=\"0\" max=\"11\" />\n          </div>\n        </div>\n      </div>\n    </div>\n    <div class=\"row\">\n      <!-- Port Stern -->\n      <div class=\"col-md-6 mb-3\">\n        <label class=\"form-label\">Port Stern</label>\n        <div class=\"row\">\n          <div class=\"col-md-6\">\n            <input type=\"number\" id=\"draftPortSternFeet\" class=\"form-control\" placeholder=\"Feet\" min=\"0\" max=\"99\" />\n          </div>\n          <div class=\"col-md-6\">\n            <input type=\"number\" id=\"draftPortSternInches\" class=\"form-control\" placeholder=\"Inches\" min=\"0\" max=\"11\" />\n          </div>\n        </div>\n      </div>\n      <!-- Starboard Stern -->\n      <div class=\"col-md-6 mb-3\">\n        <label class=\"form-label\">Starboard Stern</label>\n        <div class=\"row\">\n          <div class=\"col-md-6\">\n            <input type=\"number\" id=\"draftStarboardSternFeet\" class=\"form-control\" placeholder=\"Feet\" min=\"0\" max=\"99\" />\n          </div>\n          <div class=\"col-md-6\">\n            <input type=\"number\" id=\"draftStarboardSternInches\" class=\"form-control\" placeholder=\"Inches\" min=\"0\" max=\"11\" />\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>",
+      "usage": "Four corner draft measurements group",
+      "accessibility": "Proper label associations, aria-labels for screen readers"
+    },
+    {
+      "legacyControl": "UltraPanel (Calculated Fields - Draft Survey)",
+      "modernEquivalent": "Bootstrap Card with Read-Only Display",
+      "html": "<div class=\"card mb-3\" id=\"draftSurveyPanel\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">\n      <i class=\"fas fa-calculator\"></i> Draft Survey Calculations\n    </h5>\n  </div>\n  <div class=\"card-body\">\n    <div class=\"row\">\n      <div class=\"col-md-6 mb-3\">\n        <label class=\"form-label\">Average Draft</label>\n        <input type=\"text\" id=\"draftAverage\" class=\"form-control\" readonly />\n      </div>\n      <div class=\"col-md-6 mb-3\">\n        <label class=\"form-label\">Maximum Draft</label>\n        <input type=\"text\" id=\"draft\" class=\"form-control\" readonly />\n      </div>\n    </div>\n    <div class=\"row\">\n      <div class=\"col-md-4 mb-3\">\n        <label class=\"form-label\">Estimated Cargo Deadweight (tons)</label>\n        <input type=\"text\" id=\"estimatedCargoDeadweight\" class=\"form-control\" readonly />\n      </div>\n      <div class=\"col-md-4 mb-3\">\n        <label class=\"form-label\">Lightship Correction (tons)</label>\n        <input type=\"text\" id=\"lightshipCorrection\" class=\"form-control\" readonly />\n      </div>\n      <div class=\"col-md-4 mb-3\">\n        <label class=\"form-label\">Adjustment Tons</label>\n        <input type=\"number\" id=\"adjustmentTons\" class=\"form-control\" step=\"0.01\" />\n      </div>\n    </div>\n    <div class=\"row\">\n      <div class=\"col-md-6 mb-3\">\n        <label class=\"form-label fw-bold\">Load/Unload Tons</label>\n        <input type=\"text\" id=\"loadUnloadTons\" class=\"form-control fw-bold\" readonly />\n      </div>\n    </div>\n  </div>\n</div>",
+      "usage": "Draft survey calculation results (conditional visibility based on EventType)",
+      "javascript": "// Show/hide based on event type\nif (eventType === 'DraftSurvey') {\n  $('#draftSurveyPanel').show();\n} else {\n  $('#draftSurveyPanel').hide();\n}"
+    },
+    {
+      "legacyControl": "UltraGrid (Prior Draft Surveys)",
+      "modernEquivalent": "DataTables with Server-Side Processing",
+      "html": "<div class=\"card mb-3\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">\n      <i class=\"fas fa-history\"></i> Prior Draft Surveys\n    </h5>\n  </div>\n  <div class=\"card-body\">\n    <div class=\"table-responsive\">\n      <table id=\"priorDraftSurveysTable\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\">\n        <thead>\n          <tr>\n            <th>Date/Time</th>\n            <th>Load Status</th>\n            <th>Avg Draft</th>\n            <th>Tonnage</th>\n            <th>Event Type</th>\n          </tr>\n        </thead>\n        <tbody></tbody>\n      </table>\n    </div>\n  </div>\n</div>",
+      "javascript": "$('#priorDraftSurveysTable').DataTable({\n  processing: true,\n  serverSide: true,\n  ajax: {\n    url: '/BargeDraft/PriorDraftSurveys',\n    type: 'POST',\n    data: function(d) {\n      d.ticketId = $('#TicketId').val();\n    }\n  },\n  columns: [\n    { data: 'completeDateTime', render: function(data) { return moment(data).format('MM/DD/YYYY HH:mm'); } },\n    { data: 'loadStatus' },\n    { data: 'draftAverage', render: function(data) { return parseFloat(data).toFixed(3); } },\n    { data: 'tonnage', render: function(data) { return parseFloat(data).toFixed(2); } },\n    { data: 'eventType' }\n  ],\n  order: [[0, 'desc']],\n  pageLength: 10\n});",
+      "usage": "Display historical draft survey events for reference"
+    },
+    {
+      "legacyControl": "UltraTabControl",
+      "modernEquivalent": "Bootstrap Nav Tabs",
+      "html": "<ul class=\"nav nav-tabs\" id=\"draftTabs\" role=\"tablist\">\n  <li class=\"nav-item\" role=\"presentation\">\n    <button class=\"nav-link active\" id=\"draft-tab\" data-bs-toggle=\"tab\" data-bs-target=\"#draft-panel\" type=\"button\" role=\"tab\">Draft Measurements</button>\n  </li>\n  <li class=\"nav-item\" role=\"presentation\">\n    <button class=\"nav-link\" id=\"survey-tab\" data-bs-toggle=\"tab\" data-bs-target=\"#survey-panel\" type=\"button\" role=\"tab\">Draft Survey</button>\n  </li>\n  <li class=\"nav-item\" role=\"presentation\">\n    <button class=\"nav-link\" id=\"history-tab\" data-bs-toggle=\"tab\" data-bs-target=\"#history-panel\" type=\"button\" role=\"tab\">History</button>\n  </li>\n</ul>\n<div class=\"tab-content\" id=\"draftTabContent\">\n  <div class=\"tab-pane fade show active\" id=\"draft-panel\" role=\"tabpanel\">...</div>\n  <div class=\"tab-pane fade\" id=\"survey-panel\" role=\"tabpanel\">...</div>\n  <div class=\"tab-pane fade\" id=\"history-panel\" role=\"tabpanel\">...</div>\n</div>",
+      "usage": "Organize draft measurements, survey calculations, and history into tabs"
+    },
+    {
+      "legacyControl": "Button",
+      "modernEquivalent": "Bootstrap Button",
+      "html": "<button type=\"button\" id=\"btnCalculate\" class=\"btn btn-primary\">\n  <i class=\"fas fa-calculator\"></i> Calculate\n</button>\n<button type=\"button\" id=\"btnSave\" class=\"btn btn-success\">\n  <i class=\"fas fa-save\"></i> Save\n</button>\n<button type=\"button\" id=\"btnCancel\" class=\"btn btn-secondary\">\n  <i class=\"fas fa-times\"></i> Cancel\n</button>",
+      "usage": "Action buttons for calculate, save, cancel operations"
+    }
+  ],
+  "formPatterns": {
+    "searchForm": {
+      "layout": "Bootstrap card with form-control inputs",
+      "controls": [
+        "Barge Name (text input)",
+        "Barge Series (Select2 dropdown)",
+        "Event Type (Select2 dropdown)",
+        "Load Status (Select2 dropdown)",
+        "Date Range (date inputs)",
+        "Active Only (checkbox)"
+      ],
+      "submitButton": "btn btn-primary with search icon",
+      "resetButton": "btn btn-secondary with undo icon"
+    },
+    "editForm": {
+      "layout": "Bootstrap cards with tab navigation",
+      "sections": [
+        {
+          "name": "Draft Measurements",
+          "controls": "Four corner draft inputs (feet/inches split)",
+          "validation": "Range validation, maximum draft validation"
+        },
+        {
+          "name": "Draft Survey",
+          "controls": "Average draft (readonly), calculated tonnage fields (readonly), adjustment tons (editable)",
+          "visibility": "Conditional on EventType == DraftSurvey",
+          "calculations": "Client-side recalculation on field changes"
+        },
+        {
+          "name": "Configuration",
+          "controls": "BargeSeries (Select2), LoadStatus (Select2), EventType (Select2)"
+        }
+      ]
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "serverSide": true,
+      "responsive": true,
+      "features": [
+        "Sorting",
+        "Filtering",
+        "Pagination",
+        "Column visibility toggle",
+        "Export (CSV, Excel, PDF)"
+      ],
+      "actions": "Edit button in actions column"
+    }
+  },
+  "javascriptPatterns": {
+    "draftCalculations": {
+      "file": "bargeDraftEdit.js",
+      "functions": [
+        {
+          "name": "convertToFeetInches",
+          "purpose": "Convert decimal feet to feet and inches",
+          "code": "function convertToFeetInches(decimal) {\n  if (!decimal) return { feet: 0, inches: 0 };\n  var feet = Math.floor(decimal);\n  var inches = Math.round((decimal - feet) * 12);\n  return { feet: feet, inches: inches };\n}"
+        },
+        {
+          "name": "convertToDecimal",
+          "purpose": "Convert feet and inches to decimal feet",
+          "code": "function convertToDecimal(feet, inches) {\n  var f = parseFloat(feet) || 0;\n  var i = parseFloat(inches) || 0;\n  return f + (i / 12);\n}"
+        },
+        {
+          "name": "calculateMaxDraft",
+          "purpose": "Calculate maximum of four corner drafts",
+          "code": "function calculateMaxDraft() {\n  var portBow = convertToDecimal($('#draftPortBowFeet').val(), $('#draftPortBowInches').val());\n  var starboardBow = convertToDecimal($('#draftStarboardBowFeet').val(), $('#draftStarboardBowInches').val());\n  var portStern = convertToDecimal($('#draftPortSternFeet').val(), $('#draftPortSternInches').val());\n  var starboardStern = convertToDecimal($('#draftStarboardSternFeet').val(), $('#draftStarboardSternInches').val());\n  return Math.max(portBow, starboardBow, portStern, starboardStern);\n}"
+        },
+        {
+          "name": "calculateAverageDraft",
+          "purpose": "Calculate average of four corner drafts, rounded to nearest inch",
+          "code": "function calculateAverageDraft() {\n  var portBow = convertToDecimal($('#draftPortBowFeet').val(), $('#draftPortBowInches').val());\n  var starboardBow = convertToDecimal($('#draftStarboardBowFeet').val(), $('#draftStarboardBowInches').val());\n  var portStern = convertToDecimal($('#draftPortSternFeet').val(), $('#draftPortSternInches').val());\n  var starboardStern = convertToDecimal($('#draftStarboardSternFeet').val(), $('#draftStarboardSternInches').val());\n  \n  var totalInches = (portBow + starboardBow + portStern + starboardStern) * 12;\n  var avgInches = Math.round(totalInches / 4);\n  var avgFeet = avgInches / 12;\n  return avgFeet.toFixed(3);\n}"
+        },
+        {
+          "name": "calculateTonnage",
+          "purpose": "Calculate tonnage from average draft using AJAX call to server",
+          "code": "function calculateTonnage() {\n  var avgDraft = calculateAverageDraft();\n  var bargeSeriesId = $('#BargeSeriesId').val();\n  var loadStatus = $('#LoadStatus').val();\n  \n  $.ajax({\n    url: '/BargeDraft/CalculateTonnage',\n    type: 'POST',\n    data: {\n      averageDraft: avgDraft,\n      bargeSeriesId: bargeSeriesId,\n      loadStatus: loadStatus,\n      eventType: $('#EventType').val()\n    },\n    success: function(result) {\n      $('#estimatedCargoDeadweight').val(result.estimatedCargoDeadweight);\n      $('#lightshipCorrection').val(result.lightshipCorrection);\n      calculateLoadUnloadTons();\n    }\n  });\n}"
+        },
+        {
+          "name": "calculateLoadUnloadTons",
+          "purpose": "Calculate final load/unload tonnage",
+          "code": "function calculateLoadUnloadTons() {\n  var cargo = parseFloat($('#estimatedCargoDeadweight').val()) || 0;\n  var lightship = parseFloat($('#lightshipCorrection').val()) || 0;\n  var adjustment = parseFloat($('#adjustmentTons').val()) || 0;\n  var loadUnload = cargo - lightship + adjustment;\n  $('#loadUnloadTons').val(loadUnload.toFixed(2));\n}"
+        },
+        {
+          "name": "initializeDraftFields",
+          "purpose": "Initialize form fields on page load",
+          "code": "function initializeDraftFields() {\n  // Attach change handlers to draft inputs\n  $('#draftPortBowFeet, #draftPortBowInches, #draftStarboardBowFeet, #draftStarboardBowInches, #draftPortSternFeet, #draftPortSternInches, #draftStarboardSternFeet, #draftStarboardSternInches').on('change', function() {\n    var maxDraft = calculateMaxDraft();\n    var maxFeetInches = convertToFeetInches(maxDraft);\n    $('#draftFeet').val(maxFeetInches.feet);\n    $('#draftInches').val(maxFeetInches.inches);\n    \n    if ($('#EventType').val() === 'DraftSurvey') {\n      var avgDraft = calculateAverageDraft();\n      var avgFeetInches = convertToFeetInches(parseFloat(avgDraft));\n      $('#draftAverageFeet').val(avgFeetInches.feet);\n      $('#draftAverageInches').val(avgFeetInches.inches);\n      calculateTonnage();\n    }\n  });\n  \n  // Adjustment tons change handler\n  $('#adjustmentTons').on('change', function() {\n    calculateLoadUnloadTons();\n  });\n  \n  // Event type change handler\n  $('#EventType').on('change', function() {\n    if ($(this).val() === 'DraftSurvey') {\n      $('#draftSurveyPanel').show();\n    } else {\n      $('#draftSurveyPanel').hide();\n    }\n  });\n}"
+        }
+      ]
+    },
+    "validation": {
+      "library": "jquery.validate",
+      "rules": {
+        "draftPortBowFeet": {
+          "min": 0,
+          "max": 99
+        },
+        "draftPortBowInches": {
+          "min": 0,
+          "max": 11
+        },
+        "draftStarboardBowFeet": {
+          "min": 0,
+          "max": 99
+        },
+        "draftStarboardBowInches": {
+          "min": 0,
+          "max": 11
+        },
+        "draftPortSternFeet": {
+          "min": 0,
+          "max": 99
+        },
+        "draftPortSternInches": {
+          "min": 0,
+          "max": 11
+        },
+        "draftStarboardSternFeet": {
+          "min": 0,
+          "max": 99
+        },
+        "draftStarboardSternInches": {
+          "min": 0,
+          "max": 11
+        },
+        "adjustmentTons": {
+          "number": true
+        }
+      },
+      "customValidation": [
+        {
+          "rule": "maxDraftGreaterThanCorners",
+          "code": "$.validator.addMethod('maxDraftValid', function(value, element) {\n  var maxDraft = calculateMaxDraft();\n  var draftFeet = parseFloat($('#draftFeet').val()) || 0;\n  var draftInches = parseFloat($('#draftInches').val()) || 0;\n  var draft = convertToDecimal(draftFeet, draftInches);\n  return draft >= maxDraft;\n}, 'Overall draft must be >= the highest corner draft');"
+        }
+      ]
+    },
+    "select2Initialization": {
+      "code": "$(function() {\n  // Initialize Select2 on all select elements with data-select2 attribute\n  $('[data-select2=\"true\"]').each(function() {\n    var $this = $(this);\n    var placeholder = $this.data('placeholder') || $this.find('option:first').text();\n    $this.select2({\n      placeholder: placeholder,\n      allowClear: true,\n      width: '100%'\n    });\n  });\n});"
+    },
+    "dataTablesInitialization": {
+      "file": "bargeDraftSearch.js",
+      "code": "$(document).ready(function() {\n  var dataTable = $('#bargeDraftTable').DataTable({\n    processing: true,\n    serverSide: true,\n    stateSave: true,\n    responsive: true,\n    ajax: {\n      url: '/BargeDraft/BargeDraftTable',\n      type: 'POST',\n      data: function(d) {\n        d.bargeName = $('#BargeName').val();\n        d.bargeSeriesId = $('#BargeSeriesId').val();\n        d.eventType = $('#EventType').val();\n        d.loadStatus = $('#LoadStatus').val();\n        d.startDate = $('#StartDate').val();\n        d.endDate = $('#EndDate').val();\n        d.activeOnly = $('#ActiveOnly').is(':checked');\n      }\n    },\n    columns: [\n      {\n        data: null,\n        name: 'actions',\n        orderable: false,\n        searchable: false,\n        render: function(data, type, row) {\n          return '<a href=\"/BargeDraft/Edit/' + row.draftId + '\" class=\"btn btn-sm btn-primary\"><i class=\"fas fa-edit\"></i></a>';\n        }\n      },\n      { data: 'bargeName', name: 'bargeName' },\n      { data: 'bargeSeriesId', name: 'bargeSeriesId' },\n      { data: 'eventType', name: 'eventType' },\n      { data: 'loadStatus', name: 'loadStatus' },\n      { \n        data: 'draftAverage',\n        name: 'draftAverage',\n        render: function(data) {\n          return data ? parseFloat(data).toFixed(3) : '';\n        }\n      },\n      {\n        data: 'loadUnloadTons',\n        name: 'loadUnloadTons',\n        render: function(data) {\n          return data ? parseFloat(data).toFixed(2) : '';\n        }\n      },\n      {\n        data: 'completeDateTime',\n        name: 'completeDateTime',\n        render: function(data) {\n          return data ? moment(data).format('MM/DD/YYYY HH:mm') : '';\n        }\n      }\n    ],\n    order: [[7, 'desc']],\n    pageLength: 25\n  });\n  \n  $('#btnSearch').click(function() {\n    dataTable.ajax.reload();\n  });\n  \n  $('#btnReset').click(function() {\n    $('#searchForm')[0].reset();\n    $('#BargeSeriesId').val('').trigger('change');\n    $('#EventType').val('').trigger('change');\n    $('#LoadStatus').val('').trigger('change');\n    dataTable.ajax.reload();\n  });\n});"
+    }
+  },
+  "stylingGuidance": {
+    "framework": "Bootstrap 5",
+    "colorScheme": {
+      "primary": "btn-primary for main actions (Calculate, Save)",
+      "secondary": "btn-secondary for cancel/reset",
+      "success": "btn-success for successful operations",
+      "info": "btn-info for informational actions",
+      "warning": "btn-warning for warnings",
+      "danger": "btn-danger for delete operations"
+    },
+    "spacing": {
+      "cards": "mb-3 (margin-bottom)",
+      "formGroups": "mb-3",
+      "rows": "row with col-md-* for responsive layout"
+    },
+    "customCSS": [
+      "/* Draft input groups */\n.draft-input-group {\n  display: flex;\n  gap: 0.5rem;\n}\n\n.draft-input-group input {\n  flex: 1;\n}",
+      "/* Readonly calculated fields */\ninput[readonly] {\n  background-color: #e9ecef;\n  cursor: not-allowed;\n}",
+      "/* Highlight calculated tonnage */\n#loadUnloadTons {\n  font-size: 1.1rem;\n  font-weight: bold;\n  background-color: #d1ecf1;\n  border-color: #bee5eb;\n}",
+      "/* Four corner draft layout */\n.draft-corners {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 1rem;\n}\n\n.draft-corner {\n  border: 1px solid #dee2e6;\n  padding: 1rem;\n  border-radius: 0.25rem;\n  background-color: #f8f9fa;\n}"
+    ]
+  },
+  "accessibilityConsiderations": [
+    "All form inputs have associated <label> elements with asp-for tag helper",
+    "Readonly fields have aria-readonly=\"true\" attribute",
+    "Required fields marked with aria-required=\"true\"",
+    "Validation errors displayed with aria-describedby linking to error messages",
+    "Tab navigation follows logical order: four corner drafts, calculated fields, actions",
+    "Select2 dropdowns maintain keyboard accessibility",
+    "DataTables grid supports keyboard navigation and screen readers",
+    "Icon buttons have title attributes for tooltips"
+  ],
+  "viewModelStructure": {
+    "namespace": "BargeOpsAdmin.ViewModels",
+    "searchViewModel": {
+      "name": "BargeDraftSearchViewModel",
+      "properties": [
+        "string BargeName",
+        "string BargeSeriesId",
+        "SelectList BargeSeries",
+        "string EventType",
+        "SelectList EventTypes",
+        "string LoadStatus",
+        "SelectList LoadStatuses",
+        "DateTime? StartDate",
+        "DateTime? EndDate",
+        "bool ActiveOnly"
+      ]
+    },
+    "editViewModel": {
+      "name": "BargeDraftEditViewModel",
+      "properties": [
+        "int DraftId",
+        "decimal? Draft",
+        "int? DraftFeet",
+        "int? DraftInches",
+        "decimal? DraftPortBow",
+        "int? DraftPortBowFeet",
+        "int? DraftPortBowInches",
+        "decimal? DraftStarboardBow",
+        "int? DraftStarboardBowFeet",
+        "int? DraftStarboardBowInches",
+        "decimal? DraftPortStern",
+        "int? DraftPortSternFeet",
+        "int? DraftPortSternInches",
+        "decimal? DraftStarboardStern",
+        "int? DraftStarboardSternFeet",
+        "int? DraftStarboardSternInches",
+        "decimal? DraftAverage",
+        "int? DraftAverageFeet",
+        "int? DraftAverageInches",
+        "decimal? EstimatedCargoDeadweight",
+        "decimal? LightshipCorrection",
+        "decimal? AdjustmentTons",
+        "decimal? LoadUnloadTons",
+        "string BargeSeriesId",
+        "SelectList BargeSeries",
+        "string EventType",
+        "SelectList EventTypes",
+        "string LoadStatus",
+        "SelectList LoadStatuses",
+        "bool IsVoidOnLoad",
+        "int TicketEventId"
+      ]
+    }
+  },
+  "controllerStructure": {
+    "namespace": "BargeOpsAdmin.Controllers",
+    "name": "BargeDraftController",
+    "baseClass": "AppController",
+    "actions": [
+      {
+        "name": "Index",
+        "returnType": "IActionResult",
+        "httpMethod": "GET",
+        "purpose": "Display search page"
+      },
+      {
+        "name": "BargeDraftTable",
+        "returnType": "IActionResult",
+        "httpMethod": "POST",
+        "purpose": "Server-side DataTables data source"
+      },
+      {
+        "name": "Create",
+        "returnType": "IActionResult",
+        "httpMethod": "GET",
+        "purpose": "Display create form"
+      },
+      {
+        "name": "Create",
+        "returnType": "IActionResult",
+        "httpMethod": "POST",
+        "purpose": "Handle create form submission"
+      },
+      {
+        "name": "Edit",
+        "returnType": "IActionResult",
+        "httpMethod": "GET",
+        "parameters": ["int id"],
+        "purpose": "Display edit form"
+      },
+      {
+        "name": "Edit",
+        "returnType": "IActionResult",
+        "httpMethod": "POST",
+        "purpose": "Handle edit form submission"
+      },
+      {
+        "name": "CalculateTonnage",
+        "returnType": "JsonResult",
+        "httpMethod": "POST",
+        "parameters": ["decimal averageDraft", "string bargeSeriesId", "string loadStatus", "string eventType"],
+        "purpose": "AJAX endpoint for tonnage calculation"
+      },
+      {
+        "name": "PriorDraftSurveys",
+        "returnType": "IActionResult",
+        "httpMethod": "POST",
+        "parameters": ["int ticketId"],
+        "purpose": "Server-side DataTables data source for prior surveys"
+      }
+    ]
+  },
+  "viewStructure": {
+    "path": "src/BargeOps.UI/Views/BargeDraft/",
+    "files": [
+      {
+        "name": "Index.cshtml",
+        "purpose": "Main search page",
+        "includes": [
+          "_Search.cshtml partial",
+          "_SearchResults.cshtml partial",
+          "bargeDraftSearch.js script"
+        ]
+      },
+      {
+        "name": "_Search.cshtml",
+        "purpose": "Search form partial",
+        "controls": [
+          "Barge Name input",
+          "Barge Series Select2",
+          "Event Type Select2",
+          "Load Status Select2",
+          "Date range inputs",
+          "Active Only checkbox",
+          "Search and Reset buttons"
+        ]
+      },
+      {
+        "name": "_SearchResults.cshtml",
+        "purpose": "DataTables grid container",
+        "structure": "Bootstrap card with table-responsive div containing table element"
+      },
+      {
+        "name": "Edit.cshtml",
+        "purpose": "Edit form with tabs",
+        "sections": [
+          "Draft Measurements tab (four corner drafts)",
+          "Draft Survey tab (calculations)",
+          "Configuration tab (barge series, event type, load status)",
+          "History tab (prior surveys grid)"
+        ]
+      },
+      {
+        "name": "_DraftMeasurements.cshtml",
+        "purpose": "Four corner draft inputs partial",
+        "layout": "Bootstrap card with 2x2 grid"
+      },
+      {
+        "name": "_DraftSurvey.cshtml",
+        "purpose": "Draft survey calculations partial",
+        "controls": [
+          "Average Draft (readonly)",
+          "Maximum Draft (readonly)",
+          "Estimated Cargo Deadweight (readonly)",
+          "Lightship Correction (readonly)",
+          "Adjustment Tons (editable)",
+          "Load/Unload Tons (readonly, highlighted)"
+        ]
+      },
+      {
+        "name": "_Configuration.cshtml",
+        "purpose": "Configuration fields partial",
+        "controls": [
+          "Barge Series Select2",
+          "Event Type Select2",
+          "Load Status Select2",
+          "Ticket Event reference"
+        ]
+      },
+      {
+        "name": "_BottomToolbar.cshtml",
+        "purpose": "Save, Cancel, Delete buttons"
+      }
+    ]
+  },
+  "technicalNotes": [
+    "Draft calculations use JavaScript for immediate feedback, but final calculations done server-side",
+    "BargeSeries draft tables loaded via AJAX to avoid large page payload",
+    "Tonnage interpolation requires server-side logic due to complexity",
+    "Prior draft survey lookup requires filtering non-voided events with opposing load status",
+    "Cover weight adjustment logic requires CoverType, CoverSubType, and CoverConfig data",
+    "All decimal calculations maintain 0.001 precision",
+    "Average draft rounding uses Math.round() for midpoint-away-from-zero behavior",
+    "Feet/inches conversion done both client-side (display) and server-side (persistence)",
+    "Conditional visibility of Draft Survey panel based on EventType selection",
+    "DataTables state saved to localStorage for user preference persistence"
+  ],
+  "commonMistakes": [
+    "❌ Not splitting draft into feet and inches for display",
+    "❌ Using standard rounding instead of midpoint-away-from-zero for average draft",
+    "❌ Not validating that maximum draft >= all corner drafts",
+    "❌ Forgetting to filter voided events from prior survey lookup",
+    "❌ Not adjusting tonnage for cover weight",
+    "❌ Using client-side only for complex tonnage calculations (must be server-side)",
+    "❌ Not maintaining 0.001 decimal precision in calculations",
+    "❌ Forgetting to show/hide Draft Survey panel based on EventType",
+    "❌ Not initializing Select2 on dynamically loaded selects"
+  ],
+  "implementationChecklist": [
+    "✓ Create ViewModel with all draft and tonnage properties",
+    "✓ Create Controller with CRUD actions and AJAX endpoints",
+    "✓ Create search form with Select2 dropdowns",
+    "✓ Create DataTables grid with server-side processing",
+    "✓ Create edit form with tabbed layout",
+    "✓ Implement four corner draft inputs with feet/inches split",
+    "✓ Implement draft calculations (max, average)",
+    "✓ Implement tonnage calculation AJAX endpoint",
+    "✓ Implement prior draft survey grid",
+    "✓ Add validation rules (range, max draft validation)",
+    "✓ Add conditional visibility for Draft Survey panel",
+    "✓ Add change handlers for auto-calculation",
+    "✓ Add Select2 initialization",
+    "✓ Add DataTables initialization with state save",
+    "✓ Test feet/inches to decimal conversion",
+    "✓ Test average draft rounding",
+    "✓ Test tonnage lookup with BargeSeries tables",
+    "✓ Test cover weight adjustment",
+    "✓ Test prior draft survey filtering",
+    "✓ Test form validation",
+    "✓ Test accessibility with screen reader",
+    "✓ Test responsive layout on mobile"
+  ]
+}
