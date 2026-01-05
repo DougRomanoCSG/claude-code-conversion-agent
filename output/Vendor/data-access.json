@@ -1,0 +1,1174 @@
+{
+  "entity": "Vendor",
+  "softDelete": false,
+  "hasIsActive": true,
+  "notes": "Vendor uses IsActive for filtering but not for soft delete pattern. Hard delete is appropriate based on VendorBase.vb:562 which references VendorDelete stored procedure.",
+  "storedProcedures": [
+    {
+      "name": "VendorSearch",
+      "operation": "Search",
+      "parameters": [
+        {
+          "name": "@Name",
+          "type": "varchar",
+          "required": false,
+          "description": "Vendor name search filter"
+        },
+        {
+          "name": "@AccountingCode",
+          "type": "varchar",
+          "required": false,
+          "description": "Accounting code search filter"
+        },
+        {
+          "name": "@IsBargeExEnabledOnly",
+          "type": "bit",
+          "required": true,
+          "description": "Filter to BargeEx enabled vendors only"
+        },
+        {
+          "name": "@IsActiveOnly",
+          "type": "bit",
+          "required": true,
+          "description": "Filter to active vendors only"
+        },
+        {
+          "name": "@EnablePortalOnly",
+          "type": "bit",
+          "required": true,
+          "description": "Filter to portal enabled vendors only"
+        },
+        {
+          "name": "@FuelSuppliersOnly",
+          "type": "bit",
+          "required": true,
+          "description": "Filter to fuel suppliers only"
+        },
+        {
+          "name": "@IsLiquidBrokerOnly",
+          "type": "bit",
+          "required": true,
+          "description": "Filter to liquid brokers only"
+        },
+        {
+          "name": "@IsInternalVendorOnly",
+          "type": "bit",
+          "required": true,
+          "description": "Filter to internal vendors only"
+        },
+        {
+          "name": "@IsTankermanOnly",
+          "type": "bit",
+          "required": true,
+          "description": "Filter to tankerman vendors only"
+        }
+      ],
+      "resultColumns": [
+        {
+          "column": "VendorID",
+          "property": "VendorID",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "column": "Name",
+          "property": "Name",
+          "type": "string",
+          "nullable": false,
+          "maxLength": 20
+        },
+        {
+          "column": "LongName",
+          "property": "LongName",
+          "type": "string",
+          "nullable": false,
+          "maxLength": 50
+        },
+        {
+          "column": "AccountingCode",
+          "property": "AccountingCode",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 20
+        },
+        {
+          "column": "IsBargeExEnabled",
+          "property": "IsBargeExEnabled",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "IsActive",
+          "property": "IsActive",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "EnablePortal",
+          "property": "EnablePortal",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "IsFuelSupplier",
+          "property": "IsFuelSupplier",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "IsBoatAssistSupplier",
+          "property": "IsBoatAssistSupplier",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "IsLiquidBroker",
+          "property": "IsLiquidBroker",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "IsInternalVendor",
+          "property": "IsInternalVendor",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "IsTankerman",
+          "property": "IsTankerman",
+          "type": "bool",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "VendorSelect",
+      "operation": "GetById",
+      "parameters": [
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true
+        }
+      ],
+      "resultColumns": [
+        {
+          "column": "VendorID",
+          "property": "VendorID",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "column": "Name",
+          "property": "Name",
+          "type": "string",
+          "nullable": false,
+          "maxLength": 20
+        },
+        {
+          "column": "LongName",
+          "property": "LongName",
+          "type": "string",
+          "nullable": false,
+          "maxLength": 50
+        },
+        {
+          "column": "AccountingCode",
+          "property": "AccountingCode",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 20
+        },
+        {
+          "column": "IsActive",
+          "property": "IsActive",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "EnablePortal",
+          "property": "EnablePortal",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "Address",
+          "property": "Address",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 80
+        },
+        {
+          "column": "City",
+          "property": "City",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 30
+        },
+        {
+          "column": "State",
+          "property": "State",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 2
+        },
+        {
+          "column": "Zip",
+          "property": "Zip",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 10
+        },
+        {
+          "column": "PhoneNumber",
+          "property": "PhoneNumber",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 10,
+          "formatting": "Phone10 format (xxx) xxx-xxxx"
+        },
+        {
+          "column": "FaxNumber",
+          "property": "FaxNumber",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 10,
+          "formatting": "Phone10 format (xxx) xxx-xxxx"
+        },
+        {
+          "column": "EmailAddress",
+          "property": "EmailAddress",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 100
+        },
+        {
+          "column": "IsBargeExEnabled",
+          "property": "IsBargeExEnabled",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "BargeExTradingPartnerNum",
+          "property": "BargeExTradingPartnerNum",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 8
+        },
+        {
+          "column": "BargeExConfigID",
+          "property": "BargeExConfigID",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "column": "IsLiquidBroker",
+          "property": "IsLiquidBroker",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "TermsCode",
+          "property": "TermsCode",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 8
+        },
+        {
+          "column": "IsInternalVendor",
+          "property": "IsInternalVendor",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "IsTankerman",
+          "property": "IsTankerman",
+          "type": "bool",
+          "nullable": false
+        }
+      ],
+      "returnsSets": true,
+      "resultSets": [
+        {
+          "name": "Vendor",
+          "description": "Primary vendor record"
+        },
+        {
+          "name": "VendorContacts",
+          "description": "Child contacts collection",
+          "procedure": "VendorContactsSelect"
+        }
+      ]
+    },
+    {
+      "name": "VendorInsert",
+      "operation": "Insert",
+      "parameters": [
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true,
+          "direction": "InputOutput",
+          "description": "Primary key, output on insert"
+        },
+        {
+          "name": "@Name",
+          "type": "varchar",
+          "required": true,
+          "maxLength": 20
+        },
+        {
+          "name": "@LongName",
+          "type": "varchar",
+          "required": true,
+          "maxLength": 50
+        },
+        {
+          "name": "@AccountingCode",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 20
+        },
+        {
+          "name": "@IsActive",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@EnablePortal",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@Address",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 80
+        },
+        {
+          "name": "@City",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 30
+        },
+        {
+          "name": "@State",
+          "type": "char",
+          "required": false,
+          "maxLength": 2
+        },
+        {
+          "name": "@Zip",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@PhoneNumber",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@FaxNumber",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@EmailAddress",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 100
+        },
+        {
+          "name": "@IsBargeExEnabled",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@BargeExTradingPartnerNum",
+          "type": "char",
+          "required": false,
+          "maxLength": 8
+        },
+        {
+          "name": "@BargeExConfigID",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@IsLiquidBroker",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@TermsCode",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 8
+        },
+        {
+          "name": "@IsInternalVendor",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@IsTankerman",
+          "type": "bit",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "VendorUpdate",
+      "operation": "Update",
+      "parameters": [
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@Name",
+          "type": "varchar",
+          "required": true,
+          "maxLength": 20
+        },
+        {
+          "name": "@LongName",
+          "type": "varchar",
+          "required": true,
+          "maxLength": 50
+        },
+        {
+          "name": "@AccountingCode",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 20
+        },
+        {
+          "name": "@IsActive",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@EnablePortal",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@Address",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 80
+        },
+        {
+          "name": "@City",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 30
+        },
+        {
+          "name": "@State",
+          "type": "char",
+          "required": false,
+          "maxLength": 2
+        },
+        {
+          "name": "@Zip",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@PhoneNumber",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@FaxNumber",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@EmailAddress",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 100
+        },
+        {
+          "name": "@IsBargeExEnabled",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@BargeExTradingPartnerNum",
+          "type": "char",
+          "required": false,
+          "maxLength": 8
+        },
+        {
+          "name": "@BargeExConfigID",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@IsLiquidBroker",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@TermsCode",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 8
+        },
+        {
+          "name": "@IsInternalVendor",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@IsTankerman",
+          "type": "bit",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "VendorDelete",
+      "operation": "Delete",
+      "parameters": [
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "VendorContactSelect",
+      "operation": "GetById",
+      "entity": "VendorContact",
+      "parameters": [
+        {
+          "name": "@VendorContactID",
+          "type": "int",
+          "required": true
+        }
+      ],
+      "resultColumns": [
+        {
+          "column": "VendorContactID",
+          "property": "VendorContactID",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "column": "VendorID",
+          "property": "VendorID",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "column": "Name",
+          "property": "Name",
+          "type": "string",
+          "nullable": false,
+          "maxLength": 80
+        },
+        {
+          "column": "PhoneNumber",
+          "property": "PhoneNumber",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 10,
+          "formatting": "Phone10 format"
+        },
+        {
+          "column": "PhoneExt",
+          "property": "PhoneExt",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 7
+        },
+        {
+          "column": "EmailAddress",
+          "property": "EmailAddress",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 100
+        },
+        {
+          "column": "FaxNumber",
+          "property": "FaxNumber",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 10,
+          "formatting": "Phone10 format"
+        },
+        {
+          "column": "IsPrimary",
+          "property": "IsPrimary",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "PortalUserID",
+          "property": "PortalUserID",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "column": "IsLiquidBroker",
+          "property": "IsLiquidBroker",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "IsDispatcher",
+          "property": "IsDispatcher",
+          "type": "bool",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "VendorContactsSelect",
+      "operation": "GetByParentId",
+      "entity": "VendorContact",
+      "parameters": [
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true,
+          "description": "Parent vendor ID"
+        }
+      ],
+      "resultColumns": [
+        {
+          "column": "VendorContactID",
+          "property": "VendorContactID",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "column": "VendorID",
+          "property": "VendorID",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "column": "Name",
+          "property": "Name",
+          "type": "string",
+          "nullable": false,
+          "maxLength": 80
+        },
+        {
+          "column": "PhoneNumber",
+          "property": "PhoneNumber",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 10
+        },
+        {
+          "column": "PhoneExt",
+          "property": "PhoneExt",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 7
+        },
+        {
+          "column": "EmailAddress",
+          "property": "EmailAddress",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 100
+        },
+        {
+          "column": "FaxNumber",
+          "property": "FaxNumber",
+          "type": "string",
+          "nullable": true,
+          "maxLength": 10
+        },
+        {
+          "column": "IsPrimary",
+          "property": "IsPrimary",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "PortalUserID",
+          "property": "PortalUserID",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "column": "IsLiquidBroker",
+          "property": "IsLiquidBroker",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "column": "IsDispatcher",
+          "property": "IsDispatcher",
+          "type": "bool",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "VendorContactInsert",
+      "operation": "Insert",
+      "entity": "VendorContact",
+      "parameters": [
+        {
+          "name": "@VendorContactID",
+          "type": "int",
+          "required": true,
+          "direction": "InputOutput"
+        },
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@Name",
+          "type": "varchar",
+          "required": true,
+          "maxLength": 80
+        },
+        {
+          "name": "@PhoneNumber",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@PhoneExt",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 7
+        },
+        {
+          "name": "@EmailAddress",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 100
+        },
+        {
+          "name": "@FaxNumber",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@IsPrimary",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@PortalUserID",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@IsLiquidBroker",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@IsDispatcher",
+          "type": "bit",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "VendorContactUpdate",
+      "operation": "Update",
+      "entity": "VendorContact",
+      "parameters": [
+        {
+          "name": "@VendorContactID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@Name",
+          "type": "varchar",
+          "required": true,
+          "maxLength": 80
+        },
+        {
+          "name": "@PhoneNumber",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@PhoneExt",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 7
+        },
+        {
+          "name": "@EmailAddress",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 100
+        },
+        {
+          "name": "@FaxNumber",
+          "type": "varchar",
+          "required": false,
+          "maxLength": 10
+        },
+        {
+          "name": "@IsPrimary",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@PortalUserID",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@IsLiquidBroker",
+          "type": "bit",
+          "required": true
+        },
+        {
+          "name": "@IsDispatcher",
+          "type": "bit",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "VendorContactDelete",
+      "operation": "Delete",
+      "entity": "VendorContact",
+      "parameters": [
+        {
+          "name": "@VendorContactID",
+          "type": "int",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "sqlFiles": [
+    {
+      "fileName": "Vendor_GetById.sql",
+      "operation": "GetById",
+      "description": "Fetch single vendor record by ID with child contacts",
+      "sourceStoredProc": "VendorSelect",
+      "notes": "Returns multiple result sets: Vendor record + VendorContacts collection"
+    },
+    {
+      "fileName": "Vendor_Search.sql",
+      "operation": "Search",
+      "description": "Search vendors with ListQuery filters for Name, AccountingCode, and boolean flags",
+      "sourceStoredProc": "VendorSearch",
+      "notes": "Multiple filter parameters for search functionality"
+    },
+    {
+      "fileName": "Vendor_Insert.sql",
+      "operation": "Insert",
+      "description": "Create new vendor record",
+      "sourceStoredProc": "VendorInsert",
+      "notes": "Returns SCOPE_IDENTITY() for new VendorID"
+    },
+    {
+      "fileName": "Vendor_Update.sql",
+      "operation": "Update",
+      "description": "Update existing vendor record",
+      "sourceStoredProc": "VendorUpdate"
+    },
+    {
+      "fileName": "Vendor_Delete.sql",
+      "operation": "Delete",
+      "description": "Hard delete vendor record",
+      "sourceStoredProc": "VendorDelete",
+      "notes": "This is a hard delete, NOT soft delete. IsActive is used for filtering only."
+    },
+    {
+      "fileName": "VendorContact_GetById.sql",
+      "operation": "GetById",
+      "description": "Fetch single vendor contact by ID",
+      "sourceStoredProc": "VendorContactSelect"
+    },
+    {
+      "fileName": "VendorContact_GetByVendorId.sql",
+      "operation": "GetByParentId",
+      "description": "Get all contacts for a vendor",
+      "sourceStoredProc": "VendorContactsSelect"
+    },
+    {
+      "fileName": "VendorContact_Insert.sql",
+      "operation": "Insert",
+      "description": "Create new vendor contact",
+      "sourceStoredProc": "VendorContactInsert"
+    },
+    {
+      "fileName": "VendorContact_Update.sql",
+      "operation": "Update",
+      "description": "Update existing vendor contact",
+      "sourceStoredProc": "VendorContactUpdate"
+    },
+    {
+      "fileName": "VendorContact_Delete.sql",
+      "operation": "Delete",
+      "description": "Delete vendor contact",
+      "sourceStoredProc": "VendorContactDelete"
+    }
+  ],
+  "repositoryInterface": {
+    "name": "IVendorRepository",
+    "namespace": "Admin.Infrastructure.Abstractions",
+    "location": "src/BargeOps.API/src/Admin.Infrastructure/Abstractions/",
+    "methods": [
+      {
+        "name": "GetByIdAsync",
+        "returnType": "Task<VendorDto>",
+        "parameters": [
+          "int id",
+          "CancellationToken cancellationToken = default"
+        ],
+        "description": "Fetch vendor by ID including child contacts"
+      },
+      {
+        "name": "SearchAsync",
+        "returnType": "Task<PagedResult<VendorDto>>",
+        "parameters": [
+          "VendorSearchRequest request",
+          "CancellationToken cancellationToken = default"
+        ],
+        "description": "Search vendors with multiple filter criteria"
+      },
+      {
+        "name": "CreateAsync",
+        "returnType": "Task<VendorDto>",
+        "parameters": [
+          "VendorDto vendor",
+          "CancellationToken cancellationToken = default"
+        ],
+        "description": "Create new vendor"
+      },
+      {
+        "name": "UpdateAsync",
+        "returnType": "Task<VendorDto>",
+        "parameters": [
+          "VendorDto vendor",
+          "CancellationToken cancellationToken = default"
+        ],
+        "description": "Update existing vendor"
+      },
+      {
+        "name": "DeleteAsync",
+        "returnType": "Task<bool>",
+        "parameters": [
+          "int id",
+          "CancellationToken cancellationToken = default"
+        ],
+        "description": "Hard delete vendor"
+      },
+      {
+        "name": "GetContactsAsync",
+        "returnType": "Task<IEnumerable<VendorContactDto>>",
+        "parameters": [
+          "int vendorId",
+          "CancellationToken cancellationToken = default"
+        ],
+        "description": "Get all contacts for a vendor"
+      },
+      {
+        "name": "CreateContactAsync",
+        "returnType": "Task<VendorContactDto>",
+        "parameters": [
+          "VendorContactDto contact",
+          "CancellationToken cancellationToken = default"
+        ],
+        "description": "Create new vendor contact"
+      },
+      {
+        "name": "UpdateContactAsync",
+        "returnType": "Task<VendorContactDto>",
+        "parameters": [
+          "VendorContactDto contact",
+          "CancellationToken cancellationToken = default"
+        ],
+        "description": "Update vendor contact"
+      },
+      {
+        "name": "DeleteContactAsync",
+        "returnType": "Task<bool>",
+        "parameters": [
+          "int contactId",
+          "CancellationToken cancellationToken = default"
+        ],
+        "description": "Delete vendor contact"
+      }
+    ]
+  },
+  "repositoryImplementation": {
+    "name": "VendorRepository",
+    "namespace": "Admin.Infrastructure.Repositories",
+    "location": "src/BargeOps.API/src/Admin.Infrastructure/Repositories/",
+    "pattern": "Dapper with embedded SQL resources",
+    "sqlResourcePattern": "SqlText.GetSqlText(fileName)",
+    "notes": "Follow FacilityRepository.cs pattern for multi-table updates with transactions"
+  },
+  "listQueryFields": {
+    "filterable": [
+      "Name",
+      "AccountingCode",
+      "IsBargeExEnabled",
+      "IsActive",
+      "EnablePortal",
+      "IsFuelSupplier",
+      "IsBoatAssistSupplier",
+      "IsLiquidBroker",
+      "IsInternalVendor",
+      "IsTankerman"
+    ],
+    "sortable": [
+      "VendorID",
+      "Name",
+      "LongName",
+      "AccountingCode",
+      "IsActive"
+    ],
+    "defaultSort": "Name ASC"
+  },
+  "dataTransformations": [
+    {
+      "field": "PhoneNumber",
+      "transformation": "Phone10 format - stored as 10 digits, displayed as (xxx) xxx-xxxx",
+      "methods": "GetPhone10Prop/SetPhone10Prop in VB.NET"
+    },
+    {
+      "field": "FaxNumber",
+      "transformation": "Phone10 format - stored as 10 digits, displayed as (xxx) xxx-xxxx",
+      "methods": "GetPhone10Prop/SetPhone10Prop in VB.NET"
+    },
+    {
+      "field": "PhoneExt",
+      "transformation": "Phone7 format for extensions",
+      "methods": "GetPhone7Prop/SetPhone7Prop in VB.NET",
+      "entity": "VendorContact"
+    },
+    {
+      "field": "Zip",
+      "transformation": "Zip code with optional extension",
+      "methods": "SetZipCodeOptionalExtention in VB.NET"
+    },
+    {
+      "field": "State",
+      "transformation": "2-character state code",
+      "maxLength": 2
+    }
+  ],
+  "businessRules": [
+    {
+      "rule": "BargeEx Configuration Required",
+      "description": "When IsBargeExEnabled is true, both BargeExTradingPartnerNum and BargeExConfigID are required",
+      "severity": "Error",
+      "location": "Vendor.vb:84-91"
+    },
+    {
+      "rule": "Name Required",
+      "description": "Vendor Name is required and cannot be empty",
+      "severity": "Error",
+      "maxLength": 20
+    },
+    {
+      "rule": "LongName Required",
+      "description": "Vendor LongName is required and cannot be empty",
+      "severity": "Error",
+      "maxLength": 50
+    },
+    {
+      "rule": "VendorContact Name Required",
+      "description": "Contact Name is required",
+      "severity": "Error",
+      "maxLength": 80,
+      "entity": "VendorContact"
+    }
+  ],
+  "childEntities": [
+    {
+      "name": "VendorContact",
+      "relationship": "OneToMany",
+      "foreignKey": "VendorID",
+      "collection": "VendorContacts",
+      "loadingStrategy": "Eager",
+      "notes": "Loaded with parent in GetById via second result set"
+    },
+    {
+      "name": "VendorBusinessUnit",
+      "relationship": "OneToMany",
+      "foreignKey": "VendorID",
+      "collection": "VendorBusinessUnits",
+      "loadingStrategy": "Deferred",
+      "notes": "Not loaded by default, separate repository needed"
+    },
+    {
+      "name": "VendorPortalGroup",
+      "relationship": "OneToMany",
+      "foreignKey": "VendorID",
+      "collection": "VendorPortalGroups",
+      "loadingStrategy": "Deferred",
+      "notes": "Not loaded by default, separate repository needed"
+    }
+  ],
+  "dtoReferences": {
+    "primary": {
+      "name": "VendorDto",
+      "namespace": "BargeOps.Shared.Dto.Admin",
+      "location": "src/BargeOps.Shared/Dto/Admin/VendorDto.cs",
+      "exists": true
+    },
+    "child": [
+      {
+        "name": "VendorContactDto",
+        "namespace": "BargeOps.Shared.Dto.Admin",
+        "location": "src/BargeOps.Shared/Dto/Admin/VendorContactDto.cs",
+        "required": true,
+        "notes": "Needs to be created"
+      }
+    ],
+    "search": {
+      "name": "VendorSearchRequest",
+      "namespace": "BargeOps.Shared.Dto.Admin",
+      "location": "src/BargeOps.Shared/Dto/Admin/VendorSearchRequest.cs",
+      "required": true,
+      "notes": "Needs to be created with all search filter properties"
+    }
+  },
+  "implementationNotes": [
+    "Vendor does NOT use soft delete pattern - IsActive is for filtering only",
+    "Hard delete is appropriate based on VendorDelete stored procedure",
+    "Phone number formatting should be handled in UI layer, store raw digits in database",
+    "VendorContacts are loaded eagerly with parent via second result set",
+    "VendorBusinessUnits and VendorPortalGroups use deferred loading and need separate repositories",
+    "Follow FacilityRepository.cs pattern for transaction handling in multi-table operations",
+    "Use SqlText.GetSqlText() to load SQL from embedded resources",
+    "All SQL files must be marked as EmbeddedResource in .csproj",
+    "Search operation has many boolean filter parameters for various vendor types",
+    "VendorContact has additional properties: PhoneExt, IsPrimary, PortalUserID, IsLiquidBroker, IsDispatcher"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "mainForm": "frmBargePositions",
+  "entity": "BargePositions",
+  "childForms": [
+    "frmBargePositionHistory",
+    "frmSendTowDiagram",
+    "frmBargeViewConflicts"
+  ],
+  "detectedAt": "2025-12-19T18:22:57.744Z"
+}

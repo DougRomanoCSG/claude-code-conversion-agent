@@ -1,0 +1,697 @@
+{
+  "formName": "frmBargePositions",
+  "formType": "Complex Interactive Grid",
+  "description": "Fleet management form for tracking and managing barge positions across facilities, berths, tier groups, and boats. Supports both workspace mode (non-modal) and event mode (modal from BargeEvent/BargeDetail forms).",
+  "primaryWorkflows": [
+    {
+      "name": "WorkspaceMode_ViewFleet",
+      "description": "User opens form from main menu to view and manage fleet positions",
+      "mode": "Non-Modal",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenForm",
+          "trigger": "Button on frmMain",
+          "method": "Initialize(fleetID)",
+          "initialization": "Creates new BargePositions collection, enables timers, sets workspace mode"
+        },
+        {
+          "step": 2,
+          "action": "FormLoad",
+          "method": "frmBargePositions_Load",
+          "result": "Restores form settings, builds color legend menus, sets timer intervals, checks conflicts"
+        },
+        {
+          "step": 3,
+          "action": "SelectMode",
+          "control": "Mode Combo (MainToolbar)",
+          "options": ["In Fleet", "At Facility/Ship", "Midstream-In Update", "Midstream-Out Update", "Tow Diagram"],
+          "trigger": "User selection",
+          "handler": "MainToolbarManager_ToolValueChanged"
+        },
+        {
+          "step": 4,
+          "action": "RefreshGrids",
+          "method": "RefreshWorkspaceGrid / RefreshTierGroupGrid",
+          "result": "Background worker loads barge data into grids"
+        },
+        {
+          "step": 5,
+          "action": "DragDropBarges",
+          "grids": ["ctlWorkspace", "ctlTierGroup"],
+          "handler": "ctlWorkspace_BeforeControlDropped / ctlWorkspace_ControlDropped",
+          "validation": "Checks movement rules, conflict detection, event mode constraints"
+        },
+        {
+          "step": 6,
+          "action": "SaveMovement",
+          "saveMode": "Immediate",
+          "result": "Movement saved to DB immediately in workspace mode"
+        }
+      ]
+    },
+    {
+      "name": "EventMode_BargePositioning",
+      "description": "User opens form modally from BargeEvent form to position barges for a specific event",
+      "mode": "Modal",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenModalForm",
+          "trigger": "Barge Positions button on frmBargeEvent",
+          "method": "Initialize(fleetID, eventType, bargePositions, eventFleetLocationID, eventBoatLocationID)",
+          "initialization": "_InEventMode=True, disables timers, hides main toolbar, shows submit/cancel buttons"
+        },
+        {
+          "step": 2,
+          "action": "LoadEventData",
+          "result": "Builds tokens from in-memory BargePositions collection, marks barges as deferred save"
+        },
+        {
+          "step": 3,
+          "action": "PositionBarges",
+          "grids": ["ctlWorkspace", "ctlTierGroup"],
+          "constraints": "Only event-related barges deferred, other barges save immediately"
+        },
+        {
+          "step": 4,
+          "action": "SaveOrCancel",
+          "options": [
+            {
+              "button": "btnSet (&Set)",
+              "handler": "btnSet_Click",
+              "method": "_BargePositions.ApplyEdit()",
+              "result": "Saves event barge movements to memory, closes form"
+            },
+            {
+              "button": "btnClose (&Cancel)",
+              "handler": "btnClose_Click",
+              "method": "_BargePositions.CancelEdit()",
+              "result": "Discards event barge movements, closes form"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "InFleet_ManageBarges",
+      "description": "User manages barges in fleet workspace and tier groups",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectMode",
+          "control": "Mode Combo",
+          "value": "In Fleet",
+          "result": "Sets _EventType = Workspace, refreshes workspace grid, loads tier group list"
+        },
+        {
+          "step": 2,
+          "action": "SelectTierGroup",
+          "control": "TierGroupCombo (TierGroupToolbar)",
+          "handler": "TierGroupToolbarManager_ToolValueChanged",
+          "result": "Refreshes tier group grid with selected tier"
+        },
+        {
+          "step": 3,
+          "action": "DragBargeBetweenGrids",
+          "from": "ctlWorkspace or ctlTierGroup",
+          "to": "ctlWorkspace or ctlTierGroup",
+          "handler": "BeforeControlDropped validation, then ControlDropped",
+          "validation": "Checks NoDropBarges list, collision detection, position rules"
+        },
+        {
+          "step": 4,
+          "action": "ApplyBargeActions",
+          "toolbar": "TierGroupToolbar",
+          "actions": ["Flip Barge", "Set Anchor Wire", "View Conflicts", "Set Color", "Set Note", "Send Tow Diagram"]
+        }
+      ]
+    },
+    {
+      "name": "AtFacilityShip_ManageBerths",
+      "description": "User manages barges at facilities and berths",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectMode",
+          "control": "Mode Combo",
+          "value": "At Facility/Ship",
+          "result": "Sets _EventType = Berth, clears grids, loads facility list"
+        },
+        {
+          "step": 2,
+          "action": "SelectFacility",
+          "control": "FacilityCombo",
+          "handler": "MainToolbarManager_ToolValueChanged",
+          "result": "Sets _LocationID, loads berth list, refreshes workspace"
+        },
+        {
+          "step": 3,
+          "action": "SelectBerth",
+          "control": "BerthCombo",
+          "handler": "TierGroupToolbarManager_ToolValueChanged",
+          "result": "Refreshes berth grid, enables Arrive/Depart Ship button"
+        },
+        {
+          "step": 4,
+          "action": "ArriveDepartShip",
+          "button": "Arrive/Depart Ship",
+          "handler": "TierGroupToolbarManager_ToolClick",
+          "method": "ArriveDepartShip()",
+          "result": "Opens modal dialog to arrive or depart ship"
+        }
+      ]
+    },
+    {
+      "name": "MidstreamUpdate_BoatOperations",
+      "description": "User performs midstream-in or midstream-out operations",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectMode",
+          "control": "Mode Combo",
+          "value": "Midstream-In Update or Midstream-Out Update",
+          "result": "Sets _EventType, _IsMidstream=True, loads boat and tier group lists"
+        },
+        {
+          "step": 2,
+          "action": "SelectBoat",
+          "control": "BoatCombo",
+          "handler": "MainToolbarManager_ToolValueChanged",
+          "result": "Sets _LocationID to boat location, refreshes both grids"
+        },
+        {
+          "step": 3,
+          "action": "SelectTierGroup",
+          "control": "TierGroupCombo",
+          "result": "Refreshes tier group grid"
+        },
+        {
+          "step": 4,
+          "action": "MoveBarges",
+          "rule": "Workspace barges can move to tiers, tier barges can move within tiers",
+          "locationUpdate": "Barge location changes to boat location (workspace) or fleet location (tiers)"
+        }
+      ]
+    },
+    {
+      "name": "TowDiagram_Management",
+      "description": "User views and manipulates tow diagrams",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectMode",
+          "control": "Mode Combo",
+          "value": "Tow Diagram",
+          "result": "Sets _EventType = TowDiagram, hides tier grid, loads boat list"
+        },
+        {
+          "step": 2,
+          "action": "SelectBoat",
+          "control": "BoatCombo",
+          "result": "Loads tow diagram for selected boat"
+        },
+        {
+          "step": 3,
+          "action": "EnableShowTowDiagram",
+          "button": "Show Tow Diagram (State Button)",
+          "handler": "MainToolbarManager_ToolClick",
+          "result": "Toggles tow diagram view, enables Flip Tow and Drop Tow buttons"
+        },
+        {
+          "step": 4,
+          "action": "DropTowMode",
+          "button": "Drop Tow (State Button)",
+          "handler": "SetDropTowMode(IsDropTow)",
+          "result": "Enables drop tow mode for positioning entire tow"
+        },
+        {
+          "step": 5,
+          "action": "FlipTow",
+          "button": "Flip Tow",
+          "method": "FlipTow()",
+          "result": "Flips entire tow diagram horizontally"
+        },
+        {
+          "step": 6,
+          "action": "SendTowDiagram",
+          "button": "Send Tow Diagram",
+          "method": "SendTowDiagram()",
+          "result": "Opens frmSendTowDiagram modal dialog"
+        }
+      ]
+    },
+    {
+      "name": "AutoRefresh_BackgroundOperations",
+      "description": "System automatically refreshes grid data on timer",
+      "steps": [
+        {
+          "step": 1,
+          "action": "TimerTick",
+          "timer": "tmrBargePositions",
+          "interval": "GlobalSettingList.BargePositionsIntervalMinutes * 60000",
+          "handler": "tmrBargePositions_Tick"
+        },
+        {
+          "step": 2,
+          "action": "ValidateRefreshConditions",
+          "checks": ["Mouse buttons not down", "Form has focus", "Not in event mode"],
+          "result": "Sets _Refreshing flag"
+        },
+        {
+          "step": 3,
+          "action": "RefreshGrids",
+          "sequence": "TierGroup/Berth first, then Workspace",
+          "method": "Background worker loads data asynchronously"
+        },
+        {
+          "step": 4,
+          "action": "RebuildColorMenus",
+          "method": "DynamicallyAddToolbarButtons",
+          "result": "Syncs color legend with Onboard changes"
+        }
+      ]
+    },
+    {
+      "name": "ConflictDetection_AutoCheck",
+      "description": "System checks for barge position conflicts",
+      "steps": [
+        {
+          "step": 1,
+          "action": "TimerTick",
+          "timer": "tmrBargeConflicts",
+          "interval": "1800000 (30 minutes, 30 seconds in DEBUG)",
+          "handler": "tmrBargeConflicts_Tick"
+        },
+        {
+          "step": 2,
+          "action": "CheckConflicts",
+          "method": "CheckForBargeConflicts()",
+          "result": "Updates _BargeConflictCount, shows warning if conflicts exist"
+        },
+        {
+          "step": 3,
+          "action": "ViewConflicts",
+          "button": "View Conflicts",
+          "condition": "Button enabled when conflicts > 0",
+          "handler": "ViewConflicts()",
+          "result": "Opens conflict resolution dialog"
+        }
+      ]
+    }
+  ],
+  "formStates": [
+    {
+      "state": "Initial_WorkspaceMode",
+      "description": "Form first loaded in workspace mode",
+      "_InEventMode": false,
+      "visibleToolbars": ["MainToolbar (UltraToolbar1, UltraToolbar2)", "TierGroupToolbar"],
+      "visibleButtons": ["Refresh", "History", "Define Color Legend", "Close"],
+      "hiddenControls": ["grpSubmitCancel"],
+      "timersEnabled": ["tmrBargePositions", "tmrBargeConflicts"],
+      "gridState": "Empty until mode selected"
+    },
+    {
+      "state": "Initial_EventMode",
+      "description": "Form loaded modally from BargeEvent",
+      "_InEventMode": true,
+      "visibleToolbars": ["UltraToolbar2 (Servicing Boat controls)", "TierGroupToolbar"],
+      "hiddenToolbars": ["UltraToolbar1 (Mode Combo)"],
+      "visibleButtons": ["Set", "Cancel", "Refresh"],
+      "visibleControls": ["grpSubmitCancel"],
+      "timersEnabled": [],
+      "minimizeBox": false,
+      "gridState": "Pre-populated with event barges"
+    },
+    {
+      "state": "InFleet_Selected",
+      "description": "Mode set to In Fleet",
+      "_EventType": "Workspace",
+      "workspaceGrid": "Displays barges in fleet workspace",
+      "tierGroupGrid": "Empty until tier group selected",
+      "visibleCombos": ["Mode Combo"],
+      "visibleButtons": ["Refresh", "History", "Define Color Legend", "Close", "Set Color", "Set Note", "Flip Barge"],
+      "enabledActions": ["Drag barges between workspace and tiers"]
+    },
+    {
+      "state": "AtFacilityShip_Selected",
+      "description": "Mode set to At Facility/Ship",
+      "_EventType": "Berth",
+      "workspaceGrid": "Empty until facility and berth selected",
+      "tierGroupGrid": "Hidden (ShowHeaders=False)",
+      "visibleCombos": ["Mode Combo", "Facility Combo", "Berth Combo"],
+      "visibleButtons": ["Arrive/Depart Ship (when berth selected)"],
+      "enabledActions": ["Select facility", "Select berth", "Manage berth positions"]
+    },
+    {
+      "state": "Midstream_Selected",
+      "description": "Mode set to Midstream-In/Out Update",
+      "_EventType": "MidstreamInUpdate or MidstreamOutUpdate",
+      "_IsMidstream": true,
+      "workspaceGrid": "Displays barges on selected boat",
+      "tierGroupGrid": "Displays selected tier group",
+      "visibleCombos": ["Mode Combo", "Boat Combo", "Tier Group Combo"],
+      "movementConstraints": "Workspace barges move to tiers, tier barges move within tiers"
+    },
+    {
+      "state": "TowDiagram_Selected",
+      "description": "Mode set to Tow Diagram",
+      "_EventType": "TowDiagram",
+      "workspaceGrid": "Displays tow diagram for selected boat",
+      "tierGroupGrid": "Hidden (splitter moved down)",
+      "visibleCombos": ["Mode Combo", "Boat Combo", "Servicing Boat Combo"],
+      "visibleButtons": ["Show Tow Diagram", "Drop Tow", "Flip Tow", "Flip Barge", "Set Color", "Set Note"],
+      "stateButtons": {
+        "Show Tow Diagram": "Toggles tow diagram view",
+        "Drop Tow": "Enables drop tow mode"
+      }
+    },
+    {
+      "state": "Refreshing",
+      "description": "Grid data being refreshed",
+      "_Refreshing": true,
+      "behavior": "Retains scroll position, background worker loads data",
+      "triggers": ["Manual refresh button", "Timer tick", "Mode change", "Fleet change"]
+    },
+    {
+      "state": "UnsavedChanges_EventMode",
+      "description": "User has moved event barges but not saved",
+      "_UnsavedEventAction": true,
+      "_BargePositions.IsDirty": true,
+      "warning": "Displays on refresh or fleet change",
+      "buttons": {
+        "Set": "Saves changes to memory (ApplyEdit)",
+        "Cancel": "Discards changes (CancelEdit)"
+      }
+    },
+    {
+      "state": "ConflictsDetected",
+      "description": "Barge position conflicts found",
+      "_BargeConflictCount": "> 0",
+      "statusBarMessage": "c_BargeConflictMessage",
+      "buttonState": "View Conflicts enabled and highlighted red",
+      "autoCheck": "Every 30 minutes via tmrBargeConflicts"
+    },
+    {
+      "state": "DropTowMode",
+      "description": "Drop tow mode enabled",
+      "IsDropTow": true,
+      "behavior": "User can select barge in tow diagram and drop entire tow",
+      "_DropTowDiagramSelectedBarge": "Stores selected barge location",
+      "exitKeys": ["Escape key", "Toggle Drop Tow button"]
+    },
+    {
+      "state": "FormHidden",
+      "description": "Form closed in workspace mode (actually hidden)",
+      "visible": false,
+      "timersEnabled": [],
+      "persistence": "Form settings saved, _BargePositions retained in memory",
+      "reopen": "_WasReopened flag triggers refresh on Activated event"
+    }
+  ],
+  "navigationPatterns": [
+    {
+      "from": "frmMain",
+      "to": "frmBargePositions",
+      "trigger": "Barge Positions button",
+      "mode": "Non-Modal (Show)",
+      "initialization": "Initialize(fleetID)"
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmBargePositions",
+      "trigger": "Barge Positions button",
+      "mode": "Modal (ShowDialog)",
+      "initialization": "Initialize(fleetID, eventType, bargePositions, eventFleetLocationID, eventBoatLocationID)",
+      "dataPassed": "BargePositions collection, event type, location IDs"
+    },
+    {
+      "from": "frmBargeDetail",
+      "to": "frmBargePositions",
+      "trigger": "Barge Positions button",
+      "mode": "Modal (ShowDialog)",
+      "initialization": "Initialize(fleetID, eventType, bargePositions, eventFleetLocationID, eventBoatLocationID)"
+    },
+    {
+      "from": "frmBargePositions",
+      "to": "frmBargePositionHistory",
+      "trigger": "History button (toolbar)",
+      "mode": "Modal (ShowDialog)",
+      "method": "Initialize(_Fleet.FleetID)",
+      "condition": "_ShowBargePositionHistory enabled"
+    },
+    {
+      "from": "frmBargePositions",
+      "to": "frmDefineColorLegend",
+      "trigger": "Define Color Legend button",
+      "mode": "Modal (ShowDialog)",
+      "method": "Initialize(_Fleet.FleetID)",
+      "result": "Rebuilds Set Color menus if changes saved"
+    },
+    {
+      "from": "frmBargePositions",
+      "to": "frmSendTowDiagram",
+      "trigger": "Send Tow Diagram button",
+      "mode": "Modal (ShowDialog)",
+      "context": "Available in tier group toolbar and main toolbar"
+    },
+    {
+      "from": "frmBargePositions",
+      "to": "Conflict Resolution Dialog",
+      "trigger": "View Conflicts button",
+      "method": "ViewConflicts()",
+      "condition": "_BargeConflictCount > 0"
+    }
+  ],
+  "sessionManagement": {
+    "workspaceMode": {
+      "persistence": "Form hidden on close, not disposed",
+      "state": "_BargePositions retained in memory",
+      "formSettings": "MyAppSettingHelper.SaveForm / RestoreForm",
+      "reopenBehavior": "_WasReopened flag triggers data refresh via Activated event"
+    },
+    "eventMode": {
+      "persistence": "Form truly closes (disposed)",
+      "state": "BargePositions passed by reference to calling form",
+      "saveActions": {
+        "Set": "_BargePositions.ApplyEdit() - saves to memory for caller",
+        "Cancel": "_BargePositions.CancelEdit() - discards changes"
+      },
+      "deferredSave": "_DeferredSaveBarges tracks event barges not saved to DB until Set clicked"
+    },
+    "stateTracking": {
+      "_BargePositions": "Collection of moved barges",
+      "_MovedBargeTokens": "ArrayList of token objects for moved barges",
+      "_NoDropBarges": "ArrayList of barges that cannot be moved",
+      "_DeferredSaveBarges": "ArrayList of barges whose saves are deferred",
+      "_Refreshing": "Flag to retain scroll position during refresh",
+      "_InEventMode": "Determines save behavior and form lifecycle",
+      "_UnsavedEventAction": "Tracks unsaved event barge movements"
+    },
+    "fleetChangeNotifier": {
+      "event": "_FleetChangeNotifier_FleetChanged",
+      "behavior": "Prompts to save if IsDirty, refreshes grids for new fleet",
+      "cleanup": "Set to Nothing in Disposed to prevent memory leaks"
+    },
+    "eventNotifier": {
+      "events": ["_Notifier_BerthsChanged", "_Notifier_TierGroupsChanged"],
+      "behavior": "Auto-refreshes grids when admin data changes",
+      "condition": "Only in workspace mode (not event mode)",
+      "cleanup": "Set to Nothing in Disposed"
+    }
+  },
+  "actionSequences": {
+    "dragDropBarge": {
+      "sequence": [
+        "User drags barge token from source grid",
+        "BeforeControlDropped validates movement (_InterGridMove flag set)",
+        "Checks NoDropBarges list, collision detection, event mode rules",
+        "ControlDropped handler fires",
+        "RecordBargeMove creates BargePosition object",
+        "If deferred save: adds to _BargePositions collection",
+        "If immediate save: saves to DB via BargePositions.SaveBargePositions()",
+        "Refreshes grids to show updated positions"
+      ]
+    },
+    "refreshData": {
+      "triggers": ["Refresh button", "Timer tick", "Mode change", "Fleet change", "Form activated (if reopened)"],
+      "sequence": [
+        "Set _Refreshing = True",
+        "Check unsaved changes warning (event mode)",
+        "Clear or cancel edit if needed",
+        "Call RefreshWorkspaceGrid / RefreshTierGroupGrid / RefreshBerthGrid",
+        "Background worker (bckRetrieveBarges) loads data from DB",
+        "BuildBargeTokens creates token controls from data",
+        "Re-apply moved barge tokens from _MovedBargeTokens",
+        "Reset _Refreshing = False"
+      ]
+    },
+    "modeChange": {
+      "trigger": "Mode Combo selection changed",
+      "handler": "MainToolbarManager_ToolValueChanged",
+      "sequence": [
+        "Set _LocationID = 0 (if not event mode)",
+        "Clear all other combos (if unselected)",
+        "Set _EventType based on mode",
+        "Clear/refresh grids as needed",
+        "Load dependent combo lists (facilities, boats, tier groups)",
+        "Call SetToolState to enable/disable buttons",
+        "Deselect all cells"
+      ]
+    },
+    "setColor": {
+      "sequence": [
+        "User selects barges in grid",
+        "Clicks Set Color menu item",
+        "SetColorForSelectedBarges(grid, backColor) called",
+        "For each selected barge token: updates color in ViewFleetColor",
+        "Refreshes grid to show new colors"
+      ]
+    },
+    "flipBarge": {
+      "sequence": [
+        "User selects barge (rake type) in grid",
+        "Clicks Flip Barge button",
+        "FlipBarge(grid, isTowDiagram) called",
+        "Toggles rake direction (Left ↔ Right)",
+        "Updates barge position in DB",
+        "Refreshes grid"
+      ]
+    },
+    "closeForm": {
+      "workspaceMode": [
+        "User clicks Close or X button",
+        "WndProc intercepts SC_CLOSE",
+        "MyAppSettingHelper.SaveForm saves position/size",
+        "Form.Hide() (not Close)",
+        "Timers disabled"
+      ],
+      "eventMode": [
+        "User clicks Cancel/Close",
+        "_BargePositions.CancelEdit() discards changes",
+        "Form.Close() actually disposes form",
+        "Non-event barge movements already saved to DB (cannot undo)"
+      ]
+    }
+  },
+  "userExperience": {
+    "defaultMode": "In Fleet (if workspace mode)",
+    "closeButtonBehavior": "Hides form in workspace mode, closes in event mode",
+    "keyboardShortcuts": {
+      "Escape": "Exits Drop Tow mode"
+    },
+    "autoRefresh": {
+      "interval": "Configurable via GlobalSettingList.BargePositionsIntervalMinutes",
+      "condition": "Mouse not down, form has focus, not in event mode"
+    },
+    "dragDropUX": {
+      "allowDrop": true,
+      "dragMode": "Move",
+      "multiSelect": "Single (CsgContainerGrid.MultiSelectModes.Single)",
+      "gridOrigin": {
+        "ctlTierGroup": "Bottom",
+        "ctlWorkspace": "Default"
+      }
+    },
+    "statusBarUpdates": "Shows selected barge info, conflict warnings",
+    "gridHeaders": {
+      "ctlTierGroup": "Shown in fleet mode, hidden in berth mode",
+      "ctlWorkspace": "Hidden by default (ShowHeaders=False)"
+    },
+    "splitGridLayout": "UltraSplitter divides workspace and tier group grids",
+    "colorLegend": "Dynamic menus built from ViewFleetColor table",
+    "conflictWarning": "Red bold text on View Conflicts button when conflicts exist"
+  },
+  "eventHandlerChains": {
+    "gridDataLoad": {
+      "trigger": "Refresh method called",
+      "chain": [
+        "RefreshWorkspaceGrid / RefreshTierGroupGrid / RefreshBerthGrid",
+        "Background worker DoWork event",
+        "Calls BargePositionList.GetBargePositionDataTable",
+        "RunWorkerCompleted event",
+        "BuildBargeTokens creates UI controls",
+        "ReapplyMovedBargeTokens restores user changes"
+      ]
+    },
+    "toolbarButtonClick": {
+      "toolbars": ["MainToolbarManager", "TierGroupToolbarManager"],
+      "handler": "ToolClick event",
+      "security": "ToolbarButtonCanBeEnabled checks permissions from _ToolbarButtonTypes hashtable"
+    },
+    "comboValueChanged": {
+      "combos": ["Mode Combo", "Facility Combo", "Boat Combo", "Tier Group Combo", "Berth Combo", "Servicing Boat Combo"],
+      "handler": "ToolValueChanged event",
+      "cascadingRefresh": "Dependent combos and grids refresh based on selection"
+    },
+    "timerEvents": {
+      "tmrBargePositions": {
+        "interval": "GlobalSettingList.BargePositionsIntervalMinutes * 60000",
+        "handler": "tmrBargePositions_Tick",
+        "action": "Auto-refresh grids if conditions met"
+      },
+      "tmrBargeConflicts": {
+        "interval": "1800000 (30 min), 30000 (DEBUG)",
+        "handler": "tmrBargeConflicts_Tick",
+        "action": "CheckForBargeConflicts"
+      }
+    }
+  },
+  "statePersistence": {
+    "formLevel": {
+      "method": "MyAppSettingHelper.SaveForm / RestoreForm",
+      "savedProperties": ["Size", "Location", "WindowState"],
+      "saveTriggers": ["Close button (workspace mode)", "X button (workspace mode)", "Disposed event"],
+      "restoreTrigger": "Form Load (workspace mode)"
+    },
+    "applicationLevel": {
+      "_BargePositions": "Retained in memory between hide/show cycles in workspace mode",
+      "_MovedBargeTokens": "Retained to reapply user changes after refresh",
+      "_Fleet": "Updated when FleetChangeNotifier fires",
+      "combos": "Selections lost on form hide in workspace mode"
+    },
+    "databaseLevel": {
+      "immediateWrites": "Workspace mode barge movements, non-event barges in event mode",
+      "deferredWrites": "Event mode barge movements (saved via ApplyEdit on Set button)"
+    }
+  },
+  "validationRules": {
+    "beforeDrop": [
+      "Check if barge in _NoDropBarges list",
+      "Check collision with existing barges",
+      "Check event mode movement constraints",
+      "Validate target grid accepts barge type",
+      "Check CanMoveToEvent flag on token"
+    ],
+    "saveValidation": [
+      "Check _InEventMode to determine save type",
+      "Check _DeferredSaveBarges list",
+      "Validate position coordinates within grid bounds",
+      "Check tier/berth/workspace position types"
+    ],
+    "conflictDetection": [
+      "Run CheckForBargeConflicts periodically",
+      "Update _BargeConflictCount",
+      "Display warning in status bar",
+      "Enable/highlight View Conflicts button"
+    ]
+  },
+  "backgroundWorkers": {
+    "bckRetrieveBarges": {
+      "purpose": "Load workspace/tier grid barge data asynchronously",
+      "doWork": "Calls BargePositionList.GetBargePositionDataTable",
+      "completed": "Calls BuildBargeTokens to create UI controls"
+    },
+    "bckRetrieveWorkspace": {
+      "purpose": "Load workspace grid data",
+      "doWork": "Same handler as bckRetrieveBarges",
+      "completed": "Builds workspace tokens"
+    }
+  },
+  "errorHandling": {
+    "exceptionManager": "All exceptions published via ExceptionManager.Publish(ex)",
+    "refreshFlagReset": "_Refreshing = False in Finally blocks",
+    "cursorRestoration": "MouseHelper.CursorState.Restore() in Finally blocks",
+    "validationCancellation": "e.Cancel = True in BeforeControlDropped on validation failure"
+  }
+}

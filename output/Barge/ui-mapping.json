@@ -1,0 +1,801 @@
+{
+  "entity": "Barge",
+  "legacyForms": {
+    "searchForm": "frmBargeSearch",
+    "detailForm": "frmBargeDetail",
+    "baseClasses": {
+      "search": "frmBaseSearch",
+      "detail": "frmBaseDetail"
+    }
+  },
+  "controlMappings": [
+    {
+      "legacyControl": "UltraTextEditor",
+      "modernEquivalent": "Bootstrap Text Input",
+      "html": "<input type=\"text\" class=\"form-control\" asp-for=\"PropertyName\" />",
+      "accessibility": "Use asp-for tag helper to auto-generate id, name, and for attributes",
+      "validation": "Use jquery.validate with asp-validation-for tag helper",
+      "examples": [
+        "txtBargeNum - Barge number search (starts with)",
+        "txtTicketID - Ticket ID search (exact match)",
+        "txtCoastGuardNum - USCG number search (exact match)",
+        "txtStartMile - Mile range start (>=)",
+        "txtEndMile - Mile range end (<=)",
+        "txtContractNumber - Contract number search (contains)",
+        "txtExternalLength - Barge length",
+        "txtExternalWidth - Barge width",
+        "txtExternalDepth - Barge depth",
+        "txtDraft - Overall draft",
+        "txtDraftFeet - Draft in feet",
+        "txtDraftInches - Draft in inches (0-11)"
+      ]
+    },
+    {
+      "legacyControl": "UltraComboEditor / UltraCombo",
+      "modernEquivalent": "Select2 Dropdown",
+      "html": "<select class=\"form-select\" asp-for=\"PropertyName\" asp-items=\"Model.DropdownItems\" data-select2=\"true\"></select>",
+      "javascript": "$('.form-select[data-select2]').select2({ placeholder: 'Select...', allowClear: true });",
+      "accessibility": "Include aria-label and ensure proper label association",
+      "serverSide": "Populate via ViewModel SelectListItem collections",
+      "examples": [
+        "cboHullType - Hull type dropdown",
+        "cboOperatorID - Operator/customer dropdown",
+        "cboCustomerID - Customer dropdown (for customer-operated barges)",
+        "cboOwnerID - Owner dropdown",
+        "cboLoadStatus - Load status dropdown",
+        "cboStatus - Barge status dropdown",
+        "cboCoverType - Cover type dropdown",
+        "cboEquipmentType - Equipment type dropdown",
+        "cboSizeCategory - Size category dropdown",
+        "cboRiver - River dropdown",
+        "cboCommodityID - Commodity dropdown",
+        "cboBoatSearchType - Boat search type dropdown",
+        "cboBoatLocationID - Boat location dropdown (conditional)",
+        "cboFacilitySearchType - Facility search type dropdown",
+        "cboFacilityLocationID - Facility location dropdown (conditional, expandable)",
+        "cboShipSearchType - Ship search type dropdown",
+        "cboShipLocationID - Ship location dropdown (conditional)",
+        "cboBargeSeriesID - Barge series dropdown (auto-populates fields)",
+        "cboCoverSubTypeID - Cover sub-type dropdown",
+        "cboCoverConfig - Cover configuration dropdown",
+        "cboCleanStatus - Clean status dropdown",
+        "cboRepairStatus - Repair status dropdown",
+        "cboDamageLevel - Damage level dropdown",
+        "cboRakeDirection - Rake direction dropdown",
+        "cboColorPairID - Color pair dropdown"
+      ],
+      "conditionalBehavior": {
+        "description": "Some combos enable/disable based on other selections",
+        "examples": [
+          "cboBoatSearchType enables cboBoatLocationID",
+          "cboFacilitySearchType enables cboFacilityLocationID",
+          "cboShipSearchType enables cboShipLocationID",
+          "cboEquipmentType auto-unchecks chkOpenTicketsOnly when 'Fleet-owned' selected"
+        ]
+      },
+      "expandableBehavior": {
+        "control": "cboFacilityLocationID",
+        "description": "Special expandable combo - clicking header toggles between ConsignFacilities and AllFacilities modes",
+        "modernEquivalent": "Implement with toggle button and Select2 data reload"
+      }
+    },
+    {
+      "legacyControl": "UltraGrid",
+      "modernEquivalent": "DataTables (Server-side)",
+      "html": "<table id=\"bargeTable\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\"></table>",
+      "javascript": {
+        "initialization": "DataTables with server-side processing",
+        "pattern": "See bargeSearch.js for full implementation",
+        "features": [
+          "Server-side processing",
+          "State saving with localStorage",
+          "Responsive design",
+          "Column ordering",
+          "Pagination",
+          "Search/filter integration",
+          "Multi-row selection for bulk operations",
+          "Row formatting based on CrossCharterCode and DamageLevel"
+        ]
+      },
+      "rowFormatting": [
+        {
+          "condition": "CrossCharterCode = 'CTC'",
+          "backgroundColor": "GlobalSetting.CrossCharterBargeBackColorCTC",
+          "implementation": "Use DataTables rowCallback to apply background color"
+        },
+        {
+          "condition": "CrossCharterCode = 'RTD'",
+          "backgroundColor": "GlobalSetting.CrossCharterBargeBackColorRTD",
+          "implementation": "Use DataTables rowCallback to apply background color"
+        },
+        {
+          "condition": "DamageLevel has value",
+          "cellFormatting": "DamageLevel column color-coded from BargeTokenMapList",
+          "implementation": "Use DataTables createdCell callback for DamageLevel column"
+        }
+      ],
+      "examples": [
+        "grdBargeSearch - Main search results grid (58 columns including hidden columns)",
+        "grdBargeCharters - Barge charters child grid"
+      ],
+      "columns": {
+        "visible": 52,
+        "hidden": 6,
+        "specialColumns": [
+          "BargeID (hidden, unique identifier)",
+          "CrossCharterCode (hidden, for row formatting)",
+          "NewCargoTransferPossible (hidden, enables button)",
+          "DateTime columns formatted as MM/dd/yyyy HH:mm (24-hour)",
+          "Decimal columns with right alignment",
+          "Boolean columns as centered checkboxes"
+        ],
+        "conditionalVisibility": [
+          "Freight license columns (FreightCustomer, ContractNumber, PurchaseOrderNum, etc.)",
+          "Terminal license columns (CargoHandlingStatus, Cargo, CargoCustomer, etc.)",
+          "CommodityInfoCustomization columns (SurveyTons as Quantity)"
+        ]
+      }
+    },
+    {
+      "legacyControl": "UltraCheckEditor",
+      "modernEquivalent": "Bootstrap Checkbox",
+      "html": "<div class=\"form-check\">\n  <input type=\"checkbox\" class=\"form-check-input\" asp-for=\"PropertyName\" />\n  <label class=\"form-check-label\" asp-for=\"PropertyName\"></label>\n</div>",
+      "accessibility": "Use form-check-input and form-check-label classes",
+      "examples": [
+        "chkOpenTicketsOnly - Open tickets only filter (default: checked)",
+        "chkActiveOnly - Active only filter (default: checked)",
+        "chkIsActive - Active status on detail form",
+        "chkIsDamaged - Damage noted flag",
+        "chkIsCargoDamaged - Damaged cargo flag",
+        "chkIsLeaker - Leaker flag",
+        "chkIsDryDocked - Dry dock flag",
+        "chkIsRepairScheduled - Scheduled for repair flag",
+        "chkHasInsufficientFreeboard - Insufficient freeboard flag",
+        "chkHasAnchorWire - Has anchor wire flag"
+      ]
+    },
+    {
+      "legacyControl": "UltraPanel",
+      "modernEquivalent": "Bootstrap Card",
+      "html": "<div class=\"card\">\n  <div class=\"card-header\"><h5>Title</h5></div>\n  <div class=\"card-body\">Content</div>\n</div>",
+      "styling": "Use Bootstrap card, card-header, card-body classes",
+      "examples": [
+        "pnlBargeSearch - Root panel",
+        "pnlContextTitle - Title bar panel",
+        "pnlCriteria - Search criteria container",
+        "pnlCriteriaNonExpandable - Basic search criteria (always visible)",
+        "pnlExpandableSearchOptions - Advanced search options container"
+      ]
+    },
+    {
+      "legacyControl": "UltraExpandableGroupBox",
+      "modernEquivalent": "Bootstrap Collapse / Accordion",
+      "html": "<div class=\"card\">\n  <div class=\"card-header\" id=\"headingAdvanced\">\n    <h5 class=\"mb-0\">\n      <button class=\"btn btn-link\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseAdvanced\" aria-expanded=\"false\" aria-controls=\"collapseAdvanced\">\n        Show search options\n      </button>\n    </h5>\n  </div>\n  <div id=\"collapseAdvanced\" class=\"collapse\" aria-labelledby=\"headingAdvanced\">\n    <div class=\"card-body\">Advanced search fields...</div>\n  </div>\n</div>",
+      "javascript": "Use Bootstrap collapse component with toggle button text change",
+      "examples": [
+        "grpMoreSearchOptions - Collapsible advanced search options (default: collapsed)"
+      ],
+      "behavior": {
+        "expandedText": "Hide search options",
+        "collapsedText": "Show search options",
+        "defaultState": "Collapsed"
+      }
+    },
+    {
+      "legacyControl": "UltraButton",
+      "modernEquivalent": "Bootstrap Button",
+      "html": "<button type=\"button\" class=\"btn btn-primary\"><i class=\"fas fa-icon\"></i> Text</button>",
+      "variants": [
+        "btn-primary (Find, Submit)",
+        "btn-secondary (Reset, Cancel)",
+        "btn-success (New)",
+        "btn-danger (Delete)",
+        "btn-sm (Small buttons in grids)"
+      ],
+      "examples": [
+        "btnFind - Execute search",
+        "btnReset - Clear search criteria"
+      ]
+    },
+    {
+      "legacyControl": "UltraLabel",
+      "modernEquivalent": "Bootstrap Label with asp-for",
+      "html": "<label asp-for=\"PropertyName\" class=\"form-label\"></label>",
+      "styling": "Use form-label class for form inputs",
+      "accessibility": "asp-for auto-generates for attribute",
+      "examples": [
+        "lblBargeNum",
+        "lblOperatorID",
+        "lblStatus",
+        "lblHullType",
+        "lblCoverType",
+        "lblTicketID",
+        "lblCustomerID",
+        "lblLoadStatus",
+        "lblExternalLength",
+        "lblExternalWidth",
+        "lblExternalDepth",
+        "lblDraft",
+        "lblContextTitle - Search screen title (special styling)"
+      ]
+    },
+    {
+      "legacyControl": "UltraTabControl",
+      "modernEquivalent": "Bootstrap Nav Tabs",
+      "html": "<ul class=\"nav nav-tabs\" id=\"bargeTabs\" role=\"tablist\">\n  <li class=\"nav-item\" role=\"presentation\">\n    <button class=\"nav-link active\" id=\"general-tab\" data-bs-toggle=\"tab\" data-bs-target=\"#general\" type=\"button\" role=\"tab\" aria-controls=\"general\" aria-selected=\"true\">General</button>\n  </li>\n  <li class=\"nav-item\" role=\"presentation\">\n    <button class=\"nav-link\" id=\"charters-tab\" data-bs-toggle=\"tab\" data-bs-target=\"#charters\" type=\"button\" role=\"tab\" aria-controls=\"charters\" aria-selected=\"false\">Charters</button>\n  </li>\n</ul>\n<div class=\"tab-content\" id=\"bargeTabContent\">\n  <div class=\"tab-pane fade show active\" id=\"general\" role=\"tabpanel\" aria-labelledby=\"general-tab\">...</div>\n  <div class=\"tab-pane fade\" id=\"charters\" role=\"tabpanel\" aria-labelledby=\"charters-tab\">...</div>\n</div>",
+      "styling": "Use Bootstrap nav-tabs and tab-content classes",
+      "javascript": "Bootstrap handles tab switching automatically",
+      "examples": [
+        "Detail form tabs for General info, Charters, etc."
+      ]
+    },
+    {
+      "legacyControl": "UltraDateTimeEditor",
+      "modernEquivalent": "SPLIT Date + Time Inputs (24-hour)",
+      "html": "<div class=\"row\">\n  <div class=\"col-md-6\">\n    <label asp-for=\"InServiceDate\" class=\"form-label\">In Service Date</label>\n    <input asp-for=\"InServiceDate\" class=\"form-control\" type=\"date\" id=\"dtInServiceDate\" />\n  </div>\n  <div class=\"col-md-6\">\n    <label class=\"form-label\">In Service Time (24-hour)</label>\n    <input type=\"time\" class=\"form-control\" id=\"dtInServiceTime\" />\n  </div>\n</div>",
+      "javascript": {
+        "splitDateTime": "function splitDateTime(dateTimeValue, dateFieldId, timeFieldId) { ... }",
+        "combineDateTime": "function combineDateTime(dateFieldId, timeFieldId) { ... }",
+        "initialization": "Split on page load, combine on form submit"
+      },
+      "displayFormat": "MM/dd/yyyy HH:mm (24-hour military time)",
+      "examples": [
+        "dtLocationDateTime - Position updated date/time",
+        "dtInServiceDate - In service date",
+        "dtOutOfServiceDate - Out of service date",
+        "dtFleetBoatActivityDateTime - Fleet boat activity date/time"
+      ],
+      "criticalNote": "ALL datetime fields MUST use military time (24-hour format) with separate date and time inputs. NEVER use datetime-local or 12-hour format."
+    }
+  ],
+  "formPatterns": {
+    "searchForm": {
+      "layout": "Bootstrap form with row/col grid system and expandable advanced section",
+      "structure": {
+        "header": "Card header with 'Barges' title (blue background, white text)",
+        "basicCriteria": "Card body with basic search inputs in grid layout (always visible)",
+        "advancedCriteria": "Collapsible card section with advanced search inputs (default: collapsed)",
+        "searchButtons": "Find and Reset buttons (right-aligned)",
+        "resultsGrid": "DataTables grid below search criteria with 58 columns"
+      },
+      "sections": {
+        "basic": [
+          "Barge (starts with search)",
+          "Operator",
+          "Status",
+          "Hull Type",
+          "Open Tickets Only (checkbox)",
+          "Ticket ID (exact match)",
+          "Customer",
+          "Load Status",
+          "Cover Type",
+          "Active Only (checkbox)"
+        ],
+        "advanced": [
+          "Boat Search Type + Boat Location (conditional)",
+          "Facility Search Type + Facility Location (conditional, expandable)",
+          "Ship Search Type + Ship Location (conditional)",
+          "Equipment Type",
+          "USCG Number (exact match)",
+          "Barge Size",
+          "River",
+          "Mile Range (Start - End)",
+          "Commodity",
+          "Contract Number (contains, Freight license only)"
+        ]
+      },
+      "htmlPattern": "<div class=\"card mb-3\">\n  <div class=\"card-header\" style=\"background-color: #0066cc; color: white;\">\n    <h5 class=\"mb-0\">Barges</h5>\n  </div>\n  <div class=\"card-body\">\n    <form id=\"searchForm\">\n      <!-- Basic criteria -->\n      <div class=\"row mb-3\">\n        <div class=\"col-md-3\">...</div>\n      </div>\n      <!-- Expandable advanced criteria -->\n      <div class=\"card\">\n        <div class=\"card-header\">\n          <button class=\"btn btn-link\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#advancedCriteria\">Show search options</button>\n        </div>\n        <div id=\"advancedCriteria\" class=\"collapse\">\n          <div class=\"card-body\">...</div>\n        </div>\n      </div>\n      <!-- Search buttons -->\n      <div class=\"row\">\n        <div class=\"col-12 text-end\">\n          <button type=\"button\" id=\"btnSearch\" class=\"btn btn-primary\">Find</button>\n          <button type=\"button\" id=\"btnReset\" class=\"btn btn-secondary\">Reset</button>\n        </div>\n      </div>\n    </form>\n  </div>\n</div>\n<!-- Results grid -->\n<div class=\"card\">\n  <div class=\"card-body\">\n    <table id=\"bargeTable\" class=\"table table-striped\">...</table>\n  </div>\n</div>"
+    },
+    "detailForm": {
+      "layout": "Vertical sections with tab navigation",
+      "structure": {
+        "tabs": "Bootstrap nav tabs (General, Charters, etc.)",
+        "generalTab": "Main barge properties in grid layout",
+        "chartersTab": "Child grid for barge charters",
+        "submitCancel": "Action buttons (bottom, right-aligned)"
+      },
+      "fields": {
+        "general": [
+          "Barge Number (required)",
+          "USCG VIN",
+          "Owner",
+          "Operator (required if not fleet-owned)",
+          "Hull Type",
+          "Barge Series (auto-populates fields)",
+          "External Length/Width/Depth",
+          "Size Category (auto-calculated)",
+          "Draft (feet/inches)",
+          "Draft calculated (feet/inches)",
+          "Corner drafts (Port Bow, Port Stern, Starboard Bow, Starboard Stern)",
+          "Cover Type (required conditionally)",
+          "Cover Config (required conditionally)",
+          "Cover Sub Type (required conditionally)",
+          "Commodity",
+          "Load Status",
+          "Clean Status",
+          "Repair Status",
+          "Damage Level",
+          "Damage Note (required if IsDamaged checked)",
+          "IsDamaged/IsCargoDamaged/IsLeaker flags",
+          "IsDryDocked/IsRepairScheduled flags",
+          "HasInsufficientFreeboard + Freeboard Range (conditional)",
+          "Fleet ID (required if fleet-owned)",
+          "Equipment Type",
+          "In Service Date / Out of Service Date",
+          "Hull Number",
+          "G/L Account Number",
+          "Barge Type",
+          "Active checkbox"
+        ]
+      },
+      "htmlPattern": "<div class=\"container-fluid\">\n  <ul class=\"nav nav-tabs\" id=\"bargeTabs\">\n    <li class=\"nav-item\"><button class=\"nav-link active\" data-bs-toggle=\"tab\" data-bs-target=\"#general\">General</button></li>\n    <li class=\"nav-item\"><button class=\"nav-link\" data-bs-toggle=\"tab\" data-bs-target=\"#charters\">Charters</button></li>\n  </ul>\n  <div class=\"tab-content\">\n    <div class=\"tab-pane active\" id=\"general\">\n      <div class=\"card mb-3\">\n        <div class=\"card-body\">\n          <div class=\"row\">...</div>\n        </div>\n      </div>\n    </div>\n    <div class=\"tab-pane\" id=\"charters\">...</div>\n  </div>\n  <div class=\"row\">\n    <div class=\"col-12 text-end\">\n      <button type=\"submit\" class=\"btn btn-primary\">Submit</button>\n      <button type=\"button\" class=\"btn btn-secondary\">Cancel</button>\n    </div>\n  </div>\n</div>"
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "serverSide": true,
+      "features": [
+        "Server-side processing",
+        "Pagination",
+        "Sorting",
+        "Filtering",
+        "State saving (localStorage)",
+        "Responsive design",
+        "Column visibility toggle",
+        "Export functionality",
+        "Multi-row selection",
+        "Row formatting based on data values"
+      ],
+      "jsPattern": "$(document).ready(function() {\n  var dataTable = $('#bargeTable').DataTable({\n    processing: true,\n    serverSide: true,\n    stateSave: true,\n    responsive: true,\n    ajax: {\n      url: '/BargeSearch/BargeTable',\n      type: 'POST',\n      data: function(d) {\n        d.bargeNum = $('#BargeNum').val();\n        d.operatorId = $('#OperatorId').val();\n        d.status = $('#Status').val();\n        d.hullType = $('#HullType').val();\n        d.openTicketsOnly = $('#OpenTicketsOnly').is(':checked');\n        d.activeOnly = $('#ActiveOnly').is(':checked');\n      }\n    },\n    columns: [ /* 58 columns */ ],\n    order: [[1, 'asc']], // Sort by BargeNum\n    rowCallback: function(row, data) {\n      // Apply cross-charter background colors\n      if (data.crossCharterCode === 'CTC') {\n        $(row).css('background-color', '#FFFACD');\n      } else if (data.crossCharterCode === 'RTD') {\n        $(row).css('background-color', '#FFE4E1');\n      }\n    },\n    createdCell: function(cell, cellData, rowData, row, col) {\n      // Apply damage level cell colors\n      if (col === 39 && rowData.damageLevel) {\n        // Look up color from BargeTokenMapList\n        $(cell).css('background-color', damageColor);\n      }\n    }\n  });\n});"
+    },
+    "validationPattern": {
+      "library": "jquery.validate + unobtrusive validation",
+      "approach": "Server-side validation with client-side display",
+      "htmlPattern": "<span asp-validation-for=\"PropertyName\" class=\"text-danger\"></span>",
+      "jsInitialization": "$.validator.unobtrusive.parse('#formId');",
+      "complexRules": [
+        "Draft must be >= highest corner draft",
+        "DraftInches range 0-11",
+        "CustomerID required if not fleet-owned and not Terminal Mode",
+        "SizeCategory required if not fleet-owned and not Terminal Mode",
+        "FleetID required if EquipmentType is 'fleet-owned'",
+        "FacilityBerthID must match barge location",
+        "DamageNote must be blank if IsDamaged is not checked",
+        "FreeboardRange required if HasInsufficientFreeboard is checked",
+        "OutOfServiceDate must be later than InServiceDate",
+        "CoverConfig required if company-operated and CoverType is not OT",
+        "CoverType required if commodity requires cover",
+        "CoverSubTypeID required if commodity requires cover",
+        "CoverSubTypeID must be blank if CoverType is OT or blank"
+      ]
+    }
+  },
+  "javascriptFiles": {
+    "search": {
+      "filename": "bargeSearch.js",
+      "location": "wwwroot/js/",
+      "responsibilities": [
+        "Initialize DataTables with server-side processing",
+        "Wire up search button click handler",
+        "Wire up reset button click handler",
+        "Handle Enter key in search fields",
+        "Auto-search when dropdowns change",
+        "Handle expandable search options collapse/expand",
+        "Enable/disable location combos based on search type selection",
+        "Auto-uncheck 'Open tickets only' when 'Fleet-owned' equipment type selected",
+        "Handle facility combo expandable behavior (toggle between ConsignFacilities and AllFacilities)",
+        "Apply row formatting for cross-charter and damage level",
+        "State management with localStorage"
+      ]
+    },
+    "detail": {
+      "filename": "bargeEdit.js",
+      "location": "wwwroot/js/",
+      "responsibilities": [
+        "Initialize Select2 dropdowns",
+        "Split DateTime fields on page load",
+        "Combine DateTime fields on form submit",
+        "Handle BargeSeriesID change to auto-populate fields",
+        "Handle draft feet/inches conversions",
+        "Calculate SizeCategory when ExternalLength or ExternalWidth changes",
+        "Enable/disable conditional fields (DamageNote, FreeboardRange, CoverConfig, CoverSubTypeID)",
+        "Form validation",
+        "AJAX form submission (if needed)",
+        "Tab navigation"
+      ]
+    }
+  },
+  "viewModels": {
+    "search": {
+      "name": "BargeSearchViewModel",
+      "namespace": "BargeOpsAdmin.ViewModels",
+      "properties": [
+        "BargeNum (string)",
+        "OperatorId (string)",
+        "Status (string)",
+        "HullType (string)",
+        "CoverType (string)",
+        "TicketId (int?)",
+        "CustomerId (string)",
+        "LoadStatus (string)",
+        "OpenTicketsOnly (bool, default: true)",
+        "ActiveOnly (bool, default: true)",
+        "BoatSearchType (string)",
+        "BoatLocationId (string)",
+        "FacilitySearchType (string)",
+        "FacilityLocationId (string)",
+        "ShipSearchType (string)",
+        "ShipLocationId (string)",
+        "EquipmentType (string)",
+        "UscgNum (string)",
+        "SizeCategory (string)",
+        "RiverId (string)",
+        "StartMile (decimal?)",
+        "EndMile (decimal?)",
+        "CommodityId (string)",
+        "ContractNumber (string)",
+        "Operators (SelectList)",
+        "Customers (SelectList)",
+        "HullTypes (SelectList)",
+        "CoverTypes (SelectList)",
+        "LoadStatuses (SelectList)",
+        "Statuses (SelectList)",
+        "EquipmentTypes (SelectList)",
+        "SizeCategories (SelectList)",
+        "Rivers (SelectList)",
+        "Commodities (SelectList)",
+        "BoatSearchTypes (SelectList)",
+        "BoatLocations (SelectList)",
+        "FacilitySearchTypes (SelectList)",
+        "FacilityLocations (SelectList)",
+        "ShipSearchTypes (SelectList)",
+        "ShipLocations (SelectList)",
+        "IsFreightLicenseActive (bool)",
+        "IsTerminalLicenseActive (bool)",
+        "IsCommodityInfoCustomizationActive (bool)",
+        "SelectedFleetId (int)",
+        "CanModify (bool, permission-based)"
+      ]
+    },
+    "detail": {
+      "name": "BargeDetailViewModel",
+      "namespace": "BargeOpsAdmin.ViewModels",
+      "properties": [
+        "BargeId (int)",
+        "BargeNum (string, required)",
+        "UscgNum (string)",
+        "IsActive (bool, default: true)",
+        "OwnerId (string)",
+        "OperatorId (string, conditionally required)",
+        "HullType (string)",
+        "BargeSeriesId (string)",
+        "ExternalLength (decimal?)",
+        "ExternalWidth (decimal?)",
+        "ExternalDepth (decimal?)",
+        "SizeCategory (string, conditionally required)",
+        "Draft (decimal?)",
+        "DraftFeet (int?)",
+        "DraftInches (int?, range: 0-11)",
+        "DraftCalculated (decimal?)",
+        "DraftCalculatedFeet (int?)",
+        "DraftCalculatedInches (int?, range: 0-11)",
+        "DraftPortBow (decimal?)",
+        "DraftPortStern (decimal?)",
+        "DraftStarboardBow (decimal?)",
+        "DraftStarboardStern (decimal?)",
+        "CoverType (string, conditionally required)",
+        "CoverConfig (string, conditionally required)",
+        "CoverSubTypeId (string, conditionally required)",
+        "CommodityId (string)",
+        "LoadStatus (string)",
+        "CleanStatus (string)",
+        "RepairStatus (string)",
+        "DamageLevel (string)",
+        "DamageNote (string, conditionally required)",
+        "IsDamaged (bool)",
+        "IsCargoDamaged (bool)",
+        "IsLeaker (bool)",
+        "IsDryDocked (bool)",
+        "IsRepairScheduled (bool)",
+        "HasInsufficientFreeboard (bool)",
+        "FreeboardRange (string, conditionally required)",
+        "FleetId (string, conditionally required)",
+        "EquipmentType (string)",
+        "InServiceDate (DateTime?)",
+        "InServiceTime (string)",
+        "OutOfServiceDate (DateTime?)",
+        "OutOfServiceTime (string)",
+        "HullNumber (string)",
+        "GlAccountNum (string)",
+        "BargeType (string)",
+        "HasAnchorWire (bool, default: false)",
+        "RakeDirection (string)",
+        "ColorPairId (string)",
+        "Owners (SelectList)",
+        "Operators (SelectList)",
+        "HullTypes (SelectList)",
+        "BargeSeries (SelectList)",
+        "CoverTypes (SelectList)",
+        "CoverConfigs (SelectList)",
+        "CoverSubTypes (SelectList)",
+        "Commodities (SelectList)",
+        "LoadStatuses (SelectList)",
+        "CleanStatuses (SelectList)",
+        "RepairStatuses (SelectList)",
+        "DamageLevels (SelectList)",
+        "FreeboardRanges (SelectList)",
+        "Fleets (SelectList)",
+        "EquipmentTypes (SelectList)",
+        "RakeDirections (SelectList)",
+        "ColorPairs (SelectList)",
+        "Charters (List<BargeCharterViewModel>)",
+        "IsCompanyOperatedBarge (bool)",
+        "IsTerminalMode (bool)",
+        "CanModify (bool, permission-based)",
+        "IsReadOnly (bool, permission-based)"
+      ]
+    },
+    "charterChild": {
+      "name": "BargeCharterViewModel",
+      "namespace": "BargeOpsAdmin.ViewModels",
+      "properties": [
+        "BargeCha rterId (int)",
+        "BargeId (int, FK)",
+        "ChartererCustomerId (string)",
+        "StartDate (DateTime)",
+        "EndDate (DateTime?)",
+        "Notes (string)"
+      ]
+    }
+  },
+  "views": {
+    "search": {
+      "main": "Views/BargeSearch/Index.cshtml",
+      "partials": [
+        "_Search.cshtml (search criteria card with basic and advanced sections)",
+        "_SearchResults.cshtml (DataTables grid)"
+      ]
+    },
+    "detail": {
+      "main": "Views/BargeSearch/Edit.cshtml",
+      "alternative": "Views/BargeSearch/Create.cshtml"
+    }
+  },
+  "controllers": {
+    "ui": {
+      "name": "BargeSearchController",
+      "namespace": "BargeOpsAdmin.Controllers",
+      "baseClass": "AppController",
+      "actions": [
+        "Index() - Search page",
+        "BargeTable() - DataTables server-side endpoint",
+        "Create() - Create new barge",
+        "Edit(int id) - Edit existing barge",
+        "Delete(int id) - Delete barge",
+        "CloseTickets(List<int> bargeIds) - Bulk close tickets",
+        "Export() - Export to Excel"
+      ]
+    }
+  },
+  "cssFiles": {
+    "custom": {
+      "filename": "bargeSearch.css",
+      "location": "wwwroot/css/",
+      "purpose": "Custom styling overrides for Barge screens",
+      "includes": [
+        "Search title bar styling (blue background)",
+        "Cross-charter row background colors",
+        "Damage level cell colors",
+        "Expandable section styling"
+      ]
+    }
+  },
+  "dependencies": {
+    "clientSide": [
+      "Bootstrap 5",
+      "DataTables (with Bootstrap 5 styling)",
+      "Select2 (for enhanced dropdowns)",
+      "jQuery",
+      "jQuery Validate",
+      "jQuery Unobtrusive Validation",
+      "Font Awesome (for icons)"
+    ],
+    "serverSide": [
+      "ASP.NET Core 8 MVC",
+      "FluentValidation (for ViewModel validation)",
+      "AutoMapper (for DTO mapping)",
+      "Entity Framework Core"
+    ]
+  },
+  "specialFeatures": {
+    "expandableSearchOptions": {
+      "description": "Collapsible advanced search section",
+      "implementation": "Bootstrap collapse component with toggle button text change",
+      "defaultState": "Collapsed",
+      "expandedText": "Hide search options",
+      "collapsedText": "Show search options"
+    },
+    "conditionalLocationCombos": {
+      "description": "Location combos enabled/disabled based on search type selection",
+      "examples": [
+        "Boat Search Type enables Boat Location",
+        "Facility Search Type enables Facility Location",
+        "Ship Search Type enables Ship Location"
+      ],
+      "implementation": "JavaScript onChange handlers"
+    },
+    "expandableFacilityCombo": {
+      "description": "Facility combo toggles between ConsignFacilities and AllFacilities modes",
+      "legacyBehavior": "Header click toggles mode",
+      "modernEquivalent": "Toggle button next to dropdown with Select2 data reload"
+    },
+    "equipmentTypeLogic": {
+      "description": "Auto-uncheck 'Open tickets only' when 'Fleet-owned' selected",
+      "implementation": "JavaScript onChange handler for Equipment Type dropdown"
+    },
+    "bargeSeriesAutoPopulation": {
+      "description": "Selecting Barge Series auto-populates Owner, Operator, Hull Type, Cover Type, and dimensions",
+      "implementation": "JavaScript onChange handler with AJAX call or data attributes"
+    },
+    "draftConversions": {
+      "description": "Draft values support both decimal (feet) and feet/inches representations",
+      "implementation": "JavaScript functions to convert between decimal and feet/inches on change"
+    },
+    "sizeCategoryAutoCalculation": {
+      "description": "Size category auto-calculated when External Length or Width changes",
+      "implementation": "JavaScript onChange handler with calculation logic or AJAX call"
+    },
+    "conditionalFieldRequirements": {
+      "description": "Many fields have conditional required/blank rules",
+      "examples": [
+        "CustomerID required if not fleet-owned and not Terminal Mode",
+        "FleetID required if EquipmentType is 'fleet-owned'",
+        "DamageNote must be blank if IsDamaged is not checked",
+        "FreeboardRange required if HasInsufficientFreeboard is checked",
+        "CoverConfig required if company-operated and CoverType is not OT",
+        "CoverSubTypeID required if commodity requires cover"
+      ],
+      "implementation": "FluentValidation with conditional rules + JavaScript for UI enable/disable"
+    },
+    "rowFormatting": {
+      "description": "Grid rows formatted based on CrossCharterCode and DamageLevel",
+      "implementation": "DataTables rowCallback and createdCell callbacks with color lookup from server"
+    },
+    "columnVisibility": {
+      "description": "Grid columns conditionally visible based on license features",
+      "features": [
+        "Freight license (FreightCustomer, ContractNumber, etc.)",
+        "Terminal license (CargoHandlingStatus, Cargo, etc.)",
+        "CommodityInfoCustomization (SurveyTons as Quantity)"
+      ],
+      "implementation": "Server-side column configuration in DataTables ajax response"
+    },
+    "multiRowSelection": {
+      "description": "Grid supports multi-select for bulk ticket closing",
+      "implementation": "DataTables with checkboxes and select extension"
+    },
+    "dateTimeSplitting": {
+      "description": "ALL datetime fields MUST be split into separate date and time inputs with 24-hour format",
+      "displayFormat": "MM/dd/yyyy HH:mm (military time)",
+      "examples": [
+        "InServiceDate + InServiceTime",
+        "OutOfServiceDate + OutOfServiceTime"
+      ],
+      "implementation": "JavaScript split on page load, combine on submit"
+    }
+  },
+  "accessibility": {
+    "standards": "WCAG 2.1 Level AA",
+    "requirements": [
+      "All form inputs must have associated labels (use asp-for)",
+      "All interactive elements must be keyboard accessible",
+      "Use aria-label for icon-only buttons",
+      "Use aria-required for required fields",
+      "Use aria-expanded for collapse/expand sections",
+      "Ensure color contrast meets standards (cross-charter and damage level colors)",
+      "Provide focus indicators",
+      "Use semantic HTML5 elements"
+    ]
+  },
+  "responsiveDesign": {
+    "approach": "Mobile-first with Bootstrap 5 grid system",
+    "breakpoints": [
+      "xs: <576px (mobile)",
+      "sm: ≥576px (tablet portrait)",
+      "md: ≥768px (tablet landscape)",
+      "lg: ≥992px (desktop)",
+      "xl: ≥1200px (large desktop)"
+    ],
+    "dataTablesResponsive": "Use responsive extension for grid column collapsing on small screens",
+    "searchForm": "Stack form fields vertically on mobile, side-by-side on larger screens"
+  },
+  "commonMistakes": {
+    "avoid": [
+      "Using datetime-local instead of split date + time inputs",
+      "Using 12-hour time format (hh:mm tt) instead of 24-hour (HH:mm)",
+      "Not splitting datetime on page load",
+      "Using inline styles instead of Bootstrap classes",
+      "Not using asp-for tag helpers for form inputs",
+      "Forgetting to initialize Select2 on dropdowns",
+      "Not implementing server-side DataTables processing",
+      "Hardcoding URLs instead of using Url.Action()",
+      "Not handling conditional field requirements properly",
+      "Missing aria attributes for accessibility",
+      "Not implementing row formatting callbacks",
+      "Not handling column visibility based on licenses",
+      "Not implementing auto-population on BargeSeriesID change",
+      "Not implementing draft conversions",
+      "Not implementing size category auto-calculation",
+      "Not implementing expandable facility combo toggle"
+    ]
+  },
+  "implementationNotes": [
+    "CRITICAL: ALL datetime fields MUST use military time (24-hour format) with separate date and time inputs",
+    "Use Bootstrap 5 card components instead of UltraPanel/UltraGroupBox",
+    "Replace UltraGrid with DataTables configured for server-side processing with 58 columns",
+    "Use Select2 for all dropdown controls (UltraCombo)",
+    "Implement expandable search section using Bootstrap collapse",
+    "Implement conditional location combo enable/disable logic",
+    "Implement expandable facility combo with toggle button and Select2 reload",
+    "Implement Equipment Type auto-uncheck 'Open tickets only' logic",
+    "Implement BargeSeriesID auto-population logic",
+    "Implement draft decimal/feet+inches conversions",
+    "Implement size category auto-calculation",
+    "Implement conditional field required/blank logic with FluentValidation and JavaScript",
+    "Implement row formatting with DataTables callbacks and server-side color lookup",
+    "Implement column visibility based on license features",
+    "Implement multi-row selection for bulk ticket closing",
+    "Use Font Awesome icons for all buttons",
+    "Ensure all forms use asp-for tag helpers for proper model binding",
+    "Implement jquery.validate for client-side validation",
+    "Use ViewModels for all data passing (no ViewBag/ViewData)",
+    "Store DataTables state in localStorage with versioned keys",
+    "Implement proper permission checks in controllers and views",
+    "Handle validation messages via toast notifications or validation summary (not status bar)"
+  ],
+  "migrationPriority": "High",
+  "complexity": "Very High",
+  "estimatedEffort": "10-15 days",
+  "dependencies": [
+    "Customer data for Operator/Owner dropdowns",
+    "HullType lookup data",
+    "CoverType lookup data",
+    "LoadStatus lookup data",
+    "BargeStatus lookup data",
+    "EquipmentType lookup data",
+    "SizeCategory lookup data",
+    "River lookup data",
+    "Commodity lookup data",
+    "BargeSeries data with auto-population logic",
+    "Location data (Boat, Facility, Ship)",
+    "BoatSearchType, FacilitySearchType, ShipSearchType lookup data",
+    "CoverSubType lookup data",
+    "CleanStatus, RepairStatus, DamageLevel lookup data",
+    "FreeboardRange lookup data",
+    "Fleet lookup data",
+    "RakeDirection lookup data",
+    "ColorPair lookup data",
+    "BargeCharter child entity implementation",
+    "GlobalSetting for cross-charter colors and RequireBargeCoverType",
+    "BargeTokenMapList for damage level color mapping",
+    "License feature flags (Freight, Terminal, CommodityInfoCustomization)"
+  ],
+  "notes": [
+    "Barge is the most complex entity in the system with 58 grid columns, conditional visibility, row formatting, and extensive business rules",
+    "Search form has two sections: basic (always visible) and advanced (collapsible)",
+    "Detail form uses tabs for organization (General, Charters, etc.)",
+    "Many fields have conditional required/blank rules based on other field values",
+    "BargeSeriesID acts as a template that auto-populates multiple fields",
+    "Draft values support both decimal and feet/inches representations",
+    "Size category is auto-calculated from dimensions",
+    "Grid supports multi-row selection for bulk operations",
+    "Grid rows are color-coded based on cross-charter status and damage level",
+    "Grid columns are conditionally visible based on license features",
+    "DateTime fields MUST use 24-hour format with split date and time inputs",
+    "Facility combo has special expandable behavior (toggle between two data sets)",
+    "Equipment type selection affects other field states (auto-uncheck checkbox)",
+    "Search types enable/disable associated location combos",
+    "Validation messages should use toast notifications instead of status bar",
+    "Grid settings are saved/restored per user with localStorage",
+    "All DateTime displays MUST use MM/dd/yyyy HH:mm format (24-hour time)"
+  ]
+}

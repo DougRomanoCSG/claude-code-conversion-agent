@@ -1,0 +1,737 @@
+{
+  "formName": "frmBargeDailyExpenseSearch",
+  "formType": "Search",
+  "relatedForms": [
+    {
+      "formName": "frmBargeDailyExpenseDetail",
+      "formType": "DetailEditList",
+      "relationship": "Modal detail form for editing expense dates and line items"
+    }
+  ],
+  "primaryWorkflows": [
+    {
+      "name": "SearchAndViewDailyExpenses",
+      "description": "User searches for barge daily expenses by effective date and views results",
+      "steps": [
+        {
+          "step": 1,
+          "action": "EnterEffectiveDate",
+          "controls": ["dtEffectiveDate"],
+          "defaultValue": "Date.Today",
+          "notes": "Effective date defaults to today's date on form load and reset"
+        },
+        {
+          "step": 2,
+          "action": "ClickFind",
+          "button": "btnFind",
+          "result": "Results displayed in grid (grdSearch)",
+          "dataSource": "Lists.BargeDailyExpenseDateSearch.GetList(effectiveDate).List"
+        },
+        {
+          "step": 3,
+          "action": "ViewResults",
+          "control": "grdSearch",
+          "columns": ["EffectiveDate"],
+          "gridBehavior": "AutoFitStyle.ExtendLastColumn"
+        }
+      ]
+    },
+    {
+      "name": "CreateNewDailyExpenseDate",
+      "description": "User creates a new barge daily expense date record with line items",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickAdd",
+          "trigger": "Main toolbar Add button via IBaseSearch.ItemAdd",
+          "navigation": "Opens frmBargeDailyExpenseDetail as modal dialog"
+        },
+        {
+          "step": 2,
+          "action": "InitializeNewRecord",
+          "businessObject": "BargeDailyExpenseDate.NewBargeDailyExpenseDate",
+          "mode": "New",
+          "formTitle": "New - Barge Daily Expense Detail"
+        },
+        {
+          "step": 3,
+          "action": "EnterEffectiveDate",
+          "control": "dtEffectiveDate",
+          "validation": "Required",
+          "businessObjectProperty": "BargeDailyExpenseDate.EffectiveDate"
+        },
+        {
+          "step": 4,
+          "action": "AddDailyExpenseLineItems",
+          "control": "grdBargeDailyExpenses",
+          "button": "Toolbar Add button",
+          "description": "Creates new BargeDailyExpense child objects in collection"
+        },
+        {
+          "step": 5,
+          "action": "EditInGridCells",
+          "editableColumns": [
+            "SizeCategoryUnbound (dropdown: BargeSizeCategory)",
+            "CoverTypeUnbound (dropdown: CoverType)",
+            "CoverSubTypeIDUnbound (dropdown: filtered by CoverType)",
+            "IsCharteredInUnbound (boolean)",
+            "DailyExpenseUnbound (decimal with currency format)"
+          ],
+          "editMode": "InlineGridEditing",
+          "updateMode": "OnCellChangeOrLostFocus",
+          "notes": "Unbound columns transfer data to/from bound business object properties"
+        },
+        {
+          "step": 6,
+          "action": "ClickSubmit",
+          "button": "btnSubmit",
+          "validation": "ValidatorExtender validates all fields",
+          "businessObjectMethod": "BargeDailyExpenseDate.ApplyEdit",
+          "result": "Dialog closes with DialogResult.OK"
+        }
+      ]
+    },
+    {
+      "name": "EditExistingDailyExpenseDate",
+      "description": "User edits an existing barge daily expense date and its line items",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRow",
+          "control": "grdSearch",
+          "trigger": "Row selection"
+        },
+        {
+          "step": 2,
+          "action": "ClickModify",
+          "trigger": "Main toolbar Modify button via IBaseSearch.ItemModify",
+          "navigation": "Opens frmBargeDailyExpenseDetail as modal dialog"
+        },
+        {
+          "step": 3,
+          "action": "LoadExistingRecord",
+          "businessObject": "BargeDailyExpenseDate.GetBargeDailyExpenseDate(GridControlIndex)",
+          "mode": "Edit",
+          "formTitle": "{EffectiveDate} - Barge Daily Expense Detail"
+        },
+        {
+          "step": 4,
+          "action": "ModifyEffectiveDate",
+          "control": "dtEffectiveDate",
+          "validation": "Required"
+        },
+        {
+          "step": 5,
+          "action": "EditLineItems",
+          "control": "grdBargeDailyExpenses",
+          "operations": [
+            "Inline edit existing rows",
+            "Add new expense line items (toolbar Add)",
+            "Remove expense line items (toolbar Remove)"
+          ],
+          "inlineEditBehavior": "Cells immediately enter edit mode on tab/click"
+        },
+        {
+          "step": 6,
+          "action": "ClickSubmit",
+          "button": "btnSubmit",
+          "validation": "ValidatorExtender validates all fields",
+          "businessObjectMethod": "BargeDailyExpenseDate.ApplyEdit",
+          "result": "Dialog closes and search form refreshes"
+        }
+      ]
+    },
+    {
+      "name": "DeleteDailyExpenseDate",
+      "description": "User deletes a barge daily expense date record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRow",
+          "control": "grdSearch"
+        },
+        {
+          "step": 2,
+          "action": "ClickRemove",
+          "trigger": "Main toolbar Remove button via IBaseSearch.ItemRemove"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDelete",
+          "dialog": "Main.ItemRemoveDialog('Barge Daily Expense Date')",
+          "options": ["Yes", "No"]
+        },
+        {
+          "step": 4,
+          "action": "DeleteRecord",
+          "businessObjectMethod": "BargeDailyExpenseDate.DeleteBargeDailyExpenseDate(GridControlIndex)",
+          "result": "Grid refreshes without selecting first row"
+        }
+      ]
+    },
+    {
+      "name": "DeleteDailyExpenseLineItem",
+      "description": "User removes a line item from daily expenses within detail form",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRow",
+          "control": "grdBargeDailyExpenses",
+          "context": "Within frmBargeDailyExpenseDetail"
+        },
+        {
+          "step": 2,
+          "action": "ClickRemove",
+          "trigger": "Detail form toolbar Remove button"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDelete",
+          "dialog": "Main.ItemRemoveDialog('Barge Daily Expense')",
+          "options": ["Yes", "No"]
+        },
+        {
+          "step": 4,
+          "action": "RemoveFromCollection",
+          "businessObjectMethod": "BargeDailyExpenseDate.BargeDailyExpenses.Remove(selectedExpense)",
+          "result": "Grid refreshes to show remaining line items"
+        }
+      ]
+    },
+    {
+      "name": "CancelEditing",
+      "description": "User cancels changes and closes detail form",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickCancel",
+          "button": "btnCancel",
+          "businessObjectMethod": "BargeDailyExpenseDate.CancelEdit (via base form)"
+        },
+        {
+          "step": 2,
+          "action": "CloseDialog",
+          "result": "Dialog closes with DialogResult.Cancel, no changes persisted"
+        }
+      ]
+    },
+    {
+      "name": "ResetSearchCriteria",
+      "description": "User resets search criteria to default values",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickReset",
+          "button": "btnReset"
+        },
+        {
+          "step": 2,
+          "action": "ResetFields",
+          "controls": {
+            "dtEffectiveDate": "Date.Today"
+          },
+          "result": "Search criteria returns to initial state"
+        }
+      ]
+    }
+  ],
+  "formStates": {
+    "searchForm": [
+      {
+        "state": "Initial",
+        "description": "Form first loaded via pnlSearch.HandleCreated",
+        "gridState": "Empty",
+        "controls": {
+          "dtEffectiveDate": "Date.Today (default value)",
+          "grdSearch": "Empty grid",
+          "btnFind": "Enabled",
+          "btnReset": "Enabled"
+        },
+        "focus": "dtEffectiveDate (via IBaseSearch.FocusFirstField)"
+      },
+      {
+        "state": "ResultsDisplayed",
+        "description": "After successful search",
+        "gridState": "Populated with BargeDailyExpenseDate records",
+        "controls": {
+          "grdSearch": "Shows effective dates",
+          "btnFind": "Enabled",
+          "btnReset": "Enabled"
+        },
+        "toolbarButtons": {
+          "Add": "Enabled (subject to security)",
+          "Modify": "Enabled if row selected",
+          "Remove": "Enabled if row selected"
+        }
+      },
+      {
+        "state": "NoResults",
+        "description": "Search returned no records",
+        "gridState": "Empty",
+        "toolbarButtons": {
+          "Add": "Enabled (subject to security)",
+          "Modify": "Disabled",
+          "Remove": "Disabled"
+        }
+      }
+    ],
+    "detailForm": [
+      {
+        "state": "NewRecord",
+        "description": "Creating new BargeDailyExpenseDate",
+        "formTitle": "New - Barge Daily Expense Detail",
+        "controls": {
+          "dtEffectiveDate": "Empty, awaiting user input",
+          "grdBargeDailyExpenses": "Empty, no line items yet"
+        },
+        "businessObject": "BargeDailyExpenseDate.IsNew = True",
+        "businessObjectState": "BeginEdit called"
+      },
+      {
+        "state": "EditingExistingRecord",
+        "description": "Modifying existing BargeDailyExpenseDate",
+        "formTitle": "{EffectiveDate} - Barge Daily Expense Detail",
+        "controls": {
+          "dtEffectiveDate": "Populated with existing date",
+          "grdBargeDailyExpenses": "Populated with existing BargeDailyExpenses collection"
+        },
+        "businessObject": "BargeDailyExpenseDate.IsNew = False",
+        "businessObjectState": "BeginEdit called"
+      },
+      {
+        "state": "GridInEditMode",
+        "description": "User actively editing a cell in the grid",
+        "gridBehavior": {
+          "activeCell": "In edit mode",
+          "selectedRows": "Cleared (grdBargeDailyExpenses.Selected.Rows.Clear())",
+          "toolbarButtons": "Disabled during edit (EnableDisableControls called)"
+        },
+        "keyboardNavigation": {
+          "Right": "Exit edit, move to next cell, re-enter edit",
+          "Left": "Exit edit, move to previous cell, re-enter edit",
+          "Down": "Exit edit, move down (if not combo), re-enter edit",
+          "Up": "Exit edit, move up (if not combo), re-enter edit",
+          "Tab": "Move to next cell per TabNavigation.NextControlOnLastCell"
+        }
+      },
+      {
+        "state": "GridNotInEditMode",
+        "description": "Grid has rows but no active cell editing",
+        "gridBehavior": {
+          "rowSelection": "Single row can be selected",
+          "toolbarButtons": {
+            "Add": "Enabled",
+            "Remove": "Enabled if row selected"
+          }
+        }
+      },
+      {
+        "state": "Validating",
+        "description": "User clicked Submit, validation in progress",
+        "validationBehavior": {
+          "validatorExtender": "Checks all fields with validation rules",
+          "displayControl": "staStatus (status bar)",
+          "onSuccess": "ApplyEdit called, form closes",
+          "onFailure": "Form remains open, validation messages shown"
+        }
+      }
+    ]
+  },
+  "navigationPatterns": [
+    {
+      "from": "frmBargeDailyExpenseSearch",
+      "to": "frmBargeDailyExpenseDetail",
+      "trigger": "ItemAdd (toolbar Add button)",
+      "modalType": "ShowDialog",
+      "dataPassedForward": "BargeDailyExpenseDate.NewBargeDailyExpenseDate",
+      "dataPassedBack": "DialogResult (OK or Cancel)",
+      "onDialogClosed": "Search form automatically refreshes if needed"
+    },
+    {
+      "from": "frmBargeDailyExpenseSearch",
+      "to": "frmBargeDailyExpenseDetail",
+      "trigger": "ItemModify (toolbar Modify button)",
+      "modalType": "ShowDialog",
+      "dataPassedForward": "BargeDailyExpenseDate.GetBargeDailyExpenseDate(GridControlIndex)",
+      "dataPassedBack": "DialogResult (OK or Cancel)",
+      "onDialogClosed": "Search form automatically refreshes if needed"
+    }
+  ],
+  "eventHandlerChains": {
+    "searchForm": {
+      "pnlSearch.HandleCreated": {
+        "trigger": "Panel re-parented into main form",
+        "sequence": [
+          "FormatControls() - Sets up grid and controls",
+          "MyAppSettingHelper.RestoreGrid() - Restores user grid settings",
+          "Grid unique identifier set to 'BargeDailyExpenseDateID'",
+          "Initial sort order: EffectiveDate Descending",
+          "dtEffectiveDate.Value = Date.Today"
+        ]
+      },
+      "pnlSearch.HandleDestroyed": {
+        "trigger": "Panel destroyed",
+        "sequence": [
+          "MyAppSettingHelper.SaveGrid() - Saves user grid settings"
+        ]
+      },
+      "btnFind.Click": {
+        "trigger": "User clicks Find button",
+        "sequence": [
+          "RefreshList(selectFirstRow: True)",
+          "Calls Lists.BargeDailyExpenseDateSearch.GetList(effectiveDate)",
+          "RefreshListBase populates grid",
+          "First row selected automatically"
+        ]
+      },
+      "btnReset.Click": {
+        "trigger": "User clicks Reset button",
+        "sequence": [
+          "ResetControls()",
+          "dtEffectiveDate.Value = Date.Today"
+        ]
+      },
+      "IBaseSearch.ItemAdd": {
+        "trigger": "Main toolbar Add button",
+        "sequence": [
+          "Using frm As New frmBargeDailyExpenseDetail",
+          "frm.Initialize(BargeDailyExpenseDate.NewBargeDailyExpenseDate)",
+          "frm.ShowDialog(Me.LocalPanel.Parent)",
+          "Dialog closed, form disposes via Using statement"
+        ]
+      },
+      "IBaseSearch.ItemModify": {
+        "trigger": "Main toolbar Modify button",
+        "sequence": [
+          "Using frm As New frmBargeDailyExpenseDetail",
+          "frm.Initialize(BargeDailyExpenseDate.GetBargeDailyExpenseDate(GridControlIndex))",
+          "frm.ShowDialog(Me.LocalPanel.Parent)",
+          "Dialog closed, form disposes via Using statement"
+        ]
+      },
+      "IBaseSearch.ItemRemove": {
+        "trigger": "Main toolbar Remove button",
+        "sequence": [
+          "Main.ItemRemoveDialog confirmation",
+          "If Yes: BargeDailyExpenseDate.DeleteBargeDailyExpenseDate(GridControlIndex)",
+          "RefreshList(selectFirstRow: False)"
+        ]
+      }
+    },
+    "detailForm": {
+      "frmDetailEdit.Load": {
+        "trigger": "Form loads",
+        "sequence": [
+          "FormatControls() - Sets up grid, validation, combos",
+          "LoadControlsForBargeDailyExpenseDate() - Populates parent fields",
+          "RefreshList(selectFirstRow: False) - Populates child grid",
+          "_IsLoading flag controls InitializeRow behavior"
+        ]
+      },
+      "frmDetailEdit.FormClosed": {
+        "trigger": "Form closing",
+        "sequence": [
+          "MyAppSettingHelper.SaveGrid() - Saves user grid settings"
+        ]
+      },
+      "btnSubmit.Click": {
+        "trigger": "User clicks Submit button",
+        "sequence": [
+          "SubmitNoRefreshClick() - Base form method",
+          "ValidatorExtender validates all fields",
+          "If valid: BusinessObject.ApplyEdit()",
+          "DialogResult = OK, form closes"
+        ]
+      },
+      "btnCancel.Click": {
+        "trigger": "User clicks Cancel button",
+        "sequence": [
+          "CancelClick() - Base form method",
+          "BusinessObject.CancelEdit()",
+          "DialogResult = Cancel, form closes"
+        ]
+      },
+      "ToolbarsManager.ToolClick (Add)": {
+        "trigger": "Toolbar Add button for line items",
+        "sequence": [
+          "_IsAddingRow = True",
+          "ItemAdd()",
+          "BargeDailyExpenses.NewBargeDailyExpense created",
+          "Added to BargeDailyExpenseDate.BargeDailyExpenses collection",
+          "EnableDisableControls()",
+          "_IsAddingRow = False"
+        ]
+      },
+      "ToolbarsManager.ToolClick (Remove)": {
+        "trigger": "Toolbar Remove button for line items",
+        "sequence": [
+          "ItemRemove()",
+          "Confirmation dialog",
+          "If Yes: Remove from BargeDailyExpenses collection",
+          "RefreshList(selectFirstRow: False)"
+        ]
+      },
+      "grdBargeDailyExpenses.Enter": {
+        "trigger": "User tabs into grid",
+        "sequence": [
+          "First row activated",
+          "PerformAction(ActivateCell)",
+          "PerformAction(EnterEditMode)",
+          "Grid immediately ready for editing"
+        ]
+      },
+      "grdBargeDailyExpenses.InitializeLayout": {
+        "trigger": "Grid layout initializing",
+        "sequence": [
+          "Add unbound columns to grid",
+          "SizeCategoryUnbound, CoverTypeUnbound, CoverSubTypeIDUnbound, IsCharteredInUnbound, DailyExpenseUnbound",
+          "Set Nullable properties",
+          "Set DataType for boolean columns"
+        ]
+      },
+      "grdBargeDailyExpenses.InitializeRow": {
+        "trigger": "Each row added to grid",
+        "sequence": [
+          "If _IsLoading: AssignEditorControlsToRow() + TransferBoundToUnbound()",
+          "If _IsAddingRow: AssignEditorControlsToRow()",
+          "Combos populated for SizeCategory, CoverType, CoverSubType",
+          "Data copied from bound to unbound cells"
+        ]
+      },
+      "grdBargeDailyExpenses.AfterEnterEditMode": {
+        "trigger": "Cell enters edit mode",
+        "sequence": [
+          "Selected.Rows.Clear() - Clears row selection",
+          "EnableDisableControls() - Disables toolbar during edit"
+        ]
+      },
+      "grdBargeDailyExpenses.BeforeExitEditMode": {
+        "trigger": "Before exiting cell edit mode",
+        "sequence": [
+          "If CancellingEditOperation: Return immediately",
+          "Field-level validation (e.g., DailyExpense must be decimal)",
+          "If invalid: e.Cancel = True, stay in edit mode",
+          "Status bar shows error message",
+          "If ForceExit: ActiveCell.CancelUpdate()"
+        ]
+      },
+      "grdBargeDailyExpenses.AfterExitEditMode": {
+        "trigger": "After exiting cell edit mode",
+        "sequence": [
+          "Transfer data from unbound cells to business object properties",
+          "expense.SizeCategory = ActiveCell.Value (for SizeCategoryUnbound)",
+          "expense.CoverType = ActiveCell.Value (for CoverTypeUnbound)",
+          "expense.CoverSubTypeID = ActiveCell.Value (for CoverSubTypeIDUnbound)",
+          "expense.IsCharteredIn = ActiveCell.Value (for IsCharteredInUnbound)",
+          "expense.DailyExpense = ActiveCell.Value (for DailyExpenseUnbound)",
+          "If CoverType changes: Clear CoverSubTypeID and update combo"
+        ]
+      },
+      "grdBargeDailyExpenses.CellChange": {
+        "trigger": "Cell value changes",
+        "sequence": [
+          "If _IsLoading: Exit (ignore during initial load)",
+          "If CoverType changed: Clear CoverSubTypeID",
+          "UpdateCoverSubTypeCombo() - Repopulates filtered list",
+          "TransferCoverSubTypeID() - Updates unbound cell"
+        ]
+      },
+      "grdBargeDailyExpenses.CellDataError": {
+        "trigger": "Data error in cell",
+        "sequence": [
+          "e.RaiseErrorEvent = False - Suppresses default dialog",
+          "e.StayInEditMode = True - Keeps focus on invalid cell"
+        ]
+      },
+      "grdBargeDailyExpenses.KeyDown": {
+        "trigger": "Keyboard navigation in grid",
+        "arrowKeyBehavior": "Custom navigation exits edit mode, moves cell, re-enters edit mode",
+        "notes": "Up/Down keys check if cell is combo before moving to prevent interfering with combo dropdown"
+      },
+      "dtEffectiveDate.Validated": {
+        "trigger": "Effective date field validated",
+        "sequence": [
+          "If enabled and not readonly:",
+          "_BargeDailyExpenseDate.EffectiveDate = dtEffectiveDate.Text",
+          "dtEffectiveDate.Text = _BargeDailyExpenseDate.EffectiveDate (formatted by business object)"
+        ]
+      }
+    }
+  },
+  "formLifecycleMethods": {
+    "searchForm": {
+      "initialization": "pnlSearch.HandleCreated (not Form_Load)",
+      "cleanup": "pnlSearch.HandleDestroyed",
+      "baseImplements": "IBaseSearch",
+      "inheritFrom": "frmBaseSearch",
+      "subsystem": "SubSystem.frmBargeDailyExpenseSearch"
+    },
+    "detailForm": {
+      "initialization": "frmDetailEdit.Load",
+      "cleanup": "frmDetailEdit.FormClosed",
+      "baseImplements": "IBaseDetailEdit",
+      "inheritFrom": "frmBaseDetailEditList",
+      "subsystem": "SubSystem.frmBargeDailyExpenseSearch (detail inherits parent's subsystem)"
+    }
+  },
+  "statePersistencePatterns": {
+    "gridSettings": {
+      "saveOn": "pnlSearch.HandleDestroyed (search), frmDetailEdit.FormClosed (detail)",
+      "restoreOn": "pnlSearch.HandleCreated (search), implied on detail load",
+      "method": "MyAppSettingHelper.SaveGrid() and RestoreGrid()",
+      "persisted": "Column widths, sort orders, visible columns, column order"
+    },
+    "businessObjectEditing": {
+      "pattern": "BeginEdit/CancelEdit/ApplyEdit",
+      "beginEdit": "Called in Initialize() method when form opens",
+      "cancelEdit": "Called when btnCancel clicked or form cancelled",
+      "applyEdit": "Called when btnSubmit clicked after validation",
+      "scope": "Parent object (BargeDailyExpenseDate) and all child objects (BargeDailyExpenses collection)"
+    },
+    "gridRowReselection": {
+      "identifier": "BargeDailyExpenseDateID",
+      "behavior": "After RefreshList, previously selected row is reselected",
+      "note": "Disabled for detail form grid due to interference with inline editing"
+    },
+    "formState": {
+      "_IsLoading": "Flag to prevent event handlers from executing during initial form load",
+      "_IsAddingRow": "Flag to control InitializeRow behavior when adding new line items"
+    }
+  },
+  "modalDialogPatterns": {
+    "detailFormUsage": "Modal dialog opened via ShowDialog",
+    "parentControl": "Me.LocalPanel.Parent (main form explorer panel)",
+    "dialogResult": {
+      "onSubmit": "DialogResult.OK",
+      "onCancel": "DialogResult.Cancel"
+    },
+    "disposePattern": "Using statement ensures form disposal after dialog closes",
+    "businessObjectLifecycle": {
+      "new": "BargeDailyExpenseDate.NewBargeDailyExpenseDate creates new instance",
+      "existing": "BargeDailyExpenseDate.GetBargeDailyExpenseDate(id) retrieves from database",
+      "save": "ApplyEdit persists changes",
+      "discard": "CancelEdit reverts changes, original data unchanged"
+    }
+  },
+  "refreshUpdateTriggers": {
+    "searchGridRefresh": [
+      {
+        "trigger": "btnFind.Click",
+        "method": "RefreshList(selectFirstRow: True)",
+        "selectFirstRow": true
+      },
+      {
+        "trigger": "After delete (ItemRemove)",
+        "method": "RefreshList(selectFirstRow: False)",
+        "selectFirstRow": false
+      }
+    ],
+    "detailGridRefresh": [
+      {
+        "trigger": "Form Load",
+        "method": "RefreshList(selectFirstRow: False)",
+        "selectFirstRow": false
+      },
+      {
+        "trigger": "After adding line item (ItemAdd)",
+        "method": "Implicit via EnableDisableControls()",
+        "notes": "New row appears in grid, no explicit refresh needed"
+      },
+      {
+        "trigger": "After removing line item (ItemRemove)",
+        "method": "RefreshList(selectFirstRow: False)",
+        "selectFirstRow": false
+      }
+    ],
+    "cellLevelUpdates": [
+      {
+        "trigger": "AfterExitEditMode event",
+        "method": "Direct property assignment on business object",
+        "pattern": "expense.PropertyName = ActiveCell.Value",
+        "notes": "Updates happen immediately per cell, not batched"
+      },
+      {
+        "trigger": "CoverType change",
+        "method": "UpdateCoverSubTypeCombo() + TransferCoverSubTypeID()",
+        "cascadingBehavior": "CoverSubType dropdown filtered by CoverType, CoverSubTypeID cleared"
+      }
+    ],
+    "comboRefresh": [
+      {
+        "trigger": "CoverType cell value changes",
+        "method": "UpdateCoverSubTypeCombo()",
+        "behavior": "Creates new UltraCombo, populates based on CoverType, assigns to cell EditorComponent"
+      },
+      {
+        "trigger": "Row initialization (InitializeRow)",
+        "method": "AssignEditorControlsToRow()",
+        "combos": [
+          "SizeCategory (ValidationTypes.BargeSizeCategory)",
+          "CoverType (ValidationTypes.CoverType)",
+          "CoverSubType (filtered by CoverType, dynamically populated)"
+        ]
+      }
+    ]
+  },
+  "inlineEditingBehavior": {
+    "editingModel": "Direct in-grid cell editing (no separate Set/Cancel buttons)",
+    "updateMode": "OnCellChangeOrLostFocus",
+    "cellClickAction": "EditAndSelectText",
+    "validationTiming": "BeforeExitEditMode event",
+    "dataFlow": {
+      "boundToUnbound": "TransferBoundToUnbound() copies business object properties to unbound grid columns",
+      "unboundToBound": "AfterExitEditMode copies unbound grid column values back to business object properties"
+    },
+    "reasonForUnboundColumns": "Standard business object collections don't allow cell editing when bound directly to grid",
+    "gridTabBehavior": "TabNavigation.NextControlOnLastCell (tabs out of grid after last cell)",
+    "autoEnterEditMode": "Grid.Enter event automatically activates first cell and enters edit mode"
+  },
+  "securityModel": {
+    "authorization": "ControlAuthorizationBase via ControlAuthorization property",
+    "buttonTypes": {
+      "btnFind": "ButtonType.Open",
+      "btnReset": "ButtonType.Open",
+      "btnSubmit": "ButtonType.Submit",
+      "btnCancel": "ButtonType.Cancel",
+      "toolbarAdd": "ButtonType.Add",
+      "toolbarRemove": "ButtonType.Remove"
+    },
+    "toolbarSecurity": "ToolbarButtonCanBeEnabled() checks permissions before enabling toolbar buttons",
+    "subsystem": "SubSystem.frmBargeDailyExpenseSearch (both search and detail forms)"
+  },
+  "specialNotes": {
+    "unboundColumnPattern": "Unique to forms with inline grid editing - unbound columns enable cell editing of business objects",
+    "noModifyButton": "Detail form toolbar has no Modify button because editing is done inline",
+    "noSetCancelButtons": "No Set/Cancel buttons at child level because changes are immediate per cell",
+    "coverTypeSubTypeDependency": "CoverSubType dropdown is dynamically filtered based on selected CoverType",
+    "currencyFormatting": "Business object formats DailyExpense as currency; grid handles $ removal during validation",
+    "keyboardNavigation": "Custom arrow key handling exits/re-enters edit mode for seamless cell navigation",
+    "gridUniqueIdentifier": "Intentionally not set for detail form grid to avoid interference with ActiveCell during inline editing"
+  },
+  "validationRules": {
+    "parentObject": {
+      "EffectiveDate": "Required (ValidatorExtender configured)"
+    },
+    "childObjects": {
+      "DailyExpense": "Must be valid decimal; BeforeExitEditMode validates and blocks exit if invalid"
+    },
+    "validationDisplay": "staStatus (status bar) shows validation messages",
+    "invalidValueBehavior": "InvalidValueBehavior.RetainValueAndFocus keeps user on invalid cell"
+  },
+  "userExperienceDetails": {
+    "searchForm": {
+      "defaultFocus": "dtEffectiveDate (via FocusFirstField)",
+      "enterKeyBehavior": "AcceptButton = btnFind (Enter key triggers search)",
+      "defaultDate": "Today's date in Effective Date field",
+      "gridSortOrder": "Descending by EffectiveDate (most recent first)"
+    },
+    "detailForm": {
+      "defaultFocus": "dtEffectiveDate",
+      "enterKeyBehavior": "Default submit behavior",
+      "gridAutoEdit": "Grid enters edit mode immediately when tabbed into",
+      "arrowKeyEditing": "Arrow keys navigate between cells while staying in edit mode",
+      "validationFeedback": "Status bar shows field-level errors immediately",
+      "modalSize": "Fixed3D border, not resizable, centered on parent"
+    }
+  }
+}

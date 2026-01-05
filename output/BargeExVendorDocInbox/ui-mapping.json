@@ -1,0 +1,735 @@
+{
+  "entity": "BargeExVendorDocInbox",
+  "formName": "frmBargeExVendorDocInboxSearch",
+  "formTitle": "BargeEx Vendor Document Inbox",
+  "modernArchitecture": {
+    "viewModels": "src/BargeOps.UI/Models/BargeExVendorDocInboxSearchViewModel.cs",
+    "namespace": "BargeOpsAdmin.ViewModels",
+    "controllers": "src/BargeOps.UI/Controllers/BargeExVendorDocInboxSearchController.cs",
+    "controllerNamespace": "BargeOpsAdmin.Controllers",
+    "baseController": "AppController",
+    "views": "src/BargeOps.UI/Views/BargeExVendorDocInboxSearch/",
+    "javascript": {
+      "search": "src/BargeOps.UI/wwwroot/js/bargeExVendorDocInboxSearch.js",
+      "import": "src/BargeOps.UI/wwwroot/js/bargeExVendorDocInboxImport.js"
+    }
+  },
+  "technologyStack": {
+    "framework": "ASP.NET Core 8 MVC",
+    "ui": "Bootstrap 5",
+    "grid": "DataTables (server-side processing)",
+    "dropdowns": "Select2",
+    "validation": "jQuery Validate + Unobtrusive Validation",
+    "modals": "Bootstrap 5 Modals",
+    "datetime": "Split date/time inputs with 24-hour format"
+  },
+  "controlMappings": [
+    {
+      "legacyControl": "UltraTextEditor (txtControlNumberSearch)",
+      "legacyType": "Text Input",
+      "modernEquivalent": "Bootstrap Text Input",
+      "html": "<input type=\"text\" class=\"form-control\" id=\"ControlNumberSearch\" name=\"ControlNumberSearch\" placeholder=\"Enter control number\" />",
+      "label": "<label asp-for=\"ControlNumberSearch\" class=\"form-label\">Control number:</label>",
+      "validation": "None (optional field)",
+      "accessibility": "aria-label=\"Control number\""
+    },
+    {
+      "legacyControl": "UltraComboEditor (cboVendorIDSearch)",
+      "legacyType": "Dropdown",
+      "modernEquivalent": "Select2 Enhanced Dropdown",
+      "html": "<select asp-for=\"VendorId\" class=\"form-select\" id=\"VendorId\" asp-items=\"Model.VendorList\"></select>",
+      "javascript": "$('#VendorId').select2({ placeholder: 'Select vendor', allowClear: true, width: '100%' });",
+      "dataSource": "Lists.VendorSearch.GetList",
+      "apiEndpoint": "/api/vendors/search",
+      "label": "<label asp-for=\"VendorId\" class=\"form-label\">Vendor:</label>",
+      "accessibility": "aria-label=\"Vendor selection\""
+    },
+    {
+      "legacyControl": "UltraComboEditor (cboDocumentSubTypeIDSearch)",
+      "legacyType": "Multi-column Dropdown",
+      "modernEquivalent": "Select2 with Optgroups/Custom Template",
+      "html": "<select asp-for=\"DocumentSubTypeId\" class=\"form-select\" id=\"DocumentSubTypeId\" asp-items=\"Model.DocumentSubTypeList\"></select>",
+      "javascript": "$('#DocumentSubTypeId').select2({ placeholder: 'Select document type', allowClear: true, width: '100%', templateResult: formatDocumentType, templateSelection: formatDocumentTypeSelection });",
+      "dataSource": "Lists.BargeExDocumentSubTypeList.GetList",
+      "filter": "BargeStatus (BreakTow, Clean, CoverHandling, Fleeting, MakeTow, MidstreamIn, MidstreamOut, Pump, Shift) and BoatStatus (Assist)",
+      "displayColumns": ["SubType (Document Type)", "Type (Transaction Type)"],
+      "label": "<label asp-for=\"DocumentSubTypeId\" class=\"form-label\">Document type:</label>",
+      "notes": "Use optgroups to group by Type, display SubType as option text",
+      "accessibility": "aria-label=\"Document type selection\""
+    },
+    {
+      "legacyControl": "UltraGrid (grdSearch)",
+      "legacyType": "Data Grid",
+      "modernEquivalent": "DataTables with Server-Side Processing",
+      "html": "<table id=\"bargeExVendorDocInboxTable\" class=\"table table-striped table-hover w-100\"></table>",
+      "javascript": "See bargeExVendorDocInboxSearch.js",
+      "features": [
+        "Server-side processing (POST to /BargeExVendorDocInboxSearch/Search)",
+        "Checkbox selection column (IsSelected)",
+        "Column sorting",
+        "Column filtering",
+        "Responsive design",
+        "State persistence (localStorage)",
+        "Export to Excel/PDF",
+        "Column visibility toggle",
+        "Group by Vendor (optional)"
+      ],
+      "columns": [
+        {
+          "name": "IsSelected",
+          "header": "Select",
+          "type": "checkbox",
+          "width": "50px",
+          "orderable": false,
+          "searchable": false,
+          "className": "text-center",
+          "render": "Checkbox input for row selection"
+        },
+        {
+          "name": "VendorName",
+          "header": "Vendor",
+          "type": "string",
+          "width": "100px",
+          "groupBy": true,
+          "initialSort": "asc"
+        },
+        {
+          "name": "BargeNum",
+          "header": "Barge",
+          "type": "string",
+          "width": "100px"
+        },
+        {
+          "name": "TicketID",
+          "header": "Ticket",
+          "type": "integer",
+          "width": "70px",
+          "className": "text-end"
+        },
+        {
+          "name": "SubDocType",
+          "header": "Type",
+          "type": "string",
+          "width": "100px"
+        },
+        {
+          "name": "StartDateTime",
+          "header": "Start Time",
+          "type": "datetime",
+          "width": "100px",
+          "format": "MM/dd/yyyy HH:mm",
+          "render": "Format as 24-hour military time"
+        },
+        {
+          "name": "EndDateTime",
+          "header": "End Time",
+          "type": "datetime",
+          "width": "100px",
+          "format": "MM/dd/yyyy HH:mm",
+          "render": "Format as 24-hour military time"
+        },
+        {
+          "name": "AssistedBoat",
+          "header": "Assisted Boat",
+          "type": "string",
+          "width": "100px"
+        },
+        {
+          "name": "Location",
+          "header": "Location",
+          "type": "string",
+          "width": "100px"
+        },
+        {
+          "name": "EndLocation",
+          "header": "End Location",
+          "type": "string",
+          "width": "100px"
+        },
+        {
+          "name": "ServicingBoat",
+          "header": "Servicing Boat",
+          "type": "string",
+          "width": "100px"
+        },
+        {
+          "name": "LoadStatus",
+          "header": "Load Status",
+          "type": "string",
+          "width": "100px"
+        },
+        {
+          "name": "CleanPumpCoverHandlingType",
+          "header": "Clean/Cover/Pump",
+          "type": "string",
+          "width": "115px"
+        },
+        {
+          "name": "River",
+          "header": "River",
+          "type": "string",
+          "width": "46px"
+        },
+        {
+          "name": "Mile",
+          "header": "Mile",
+          "type": "decimal",
+          "width": "60px",
+          "className": "text-end",
+          "format": "0.00"
+        },
+        {
+          "name": "EstimatedCost",
+          "header": "Est. Cost",
+          "type": "currency",
+          "width": "100px",
+          "className": "text-end",
+          "format": "$#,##0.00"
+        },
+        {
+          "name": "ControlNumber",
+          "header": "Control Number",
+          "type": "string",
+          "width": "100px"
+        },
+        {
+          "name": "OriginalControlNumber",
+          "header": "Original Control Number",
+          "type": "string",
+          "width": "145px"
+        },
+        {
+          "name": "RevisionNumber",
+          "header": "Revision",
+          "type": "integer",
+          "width": "65px",
+          "className": "text-end"
+        },
+        {
+          "name": "HasPriorImport",
+          "header": "Has Prior Import",
+          "type": "boolean",
+          "width": "65px",
+          "className": "text-center",
+          "visible": false,
+          "render": "Checkbox (disabled)"
+        },
+        {
+          "name": "PrimaryControlNumber",
+          "header": "Primary Control Number",
+          "type": "string",
+          "width": "145px",
+          "visible": false
+        },
+        {
+          "name": "SenderTradingPartnerNumber",
+          "header": "Sender Trading Partner Number",
+          "type": "string",
+          "width": "145px",
+          "visible": false
+        },
+        {
+          "name": "ReceivedDateTime",
+          "header": "Received",
+          "type": "datetime",
+          "width": "100px",
+          "format": "MM/dd/yyyy HH:mm",
+          "visible": false
+        },
+        {
+          "name": "DocType",
+          "header": "BargeEx Transaction Type",
+          "type": "string",
+          "width": "150px",
+          "visible": false
+        },
+        {
+          "name": "BargeExBargeNum",
+          "header": "BargeEx Barge #",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExBargeUscg",
+          "header": "BargeEx Barge USCG",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExLocation",
+          "header": "BargeEx Location",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExLocationCode",
+          "header": "BargeEx Location Code",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExEndLocation",
+          "header": "BargeEx End Location",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExEndLocationCode",
+          "header": "BargeEx End Location Code",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExServicingBoat",
+          "header": "BargeEx Servicing Boat",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExServicingBoatUscg",
+          "header": "BargeEx Servicing Boat USCG",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExAssistedBoat",
+          "header": "BargeEx Assisted Boat",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExAssistedBoatUscg",
+          "header": "BargeEx Assisted Boat USCG",
+          "type": "string",
+          "width": "100px",
+          "visible": false
+        },
+        {
+          "name": "BargeExVendorDocumentInboxID",
+          "header": "ID",
+          "type": "integer",
+          "visible": false,
+          "isUniqueIdentifier": true
+        }
+      ],
+      "dataTableOptions": {
+        "processing": true,
+        "serverSide": true,
+        "stateSave": true,
+        "stateKey": "bargeExVendorDocInboxTable_v1",
+        "responsive": true,
+        "autoWidth": false,
+        "order": [[1, "asc"], [2, "asc"], [5, "asc"]],
+        "pageLength": 25,
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+        "ajax": {
+          "url": "/BargeExVendorDocInboxSearch/Search",
+          "type": "POST",
+          "data": "function(d) { d.vendorId = $('#VendorId').val(); d.documentSubTypeId = $('#DocumentSubTypeId').val(); d.controlNumber = $('#ControlNumberSearch').val(); }"
+        }
+      }
+    },
+    {
+      "legacyControl": "UltraPanel (pnlSearch, pnlCriteria, pnlContextTitle)",
+      "legacyType": "Container Panel",
+      "modernEquivalent": "Bootstrap Card/Container",
+      "html": "<div class=\"card mb-3\"><div class=\"card-header\"><h5>Search Criteria</h5></div><div class=\"card-body\"><!-- Search form controls --></div></div>",
+      "notes": "Use Bootstrap cards for grouping related content"
+    },
+    {
+      "legacyControl": "UltraGroupBox (grpDetail)",
+      "legacyType": "Group Box",
+      "modernEquivalent": "Bootstrap Card Footer/Action Section",
+      "html": "<div class=\"card-footer d-flex justify-content-end gap-2\"><!-- Action buttons --></div>",
+      "notes": "Action buttons in footer section"
+    },
+    {
+      "legacyControl": "Button (btnFind)",
+      "legacyType": "Search Button",
+      "modernEquivalent": "Bootstrap Primary Button",
+      "html": "<button type=\"submit\" id=\"btnFind\" class=\"btn btn-primary\"><i class=\"fas fa-search\"></i> Find</button>",
+      "handler": "Triggers DataTables ajax.reload()",
+      "accessibility": "aria-label=\"Search documents\""
+    },
+    {
+      "legacyControl": "Button (btnReset)",
+      "legacyType": "Reset Button",
+      "modernEquivalent": "Bootstrap Secondary Button",
+      "html": "<button type=\"button\" id=\"btnReset\" class=\"btn btn-secondary\"><i class=\"fas fa-undo\"></i> Reset</button>",
+      "handler": "Clears all search fields and reloads grid",
+      "accessibility": "aria-label=\"Reset search criteria\""
+    },
+    {
+      "legacyControl": "Button (btnImport)",
+      "legacyType": "Action Button",
+      "modernEquivalent": "Bootstrap Success Button",
+      "html": "<button type=\"button\" id=\"btnImport\" class=\"btn btn-success\" disabled><i class=\"fas fa-file-import\"></i> Import</button>",
+      "handler": "Opens import wizard modal/page with selected documents",
+      "validation": [
+        "Checks if any rows selected",
+        "Warns if selected barges have no open tickets",
+        "Warns if revisions selected with no prior import"
+      ],
+      "enabledWhen": "At least one row selected",
+      "accessibility": "aria-label=\"Import selected documents\""
+    },
+    {
+      "legacyControl": "Button (btnDiscard)",
+      "legacyType": "Delete Button",
+      "modernEquivalent": "Bootstrap Danger Button",
+      "html": "<button type=\"button\" id=\"btnDiscard\" class=\"btn btn-danger\" disabled><i class=\"fas fa-trash\"></i> Discard</button>",
+      "handler": "Permanently deletes selected documents after confirmation",
+      "confirmation": "Bootstrap modal: 'Are you sure you want to discard the selected documents?'",
+      "enabledWhen": "At least one row selected",
+      "accessibility": "aria-label=\"Discard selected documents\""
+    },
+    {
+      "legacyControl": "Label (lblContextTitle)",
+      "legacyType": "Header Label",
+      "modernEquivalent": "Bootstrap Page Header",
+      "html": "<h2 class=\"mb-3\">BargeEx Vendor Document Inbox</h2>",
+      "styling": "Standard Bootstrap heading"
+    },
+    {
+      "legacyControl": "Label (lblVendorID, lblDocumentType, lblControlNumber)",
+      "legacyType": "Field Labels",
+      "modernEquivalent": "Bootstrap Form Labels (asp-for tag helper)",
+      "html": "<label asp-for=\"VendorId\" class=\"form-label\">Vendor:</label>",
+      "notes": "Use asp-for tag helper for automatic for attribute and validation integration"
+    }
+  ],
+  "formPatterns": {
+    "searchForm": {
+      "layout": "Bootstrap form with row/col grid system",
+      "container": "card with card-header and card-body",
+      "submitPattern": "Button triggers DataTables ajax.reload()",
+      "resetPattern": "Button clears form and triggers ajax.reload()",
+      "validation": "Optional fields - no validation required",
+      "exampleHtml": "<form id=\"searchForm\" class=\"mb-3\"><div class=\"card\"><div class=\"card-header\"><h5>Search Criteria</h5></div><div class=\"card-body\"><div class=\"row g-3\"><!-- Form controls --></div></div></div></form>"
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "serverSide": true,
+      "ajax": {
+        "url": "/BargeExVendorDocInboxSearch/Search",
+        "type": "POST",
+        "data": "Search criteria from form"
+      },
+      "selectionPattern": "Checkbox column with row selection tracking",
+      "actionButtons": "Enable/disable based on selected row count",
+      "persistence": "localStorage for column visibility, order, and sort preferences"
+    },
+    "modalPattern": {
+      "confirmations": "Bootstrap 5 modals for delete/discard confirmations",
+      "importWizard": "Multi-step modal or separate page for import workflow",
+      "addForms": "Modal dialogs for adding barge, boat, location from BargeEx data"
+    }
+  },
+  "javascriptPatterns": {
+    "initialization": {
+      "description": "Initialize DataTables, Select2, and event handlers on document ready",
+      "code": "$(document).ready(function() { initializeDataTable(); initializeSelect2(); bindEventHandlers(); });"
+    },
+    "select2Initialization": {
+      "vendor": "$('#VendorId').select2({ placeholder: 'Select vendor', allowClear: true });",
+      "documentType": "$('#DocumentSubTypeId').select2({ placeholder: 'Select document type', allowClear: true, templateResult: formatDocumentType });"
+    },
+    "dataTableInitialization": {
+      "code": "var table = $('#bargeExVendorDocInboxTable').DataTable({ serverSide: true, ajax: { url: '/BargeExVendorDocInboxSearch/Search', type: 'POST' }, columns: [...] });"
+    },
+    "rowSelection": {
+      "description": "Track selected rows via checkbox column, enable/disable action buttons",
+      "code": "$('#bargeExVendorDocInboxTable').on('change', '.row-checkbox', function() { updateActionButtons(); });"
+    },
+    "checkAll": {
+      "description": "Select all checkboxes in current result set",
+      "code": "function checkAll() { $('.row-checkbox').prop('checked', true); updateActionButtons(); }"
+    },
+    "uncheckAll": {
+      "description": "Deselect all checkboxes",
+      "code": "function uncheckAll() { $('.row-checkbox').prop('checked', false); updateActionButtons(); }"
+    },
+    "importHandler": {
+      "description": "Validate selections, show warnings if needed, open import wizard",
+      "code": "$('#btnImport').on('click', function() { validateSelections(); showImportModal(selectedDocuments); });"
+    },
+    "discardHandler": {
+      "description": "Show confirmation modal, delete selected documents via AJAX",
+      "code": "$('#btnDiscard').on('click', function() { showConfirmation('Discard?', discardDocuments); });"
+    },
+    "addBargeHandler": {
+      "description": "Open barge detail modal/page with BargeEx data pre-filled",
+      "code": "function addBarge() { var row = getSelectedRow(); showBargeDetailModal(row.BargeExBargeNum, row.BargeExBargeUscg); }"
+    },
+    "addBoatHandler": {
+      "description": "Open boat detail modal/page with BargeEx data pre-filled",
+      "code": "function addBoat(type) { var row = getSelectedRow(); showBoatDetailModal(row['BargeEx' + type + 'Boat'], row['BargeEx' + type + 'BoatUscg']); }"
+    },
+    "addLocationHandler": {
+      "description": "Open facility detail modal/page with BargeEx data pre-filled",
+      "code": "function addLocation(type) { var row = getSelectedRow(); showFacilityDetailModal(row['BargeEx' + type + 'Location'], row['BargeEx' + type + 'LocationCode']); }"
+    }
+  },
+  "viewModelStructure": {
+    "name": "BargeExVendorDocInboxSearchViewModel",
+    "properties": [
+      {
+        "name": "VendorId",
+        "type": "int?",
+        "display": "Vendor",
+        "required": false
+      },
+      {
+        "name": "DocumentSubTypeId",
+        "type": "int?",
+        "display": "Document type",
+        "required": false
+      },
+      {
+        "name": "ControlNumberSearch",
+        "type": "string",
+        "display": "Control number",
+        "required": false,
+        "maxLength": 50
+      },
+      {
+        "name": "VendorList",
+        "type": "SelectList",
+        "description": "Dropdown options for vendors"
+      },
+      {
+        "name": "DocumentSubTypeList",
+        "type": "SelectList",
+        "description": "Dropdown options for document sub-types (grouped by Type)"
+      }
+    ]
+  },
+  "controllerActions": {
+    "Index": {
+      "httpMethod": "GET",
+      "description": "Displays search form with empty criteria",
+      "returns": "View with BargeExVendorDocInboxSearchViewModel"
+    },
+    "Search": {
+      "httpMethod": "POST",
+      "description": "Server-side DataTables endpoint for search results",
+      "parameters": [
+        "vendorId (int?)",
+        "documentSubTypeId (int?)",
+        "controlNumber (string)",
+        "DataTables parameters (draw, start, length, order, search)"
+      ],
+      "returns": "JsonResult with DataTables response format"
+    },
+    "Import": {
+      "httpMethod": "POST",
+      "description": "Initiates import wizard with selected document IDs",
+      "parameters": ["selectedIds (int[])"],
+      "returns": "RedirectToAction or PartialView for import wizard"
+    },
+    "Discard": {
+      "httpMethod": "POST",
+      "description": "Permanently deletes selected documents",
+      "parameters": ["selectedIds (int[])"],
+      "returns": "JsonResult with success/error message",
+      "validation": "Requires confirmation from client"
+    },
+    "CheckAll": {
+      "httpMethod": "POST",
+      "description": "Returns all document IDs matching current search criteria for bulk selection",
+      "returns": "JsonResult with array of IDs"
+    },
+    "GetBargeData": {
+      "httpMethod": "GET",
+      "description": "Returns BargeEx barge data for add form pre-fill",
+      "parameters": ["documentId (int)"],
+      "returns": "JsonResult with barge data"
+    },
+    "GetBoatData": {
+      "httpMethod": "GET",
+      "description": "Returns BargeEx boat data for add form pre-fill",
+      "parameters": ["documentId (int)", "boatType (string)"],
+      "returns": "JsonResult with boat data"
+    },
+    "GetLocationData": {
+      "httpMethod": "GET",
+      "description": "Returns BargeEx location data for add form pre-fill",
+      "parameters": ["documentId (int)", "locationType (string)"],
+      "returns": "JsonResult with location data"
+    }
+  },
+  "securityAuthorization": {
+    "authorizationPattern": "Use [Authorize] attribute on controller",
+    "roleBasedAccess": "Check user permissions for Import and Discard actions",
+    "buttonSecurity": "Conditionally render action buttons based on user role",
+    "notes": "Map legacy ControlAuthorizationBase to ASP.NET Core authorization policies"
+  },
+  "validationRules": {
+    "searchCriteria": "All fields optional - no validation required",
+    "importValidation": [
+      {
+        "rule": "At least one document must be selected",
+        "message": "Please select at least one document to import"
+      },
+      {
+        "rule": "Warn if selected BargeStatus documents have no open tickets",
+        "message": "The following barges have no open tickets: {BargeNums}. Continue?",
+        "userChoice": true
+      },
+      {
+        "rule": "Warn if selected revisions have no prior import",
+        "message": "The following revisions have no prior import: {BargeNums}. Continue?",
+        "userChoice": true
+      }
+    ],
+    "discardValidation": [
+      {
+        "rule": "At least one document must be selected",
+        "message": "Please select at least one document to discard"
+      },
+      {
+        "rule": "User confirmation required",
+        "message": "Are you sure you want to discard the selected documents? This action cannot be undone.",
+        "confirmationType": "Bootstrap modal with Confirm/Cancel"
+      }
+    ]
+  },
+  "apiEndpoints": {
+    "vendorSearch": {
+      "url": "/api/vendors/search",
+      "method": "GET",
+      "description": "Returns list of active vendors for dropdown",
+      "parameters": ["searchTerm (string, optional)"],
+      "returns": "JSON array of { id, text }"
+    },
+    "documentSubTypeList": {
+      "url": "/api/document-subtypes/bargeex",
+      "method": "GET",
+      "description": "Returns filtered list of BargeEx document sub-types",
+      "filter": "BargeStatus and BoatStatus types only",
+      "returns": "JSON array grouped by Type with SubType options"
+    }
+  },
+  "toolbarIntegration": {
+    "modernPattern": "Context menu or action buttons within grid",
+    "actions": [
+      {
+        "name": "Check All",
+        "icon": "fas fa-check-square",
+        "handler": "checkAll()",
+        "description": "Select all documents in current result set"
+      },
+      {
+        "name": "Uncheck All",
+        "icon": "fas fa-square",
+        "handler": "uncheckAll()",
+        "description": "Deselect all documents"
+      },
+      {
+        "name": "Add Barge",
+        "icon": "fas fa-ship",
+        "handler": "addBarge()",
+        "enabledWhen": "Single row selected",
+        "description": "Add new barge from BargeEx data"
+      },
+      {
+        "name": "Add Servicing Boat",
+        "icon": "fas fa-anchor",
+        "handler": "addBoat('Servicing')",
+        "enabledWhen": "Single row selected with servicing boat data",
+        "description": "Add servicing boat from BargeEx data"
+      },
+      {
+        "name": "Add Assisted Boat",
+        "icon": "fas fa-anchor",
+        "handler": "addBoat('Assisted')",
+        "enabledWhen": "Single row selected with assisted boat data",
+        "description": "Add assisted boat from BargeEx data"
+      },
+      {
+        "name": "Add Start Location",
+        "icon": "fas fa-map-marker-alt",
+        "handler": "addLocation('Start')",
+        "enabledWhen": "Single row selected with start location data",
+        "description": "Add start location from BargeEx data"
+      },
+      {
+        "name": "Add End Location",
+        "icon": "fas fa-map-marker-alt",
+        "handler": "addLocation('End')",
+        "enabledWhen": "Single row selected with end location data",
+        "description": "Add end location from BargeEx data"
+      }
+    ],
+    "placement": "Top of grid or as dropdown menu",
+    "implementation": "Bootstrap button group or dropdown"
+  },
+  "commonMistakes": [
+    "❌ Using single datetime-local input instead of split date/time",
+    "❌ Using 12-hour time format instead of 24-hour military time",
+    "❌ Not using Select2 for dropdowns",
+    "❌ Not using DataTables for grid",
+    "❌ Using inline styles instead of Bootstrap classes",
+    "❌ Not implementing server-side processing for large datasets",
+    "❌ Not persisting grid settings to localStorage",
+    "❌ Not implementing responsive design",
+    "❌ Not using asp-for tag helpers for labels",
+    "❌ Not implementing proper accessibility attributes"
+  ],
+  "criticalReminders": [
+    "⚠️ ALL datetime fields MUST display in MM/dd/yyyy HH:mm format (24-hour military time)",
+    "⚠️ DateTime inputs MUST be split into separate date and time controls",
+    "⚠️ Time input MUST use type=\"time\" (24-hour HH:mm format)",
+    "⚠️ Date input MUST use type=\"date\" (YYYY-MM-DD format)",
+    "⚠️ JavaScript MUST split datetime on load and combine on submit",
+    "⚠️ DataTables MUST be used for all grids with server-side processing",
+    "⚠️ Select2 MUST be used for all dropdowns",
+    "⚠️ Bootstrap 5 classes MUST be used for all styling",
+    "⚠️ Form controls MUST have form-control or form-select class",
+    "⚠️ Labels MUST use asp-for tag helper",
+    "⚠️ NO inline styles allowed"
+  ],
+  "modernizationNotes": {
+    "architecture": "ASP.NET Core 8 MVC with DataTables server-side processing, Select2, Bootstrap 5",
+    "searchPattern": "POST to /BargeExVendorDocInboxSearch/Search with DataTables parameters",
+    "importPattern": "Multi-step wizard as Bootstrap modal or separate page flow",
+    "checkboxSelection": "DataTables checkbox column with tracked selection state",
+    "toolbarActions": "Convert to context menu, dropdown menu, or button group above grid",
+    "fleetContext": "Pass fleet ID via user context/session, not form-to-form parameters",
+    "gridPersistence": "localStorage for column visibility, order, sort, and filters",
+    "validationWarnings": "Bootstrap modals for confirmation dialogs and warnings",
+    "multiColumnDropdown": "Select2 with optgroups or custom templateResult for multi-column display",
+    "realTimeUpdates": "Consider SignalR for real-time updates when documents imported/discarded by other users",
+    "accessibility": "Ensure WCAG 2.1 compliance with aria-labels, for attributes, keyboard navigation",
+    "responsiveDesign": "Bootstrap responsive utilities and DataTables responsive extension"
+  },
+  "businessLogicIntegration": {
+    "searchLogic": "Lists.BargeExVendorDocumentInboxSearch.GetList",
+    "importLogic": "BargeExVendorDocumentInbox.Import with validation checks",
+    "discardLogic": "BargeExVendorDocumentInbox.MultiDelete",
+    "vendorList": "Lists.VendorSearch.GetList",
+    "documentSubTypeList": "Lists.BargeExDocumentSubTypeList.GetList with filter",
+    "ticketValidation": "Check for open tickets on BargeStatus documents",
+    "revisionValidation": "Check for prior imports on revision documents"
+  },
+  "relatedEntities": [
+    "BargeExVendorDocumentInbox",
+    "Vendor",
+    "BargeExDocumentSubType",
+    "Barge",
+    "Boat",
+    "Facility",
+    "Ticket",
+    "TicketEvent",
+    "PartsServiceBillItem"
+  ]
+}

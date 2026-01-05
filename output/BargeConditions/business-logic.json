@@ -1,0 +1,698 @@
+{
+  "businessObject": "BargeCondition",
+  "baseClass": "BargeConditionBase",
+  "namespace": "BargeOps.BusinessObjects",
+  "tableName": "BargeCondition",
+  "description": "Manages barge condition reports with associated photos and email notification tracking",
+  "properties": [
+    {
+      "name": "BargeConditionID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "isRequired": true,
+      "description": "Unique identifier for the barge condition record",
+      "defaultValue": "0",
+      "sqlDbType": "Int"
+    },
+    {
+      "name": "BargeID",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isForeignKey": true,
+      "isNullable": false,
+      "isRequired": true,
+      "description": "Reference to the Barge entity",
+      "defaultValue": "0",
+      "sqlDbType": "Int",
+      "audited": true
+    },
+    {
+      "name": "Note",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 500,
+      "isNullable": false,
+      "isRequired": true,
+      "description": "Condition notes and observations about the barge",
+      "defaultValue": "String.Empty",
+      "sqlDbType": "VarChar",
+      "audited": true
+    },
+    {
+      "name": "EmailSentDateTime",
+      "type": "String",
+      "internalType": "SmartDate",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "isRequired": false,
+      "description": "Date and time when condition report email was sent",
+      "defaultValue": "New SmartDate",
+      "sqlDbType": "DateTime",
+      "formatString": "SmartDateTimeFormat",
+      "audited": true
+    },
+    {
+      "name": "BargeConditionPhotoes",
+      "type": "BargeConditionPhotoes",
+      "access": "ReadOnly",
+      "isCollection": true,
+      "isChildCollection": true,
+      "description": "Collection of photos documenting the barge condition",
+      "relatedEntity": "BargeConditionPhoto",
+      "relationship": "OneToMany",
+      "cascadeDelete": true,
+      "deferredLoading": true
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "NoteRequired",
+      "property": "Note",
+      "condition": "String.IsNullOrEmpty(p_Note)",
+      "message": "Note is required",
+      "severity": "Error",
+      "context": "Always",
+      "modernEquivalent": {
+        "type": "DataAnnotations",
+        "code": "[Required(ErrorMessage = \"Note is required\")]"
+      }
+    },
+    {
+      "ruleName": "NoteMaxLength",
+      "property": "Note",
+      "condition": "(p_Note.Length > MaxLength.Note)",
+      "message": "Note cannot exceed maximum length of 500.",
+      "severity": "Error",
+      "context": "Always",
+      "modernEquivalent": {
+        "type": "DataAnnotations",
+        "code": "[StringLength(500, ErrorMessage = \"Note cannot exceed maximum length of 500.\")]"
+      }
+    }
+  ],
+  "validationPatterns": {
+    "legacy": {
+      "pattern": "BrokenRules.Assert",
+      "examples": [
+        "BrokenRules.Assert(p_dispNote & cIsRequiredName, p_dispNote & cIsRequiredDesc, String.IsNullOrEmpty(p_Note))",
+        "BrokenRules.Assert(p_dispNote & cMaxLengthName, p_dispNote & cMaxLengthDesc & MaxLength.Note & \".\", (p_Note.Length > MaxLength.Note))"
+      ]
+    },
+    "modern": {
+      "dataAnnotations": [
+        "[Required(ErrorMessage = \"Note is required\")]",
+        "[StringLength(500, ErrorMessage = \"Note cannot exceed maximum length of 500.\")]"
+      ],
+      "fluentValidation": [
+        "RuleFor(x => x.Note).NotEmpty().WithMessage(\"Note is required\");",
+        "RuleFor(x => x.Note).MaximumLength(500).WithMessage(\"Note cannot exceed maximum length of 500.\");"
+      ]
+    }
+  },
+  "methods": {
+    "factory": [
+      {
+        "name": "NewBargeCondition",
+        "returnType": "BargeCondition",
+        "parameters": [],
+        "scope": "Public Shared",
+        "description": "Creates a new parent BargeCondition instance",
+        "implementation": "DataPortal.Create(New Criteria(False))"
+      },
+      {
+        "name": "NewBargeConditionAsChild",
+        "returnType": "BargeCondition",
+        "parameters": [],
+        "scope": "Friend Shared",
+        "description": "Creates a new child BargeCondition instance",
+        "implementation": "DataPortal.Create(New Criteria(True))"
+      },
+      {
+        "name": "GetBargeCondition",
+        "returnType": "BargeCondition",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "scope": "Public Shared",
+        "description": "Loads an existing parent BargeCondition by ID",
+        "implementation": "DataPortal.Fetch(New Criteria(ID, False))"
+      },
+      {
+        "name": "GetBargeConditionChild",
+        "returnType": "BargeCondition",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "scope": "Friend Shared",
+        "description": "Loads an existing child BargeCondition by ID",
+        "implementation": "DataPortal.Fetch(New Criteria(ID, True))"
+      },
+      {
+        "name": "GetBargeConditionChild",
+        "returnType": "BargeCondition",
+        "parameters": [
+          {
+            "name": "dr",
+            "type": "SafeDataReader"
+          }
+        ],
+        "scope": "Friend Shared",
+        "description": "Loads an existing child BargeCondition from a DataReader",
+        "implementation": "Activator.CreateInstance with LoadProperties"
+      }
+    ],
+    "crud": [
+      {
+        "name": "DeleteBargeCondition",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "scope": "Public Shared",
+        "description": "Deletes a parent BargeCondition by ID",
+        "implementation": "BusinessLogicBase.ImmediateDelete(New Criteria(ID, False))"
+      },
+      {
+        "name": "SaveNoRefresh",
+        "returnType": "void",
+        "parameters": [],
+        "scope": "Public Override",
+        "description": "Saves the BargeCondition and handles photo deletion from server on delete",
+        "customLogic": "When entity is deleted, collects all photo filenames and deletes them from server after base save",
+        "implementation": "Custom override that calls MyBase.SaveNoRefresh() and then deletes photo files from server using Document.DeleteFileFromServer"
+      }
+    ],
+    "initialization": [
+      {
+        "name": "Initialize",
+        "returnType": "void",
+        "scope": "Public Overrides",
+        "description": "Initializes the BargeCondition with default values",
+        "implementation": "Calls MyBase.Initialize()"
+      }
+    ],
+    "validation": [
+      {
+        "name": "CheckBusinessRules",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "PropertyName",
+            "type": "String"
+          }
+        ],
+        "scope": "Public Overrides",
+        "description": "Validates business rules for the specified property or all properties",
+        "implementation": "Calls MyBase.CheckBusinessRules(PropertyName)"
+      }
+    ],
+    "overrides": [
+      {
+        "name": "IsValid",
+        "returnType": "Boolean",
+        "scope": "Public Overrides ReadOnly",
+        "description": "Indicates if object and all children are valid",
+        "implementation": "MyBase.IsValid AndAlso p_BargeConditionPhotoes.IsValid"
+      },
+      {
+        "name": "IsDirty",
+        "returnType": "Boolean",
+        "scope": "Public Overrides ReadOnly",
+        "description": "Indicates if object or any children have unsaved changes",
+        "implementation": "MyBase.IsDirty OrElse p_BargeConditionPhotoes.IsDirty"
+      },
+      {
+        "name": "ToString",
+        "returnType": "String",
+        "scope": "Public Overrides",
+        "description": "Returns string representation of the object",
+        "implementation": "\"BargeCondition - \" & p_BargeConditionID.ToString()"
+      },
+      {
+        "name": "Equals",
+        "returnType": "Boolean",
+        "scope": "Public Overloads",
+        "description": "Compares two BargeCondition objects by ID",
+        "implementation": "p_BargeConditionID.Equals(BargeConditionBase.p_BargeConditionID)"
+      },
+      {
+        "name": "GetHashCode",
+        "returnType": "Int32",
+        "scope": "Public Overrides",
+        "description": "Returns hash code based on primary key",
+        "implementation": "p_BargeConditionID.GetHashCode()"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "property": "BargeConditionPhotoes",
+      "relatedEntity": "BargeConditionPhoto",
+      "type": "OneToMany",
+      "cascadeDelete": true,
+      "cascadeUpdate": true,
+      "description": "Collection of photos documenting the barge condition",
+      "loadingStrategy": "DeferredLoading",
+      "childKeyProperty": "BargeConditionID"
+    },
+    {
+      "property": "BargeID",
+      "relatedEntity": "Barge",
+      "type": "ManyToOne",
+      "description": "Reference to parent Barge entity",
+      "isForeignKey": true
+    }
+  ],
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "BargeConditionID",
+        "value": "0"
+      },
+      {
+        "property": "BargeID",
+        "value": "0"
+      },
+      {
+        "property": "Note",
+        "value": "String.Empty"
+      },
+      {
+        "property": "EmailSentDateTime",
+        "value": "New SmartDate"
+      },
+      {
+        "property": "BargeConditionPhotoes",
+        "value": "BargeConditionPhotoesBase.NewBargeConditionPhotoesAsChild"
+      }
+    ],
+    "storedProcedures": {
+      "fetch": "BargeConditionSelect",
+      "fetchAll": "BargeConditionsSelect",
+      "insert": "BargeConditionInsert",
+      "update": "BargeConditionUpdate",
+      "delete": "BargeConditionDelete"
+    }
+  },
+  "dataAccess": {
+    "storedProcedures": {
+      "fetch": "BargeConditionSelect",
+      "fetchAll": "BargeConditionsSelect",
+      "insert": "BargeConditionInsert",
+      "update": "BargeConditionUpdate",
+      "delete": "BargeConditionDelete"
+    },
+    "parameters": {
+      "fetch": [
+        {
+          "name": "@BargeConditionID",
+          "type": "SqlDbType.Int",
+          "direction": "Input"
+        }
+      ],
+      "insert": [
+        {
+          "name": "@BargeConditionID",
+          "type": "SqlDbType.Int",
+          "direction": "InputOutput"
+        },
+        {
+          "name": "@BargeID",
+          "type": "SqlDbType.Int",
+          "direction": "Input"
+        },
+        {
+          "name": "@Note",
+          "type": "SqlDbType.VarChar",
+          "direction": "Input"
+        },
+        {
+          "name": "@EmailSentDateTime",
+          "type": "SqlDbType.DateTime",
+          "direction": "Input"
+        }
+      ],
+      "update": [
+        {
+          "name": "@BargeConditionID",
+          "type": "SqlDbType.Int",
+          "direction": "Input"
+        },
+        {
+          "name": "@BargeID",
+          "type": "SqlDbType.Int",
+          "direction": "Input"
+        },
+        {
+          "name": "@Note",
+          "type": "SqlDbType.VarChar",
+          "direction": "Input"
+        },
+        {
+          "name": "@EmailSentDateTime",
+          "type": "SqlDbType.DateTime",
+          "direction": "Input"
+        }
+      ],
+      "delete": [
+        {
+          "name": "@BargeConditionID",
+          "type": "SqlDbType.Int",
+          "direction": "Input"
+        }
+      ]
+    },
+    "childUpdates": [
+      {
+        "property": "BargeConditionPhotoes",
+        "updateMethod": "Update",
+        "condition": "p_BargeConditionPhotoes IsNot Nothing"
+      },
+      {
+        "property": "AuditFieldEvents",
+        "updateMethod": "Update",
+        "condition": "p_AuditFieldEvents IsNot Nothing AndAlso Not Me.IsDeleted"
+      }
+    ]
+  },
+  "auditing": {
+    "enabled": true,
+    "auditedFields": [
+      "BargeConditionID",
+      "BargeID",
+      "Note",
+      "EmailSentDateTime"
+    ],
+    "auditFieldEvents": true,
+    "originalValuesTracked": true
+  },
+  "childObjects": [
+    {
+      "objectName": "BargeConditionPhoto",
+      "baseClass": "BargeConditionPhotoBase",
+      "description": "Photo documentation of barge condition",
+      "properties": [
+        {
+          "name": "BargeConditionPhotoID",
+          "type": "Int32",
+          "access": "ReadOnly",
+          "isPrimaryKey": true,
+          "isNullable": false,
+          "isRequired": true,
+          "description": "Unique identifier for the photo record",
+          "defaultValue": "0",
+          "sqlDbType": "Int"
+        },
+        {
+          "name": "BargeConditionID",
+          "type": "Int32",
+          "access": "ReadWrite",
+          "isForeignKey": true,
+          "isNullable": false,
+          "isRequired": true,
+          "description": "Reference to parent BargeCondition",
+          "defaultValue": "0",
+          "sqlDbType": "Int",
+          "audited": true
+        },
+        {
+          "name": "DocumentID",
+          "type": "Int32",
+          "access": "ReadWrite",
+          "isForeignKey": true,
+          "isNullable": false,
+          "isRequired": true,
+          "description": "Reference to Document entity containing photo file",
+          "defaultValue": "0",
+          "sqlDbType": "Int",
+          "audited": true
+        },
+        {
+          "name": "Document",
+          "type": "Document",
+          "access": "ReadOnly",
+          "isNavigationProperty": true,
+          "description": "Navigation property to Document entity",
+          "deferredLoading": true
+        },
+        {
+          "name": "DocumentName",
+          "type": "String",
+          "access": "ReadOnly",
+          "isCalculated": true,
+          "description": "Name of the document (from Document.Name)",
+          "calculation": "Document.Name"
+        },
+        {
+          "name": "DocumentExtension",
+          "type": "String",
+          "access": "ReadOnly",
+          "isCalculated": true,
+          "description": "File extension of the document (from Document.Extension)",
+          "calculation": "Document.Extension"
+        },
+        {
+          "name": "Filename",
+          "type": "String",
+          "access": "ReadOnly",
+          "isCalculated": true,
+          "description": "Full filename of the document (from Document.Filename)",
+          "calculation": "Document.Filename"
+        }
+      ],
+      "businessRules": [],
+      "customBehaviors": [
+        {
+          "behavior": "FileCleanupOnDelete",
+          "description": "When photo record is deleted, the associated file is deleted from server",
+          "implementation": "Override Update method to call Document.DeleteFileFromServer",
+          "errorHandling": "Catches exceptions to prevent transaction rollback if file deletion fails"
+        }
+      ],
+      "methods": {
+        "factory": [
+          {
+            "name": "NewBargeConditionPhoto",
+            "returnType": "BargeConditionPhoto",
+            "parameters": [],
+            "scope": "Public Shared",
+            "description": "Creates a new parent BargeConditionPhoto instance"
+          },
+          {
+            "name": "NewBargeConditionPhotoAsChild",
+            "returnType": "BargeConditionPhoto",
+            "parameters": [],
+            "scope": "Friend Shared",
+            "description": "Creates a new child BargeConditionPhoto instance"
+          },
+          {
+            "name": "GetBargeConditionPhoto",
+            "returnType": "BargeConditionPhoto",
+            "parameters": [
+              {
+                "name": "ID",
+                "type": "Int32"
+              }
+            ],
+            "scope": "Public Shared",
+            "description": "Loads an existing parent BargeConditionPhoto by ID"
+          },
+          {
+            "name": "GetBargeConditionPhotoChild",
+            "returnType": "BargeConditionPhoto",
+            "parameters": [
+              {
+                "name": "ID",
+                "type": "Int32"
+              }
+            ],
+            "scope": "Friend Shared",
+            "description": "Loads an existing child BargeConditionPhoto by ID"
+          },
+          {
+            "name": "GetBargeConditionPhotoChild",
+            "returnType": "BargeConditionPhoto",
+            "parameters": [
+              {
+                "name": "dr",
+                "type": "SafeDataReader"
+              }
+            ],
+            "scope": "Friend Shared",
+            "description": "Loads an existing child BargeConditionPhoto from DataReader"
+          }
+        ],
+        "crud": [
+          {
+            "name": "DeleteBargeConditionPhoto",
+            "returnType": "void",
+            "parameters": [
+              {
+                "name": "ID",
+                "type": "Int32"
+              }
+            ],
+            "scope": "Public Shared",
+            "description": "Deletes a parent BargeConditionPhoto by ID"
+          },
+          {
+            "name": "DeleteBargeConditionPhoto",
+            "returnType": "void",
+            "parameters": [
+              {
+                "name": "ID",
+                "type": "Int32"
+              },
+              {
+                "name": "filename",
+                "type": "String"
+              }
+            ],
+            "scope": "Public Shared Overloads",
+            "description": "Deletes a BargeConditionPhoto and its associated file from server",
+            "customLogic": "Overloaded method that accepts filename to delete from server after database delete"
+          },
+          {
+            "name": "Update",
+            "returnType": "void",
+            "parameters": [
+              {
+                "name": "tr",
+                "type": "SqlTransaction"
+              },
+              {
+                "name": "parent",
+                "type": "BusinessLogicBase"
+              }
+            ],
+            "scope": "Protected Friend Overrides",
+            "description": "Updates the photo and deletes file from server if photo is being deleted",
+            "customLogic": "Calls base Update, then deletes file from server if IsDeleted is true"
+          }
+        ]
+      },
+      "relationships": [
+        {
+          "property": "BargeConditionID",
+          "relatedEntity": "BargeCondition",
+          "type": "ManyToOne",
+          "description": "Reference to parent BargeCondition",
+          "isForeignKey": true
+        },
+        {
+          "property": "DocumentID",
+          "relatedEntity": "Document",
+          "type": "ManyToOne",
+          "description": "Reference to Document containing photo file",
+          "isForeignKey": true
+        }
+      ],
+      "initialization": {
+        "method": "Initialize",
+        "defaults": [
+          {
+            "property": "BargeConditionPhotoID",
+            "value": "0"
+          },
+          {
+            "property": "BargeConditionID",
+            "value": "0"
+          },
+          {
+            "property": "DocumentID",
+            "value": "0"
+          }
+        ],
+        "storedProcedures": {
+          "fetch": "BargeConditionPhotoSelect",
+          "fetchAll": "BargeConditionPhotoesSelect",
+          "insert": "BargeConditionPhotoInsert",
+          "update": "BargeConditionPhotoUpdate",
+          "delete": "BargeConditionPhotoDelete"
+        }
+      }
+    }
+  ],
+  "customBehaviors": [
+    {
+      "behavior": "PhotoFileManagement",
+      "description": "Manages deletion of photo files from server when BargeCondition is deleted",
+      "implementation": "SaveNoRefresh override collects photo filenames and deletes them after save",
+      "location": "BargeCondition.vb:51-77",
+      "errorHandling": "Catches exceptions to prevent save transaction rollback if file deletion fails"
+    },
+    {
+      "behavior": "ChildCollectionValidation",
+      "description": "Validates child photo collection as part of parent validation",
+      "implementation": "IsValid override includes p_BargeConditionPhotoes.IsValid check",
+      "location": "BargeConditionBase.vb:165-172"
+    },
+    {
+      "behavior": "ChildCollectionDirtyTracking",
+      "description": "Tracks changes in child photo collection",
+      "implementation": "IsDirty override includes p_BargeConditionPhotoes.IsDirty check",
+      "location": "BargeConditionBase.vb:174-181"
+    },
+    {
+      "behavior": "DeferredCollectionLoading",
+      "description": "Loads photo collection only when accessed",
+      "implementation": "BargeConditionPhotoes property checks if null and loads on demand",
+      "location": "BargeConditionBase.vb:145-163"
+    }
+  ],
+  "securityModel": {
+    "functionalArea": "General",
+    "notes": "Inherits from BusinessLogicBase with standard functional area security"
+  },
+  "modernizationNotes": {
+    "domainModel": {
+      "entityName": "BargeCondition",
+      "properties": [
+        "int BargeConditionId (Primary Key)",
+        "int BargeId (Foreign Key to Barge)",
+        "string Note (MaxLength: 500, Required)",
+        "DateTime? EmailSentDateTime (Nullable)",
+        "ICollection<BargeConditionPhoto> Photos (Navigation Property)"
+      ],
+      "dataAnnotations": [
+        "[Required(ErrorMessage = \"Note is required\")]",
+        "[StringLength(500)]"
+      ]
+    },
+    "service": {
+      "interface": "IBargeConditionService",
+      "methods": [
+        "Task<BargeCondition> GetByIdAsync(int id)",
+        "Task<BargeCondition> CreateAsync(BargeCondition bargeCondition)",
+        "Task<BargeCondition> UpdateAsync(BargeCondition bargeCondition)",
+        "Task DeleteAsync(int id)",
+        "Task<IEnumerable<BargeCondition>> GetByBargeIdAsync(int bargeId)"
+      ]
+    },
+    "validation": {
+      "strategy": "FluentValidation",
+      "validatorClass": "BargeConditionValidator",
+      "rules": [
+        "RuleFor(x => x.Note).NotEmpty().MaximumLength(500)",
+        "RuleFor(x => x.BargeId).GreaterThan(0)"
+      ]
+    },
+    "fileManagement": {
+      "recommendation": "Use IFileStorageService for photo management",
+      "implementation": "Inject file service into repository/service layer",
+      "cascadeDelete": "Handle photo deletion through domain events or service layer"
+    }
+  }
+}

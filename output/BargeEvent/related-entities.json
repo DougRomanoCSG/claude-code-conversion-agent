@@ -1,0 +1,294 @@
+{
+  "parentEntity": "BargeEvent",
+  "relationships": [
+    {
+      "relatedEntity": "Barge",
+      "relationshipType": "OneToMany",
+      "parentProperty": "Barges",
+      "childProperty": "BargeEvent",
+      "foreignKey": "BargeEventTicketID",
+      "cascadeDelete": false,
+      "gridName": "grdBargeList",
+      "gridColumns": [
+        {
+          "key": "BargeNum",
+          "header": "Barge Number",
+          "type": "String"
+        },
+        {
+          "key": "LoadStatus",
+          "header": "Load Status",
+          "type": "String"
+        },
+        {
+          "key": "LocationID",
+          "header": "Location",
+          "type": "Int32"
+        },
+        {
+          "key": "CommodityID",
+          "header": "Commodity",
+          "type": "String"
+        },
+        {
+          "key": "DraftFeet",
+          "header": "Draft (Ft)",
+          "type": "String"
+        },
+        {
+          "key": "DraftInches",
+          "header": "Draft (In)",
+          "type": "String"
+        }
+      ],
+      "operations": {
+        "add": "AddToList",
+        "edit": "ModifyDetails",
+        "delete": "RemoveFromList"
+      },
+      "notes": "Barges are managed through AddToList/RemoveFromList methods. Collection stored in _Barges and _BargesInEdit lists."
+    },
+    {
+      "relatedEntity": "OnboardOrder",
+      "relationshipType": "OneToMany",
+      "parentProperty": "OnboardOrders",
+      "childProperty": "BargeEvent",
+      "foreignKey": "BargeEventTicketID",
+      "cascadeDelete": false,
+      "gridName": null,
+      "gridColumns": [],
+      "operations": {
+        "add": null,
+        "edit": null,
+        "delete": null
+      },
+      "notes": "OnboardOrders collection is loaded separately. Used for onboard order management in relation to barge events."
+    },
+    {
+      "relatedEntity": "BoatDelay",
+      "relationshipType": "OneToMany",
+      "parentProperty": "BoatDelays",
+      "childProperty": "BargeEvent",
+      "foreignKey": "LocationID",
+      "cascadeDelete": false,
+      "gridName": null,
+      "gridColumns": [],
+      "operations": {
+        "add": "BoatDelays.Add",
+        "edit": null,
+        "delete": null
+      },
+      "notes": "Lazy-loaded child collection. Loaded via BoatDelays.GetBoatDelays with LocationID, EventTypeID, EventStartDateTime, EventEndDateTime parameters."
+    },
+    {
+      "relatedEntity": "BoatTraffic",
+      "relationshipType": "OneToOne",
+      "parentProperty": "BoatTraffic",
+      "childProperty": "BargeEvent",
+      "foreignKey": null,
+      "cascadeDelete": false,
+      "gridName": null,
+      "gridColumns": [],
+      "operations": {
+        "add": "NewBoatTrafficArrival",
+        "edit": null,
+        "delete": null
+      },
+      "notes": "Lazy-loaded. Created/updated for Midstream-In and Midstream-Out events when customization enabled."
+    },
+    {
+      "relatedEntity": "DeckLogActivity",
+      "relationshipType": "OneToOne",
+      "parentProperty": "DeckLogActivity",
+      "childProperty": "BargeEvent",
+      "foreignKey": null,
+      "cascadeDelete": false,
+      "gridName": null,
+      "gridColumns": [],
+      "operations": {
+        "add": null,
+        "edit": null,
+        "delete": null
+      },
+      "notes": "Lazy-loaded. Only instantiated when EnableBoatTowingDelays global setting is true."
+    },
+    {
+      "relatedEntity": "ShiftTowZoneRate",
+      "relationshipType": "OneToMany",
+      "parentProperty": "ShiftTowZoneRates",
+      "childProperty": "BargeEvent",
+      "foreignKey": null,
+      "cascadeDelete": false,
+      "gridName": null,
+      "gridColumns": [],
+      "operations": {
+        "add": null,
+        "edit": null,
+        "delete": null
+      },
+      "notes": "Rate-related collection for shift/tow zone calculations."
+    },
+    {
+      "relatedEntity": "HighWaterCharge",
+      "relationshipType": "OneToMany",
+      "parentProperty": "HighWaterCharges",
+      "childProperty": "BargeEvent",
+      "foreignKey": null,
+      "cascadeDelete": false,
+      "gridName": null,
+      "gridColumns": [],
+      "operations": {
+        "add": null,
+        "edit": null,
+        "delete": null
+      },
+      "notes": "Rate-related collection for high water charge calculations."
+    }
+  ],
+  "lookupRelationships": [
+    {
+      "property": "FromLocationID",
+      "lookupEntity": "Location",
+      "displayProperty": "LocationName",
+      "required": false,
+      "notes": "Can be FleetBoat, ExternalBoat, Facility, or FleetFacility depending on event type. Uses expandable combo (cboFromLocationID)."
+    },
+    {
+      "property": "ToLocationID",
+      "lookupEntity": "Location",
+      "displayProperty": "LocationName",
+      "required": false,
+      "notes": "Can be FleetBoat, ExternalBoat, Facility, or FleetFacility depending on event type. Uses expandable combo (cboToLocationID)."
+    },
+    {
+      "property": "FleetBoatID",
+      "lookupEntity": "Boat",
+      "displayProperty": "BoatName",
+      "required": false,
+      "notes": "Fleet boat performing the event."
+    },
+    {
+      "property": "BillingCustomerID",
+      "lookupEntity": "Customer",
+      "displayProperty": "CustomerName",
+      "required": false,
+      "notes": "Customer being billed for the event. Can be set at event or individual barge level."
+    },
+    {
+      "property": "ConsignLocationID",
+      "lookupEntity": "Location",
+      "displayProperty": "LocationName",
+      "required": false,
+      "notes": "Consignment facility location. Uses expandable combo (cboConsignLocationID)."
+    },
+    {
+      "property": "CargoCustomerID",
+      "lookupEntity": "Customer",
+      "displayProperty": "CustomerName",
+      "required": false,
+      "notes": "Cargo customer for the event."
+    },
+    {
+      "property": "DestinationLocationID",
+      "lookupEntity": "Location",
+      "displayProperty": "LocationName",
+      "required": false,
+      "notes": "Destination location for barges."
+    },
+    {
+      "property": "EventTypeID",
+      "lookupEntity": "EventType",
+      "displayProperty": "EventTypeName",
+      "required": true,
+      "notes": "Type of event (Load, Unload, Shift, etc.). Readonly property set during Load methods."
+    },
+    {
+      "property": "FleetID",
+      "lookupEntity": "Fleet",
+      "displayProperty": "FleetName",
+      "required": true,
+      "notes": "Fleet owning this event."
+    },
+    {
+      "property": "CommodityID",
+      "lookupEntity": "Commodity",
+      "displayProperty": "CommodityName",
+      "required": false,
+      "notes": "Commodity being handled in the event. Can be set at event level or individual barge level."
+    },
+    {
+      "property": "ConsignShipID",
+      "lookupEntity": "Ship",
+      "displayProperty": "ShipName",
+      "required": false,
+      "notes": "Ship being consigned to. Uses combo (cboConsignShipID)."
+    },
+    {
+      "property": "DestinationInID",
+      "lookupEntity": "Location",
+      "displayProperty": "LocationName",
+      "required": false,
+      "notes": "Destination for inbound barge. Uses combo (cboDestinationInID)."
+    },
+    {
+      "property": "DestinationOutID",
+      "lookupEntity": "Location",
+      "displayProperty": "LocationName",
+      "required": false,
+      "notes": "Destination for outbound barge. Uses combo (cboDestinationOutID)."
+    },
+    {
+      "property": "RiverID",
+      "lookupEntity": "River",
+      "displayProperty": "RiverName",
+      "required": false,
+      "notes": "River where event occurs. Used with Mile property for location."
+    }
+  ],
+  "serviceLayerPattern": {
+    "repositoryInterface": "IBargeEventRepository",
+    "entityLoading": "ServiceLayer",
+    "notes": "In modern Dapper pattern, child collections (Barges, OnboardOrders, BoatDelays, etc.) should NOT be properties on the BargeEvent entity. Instead, load them via separate repository methods and compose in service layer. BargeEvent entity should only contain scalar properties and foreign keys."
+  },
+  "modernRepositoryMethods": [
+    {
+      "method": "GetBargesByEventIdAsync",
+      "parameters": ["int bargeEventTicketId"],
+      "returns": "IEnumerable<Barge>",
+      "description": "Load barges associated with this event"
+    },
+    {
+      "method": "GetOnboardOrdersByEventIdAsync",
+      "parameters": ["int bargeEventTicketId"],
+      "returns": "IEnumerable<OnboardOrder>",
+      "description": "Load onboard orders for this event"
+    },
+    {
+      "method": "GetBoatDelaysByLocationAsync",
+      "parameters": ["int locationId", "int eventTypeId", "DateTime startDateTime", "DateTime? endDateTime"],
+      "returns": "IEnumerable<BoatDelay>",
+      "description": "Load boat delays for event location and time range"
+    },
+    {
+      "method": "GetBoatTrafficByEventIdAsync",
+      "parameters": ["int bargeEventTicketId"],
+      "returns": "BoatTraffic",
+      "description": "Load boat traffic record for this event (if applicable)"
+    },
+    {
+      "method": "GetDeckLogActivityByEventIdAsync",
+      "parameters": ["int bargeEventTicketId"],
+      "returns": "DeckLogActivity",
+      "description": "Load deck log activity for this event (if EnableBoatTowingDelays)"
+    }
+  ],
+  "additionalNotes": [
+    "BargeEvent uses a complex object graph with multiple child collections and lookup relationships",
+    "Child collections are lazy-loaded to improve performance",
+    "The Barges collection is the primary child relationship, managed through specialized AddToList/RemoveFromList methods",
+    "Location properties (FromLocationID, ToLocationID) can represent different location types based on event type",
+    "Several child collections (BoatDelays, BoatTraffic, DeckLogActivity) are conditionally loaded based on customization flags",
+    "Billing and freight relationships are complex with customer IDs at both event and barge levels",
+    "In modern implementation, avoid eager loading - use service layer composition pattern"
+  ]
+}

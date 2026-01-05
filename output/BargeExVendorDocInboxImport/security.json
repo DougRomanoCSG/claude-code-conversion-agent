@@ -1,0 +1,200 @@
+{
+  "entity": "BargeExVendorDocInboxImport",
+  "legacy": {
+    "formName": "frmBargeExVendorDocInboxImport",
+    "subsystem": "Unknown",
+    "subsystemNote": "SubSystem is passed as parameter from parent form (frmBargeExVendorDocInboxSearch), not directly defined in this form",
+    "securityButtons": [
+      {
+        "button": "btnStart",
+        "type": "Action",
+        "legacyPermission": "Action",
+        "description": "Start import process for selected vendor documents"
+      },
+      {
+        "button": "btnCancel",
+        "type": "Cancel",
+        "legacyPermission": "Cancel",
+        "description": "Cancel/Close the import process"
+      }
+    ],
+    "securityImplementation": {
+      "interface": "IBaseDetailEdit",
+      "initializeMethod": "Initialize(ByVal subSys As SubSystem, ByVal selectedFleetID As Int32, ByVal vendorDocInboxList As DataTable)",
+      "setButtonTypesMethod": "SetButtonTypes() - Sets Action and Cancel button types",
+      "baseFormCall": "InitializeBase(businessObject, _SubSystem)",
+      "controlAuthorizationUsed": true
+    },
+    "businessLogic": {
+      "imports": [
+        "BargeEvent - Creates/updates barge events from BargeStatus documents",
+        "PartsServiceBill - Creates/updates parts service bills from BoatStatus documents",
+        "Ticket - Manages ticket events",
+        "BargeExVendorDocumentInbox - Source of import data"
+      ],
+      "processFlow": [
+        "ProcessBargeStatus - Imports BargeStatus documents to BargeEvent/Ticket",
+        "ProcessBoatStatus - Imports BoatStatus documents to PartsServiceBill",
+        "ProcessUnsupported - Handles unsupported document types"
+      ],
+      "criticalActions": [
+        "Create/update barge events",
+        "Create/update parts service bills",
+        "Delete imported inbox records on success",
+        "Validate business rules before import"
+      ]
+    }
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "endpoints": [
+        {
+          "method": "POST",
+          "route": "api/BargeExVendorDocInboxImport/Import",
+          "action": "ImportDocuments",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeExVendorDocInboxImportExecute",
+          "description": "Execute import of selected vendor documents"
+        },
+        {
+          "method": "POST",
+          "route": "api/BargeExVendorDocInboxImport/Validate",
+          "action": "ValidateDocuments",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeExVendorDocInboxImportExecute",
+          "description": "Validate documents before import"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeExVendorDocInboxImport/Status/{importId}",
+          "action": "GetImportStatus",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeExVendorDocInboxImportView",
+          "description": "Get status of import process"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "permissions": [
+        {
+          "name": "BargeExVendorDocInboxImportView",
+          "enumValue": "AuthPermissions.BargeExVendorDocInboxImportView",
+          "description": "View import form and status",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "GetImportStatus"
+          ]
+        },
+        {
+          "name": "BargeExVendorDocInboxImportExecute",
+          "enumValue": "AuthPermissions.BargeExVendorDocInboxImportExecute",
+          "description": "Execute import of vendor documents",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Import",
+            "ValidateDocuments"
+          ]
+        }
+      ],
+      "uiElements": [
+        {
+          "element": "btnStart",
+          "action": "Start Import",
+          "permission": "BargeExVendorDocInboxImportExecute",
+          "visibility": "Hidden if user lacks Execute permission",
+          "enablement": "Enabled only when documents selected and user has Execute permission"
+        },
+        {
+          "element": "btnCancel/Close",
+          "action": "Cancel/Close",
+          "permission": null,
+          "visibility": "Always visible",
+          "enablement": "Always enabled"
+        },
+        {
+          "element": "txtLog",
+          "action": "View Progress",
+          "permission": "BargeExVendorDocInboxImportView",
+          "visibility": "Visible if user has View permission",
+          "enablement": "Read-only display"
+        },
+        {
+          "element": "proProgress",
+          "action": "Progress Bar",
+          "permission": "BargeExVendorDocInboxImportView",
+          "visibility": "Visible if user has View permission",
+          "enablement": "Read-only display"
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BargeExVendorDocInboxImportView",
+          "description": "View BargeEx vendor document import form and status"
+        },
+        {
+          "name": "BargeExVendorDocInboxImportExecute",
+          "description": "Execute import of BargeEx vendor documents"
+        }
+      ]
+    },
+    "relatedPermissions": [
+      {
+        "entity": "BargeEvent",
+        "permissions": [
+          "BargeEventModify - Required to create/update barge events during import"
+        ]
+      },
+      {
+        "entity": "PartsServiceBill",
+        "permissions": [
+          "PartsServiceBillModify - Required to create/update parts service bills during import"
+        ]
+      },
+      {
+        "entity": "BargeExVendorDocInbox",
+        "permissions": [
+          "BargeExVendorDocInboxModify - Required to delete imported records"
+        ]
+      }
+    ]
+  },
+  "securityNotes": [
+    "This form is launched from frmBargeExVendorDocInboxSearch and receives SubSystem as parameter",
+    "The form implements a batch import process with Action (Start) and Cancel buttons",
+    "Import process creates BargeEvents for BargeStatus documents and PartsServiceBills for BoatStatus documents",
+    "Successfully imported records are deleted from BargeExVendorDocumentInbox",
+    "Process includes extensive validation and broken rules checking before save",
+    "Import can be canceled mid-process by user",
+    "Modern implementation should consider async/background processing for large imports",
+    "Consider implementing role-based restrictions on which fleets/vendors can be imported",
+    "Execute permission is critical as this performs create/update/delete operations across multiple entities",
+    "May need additional permissions check for cross-entity operations (BargeEvent, PartsServiceBill, Ticket)"
+  ],
+  "implementationGuidance": {
+    "controllerPattern": "ImportProcessController",
+    "viewPattern": "ImportProgressView with real-time updates",
+    "authenticationFlow": [
+      "UI: [Authorize] attribute on controller with BargeExVendorDocInboxImportView policy",
+      "Start Import action: Requires BargeExVendorDocInboxImportExecute permission",
+      "API: [ApiKey] attribute for any API endpoints"
+    ],
+    "modernizationConsiderations": [
+      "Implement as async background job with SignalR for progress updates",
+      "Consider batch size limits to prevent timeouts",
+      "Add comprehensive logging for audit trail",
+      "Implement cancellation tokens for graceful shutdown",
+      "Consider idempotency for retry scenarios",
+      "Add pre-import validation endpoint",
+      "Track import history with success/failure counts"
+    ]
+  }
+}

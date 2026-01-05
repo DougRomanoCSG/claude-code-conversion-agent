@@ -1,0 +1,464 @@
+@model BargeOpsAdmin.ViewModels.FacilityEditViewModel
+@{
+    ViewData["Title"] = Model.IsEditMode ? "Edit Facility" : "Create Facility";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2>@ViewData["Title"]</h2>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form asp-action="Save" method="post" id="facilityForm">
+                <input type="hidden" asp-for="Facility.LocationID" />
+
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs" id="facilityTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+                            1 - Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab">
+                            2 - Status
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="berths-tab" data-bs-toggle="tab" data-bs-target="#berths" type="button" role="tab">
+                            3 - Berths
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ndc-tab" data-bs-toggle="tab" data-bs-target="#ndc" type="button" role="tab">
+                            4 - NDC Data
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content border border-top-0 p-3" id="facilityTabContent">
+
+                    <!-- Details Tab -->
+                    <div class="tab-pane fade show active" id="details" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.Name" class="form-label"></label>
+                                    <input asp-for="Facility.Name" class="form-control" required />
+                                    <span asp-validation-for="Facility.Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.ShortName" class="form-label"></label>
+                                    <input asp-for="Facility.ShortName" class="form-control" />
+                                    <span asp-validation-for="Facility.ShortName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.River" class="form-label"></label>
+                                    <select asp-for="Facility.River" asp-items="Model.Rivers" class="form-select"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.Mile" class="form-label"></label>
+                                    <input asp-for="Facility.Mile" class="form-control" type="number" step="0.1" />
+                                    <span asp-validation-for="Facility.Mile" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="form-check mt-4">
+                                        <input asp-for="Facility.IsActive" class="form-check-input" type="checkbox" />
+                                        <label asp-for="Facility.IsActive" class="form-check-label"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.BargeExCode" class="form-label"></label>
+                                    <input asp-for="Facility.BargeExCode" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.BargeExLocationType" class="form-label"></label>
+                                    <select asp-for="Facility.BargeExLocationType" asp-items="Model.FacilityTypes" class="form-select" id="facilityType"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.Bank" class="form-label"></label>
+                                    <select asp-for="Facility.Bank" asp-items="Model.Banks" class="form-select"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.Note" class="form-label"></label>
+                                    <textarea asp-for="Facility.Note" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lock/Gauge Location Group (conditionally visible) -->
+                        <div id="lockGaugeGroup" style="display: @(Model.ShowLockGaugeFields ? "block" : "none")">
+                            <h5 class="mt-4">Lock/Gauge Location Information</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Facility.LockUsaceName" class="form-label"></label>
+                                        <input asp-for="Facility.LockUsaceName" class="form-control lock-field" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Facility.LockFloodStage" class="form-label"></label>
+                                        <input asp-for="Facility.LockFloodStage" class="form-control lock-field" type="number" step="0.01" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Facility.LockPoolStage" class="form-label"></label>
+                                        <input asp-for="Facility.LockPoolStage" class="form-control lock-field" type="number" step="0.01" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Facility.LockLowWater" class="form-label"></label>
+                                        <input asp-for="Facility.LockLowWater" class="form-control lock-field" type="number" step="0.01" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Facility.LockNormalCurrent" class="form-label"></label>
+                                        <input asp-for="Facility.LockNormalCurrent" class="form-control lock-field" type="number" step="0.01" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Facility.LockHighFlow" class="form-label"></label>
+                                        <input asp-for="Facility.LockHighFlow" class="form-control lock-field" type="number" step="0.01" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Facility.LockHighWater" class="form-label"></label>
+                                        <input asp-for="Facility.LockHighWater" class="form-control lock-field" type="number" step="0.01" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Facility.LockCatastrophicLevel" class="form-label"></label>
+                                        <input asp-for="Facility.LockCatastrophicLevel" class="form-control lock-field" type="number" step="0.01" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Tab -->
+                    <div class="tab-pane fade" id="status" role="tabpanel">
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-sm btn-primary" id="btnAddStatus">
+                                <i class="bi bi-plus"></i> Add
+                            </button>
+                            <button type="button" class="btn btn-sm btn-secondary" id="btnEditStatus" disabled>
+                                <i class="bi bi-pencil"></i> Modify
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" id="btnDeleteStatus" disabled>
+                                <i class="bi bi-trash"></i> Remove
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info" id="btnExportStatus">
+                                <i class="bi bi-download"></i> Export
+                            </button>
+                        </div>
+
+                        <table id="statusTable" class="table table-striped table-bordered" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Start Date/Time</th>
+                                    <th>End Date/Time</th>
+                                    <th>Status</th>
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+
+                        <!-- Status Edit Form (hidden by default) -->
+                        <div id="statusEditForm" style="display: none;" class="mt-3 p-3 border">
+                            <h5>Status Entry</h5>
+                            <input type="hidden" id="statusId" />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="statusStartDate" class="form-label">Start Date <span class="text-danger">*</span></label>
+                                        <input type="date" id="statusStartDate" class="form-control" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="statusStartTime" class="form-label">Start Time</label>
+                                        <input type="time" id="statusStartTime" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="statusEndDate" class="form-label">End Date</label>
+                                        <input type="date" id="statusEndDate" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="statusEndTime" class="form-label">End Time</label>
+                                        <input type="time" id="statusEndTime" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="statusStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                                        <select id="statusStatus" asp-items="Model.FacilityStatuses" class="form-select" required></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="statusNote" class="form-label">Note</label>
+                                        <textarea id="statusNote" class="form-control" rows="3" maxlength="4000"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="button" class="btn btn-primary" id="btnSaveStatus">Save</button>
+                                    <button type="button" class="btn btn-secondary" id="btnCancelStatus">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Berths Tab -->
+                    <div class="tab-pane fade" id="berths" role="tabpanel">
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-sm btn-primary" id="btnAddBerth">
+                                <i class="bi bi-plus"></i> Add
+                            </button>
+                            <button type="button" class="btn btn-sm btn-secondary" id="btnEditBerth" disabled>
+                                <i class="bi bi-pencil"></i> Modify
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" id="btnDeleteBerth" disabled>
+                                <i class="bi bi-trash"></i> Remove
+                            </button>
+                        </div>
+
+                        <table id="berthTable" class="table table-striped table-bordered" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Berth Name</th>
+                                    <th>Current Ship</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+
+                        <!-- Berth Edit Form (hidden by default) -->
+                        <div id="berthEditForm" style="display: none;" class="mt-3 p-3 border">
+                            <h5>Berth Entry</h5>
+                            <input type="hidden" id="berthId" />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="berthName" class="form-label">Berth Name <span class="text-danger">*</span></label>
+                                        <input type="text" id="berthName" class="form-control" maxlength="50" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="berthShipName" class="form-label">Current Ship (Read Only)</label>
+                                        <input type="text" id="berthShipName" class="form-control" readonly />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="button" class="btn btn-primary" id="btnSaveBerth">Save</button>
+                                    <button type="button" class="btn btn-secondary" id="btnCancelBerth">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NDC Data Tab (Read Only) -->
+                    <div class="tab-pane fade" id="ndc" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcName" class="form-label"></label>
+                                    <input asp-for="Facility.NdcName" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcLocationDescription" class="form-label"></label>
+                                    <input asp-for="Facility.NdcLocationDescription" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="mt-3">Address</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcAddress" class="form-label"></label>
+                                    <input asp-for="Facility.NdcAddress" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcTown" class="form-label"></label>
+                                    <input asp-for="Facility.NdcTown" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcState" class="form-label"></label>
+                                    <input asp-for="Facility.NdcState" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcWaterway" class="form-label"></label>
+                                    <input asp-for="Facility.NdcWaterway" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcPort" class="form-label"></label>
+                                    <input asp-for="Facility.NdcPort" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcLatitude" class="form-label"></label>
+                                    <input asp-for="Facility.NdcLatitude" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcLongitude" class="form-label"></label>
+                                    <input asp-for="Facility.NdcLongitude" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="mt-3">Operator/Owner</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcOperator" class="form-label"></label>
+                                    <input asp-for="Facility.NdcOperator" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcOwner" class="form-label"></label>
+                                    <input asp-for="Facility.NdcOwner" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcPurpose" class="form-label"></label>
+                                    <textarea asp-for="Facility.NdcPurpose" class="form-control" rows="2" readonly></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.NdcRemark" class="form-label"></label>
+                                    <textarea asp-for="Facility.NdcRemark" class="form-control" rows="3" readonly></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary" @(!Model.CanEdit ? "disabled" : "")>
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                    @if (Model.IsEditMode && Model.CanDelete)
+                    {
+                        <button type="button" class="btn btn-danger" id="btnDelete">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    }
+                </div>
+            </form>
+
+            <!-- Delete Confirmation Form -->
+            @if (Model.IsEditMode && Model.CanDelete)
+            {
+                <form asp-action="Delete" method="post" id="deleteForm" style="display:none;">
+                    <input type="hidden" name="id" value="@Model.Facility.LocationID" />
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/facility-detail.js"></script>
+    <script>
+        var facilityId = @Model.Facility.LocationID;
+    </script>
+}

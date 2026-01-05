@@ -1,0 +1,36 @@
+@model BargeOpsAdmin.ViewModels.BoatFuelPriceSearchViewModel
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-search"></i> Search Criteria
+        </h5>
+    </div>
+    <div class="card-body">
+        <form id="searchForm">
+            <div class="row">
+                <div class="col-md-3">
+                    <label asp-for="EffectiveDateSearch" class="form-label"></label>
+                    <input asp-for="EffectiveDateSearch" type="date" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="FuelVendorIDSearch" class="form-label"></label>
+                    <select asp-for="FuelVendorIDSearch" asp-items="Model.FuelVendors" class="form-select select2">
+                        <option value="">-- All Vendors --</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" id="btnSearch" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Find
+                    </button>
+                    <button type="button" id="btnReset" class="btn btn-secondary me-2">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                    <button type="button" id="btnAdd" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

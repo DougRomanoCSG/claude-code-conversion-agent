@@ -1,0 +1,555 @@
+{
+  "formName": "frmBargeSeriesSearch",
+  "formTitle": "Barge Series",
+  "formType": "SearchForm",
+  "inheritsFrom": "frmBaseSearch",
+  "implements": ["IBaseSearch"],
+  "subsystem": "frmBargeSeriesSearch",
+  "uniqueIdentifier": "BargeSeriesID",
+  "defaultSortColumn": "Name",
+  "defaultSortDirection": "Ascending",
+
+  "controls": [
+    {
+      "name": "txtBargeSeries",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "Series:",
+      "dataBinding": null,
+      "validation": [],
+      "events": [],
+      "properties": {
+        "size": "255x21",
+        "location": "66,6",
+        "tabIndex": 1,
+        "isFocusField": true
+      },
+      "modernEquivalent": {
+        "htmlElement": "input",
+        "type": "text",
+        "cssClass": "form-control",
+        "placeholder": "Enter series name"
+      },
+      "purpose": "Search filter for barge series name (partial match)"
+    },
+    {
+      "name": "cboCustomerID",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Owner:",
+      "dataBinding": null,
+      "validation": [],
+      "events": [],
+      "properties": {
+        "size": "168x22",
+        "location": "66,30",
+        "tabIndex": 6,
+        "allowBlank": true
+      },
+      "dataSource": {
+        "populationMethod": "PopulateListCombo",
+        "listSource": "Lists.CustomerList.GetList",
+        "valueField": "CustomerID",
+        "displayField": "CustomerName",
+        "includeBlank": true,
+        "sorted": false
+      },
+      "modernEquivalent": {
+        "htmlElement": "select",
+        "cssClass": "form-select select2",
+        "plugin": "Select2",
+        "allowClear": true
+      },
+      "purpose": "Filter barge series by customer/owner"
+    },
+    {
+      "name": "cboHullType",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Hull type:",
+      "dataBinding": null,
+      "validation": [],
+      "events": [],
+      "properties": {
+        "size": "76x22",
+        "location": "417,6",
+        "tabIndex": 3,
+        "allowBlank": true
+      },
+      "dataSource": {
+        "populationMethod": "PopulateValidationListCombo",
+        "listSource": "Lists.ValidationList.ValidationTypes.HullType",
+        "valueField": "Code",
+        "displayField": "Description",
+        "includeBlank": true,
+        "sorted": false
+      },
+      "modernEquivalent": {
+        "htmlElement": "select",
+        "cssClass": "form-select",
+        "allowClear": true
+      },
+      "purpose": "Filter barge series by hull type (validation list)"
+    },
+    {
+      "name": "cboCoverType",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Cover type:",
+      "dataBinding": null,
+      "validation": [],
+      "events": [],
+      "properties": {
+        "size": "76x22",
+        "location": "417,30",
+        "tabIndex": 8,
+        "allowBlank": true
+      },
+      "dataSource": {
+        "populationMethod": "PopulateValidationListCombo",
+        "listSource": "Lists.ValidationList.ValidationTypes.CoverType",
+        "valueField": "Code",
+        "displayField": "Description",
+        "includeBlank": true,
+        "sorted": false
+      },
+      "modernEquivalent": {
+        "htmlElement": "select",
+        "cssClass": "form-select",
+        "allowClear": true
+      },
+      "purpose": "Filter barge series by cover type (validation list)"
+    },
+    {
+      "name": "chkActiveOnly",
+      "type": "UltraCheckEditor",
+      "category": "SearchCriteria",
+      "label": "Active only",
+      "dataBinding": null,
+      "validation": [],
+      "events": [],
+      "properties": {
+        "size": "76x21",
+        "location": "526,6",
+        "tabIndex": 4,
+        "checked": true,
+        "defaultValue": true
+      },
+      "modernEquivalent": {
+        "htmlElement": "input",
+        "type": "checkbox",
+        "cssClass": "form-check-input",
+        "defaultChecked": true
+      },
+      "purpose": "Filter to show only active barge series"
+    }
+  ],
+
+  "buttons": [
+    {
+      "name": "btnFind",
+      "text": "F&ind",
+      "type": "Search",
+      "buttonType": "Open",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnFind_Click",
+      "properties": {
+        "size": "75x23",
+        "location": "699,6",
+        "tabIndex": 9,
+        "anchor": "Top, Right",
+        "isAcceptButton": true
+      },
+      "modernEquivalent": {
+        "htmlElement": "button",
+        "type": "submit",
+        "cssClass": "btn btn-primary",
+        "icon": "fa-search"
+      },
+      "purpose": "Execute search with current criteria and select first result"
+    },
+    {
+      "name": "btnReset",
+      "text": "Reset",
+      "type": "Reset",
+      "buttonType": "Open",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnReset_Click",
+      "properties": {
+        "size": "75x23",
+        "location": "699,30",
+        "tabIndex": 10,
+        "anchor": "Top, Right",
+        "causesValidation": false
+      },
+      "modernEquivalent": {
+        "htmlElement": "button",
+        "type": "button",
+        "cssClass": "btn btn-secondary",
+        "icon": "fa-undo"
+      },
+      "purpose": "Reset all search fields to default values"
+    }
+  ],
+
+  "grids": [
+    {
+      "name": "grdSearch",
+      "type": "UltraGrid",
+      "uniqueIdentifier": "BargeSeriesID",
+      "properties": {
+        "dock": "Fill",
+        "location": "0,82",
+        "size": "779x500",
+        "tabIndex": 2
+      },
+      "dataSource": {
+        "method": "Lists.BargeSeriesSearch.GetList",
+        "parameters": [
+          {
+            "name": "bargeSeries",
+            "source": "txtBargeSeries.Text.Trim"
+          },
+          {
+            "name": "customerID",
+            "source": "cboCustomerID.Value"
+          },
+          {
+            "name": "hullType",
+            "source": "cboHullType.Value"
+          },
+          {
+            "name": "coverType",
+            "source": "cboCoverType.Value"
+          },
+          {
+            "name": "activeOnly",
+            "source": "chkActiveOnly.Checked"
+          }
+        ],
+        "returnProperty": "List"
+      },
+      "columns": [
+        {
+          "key": "Name",
+          "header": "Series Name",
+          "dataType": "String",
+          "width": 170,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "columnIndex": 0
+        },
+        {
+          "key": "Customer",
+          "header": "Customer",
+          "dataType": "String",
+          "width": 120,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "columnIndex": 1
+        },
+        {
+          "key": "HullType",
+          "header": "Hull Type",
+          "dataType": "String",
+          "width": 70,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "columnIndex": 2
+        },
+        {
+          "key": "CoverType",
+          "header": "Cover Type",
+          "dataType": "String",
+          "width": 70,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "columnIndex": 3
+        },
+        {
+          "key": "Dimensions",
+          "header": "Dimensions",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "columnIndex": 4
+        },
+        {
+          "key": "DraftLight",
+          "header": "Light Draft",
+          "dataType": "String",
+          "width": 70,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "columnIndex": 5
+        },
+        {
+          "key": "TonsPerInch",
+          "header": "TPI",
+          "dataType": "Numeric",
+          "width": 70,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "columnIndex": 6,
+          "customComparer": "NumericSortComparer"
+        },
+        {
+          "key": "IsActive",
+          "header": "Active",
+          "dataType": "Boolean",
+          "width": 50,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "columnIndex": 7
+        }
+      ],
+      "events": [
+        "DoubleClick",
+        "AfterSelectChange"
+      ],
+      "customComparers": [
+        {
+          "column": "TonsPerInch",
+          "comparer": "NumericSortComparer"
+        }
+      ],
+      "userSettings": {
+        "saveColumnOrder": true,
+        "saveColumnWidth": true,
+        "saveFilters": true,
+        "saveSortOrder": true,
+        "settingsMethod": "MyAppSettingHelper"
+      },
+      "modernEquivalent": {
+        "plugin": "DataTables",
+        "serverSide": true,
+        "ajax": {
+          "url": "/BargeSeries/Search",
+          "type": "POST"
+        },
+        "features": [
+          "sorting",
+          "filtering",
+          "pagination",
+          "columnReorder",
+          "stateSave"
+        ]
+      },
+      "purpose": "Display search results for barge series with sortable, filterable columns"
+    }
+  ],
+
+  "panels": [
+    {
+      "name": "pnlSearch",
+      "type": "UltraPanel",
+      "label": null,
+      "properties": {
+        "dock": "Fill",
+        "size": "779x582",
+        "tabIndex": 0
+      },
+      "controls": [
+        "lblContextTitle",
+        "pnlCriteria",
+        "grdSearch"
+      ],
+      "events": [
+        "HandleCreated",
+        "HandleDestroyed"
+      ],
+      "purpose": "Main container panel for entire search form"
+    },
+    {
+      "name": "pnlCriteria",
+      "type": "UltraPanel",
+      "label": null,
+      "properties": {
+        "dock": "Top",
+        "size": "779x58",
+        "location": "0,24",
+        "tabIndex": 1
+      },
+      "controls": [
+        "lblBargeSeries",
+        "txtBargeSeries",
+        "lblHullType",
+        "cboHullType",
+        "chkActiveOnly",
+        "lblCustomerID",
+        "cboCustomerID",
+        "UltraLabel1",
+        "cboCoverType",
+        "btnFind",
+        "btnReset"
+      ],
+      "purpose": "Container for search criteria controls"
+    }
+  ],
+
+  "labels": [
+    {
+      "name": "lblContextTitle",
+      "text": "Barge Series",
+      "properties": {
+        "dock": "Top",
+        "size": "779x24",
+        "tabIndex": 0,
+        "font": "Arial, 12pt, Bold",
+        "styleSetName": "SearchCaption",
+        "appearance": "BackColor=SystemColors.Highlight, ForeColor=SystemColors.HighlightText"
+      },
+      "purpose": "Form title header"
+    },
+    {
+      "name": "lblBargeSeries",
+      "text": "Series:",
+      "properties": {
+        "size": "39x21",
+        "location": "4,6",
+        "tabIndex": 0
+      }
+    },
+    {
+      "name": "lblCustomerID",
+      "text": "Owner:",
+      "properties": {
+        "size": "56x21",
+        "location": "4,30",
+        "tabIndex": 5
+      }
+    },
+    {
+      "name": "lblHullType",
+      "text": "Hull type:",
+      "properties": {
+        "size": "67x21",
+        "location": "349,6",
+        "tabIndex": 2
+      }
+    },
+    {
+      "name": "UltraLabel1",
+      "text": "Cover type:",
+      "properties": {
+        "size": "67x21",
+        "location": "349,30",
+        "tabIndex": 7
+      }
+    }
+  ],
+
+  "validation": {
+    "method": null,
+    "rules": [],
+    "note": "No explicit validation - all search fields are optional"
+  },
+
+  "eventHandlers": {
+    "pnlSearch_HandleCreated": "Initialize form controls, restore grid settings from user preferences",
+    "pnlSearch_HandleDestroyed": "Save current grid settings to user preferences",
+    "btnFind_Click": "Execute search with current criteria, refresh grid, select first row",
+    "btnReset_Click": "Clear all search criteria to default values",
+    "RefreshList": "Populate grid with search results from BusinessLogic.Lists.BargeSeriesSearch.GetList",
+    "ItemAdd": "Open frmBargeSeriesDetail with new BargeSeries entity",
+    "ItemModify": "Open frmBargeSeriesDetail with selected BargeSeries entity for editing",
+    "ItemRemove": "Delete selected BargeSeries after confirmation, refresh grid",
+    "ItemView": "No implementation",
+    "ItemRun": "No implementation",
+    "FocusFirstField": "Set focus to txtBargeSeries on form load"
+  },
+
+  "businessLogic": {
+    "namespace": "BargeOps.Onshore.BusinessLogic",
+    "searchMethod": "Lists.BargeSeriesSearch.GetList",
+    "searchParameters": [
+      "bargeSeries (String)",
+      "customerID (String)",
+      "hullType (String)",
+      "coverType (String)",
+      "activeOnly (Boolean)"
+    ],
+    "newEntityMethod": "BargeSeries.NewBargeSeries()",
+    "getEntityMethod": "BargeSeries.GetBargeSeries(bargeSeriesID)",
+    "deleteEntityMethod": "BargeSeries.DeleteBargeSeries(bargeSeriesID)"
+  },
+
+  "relatedForms": {
+    "detailForm": "frmBargeSeriesDetail",
+    "detailFormPurpose": "Add/Edit barge series details"
+  },
+
+  "securityAuthorization": {
+    "controlAuthorization": true,
+    "subsystem": "frmBargeSeriesSearch",
+    "buttonTypes": [
+      {
+        "button": "btnFind",
+        "type": "Open"
+      },
+      {
+        "button": "btnReset",
+        "type": "Open"
+      }
+    ],
+    "functionalAreas": "Set via SetFunctionalAreas method"
+  },
+
+  "initialization": {
+    "sequence": [
+      "Initialize() - Set subsystem, control authorization, button types, functional areas",
+      "HandleCreated - Format controls, restore grid settings",
+      "FormatControls() - Format Infragistics controls, set grid unique identifier, populate dropdowns",
+      "FocusFirstField() - Set focus to txtBargeSeries"
+    ],
+    "defaultValues": {
+      "txtBargeSeries": "",
+      "cboCustomerID": "Empty",
+      "cboHullType": "Empty",
+      "cboCoverType": "Empty",
+      "chkActiveOnly": true
+    }
+  },
+
+  "modernizationNotes": {
+    "targetFramework": "ASP.NET Core MVC",
+    "uiFramework": "Bootstrap 5",
+    "gridComponent": "DataTables with server-side processing",
+    "dropdownEnhancement": "Select2 for cboCustomerID (large list)",
+    "dateTimeControls": "None present",
+    "ajaxPatterns": [
+      "Asynchronous search with POST to /BargeSeries/Search",
+      "DataTables server-side processing for grid",
+      "Modal dialog for Add/Edit instead of separate form"
+    ],
+    "viewModelPattern": "BargeSeriesSearchViewModel with search criteria and results",
+    "dtoPattern": "BargeSeriesDto for grid data, BargeSeriesSearchCriteriaDto for search parameters",
+    "validationStrategy": "FluentValidation on server-side (minimal validation needed for search)",
+    "securityStrategy": "Authorize attributes on controller actions, role-based permissions"
+  },
+
+  "extractionMetadata": {
+    "extractedFrom": [
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore\\Forms\\frmBargeSeriesSearch.vb",
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore\\Forms\\frmBargeSeriesSearch.Designer.vb"
+    ],
+    "extractionDate": "2025-12-17",
+    "formComplexity": "Medium",
+    "totalControls": 14,
+    "searchCriteriaFields": 5,
+    "gridColumns": 8,
+    "actionButtons": 2,
+    "completeness": "100% - All controls, events, and grid columns documented"
+  }
+}

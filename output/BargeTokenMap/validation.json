@@ -1,0 +1,395 @@
+{
+  "entity": "BargeTokenMap",
+  "extractionDate": "2025-12-19",
+  "sourceFiles": {
+    "form": "frmBargeTokenMap.vb",
+    "businessObject": "BargeTokenMap.vb",
+    "baseClass": "BargeTokenMapBase.vb"
+  },
+  "formValidation": {
+    "method": "SetValidatorExtenderForBargeTokenMap",
+    "displayControl": "staStatus",
+    "rules": [
+      {
+        "field": "txtSymbolValue",
+        "rule": "String validation",
+        "validationType": "ValidationTypeConstants.String",
+        "condition": "DisplayType = 'Symbol'",
+        "message": "Displayed on staStatus",
+        "severity": "Error",
+        "location": "frmBargeTokenMap.vb:757"
+      }
+    ],
+    "maxLengthConstraints": [
+      {
+        "field": "txtFieldName",
+        "maxLength": 50,
+        "source": "BargeTokenMap.MaxLength.FieldName",
+        "location": "frmBargeTokenMap.vb:768"
+      },
+      {
+        "field": "txtSymbolValue",
+        "maxLength": 1,
+        "source": "BargeTokenMap.MaxLength.SymbolValue",
+        "location": "frmBargeTokenMap.vb:769"
+      }
+    ]
+  },
+  "businessValidation": {
+    "method": "CheckBusinessRules",
+    "baseClassRules": [
+      {
+        "ruleName": "FieldNameRequired",
+        "property": "FieldName",
+        "condition": "String.IsNullOrEmpty(p_FieldName)",
+        "message": "FieldName is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "location": "BargeTokenMapBase.vb:287-289"
+      },
+      {
+        "ruleName": "FieldNameMaxLength",
+        "property": "FieldName",
+        "condition": "p_FieldName.Length > MaxLength.FieldName",
+        "message": "FieldName cannot be longer than 50.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "maxLength": 50,
+        "location": "BargeTokenMapBase.vb:290-292"
+      },
+      {
+        "ruleName": "FieldValueRequired",
+        "property": "FieldValue",
+        "condition": "String.IsNullOrEmpty(p_FieldValue)",
+        "message": "FieldValue is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "note": "Overridden in child class",
+        "location": "BargeTokenMapBase.vb:295-297"
+      },
+      {
+        "ruleName": "FieldValueMaxLength",
+        "property": "FieldValue",
+        "condition": "p_FieldValue.Length > MaxLength.FieldValue",
+        "message": "FieldValue cannot be longer than 200.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "maxLength": 200,
+        "location": "BargeTokenMapBase.vb:298-300"
+      },
+      {
+        "ruleName": "DisplayTypeRequired",
+        "property": "DisplayType",
+        "condition": "String.IsNullOrEmpty(p_DisplayType)",
+        "message": "DisplayType is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "location": "BargeTokenMapBase.vb:303-305"
+      },
+      {
+        "ruleName": "DisplayTypeMaxLength",
+        "property": "DisplayType",
+        "condition": "p_DisplayType.Length > MaxLength.DisplayType",
+        "message": "DisplayType cannot be longer than 20.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "maxLength": 20,
+        "location": "BargeTokenMapBase.vb:306-308"
+      },
+      {
+        "ruleName": "SymbolValueMaxLength",
+        "property": "SymbolValue",
+        "condition": "p_SymbolValue.Length > MaxLength.SymbolValue",
+        "message": "SymbolValue cannot be longer than 1.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "maxLength": 1,
+        "location": "BargeTokenMapBase.vb:311-314"
+      }
+    ],
+    "customRules": [
+      {
+        "ruleName": "SymbolRequired",
+        "property": "SymbolValue",
+        "condition": "(p_DisplayType.ToLower() = 'symbol') AndAlso (p_SymbolValue = String.Empty)",
+        "message": "Symbol is required.",
+        "severity": "Error",
+        "appliesWhen": "DisplayType = 'Symbol'",
+        "triggers": ["SymbolValue", "FieldValue", "Empty string (all rules)"],
+        "location": "BargeTokenMap.vb:115-118"
+      },
+      {
+        "ruleName": "ColorRequired",
+        "property": "ColorPairID",
+        "condition": "((Not _DeferredDelete) AndAlso (p_DisplayType.ToLower() = 'color') AndAlso (p_ColorPairID = String.Empty))",
+        "message": "Color is required.",
+        "severity": "Error",
+        "appliesWhen": "DisplayType = 'Color' AND not marked for deferred deletion",
+        "triggers": ["ColorPairID", "FieldValue", "DeferredDelete", "Empty string (all rules)"],
+        "note": "Special handling for ShipBerth object - ColorPairID not required when DeferredDelete = true",
+        "location": "BargeTokenMap.vb:120-127"
+      },
+      {
+        "ruleName": "PictureRequired",
+        "property": "PictureID",
+        "condition": "(p_DisplayType.ToLower() = 'picture') AndAlso (p_PictureID = String.Empty)",
+        "message": "Picture is required.",
+        "severity": "Error",
+        "appliesWhen": "DisplayType = 'Picture'",
+        "triggers": ["PictureID", "FieldValue", "Empty string (all rules)"],
+        "location": "BargeTokenMap.vb:129-132"
+      },
+      {
+        "ruleName": "FieldValueRequiredIsMarkedDeleted",
+        "property": "FieldValue",
+        "condition": "(String.IsNullOrEmpty(p_FieldValue) AndAlso (Not Me.DeferredDelete))",
+        "message": "FieldValue is required.",
+        "severity": "Error",
+        "appliesWhen": "Not marked for deferred deletion",
+        "triggers": ["FieldValue", "DeferredDelete", "Empty string"],
+        "note": "Overrides base class FieldValueRequired rule - only applies when not marked for deferred deletion",
+        "location": "BargeTokenMap.vb:134-141"
+      }
+    ]
+  },
+  "conditionalLogic": [
+    {
+      "description": "FleetID assignment on submit",
+      "condition": "_BargeTokenMap.IsNew",
+      "action": "_BargeTokenMap.FleetID = _FleetID",
+      "location": "frmBargeTokenMap.vb:236",
+      "reason": "FleetID not required when creating object, but set on submit to allow save"
+    },
+    {
+      "description": "Location type field handling",
+      "condition": "IsLocationMap(_FieldName)",
+      "fields": ["Location", "Consign to", "On order to"],
+      "action": "Show cboFieldName combo with location types, populate field values based on selected type",
+      "location": "frmBargeTokenMap.vb:407-417, 546-552",
+      "types": ["Boat", "Consign Facility", "Facility", "Ship"]
+    },
+    {
+      "description": "Display type controls",
+      "condition": "_DisplayType",
+      "values": {
+        "Picture": {
+          "control": "cboPictureID",
+          "source": "PictureList.GetList()",
+          "validation": "PictureID required when DisplayType = 'Picture'",
+          "location": "frmBargeTokenMap.vb:424-427"
+        },
+        "Symbol": {
+          "control": "txtSymbolValue",
+          "maxLength": 1,
+          "validation": "SymbolValue required when DisplayType = 'Symbol'",
+          "location": "frmBargeTokenMap.vb:428-429"
+        },
+        "Color": {
+          "control": "cboColorPairID",
+          "source": "ColorPairList.GetList(_FleetID)",
+          "validation": "ColorPairID required when DisplayType = 'Color' (unless DeferredDelete)",
+          "location": "frmBargeTokenMap.vb:430-433"
+        }
+      }
+    },
+    {
+      "description": "Deferred delete handling",
+      "property": "DeferredDelete",
+      "purpose": "Allows Validation object to mark/unmark for deletion without calling MarkDeleted",
+      "effect": "When true, ColorPairID and FieldValue validations are relaxed",
+      "commitTiming": "DeferredDelete checked in Update method, MarkDeleted called if true",
+      "location": "BargeTokenMap.vb:64-72, 184-191",
+      "note": "Used by ShipBerth object for special deletion scenarios"
+    }
+  ],
+  "fieldDependencies": [
+    {
+      "field": "cboFieldName",
+      "dependsOn": "FieldName being a location type",
+      "effect": "When changed, repopulates cboFieldValue with location-specific values",
+      "location": "frmBargeTokenMap.vb:632-648"
+    },
+    {
+      "field": "cboFieldValue",
+      "dependsOn": "cboFieldName selection (for location types)",
+      "source": "BargeTokenMapFieldValueList.GetList(fieldValue, _FleetID)",
+      "location": "frmBargeTokenMap.vb:512-520"
+    },
+    {
+      "field": "Display type controls",
+      "dependsOn": "cboFieldName selection for location types",
+      "condition": "IsLocationMap(_FieldName) AndAlso cboFieldName.Text = String.Empty",
+      "effect": "Picture/Symbol/Color controls disabled until location type selected",
+      "location": "frmBargeTokenMap.vb:462-489"
+    }
+  ],
+  "validationConstants": {
+    "displayTypes": {
+      "Picture": "picture",
+      "Symbol": "symbol",
+      "Color": "color"
+    },
+    "maxLengths": {
+      "FieldName": 50,
+      "FieldValue": 200,
+      "DisplayType": 20,
+      "SymbolValue": 1
+    },
+    "brokenRulesConstants": {
+      "SymbolRequiredName": "SymbolRequired",
+      "SymbolRequiredDesc": "Symbol is required.",
+      "ColorRequiredName": "ColorRequired",
+      "ColorRequiredDesc": "Color is required.",
+      "PictureRequiredName": "PictureRequired",
+      "PictureRequiredDesc": "Picture is required."
+    }
+  },
+  "modernValidationMapping": {
+    "dataAnnotations": {
+      "example": [
+        "[Required(ErrorMessage = \"FieldName is required.\")]",
+        "[StringLength(50, ErrorMessage = \"FieldName cannot be longer than 50.\")]",
+        "public string FieldName { get; set; }",
+        "",
+        "[Required(ErrorMessage = \"FieldValue is required.\")]",
+        "[StringLength(200, ErrorMessage = \"FieldValue cannot be longer than 200.\")]",
+        "public string FieldValue { get; set; }",
+        "",
+        "[Required(ErrorMessage = \"DisplayType is required.\")]",
+        "[StringLength(20, ErrorMessage = \"DisplayType cannot be longer than 20.\")]",
+        "public string DisplayType { get; set; }",
+        "",
+        "[StringLength(1, ErrorMessage = \"SymbolValue cannot be longer than 1.\")]",
+        "public string? SymbolValue { get; set; }"
+      ],
+      "note": "Data Annotations cannot handle complex conditional validation - use FluentValidation"
+    },
+    "fluentValidation": {
+      "example": [
+        "public class BargeTokenMapValidator : AbstractValidator<BargeTokenMap>",
+        "{",
+        "    public BargeTokenMapValidator()",
+        "    {",
+        "        RuleFor(x => x.FieldName)",
+        "            .NotEmpty().WithMessage(\"FieldName is required.\")",
+        "            .MaximumLength(50).WithMessage(\"FieldName cannot be longer than 50.\");",
+        "",
+        "        RuleFor(x => x.DisplayType)",
+        "            .NotEmpty().WithMessage(\"DisplayType is required.\")",
+        "            .MaximumLength(20).WithMessage(\"DisplayType cannot be longer than 20.\");",
+        "",
+        "        RuleFor(x => x.FieldValue)",
+        "            .NotEmpty()",
+        "            .When(x => !x.DeferredDelete)",
+        "            .WithMessage(\"FieldValue is required.\")",
+        "            .MaximumLength(200).WithMessage(\"FieldValue cannot be longer than 200.\");",
+        "",
+        "        RuleFor(x => x.SymbolValue)",
+        "            .NotEmpty()",
+        "            .When(x => x.DisplayType?.ToLower() == \"symbol\")",
+        "            .WithMessage(\"Symbol is required.\")",
+        "            .MaximumLength(1).WithMessage(\"SymbolValue cannot be longer than 1.\");",
+        "",
+        "        RuleFor(x => x.ColorPairID)",
+        "            .NotEmpty()",
+        "            .When(x => x.DisplayType?.ToLower() == \"color\" && !x.DeferredDelete)",
+        "            .WithMessage(\"Color is required.\");",
+        "",
+        "        RuleFor(x => x.PictureID)",
+        "            .NotEmpty()",
+        "            .When(x => x.DisplayType?.ToLower() == \"picture\")",
+        "            .WithMessage(\"Picture is required.\");",
+        "    }",
+        "}"
+      ]
+    },
+    "clientSideValidation": {
+      "jqueryValidate": [
+        "// Custom validation method for conditional required based on DisplayType",
+        "$.validator.addMethod('symbolRequired', function(value, element, params) {",
+        "    var displayType = $('#DisplayType').val();",
+        "    if (displayType && displayType.toLowerCase() === 'symbol') {",
+        "        return value && value.trim().length > 0;",
+        "    }",
+        "    return true;",
+        "}, 'Symbol is required.');",
+        "",
+        "$.validator.addMethod('colorRequired', function(value, element, params) {",
+        "    var displayType = $('#DisplayType').val();",
+        "    var deferredDelete = $('#DeferredDelete').val();",
+        "    if (displayType && displayType.toLowerCase() === 'color' && deferredDelete !== 'true') {",
+        "        return value && value.trim().length > 0;",
+        "    }",
+        "    return true;",
+        "}, 'Color is required.');",
+        "",
+        "$.validator.addMethod('pictureRequired', function(value, element, params) {",
+        "    var displayType = $('#DisplayType').val();",
+        "    if (displayType && displayType.toLowerCase() === 'picture') {",
+        "        return value && value.trim().length > 0;",
+        "    }",
+        "    return true;",
+        "}, 'Picture is required.');"
+      ]
+    }
+  },
+  "validationTriggers": {
+    "onSubmit": [
+      "All CheckBusinessRules execute",
+      "FleetID assigned if IsNew",
+      "ValidatorExtender validates txtSymbolValue"
+    ],
+    "onFieldValidated": [
+      {
+        "field": "txtFieldName",
+        "action": "Assign to BargeTokenMap.FieldName",
+        "location": "frmBargeTokenMap.vb:611-630"
+      },
+      {
+        "field": "cboFieldName",
+        "action": "Repopulate field values for selected location type",
+        "location": "frmBargeTokenMap.vb:632-648"
+      },
+      {
+        "field": "cboFieldValue",
+        "action": "Assign to BargeTokenMap.FieldValue, triggers business rules",
+        "location": "frmBargeTokenMap.vb:666-684"
+      },
+      {
+        "field": "txtSymbolValue",
+        "action": "Assign to BargeTokenMap.SymbolValue, triggers business rules",
+        "location": "frmBargeTokenMap.vb:686-705"
+      },
+      {
+        "field": "cboColorPairID",
+        "action": "Assign to BargeTokenMap.ColorPairID, triggers business rules",
+        "location": "frmBargeTokenMap.vb:707-725"
+      },
+      {
+        "field": "cboPictureID",
+        "action": "Assign to BargeTokenMap.PictureID, triggers business rules",
+        "location": "frmBargeTokenMap.vb:727-745"
+      }
+    ]
+  },
+  "specialNotes": [
+    "FleetID is not required when creating new object but must be set before saving",
+    "DeferredDelete property allows special deletion handling for ShipBerth object",
+    "Location-type fields (Location, Consign to, On order to) require selection of location type before field values can be selected",
+    "Display type determines which control is visible and which validation rules apply",
+    "FieldValue validation overridden to only apply when not marked for deferred deletion",
+    "ColorPairID validation has special handling for deferred deletion scenario",
+    "All string comparisons use ToLower() for case-insensitive matching",
+    "Property setters automatically call CheckBusinessRules(propertyName) for targeted validation"
+  ],
+  "extractionSummary": {
+    "totalRules": 14,
+    "baseClassRules": 7,
+    "customRules": 7,
+    "conditionalRules": 4,
+    "clientSideValidations": 1,
+    "maxLengthConstraints": 4,
+    "complexityLevel": "High",
+    "reasoning": "Complex conditional validation based on DisplayType, special deferred deletion handling, dynamic UI behavior based on field type"
+  }
+}

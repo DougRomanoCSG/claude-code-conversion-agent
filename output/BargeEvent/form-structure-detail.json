@@ -1,0 +1,2047 @@
+{
+  "formName": "frmBargeEvent",
+  "implements": ["IBaseDetailEdit"],
+  "inheritsFrom": "frmBaseDetailEditList",
+  "tabs": [
+    {
+      "name": "tpgBargeDetails",
+      "label": "Barge Details",
+      "type": "UltraTabPageControl"
+    },
+    {
+      "name": "tpgBilling",
+      "label": "Billing",
+      "type": "UltraTabPageControl"
+    },
+    {
+      "name": "tpgFreightBilling",
+      "label": "Freight Billing",
+      "type": "UltraTabPageControl"
+    },
+    {
+      "name": "tpgDemurrageBilling",
+      "label": "Demurrage Billing",
+      "type": "UltraTabPageControl"
+    },
+    {
+      "name": "tpgBillingAudit",
+      "label": "Billing Audit",
+      "type": "UltraTabPageControl"
+    }
+  ],
+  "panels": [
+    {
+      "name": "pnlEventDetail",
+      "label": "Event Detail",
+      "type": "UltraPanel"
+    },
+    {
+      "name": "pnlEventControls",
+      "label": "Event Controls",
+      "type": "UltraPanel"
+    },
+    {
+      "name": "pnlBarges",
+      "label": "Barges Panel",
+      "type": "UltraPanel",
+      "contains": ["grdBargeList", "toolbar"]
+    }
+  ],
+  "groups": [
+    {
+      "name": "grpBarges",
+      "label": "Barges"
+    },
+    {
+      "name": "grpSubmitCancel",
+      "label": "Submit/Cancel"
+    },
+    {
+      "name": "grpBaseAmount",
+      "label": "Base Amount"
+    },
+    {
+      "name": "grpSurcharges",
+      "label": "Surcharges"
+    },
+    {
+      "name": "grpTotal",
+      "label": "Total"
+    },
+    {
+      "name": "grpBargeDetailsSeparator",
+      "label": "Barge Details Separator"
+    }
+  ],
+  "controls": [
+    {
+      "name": "dtStartDate",
+      "type": "UltraDateTimeEditor",
+      "category": "DateTime",
+      "label": "Start Date",
+      "dataBinding": "StartDateTime",
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "SplitDateTime",
+        "dateInput": {
+          "id": "dtStartDate",
+          "type": "date",
+          "label": "Start Date",
+          "required": true
+        },
+        "timeInput": {
+          "id": "cboStartTime",
+          "type": "time",
+          "label": "Start Time (24-hour)",
+          "required": true
+        },
+        "displayFormat": "MM/dd/yyyy HH:mm"
+      }
+    },
+    {
+      "name": "cboStartTime",
+      "type": "UltraCombo",
+      "category": "DateTime",
+      "label": "Start Time",
+      "dataBinding": "StartDateTime",
+      "validation": [],
+      "events": [],
+      "note": "Part of split datetime pattern with dtStartDate"
+    },
+    {
+      "name": "dtCompleteDate",
+      "type": "UltraDateTimeEditor",
+      "category": "DateTime",
+      "label": "Complete Date",
+      "dataBinding": "CompleteDateTime",
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "SplitDateTime",
+        "dateInput": {
+          "id": "dtCompleteDate",
+          "type": "date",
+          "label": "Complete Date",
+          "required": false
+        },
+        "timeInput": {
+          "id": "cboCompleteTime",
+          "type": "time",
+          "label": "Complete Time (24-hour)",
+          "required": false
+        },
+        "displayFormat": "MM/dd/yyyy HH:mm"
+      }
+    },
+    {
+      "name": "cboCompleteTime",
+      "type": "UltraCombo",
+      "category": "DateTime",
+      "label": "Complete Time",
+      "dataBinding": "CompleteDateTime",
+      "validation": [],
+      "events": [],
+      "note": "Part of split datetime pattern with dtCompleteDate"
+    },
+    {
+      "name": "dtSchedStartDate",
+      "type": "UltraDateTimeEditor",
+      "category": "DateTime",
+      "label": "Scheduled Start Date",
+      "dataBinding": "ScheduledStartDateTime",
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "SplitDateTime",
+        "dateInput": {
+          "id": "dtSchedStartDate",
+          "type": "date",
+          "label": "Scheduled Start Date",
+          "required": false
+        },
+        "timeInput": {
+          "id": "cboSchedStartTime",
+          "type": "time",
+          "label": "Scheduled Start Time (24-hour)",
+          "required": false
+        },
+        "displayFormat": "MM/dd/yyyy HH:mm"
+      }
+    },
+    {
+      "name": "cboSchedStartTime",
+      "type": "UltraCombo",
+      "category": "DateTime",
+      "label": "Scheduled Start Time",
+      "dataBinding": "ScheduledStartDateTime",
+      "validation": [],
+      "events": [],
+      "note": "Part of split datetime pattern with dtSchedStartDate"
+    },
+    {
+      "name": "dtSchedCompleteDate",
+      "type": "UltraDateTimeEditor",
+      "category": "DateTime",
+      "label": "Scheduled Complete Date",
+      "dataBinding": "ScheduledCompleteDateTime",
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "SplitDateTime",
+        "dateInput": {
+          "id": "dtSchedCompleteDate",
+          "type": "date",
+          "label": "Scheduled Complete Date",
+          "required": false
+        },
+        "timeInput": {
+          "id": "cboSchedCompleteTime",
+          "type": "time",
+          "label": "Scheduled Complete Time (24-hour)",
+          "required": false
+        },
+        "displayFormat": "MM/dd/yyyy HH:mm"
+      }
+    },
+    {
+      "name": "cboSchedCompleteTime",
+      "type": "UltraCombo",
+      "category": "DateTime",
+      "label": "Scheduled Complete Time",
+      "dataBinding": "ScheduledCompleteDateTime",
+      "validation": [],
+      "events": [],
+      "note": "Part of split datetime pattern with dtSchedCompleteDate"
+    },
+    {
+      "name": "dtReleaseDate",
+      "type": "UltraDateTimeEditor",
+      "category": "DateTime",
+      "label": "Release Date",
+      "dataBinding": "ReleaseDateTime",
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "SplitDateTime",
+        "dateInput": {
+          "id": "dtReleaseDate",
+          "type": "date",
+          "label": "Release Date",
+          "required": false
+        },
+        "timeInput": {
+          "id": "cboReleaseTime",
+          "type": "time",
+          "label": "Release Time (24-hour)",
+          "required": false
+        },
+        "displayFormat": "MM/dd/yyyy HH:mm"
+      }
+    },
+    {
+      "name": "cboReleaseTime",
+      "type": "UltraCombo",
+      "category": "DateTime",
+      "label": "Release Time",
+      "dataBinding": "ReleaseDateTime",
+      "validation": [],
+      "events": [],
+      "note": "Part of split datetime pattern with dtReleaseDate"
+    },
+    {
+      "name": "dtCpDate",
+      "type": "UltraDateTimeEditor",
+      "category": "DateTime",
+      "label": "CP Date",
+      "dataBinding": "CpDateTime",
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "SplitDateTime",
+        "dateInput": {
+          "id": "dtCpDate",
+          "type": "date",
+          "label": "CP Date",
+          "required": false
+        },
+        "timeInput": {
+          "id": "cboCpTime",
+          "type": "time",
+          "label": "CP Time (24-hour)",
+          "required": false
+        },
+        "displayFormat": "MM/dd/yyyy HH:mm"
+      }
+    },
+    {
+      "name": "cboCpTime",
+      "type": "UltraCombo",
+      "category": "DateTime",
+      "label": "CP Time",
+      "dataBinding": "CpDateTime",
+      "validation": [],
+      "events": [],
+      "note": "Part of split datetime pattern with dtCpDate"
+    },
+    {
+      "name": "dtWaitDate",
+      "type": "UltraDateTimeEditor",
+      "category": "DateTime",
+      "label": "Wait Date",
+      "dataBinding": "WaitDateTime",
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "SplitDateTime",
+        "dateInput": {
+          "id": "dtWaitDate",
+          "type": "date",
+          "label": "Wait Date",
+          "required": false
+        },
+        "timeInput": {
+          "id": "cboWaitTime",
+          "type": "time",
+          "label": "Wait Time (24-hour)",
+          "required": false
+        },
+        "displayFormat": "MM/dd/yyyy HH:mm"
+      }
+    },
+    {
+      "name": "cboWaitTime",
+      "type": "UltraCombo",
+      "category": "DateTime",
+      "label": "Wait Time",
+      "dataBinding": "WaitDateTime",
+      "validation": [],
+      "events": [],
+      "note": "Part of split datetime pattern with dtWaitDate"
+    },
+    {
+      "name": "cboFleetBoatID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Fleet Boat",
+      "dataBinding": "FleetBoatID",
+      "populationMethod": "PopulateFleetBoats",
+      "dataSource": "FleetBoatList",
+      "valueField": "BoatID",
+      "displayField": "BoatName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboRiver",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "River",
+      "dataBinding": "RiverID",
+      "populationMethod": "PopulateRivers",
+      "dataSource": "RiverList",
+      "valueField": "RiverID",
+      "displayField": "RiverName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "txtMile",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Mile",
+      "dataBinding": "Mile",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.1\""
+    },
+    {
+      "name": "cboCommodityID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Commodity",
+      "dataBinding": "CommodityID",
+      "populationMethod": "PopulateCommodities",
+      "dataSource": "CommodityList",
+      "valueField": "CommodityID",
+      "displayField": "CommodityName",
+      "validation": ["conditionallyRequired"],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select with Select2",
+      "note": "Required for Complete Load/Unload events if CommodityIsRequiredForLoadUnload setting is True"
+    },
+    {
+      "name": "cboBillingCustomerID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Billing Customer",
+      "dataBinding": "BillingCustomerID",
+      "populationMethod": "PopulateCustomers",
+      "dataSource": "CustomerList",
+      "valueField": "CustomerID",
+      "displayField": "CustomerName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCustomerID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Customer",
+      "dataBinding": "CustomerID",
+      "populationMethod": "PopulateCustomers",
+      "dataSource": "CustomerList",
+      "valueField": "CustomerID",
+      "displayField": "CustomerName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboRateType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Rate Type",
+      "dataBinding": "RateType",
+      "populationMethod": "PopulateRateTypes",
+      "dataSource": "RateTypeList",
+      "valueField": "RateTypeID",
+      "displayField": "RateTypeName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboToLocationID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "To Location",
+      "dataBinding": "ToLocationID",
+      "populationMethod": "PopulateLocations",
+      "dataSource": "LocationList",
+      "valueField": "LocationID",
+      "displayField": "LocationName",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select with Select2",
+      "note": "Dynamic based on cboToLocationType"
+    },
+    {
+      "name": "cboToLocationType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "To Location Type",
+      "dataBinding": null,
+      "populationMethod": "Static",
+      "dataSource": "ShiftLocationTypeList",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select",
+      "note": "Controls population of cboToLocationID"
+    },
+    {
+      "name": "cboFromLocationID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "From Location",
+      "dataBinding": "FromLocationID",
+      "populationMethod": "PopulateLocations",
+      "dataSource": "LocationList",
+      "valueField": "LocationID",
+      "displayField": "LocationName",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select with Select2",
+      "note": "Dynamic based on cboFromLocationType"
+    },
+    {
+      "name": "cboFromLocationType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "From Location Type",
+      "dataBinding": null,
+      "populationMethod": "Static",
+      "dataSource": "ShiftLocationTypeList",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select",
+      "note": "Controls population of cboFromLocationID"
+    },
+    {
+      "name": "cboFromToRiver",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "From/To River",
+      "dataBinding": "FromToRiverID",
+      "populationMethod": "PopulateRivers",
+      "dataSource": "RiverList",
+      "valueField": "RiverID",
+      "displayField": "RiverName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "txtFromToMile",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "From/To River Mile",
+      "dataBinding": "FromToMile",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.1\""
+    },
+    {
+      "name": "cboDestinationID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Destination",
+      "dataBinding": "DestinationID",
+      "populationMethod": "PopulateDestinations",
+      "dataSource": "DestinationList",
+      "valueField": "DestinationID",
+      "displayField": "DestinationName",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select with Select2",
+      "note": "Dynamic based on cboDestinationType"
+    },
+    {
+      "name": "cboDestinationType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Destination Type",
+      "dataBinding": null,
+      "populationMethod": "Static",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select",
+      "note": "Controls population of cboDestinationID"
+    },
+    {
+      "name": "cboDestinationInID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Destination In",
+      "dataBinding": "DestinationInID",
+      "populationMethod": "PopulateDestinations",
+      "dataSource": "DestinationList",
+      "valueField": "DestinationID",
+      "displayField": "DestinationName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2",
+      "tooltip": "Destination for inbound barge"
+    },
+    {
+      "name": "cboDestinationOutID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Destination Out",
+      "dataBinding": "DestinationOutID",
+      "populationMethod": "PopulateDestinations",
+      "dataSource": "DestinationList",
+      "valueField": "DestinationID",
+      "displayField": "DestinationName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2",
+      "tooltip": "Destination for outbound barge"
+    },
+    {
+      "name": "cboConsignLocationID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Consign Location",
+      "dataBinding": "ConsignLocationID",
+      "populationMethod": "PopulateLocations",
+      "dataSource": "LocationList",
+      "valueField": "LocationID",
+      "displayField": "LocationName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2",
+      "tooltip": "Consignment facility"
+    },
+    {
+      "name": "cboConsignToType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Consign To Type",
+      "dataBinding": null,
+      "populationMethod": "Static",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select"
+    },
+    {
+      "name": "cboConsignShipID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Consign Ship",
+      "dataBinding": "ConsignShipID",
+      "populationMethod": "PopulateShips",
+      "dataSource": "ShipList",
+      "valueField": "ShipID",
+      "displayField": "ShipName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2",
+      "tooltip": "Consignment ship"
+    },
+    {
+      "name": "cboConsignStockpileID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Consign Stockpile",
+      "dataBinding": "ConsignStockpileID",
+      "populationMethod": "PopulateStockpiles",
+      "dataSource": "StockpileList",
+      "valueField": "StockpileID",
+      "displayField": "StockpileName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboConsignTruckTicketID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Consign Truck Ticket",
+      "dataBinding": "ConsignTruckTicketID",
+      "populationMethod": "PopulateTruckTickets",
+      "dataSource": "TruckTicketList",
+      "valueField": "TruckTicketID",
+      "displayField": "TruckTicketNumber",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboConsignTrainTicketID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Consign Train Ticket",
+      "dataBinding": "ConsignTrainTicketID",
+      "populationMethod": "PopulateTrainTickets",
+      "dataSource": "TrainTicketList",
+      "valueField": "TrainTicketID",
+      "displayField": "TrainTicketNumber",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboBargeConsignLocationID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Barge Consign Location",
+      "dataBinding": "BargeConsignLocationID",
+      "populationMethod": "PopulateLocations",
+      "dataSource": "LocationList",
+      "valueField": "LocationID",
+      "displayField": "LocationName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboBargeConsignToType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Barge Consign To Type",
+      "dataBinding": null,
+      "populationMethod": "Static",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select"
+    },
+    {
+      "name": "cboBargeConsignShipID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Barge Consign Ship",
+      "dataBinding": "BargeConsignShipID",
+      "populationMethod": "PopulateShips",
+      "dataSource": "ShipList",
+      "valueField": "ShipID",
+      "displayField": "ShipName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboBargeConsignStockpileID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Barge Consign Stockpile",
+      "dataBinding": "BargeConsignStockpileID",
+      "populationMethod": "PopulateStockpiles",
+      "dataSource": "StockpileList",
+      "valueField": "StockpileID",
+      "displayField": "StockpileName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboBargeConsignTruckTicketID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Barge Consign Truck Ticket",
+      "dataBinding": "BargeConsignTruckTicketID",
+      "populationMethod": "PopulateTruckTickets",
+      "dataSource": "TruckTicketList",
+      "valueField": "TruckTicketID",
+      "displayField": "TruckTicketNumber",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboBargeConsignTrainTicketID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Barge Consign Train Ticket",
+      "dataBinding": "BargeConsignTrainTicketID",
+      "populationMethod": "PopulateTrainTickets",
+      "dataSource": "TrainTicketList",
+      "valueField": "TrainTicketID",
+      "displayField": "TrainTicketNumber",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCargoID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Cargo",
+      "dataBinding": "CargoID",
+      "populationMethod": "PopulateCargos",
+      "dataSource": "CargoList",
+      "valueField": "CargoID",
+      "displayField": "CargoName",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCargoCustomerID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Cargo Customer",
+      "dataBinding": "CargoCustomerID",
+      "populationMethod": "PopulateCustomers",
+      "dataSource": "CustomerList",
+      "valueField": "CustomerID",
+      "displayField": "CustomerName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCargoHandlingStatus",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Cargo Handling Status",
+      "dataBinding": "CargoHandlingStatus",
+      "populationMethod": "PopulateCargoHandlingStatuses",
+      "dataSource": "CargoHandlingStatusList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboLoadStatus",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Load Status",
+      "dataBinding": "LoadStatus",
+      "populationMethod": "PopulateLoadStatuses",
+      "dataSource": "LoadStatusList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCleanStatus",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Clean Status",
+      "dataBinding": "CleanStatus",
+      "populationMethod": "PopulateCleanStatuses",
+      "dataSource": "CleanStatusList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCleanType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Clean Type",
+      "dataBinding": "CleanType",
+      "populationMethod": "PopulateCleanTypes",
+      "dataSource": "CleanTypeList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboAdditionalCleanType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Additional Clean Type",
+      "dataBinding": "AdditionalCleanType",
+      "populationMethod": "PopulateCleanTypes",
+      "dataSource": "CleanTypeList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCoverConfig",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Cover Configuration",
+      "dataBinding": "CoverConfig",
+      "populationMethod": "PopulateCoverConfigs",
+      "dataSource": "CoverConfigList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCoverType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Cover Type",
+      "dataBinding": "CoverType",
+      "populationMethod": "PopulateCoverTypes",
+      "dataSource": "CoverTypeList",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCoverSubTypeID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Cover SubType",
+      "dataBinding": "CoverSubTypeID",
+      "populationMethod": "PopulateCoverSubTypes",
+      "dataSource": "CoverSubTypeList",
+      "valueField": "CoverSubTypeID",
+      "displayField": "CoverSubTypeName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboCoverHandlingType",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Cover Handling Type",
+      "dataBinding": "CoverHandlingType",
+      "populationMethod": "PopulateCoverHandlingTypes",
+      "dataSource": "CoverHandlingTypeList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboRepairStatus",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Repair Status",
+      "dataBinding": "RepairStatus",
+      "populationMethod": "PopulateRepairStatuses",
+      "dataSource": "RepairStatusList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboFreeboardRange",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Freeboard Range",
+      "dataBinding": "FreeboardRange",
+      "populationMethod": "PopulateFreeboardRanges",
+      "dataSource": "FreeboardRangeList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboShipID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Ship",
+      "dataBinding": "ShipID",
+      "populationMethod": "PopulateShips",
+      "dataSource": "ShipList",
+      "valueField": "ShipID",
+      "displayField": "ShipName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboRigID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Rig",
+      "dataBinding": "RigID",
+      "populationMethod": "PopulateRigs",
+      "dataSource": "RigList",
+      "valueField": "RigID",
+      "displayField": "RigName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboDirection",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Direction",
+      "dataBinding": "Direction",
+      "populationMethod": "PopulateDirections",
+      "dataSource": "DirectionList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select"
+    },
+    {
+      "name": "cboDivision",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Division",
+      "dataBinding": "DivisionID",
+      "populationMethod": "PopulateDivisions",
+      "dataSource": "DivisionList",
+      "valueField": "DivisionID",
+      "displayField": "DivisionName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboVendorID",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Vendor",
+      "dataBinding": "VendorID",
+      "populationMethod": "PopulateVendors",
+      "dataSource": "VendorList",
+      "valueField": "VendorID",
+      "displayField": "VendorName",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "select with Select2"
+    },
+    {
+      "name": "cboDamageLevel",
+      "type": "UltraCombo",
+      "category": "Lookup",
+      "label": "Damage Level",
+      "dataBinding": "DamageLevel",
+      "populationMethod": "PopulateDamageLevels",
+      "dataSource": "DamageLevelList",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "select"
+    },
+    {
+      "name": "txtBargeNumbers",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Barge Numbers",
+      "dataBinding": "BargeNumbers",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\""
+    },
+    {
+      "name": "txtNote",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Note",
+      "dataBinding": "Note",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "textarea"
+    },
+    {
+      "name": "txtInvoiceNote",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Invoice Note",
+      "dataBinding": "InvoiceNote",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "textarea"
+    },
+    {
+      "name": "txtBargeNote",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Barge Note",
+      "dataBinding": "BargeNote",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "textarea"
+    },
+    {
+      "name": "txtDamageNote",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Damage Note",
+      "dataBinding": "DamageNote",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "textarea"
+    },
+    {
+      "name": "txtVoidNote",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Void Note",
+      "dataBinding": "VoidNote",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "textarea"
+    },
+    {
+      "name": "txtConsignBargeNum",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Consign Barge Number",
+      "dataBinding": "ConsignBargeNum",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\""
+    },
+    {
+      "name": "txtBargeConsignBargeNum",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Barge Consign Barge Number",
+      "dataBinding": "BargeConsignBargeNum",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\""
+    },
+    {
+      "name": "txtTrainNum",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Train Number",
+      "dataBinding": "TrainNum",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\""
+    },
+    {
+      "name": "txtOnOrderTripNumber",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "On Order Trip Number",
+      "dataBinding": "OnOrderTripNumber",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\""
+    },
+    {
+      "name": "txtBargeDraftFeet",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Draft Feet",
+      "dataBinding": "BargeDraftFeet",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\"",
+      "tooltip": "Feet"
+    },
+    {
+      "name": "txtBargeDraftInches",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Draft Inches",
+      "dataBinding": "BargeDraftInches",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\"",
+      "tooltip": "Inches"
+    },
+    {
+      "name": "txtRequestedDraftFeet",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Requested Draft Feet",
+      "dataBinding": "RequestedDraftFeet",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\"",
+      "tooltip": "Feet"
+    },
+    {
+      "name": "txtRequestedDraftInches",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Requested Draft Inches",
+      "dataBinding": "RequestedDraftInches",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\"",
+      "tooltip": "Inches"
+    },
+    {
+      "name": "txtTicketDraftRequestedFeet",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Ticket Draft Requested Feet",
+      "dataBinding": "TicketDraftRequestedFeet",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\""
+    },
+    {
+      "name": "txtTicketDraftRequestedInches",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Ticket Draft Requested Inches",
+      "dataBinding": "TicketDraftRequestedInches",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\""
+    },
+    {
+      "name": "txtSurveyTons",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Survey Tons",
+      "dataBinding": "SurveyTons",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtLoadUnloadTons",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Load/Unload Tons",
+      "dataBinding": "LoadUnloadTons",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtProrateUnits",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Prorate Units",
+      "dataBinding": "ProrateUnits",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtBargesInTowCount",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Barges In Tow Count",
+      "dataBinding": "BargesInTowCount",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\""
+    },
+    {
+      "name": "txtCurrentFleetingDays",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Current Fleeting Days",
+      "dataBinding": "CurrentFleetingDays",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\"",
+      "tooltip": "Current fleeting days"
+    },
+    {
+      "name": "txtPriorFleetingDays",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Prior Fleeting Days",
+      "dataBinding": "PriorFleetingDays",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\"",
+      "tooltip": "Prior fleeting days"
+    },
+    {
+      "name": "txtSizeCategory",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Size Category",
+      "dataBinding": "SizeCategory",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtLoadStatus",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Load Status",
+      "dataBinding": "LoadStatus",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtCalculatedDraft",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Calculated Draft",
+      "dataBinding": "CalculatedDraft",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtAttachment",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Attachment",
+      "dataBinding": "AttachmentFileName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\"",
+      "readOnly": true,
+      "note": "File upload field"
+    },
+    {
+      "name": "txtSurveyor",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Surveyor",
+      "dataBinding": "Surveyor",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\""
+    },
+    {
+      "name": "txtBaseRate",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Base Rate",
+      "dataBinding": "BaseRate",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtMinimum",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Minimum",
+      "dataBinding": "Minimum",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtMinimumAmount",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Minimum Amount",
+      "dataBinding": "MinimumAmount",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtFreeHours",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Free Hours",
+      "dataBinding": "FreeHours",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtBaseAmount",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Base Amount",
+      "dataBinding": "BaseAmount",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtHighWaterRate",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "High Water Rate",
+      "dataBinding": "HighWaterRate",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtHighWaterAmount",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "High Water Amount",
+      "dataBinding": "HighWaterAmount",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtFuelEscalationRate",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Fuel Escalation Rate",
+      "dataBinding": "FuelEscalationRate",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtFuelEscalationAmount",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Fuel Escalation Amount",
+      "dataBinding": "FuelEscalationAmount",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtLaborEscalationRate",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Labor Escalation Rate",
+      "dataBinding": "LaborEscalationRate",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtLaborEscalationAmount",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Labor Escalation Amount",
+      "dataBinding": "LaborEscalationAmount",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtTotalAmount",
+      "type": "UltraTextEditor",
+      "category": "Billing",
+      "label": "Total Amount",
+      "dataBinding": "TotalAmount",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtFreightCustomer",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Customer",
+      "dataBinding": "FreightCustomer",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtFreightContractNumber",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Contract Number",
+      "dataBinding": "FreightContractNumber",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\"",
+      "readOnly": true,
+      "tooltip": "Freight contract number"
+    },
+    {
+      "name": "txtFreightOriginName",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Origin Name",
+      "dataBinding": "FreightOriginName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\"",
+      "tooltip": "Origin facility or river area for freight rate"
+    },
+    {
+      "name": "txtFreightDestinationName",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Destination Name",
+      "dataBinding": "FreightDestinationName",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"text\"",
+      "tooltip": "Destination facility or river area for freight rate"
+    },
+    {
+      "name": "txtFreightBillableTons",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Billable Tons",
+      "dataBinding": "FreightBillableTons",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "tooltip": "Billable quantity"
+    },
+    {
+      "name": "txtFreightMinQuantity",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Min Quantity",
+      "dataBinding": "FreightMinQuantity",
+      "validation": ["numeric"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\""
+    },
+    {
+      "name": "txtFreightBaseRate",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Base Rate",
+      "dataBinding": "FreightBaseRate",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "tooltip": "Base rate"
+    },
+    {
+      "name": "txtFreightRateEscalation",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Rate Escalation",
+      "dataBinding": "FreightRateEscalation",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "tooltip": "Escalation rate"
+    },
+    {
+      "name": "txtFreightEffectiveRate",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Effective Rate",
+      "dataBinding": "FreightEffectiveRate",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "tooltip": "Effective rate"
+    },
+    {
+      "name": "txtFreightRateEffectiveDate",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Rate Effective Date",
+      "dataBinding": "FreightRateEffectiveDate",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"date\"",
+      "tooltip": "Date used to look up the effective rate"
+    },
+    {
+      "name": "txtFreightTotalAmount",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Total Amount",
+      "dataBinding": "FreightTotalAmount",
+      "validation": ["currency"],
+      "events": [],
+      "modernEquivalent": "input type=\"number\" step=\"0.01\"",
+      "readOnly": true
+    },
+    {
+      "name": "txtFreightInvoiceNote",
+      "type": "UltraTextEditor",
+      "category": "FreightBilling",
+      "label": "Freight Invoice Note",
+      "dataBinding": "FreightInvoiceNote",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "textarea"
+    },
+    {
+      "name": "chkIncludeHighWater",
+      "type": "UltraCheckEditor",
+      "category": "Billing",
+      "label": "Include High Water",
+      "dataBinding": "IncludeHighWater",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\"",
+      "tooltip": "Charge high water rate during high water period"
+    },
+    {
+      "name": "chkIncludeFuelAndLaborEscalation",
+      "type": "UltraCheckEditor",
+      "category": "Billing",
+      "label": "Include Fuel/Labor Escalation",
+      "dataBinding": "IncludeFuelAndLaborEscalation",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\"",
+      "tooltip": "Charge escalated fuel and labor rate"
+    },
+    {
+      "name": "chkCloseTicket",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Close Ticket",
+      "dataBinding": "CloseTicket",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkPickupWhenEmpty",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Pickup When Empty",
+      "dataBinding": "PickupWhenEmpty",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkPickupWhenLoaded",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Pickup When Loaded",
+      "dataBinding": "PickupWhenLoaded",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkLoadMultipleLots",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Load Multiple Lots",
+      "dataBinding": "LoadMultipleLots",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkLoadFirst",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Load First",
+      "dataBinding": "LoadFirst",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkLoadLast",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Load Last",
+      "dataBinding": "LoadLast",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkIsLeaker",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Is Leaker",
+      "dataBinding": "IsLeaker",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkHasInsufficientFreeboard",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Has Insufficient Freeboard",
+      "dataBinding": "HasInsufficientFreeboard",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkIsDamaged",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Is Damaged",
+      "dataBinding": "IsDamaged",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkIsCommercialBarge",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Is Commercial Barge",
+      "dataBinding": "IsCommercialBarge",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkBargeMeasureDraft",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Barge Measure Draft",
+      "dataBinding": "BargeMeasureDraft",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkBargeSampleCargo",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Barge Sample Cargo",
+      "dataBinding": "BargeSampleCargo",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkMeasureDraft",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Measure Draft",
+      "dataBinding": "MeasureDraft",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkSampleCargo",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Sample Cargo",
+      "dataBinding": "SampleCargo",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkIsReleased",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Is Released",
+      "dataBinding": "IsReleased",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkCreateOnboardOrder",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Create Onboard Order",
+      "dataBinding": "CreateOnboardOrder",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "chkIsManualFreightRate",
+      "type": "UltraCheckEditor",
+      "category": "FreightBilling",
+      "label": "Is Manual Freight Rate",
+      "dataBinding": "IsManualFreightRate",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "input type=\"checkbox\""
+    },
+    {
+      "name": "optChargeType",
+      "type": "UltraOptionSet",
+      "category": "Billing",
+      "label": "Charge Type",
+      "dataBinding": "ChargeType",
+      "validation": [],
+      "events": ["ValueChanged"],
+      "modernEquivalent": "radio button group",
+      "options": [
+        {"value": "PerBarge", "label": "Per Barge"},
+        {"value": "PerHour", "label": "Per Hour"},
+        {"value": "PerTon", "label": "Per Ton"}
+      ]
+    },
+    {
+      "name": "optOnboardOrderType",
+      "type": "UltraOptionSet",
+      "category": "DataEntry",
+      "label": "Onboard Order Type",
+      "dataBinding": "OnboardOrderType",
+      "validation": [],
+      "events": [],
+      "modernEquivalent": "radio button group"
+    }
+  ],
+  "grids": [
+    {
+      "name": "grdBargeList",
+      "type": "UltraGrid",
+      "uniqueIdentifier": "BargeID",
+      "purpose": "Display list of barges associated with event",
+      "columns": [
+        {
+          "key": "BargeNumber",
+          "header": "Barge Number",
+          "dataType": "String",
+          "width": 100,
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "BargeOwner",
+          "header": "Owner",
+          "dataType": "String",
+          "width": 120,
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "LoadStatus",
+          "header": "Load Status",
+          "dataType": "String",
+          "width": 100,
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "CleanStatus",
+          "header": "Clean Status",
+          "dataType": "String",
+          "width": 100,
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "DraftFeet",
+          "header": "Draft (Ft)",
+          "dataType": "Integer",
+          "width": 60,
+          "sortable": true,
+          "filterable": false
+        },
+        {
+          "key": "DraftInches",
+          "header": "Draft (In)",
+          "dataType": "Integer",
+          "width": 60,
+          "sortable": true,
+          "filterable": false
+        },
+        {
+          "key": "Commodity",
+          "header": "Commodity",
+          "dataType": "String",
+          "width": 120,
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "CoverType",
+          "header": "Cover Type",
+          "dataType": "String",
+          "width": 100,
+          "sortable": true,
+          "filterable": true
+        }
+      ],
+      "events": ["DoubleClick", "AfterSelectChange"],
+      "modernEquivalent": "DataTables with server-side processing"
+    },
+    {
+      "name": "grdBillingAudit",
+      "type": "UltraGrid",
+      "uniqueIdentifier": "AuditID",
+      "purpose": "Display billing audit trail",
+      "columns": [
+        {
+          "key": "ChangeDate",
+          "header": "Date",
+          "dataType": "DateTime",
+          "width": 120,
+          "sortable": true,
+          "filterable": false,
+          "format": "MM/dd/yyyy HH:mm"
+        },
+        {
+          "key": "UserName",
+          "header": "User",
+          "dataType": "String",
+          "width": 100,
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "FieldName",
+          "header": "Field",
+          "dataType": "String",
+          "width": 120,
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "OldValue",
+          "header": "Old Value",
+          "dataType": "String",
+          "width": 150,
+          "sortable": false,
+          "filterable": false
+        },
+        {
+          "key": "NewValue",
+          "header": "New Value",
+          "dataType": "String",
+          "width": 150,
+          "sortable": false,
+          "filterable": false
+        }
+      ],
+      "events": [],
+      "modernEquivalent": "DataTables with server-side processing"
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnSubmit",
+      "text": "Submit",
+      "type": "Submit",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnSubmit_Click",
+      "purpose": "Save event and close form"
+    },
+    {
+      "name": "btnCancel",
+      "text": "Cancel",
+      "type": "Cancel",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnCancel_Click",
+      "purpose": "Close form without saving"
+    },
+    {
+      "name": "btnDetailSet",
+      "text": "Set",
+      "type": "Action",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnDetailSet_Click",
+      "purpose": "Apply detail changes"
+    },
+    {
+      "name": "btnDetailCancel",
+      "text": "Cancel",
+      "type": "Action",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnDetailCancel_Click",
+      "purpose": "Cancel detail changes"
+    },
+    {
+      "name": "btnDelays",
+      "text": "Delays",
+      "type": "Navigation",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnDelays_Click",
+      "purpose": "Open delays dialog"
+    },
+    {
+      "name": "btnEventBillingDetail",
+      "text": "Event Billing Detail",
+      "type": "Navigation",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnEventBillingDetail_Click",
+      "purpose": "Open event billing detail form"
+    },
+    {
+      "name": "btnDraftDetail",
+      "text": "Draft Detail",
+      "type": "Navigation",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnDraftDetail_Click",
+      "purpose": "Open draft detail dialog"
+    },
+    {
+      "name": "btnSurveyDraftDetail",
+      "text": "Survey Draft Detail",
+      "type": "Navigation",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnSurveyDraftDetail_Click",
+      "purpose": "Open survey draft detail dialog"
+    },
+    {
+      "name": "btnAddToList",
+      "text": "Add to List",
+      "type": "Action",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnAddToList_Click",
+      "purpose": "Add barge to event"
+    }
+  ],
+  "toolbarButtons": [
+    {
+      "key": "Add to List",
+      "text": "Add to List",
+      "purpose": "Add barge to event"
+    },
+    {
+      "key": "Modify Details",
+      "text": "Modify Details",
+      "purpose": "Modify barge details for multiple barges"
+    },
+    {
+      "key": "Remove from List",
+      "text": "Remove from List",
+      "purpose": "Remove barge from event"
+    },
+    {
+      "key": "Modify Barge",
+      "text": "Modify Barge",
+      "purpose": "Open barge detail form"
+    },
+    {
+      "key": "Barge Positions",
+      "text": "Barge Positions",
+      "purpose": "View barge positions"
+    },
+    {
+      "key": "New Barge",
+      "text": "New Barge",
+      "purpose": "Create new barge"
+    },
+    {
+      "key": "Enter Tonnages",
+      "text": "Enter Tonnages",
+      "purpose": "Enter barge tonnages"
+    },
+    {
+      "key": "Manage Boats",
+      "text": "Manage Boats",
+      "purpose": "Manage boats for event"
+    },
+    {
+      "key": "Export",
+      "text": "Export",
+      "purpose": "Export data"
+    }
+  ],
+  "validation": {
+    "method": "Form-level validation in business logic",
+    "rules": [
+      {
+        "control": "cboCommodityID",
+        "rule": "Required for Complete Load/Unload events when CommodityIsRequiredForLoadUnload global setting is True",
+        "message": "Commodity is required for completed load/unload events"
+      },
+      {
+        "control": "dtStartDate + cboStartTime",
+        "rule": "Required",
+        "message": "Start date and time are required"
+      },
+      {
+        "control": "grdBargeList",
+        "rule": "At least one barge required for most event types",
+        "message": "At least one barge must be added to the event"
+      }
+    ]
+  },
+  "eventHandlers": {
+    "btnSubmit_Click": "Validates and saves the event, then closes the form",
+    "btnCancel_Click": "Closes the form without saving changes",
+    "btnDetailSet_Click": "Applies changes to barge details",
+    "btnDetailCancel_Click": "Cancels changes to barge details",
+    "btnDelays_Click": "Opens the delays dialog for event",
+    "btnEventBillingDetail_Click": "Opens detailed billing form",
+    "btnDraftDetail_Click": "Opens draft detail dialog for entering draft measurements",
+    "btnSurveyDraftDetail_Click": "Opens survey draft detail dialog",
+    "btnAddToList_Click": "Adds selected barge to the event",
+    "cboVendorID_ValueChanged": "Updates billing panel when vendor changes",
+    "cboToLocationID_ValueChanged": "Updates related fields based on location selection",
+    "cboFromLocationID_ValueChanged": "Updates related fields based on location selection",
+    "cboDestinationID_ValueChanged": "Updates related fields based on destination",
+    "optChargeType_ValueChanged": "Recalculates billing based on charge type selection",
+    "cboCargoID_ValueChanged": "Updates commodity and related fields",
+    "cboConsignToType_ValueChanged": "Shows/hides consignment-related controls",
+    "cboDestinationType_ValueChanged": "Repopulates destination combo based on type",
+    "cboFromLocationType_ValueChanged": "Repopulates from location combo based on type",
+    "cboToLocationType_ValueChanged": "Repopulates to location combo based on type",
+    "cboBargeConsignToType_ValueChanged": "Shows/hides barge consignment controls",
+    "cboCoverType_ValueChanged": "Updates cover sub-type options"
+  },
+  "businessLogicNotes": [
+    "Form implements IBaseDetailEdit interface for standard detail form behavior",
+    "Complex event type logic determines which fields are visible/required",
+    "EventTypeEnumVal drives much of the form's behavior (Terminal, Onboard, Towing, Freight)",
+    "EventStatus affects validation (Order, Start, Complete)",
+    "Billing calculations are complex with base rates, surcharges, and escalations",
+    "Location combos dynamically populate based on type selection (Boat vs Facility)",
+    "Multiple consignment scenarios supported (to ship, stockpile, truck/train ticket)",
+    "Draft can be entered in feet/inches or calculated from tonnage",
+    "Freight billing has separate calculation logic from main billing",
+    "Form supports multi-shift onboard orders with complex validation",
+    "Access level checks separate for billing vs non-billing tabs"
+  ],
+  "dataAccessPatterns": [
+    "BargeEvent business object manages all event data",
+    "ModifyBargeDetails class handles batch updates to multiple barges",
+    "BargePositions object tracks fleet positions",
+    "Multiple list population methods for dynamic combos",
+    "Billing calculations may involve rate lookups from multiple tables"
+  ],
+  "modernizationNotes": [
+    "ALL datetime fields use split date/time inputs with 24-hour military time",
+    "Replace Infragistics UltraCombo with Select2 for searchable dropdowns",
+    "Replace UltraGrid with DataTables for server-side processing",
+    "Consider breaking this massive form into multiple focused views",
+    "Tabs could become separate routes or modal dialogs",
+    "Complex billing logic should move to backend API",
+    "Real-time validation should use Fluent Validation",
+    "Consider using AJAX for dynamic combo population",
+    "File upload (attachment) should use modern drag-drop component",
+    "Toolbar buttons should become standard Bootstrap buttons or action menu"
+  ]
+}

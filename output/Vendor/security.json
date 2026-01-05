@@ -1,0 +1,484 @@
+{
+  "entity": "Vendor",
+  "legacy": {
+    "searchForm": "frmVendorSearch",
+    "detailForm": "frmVendorDetail",
+    "subsystem": "frmVendorSearch",
+    "securityButtons": [
+      {
+        "form": "frmVendorSearch",
+        "button": "btnFind",
+        "type": "Open",
+        "legacyPermission": "CanView",
+        "description": "Search for vendors"
+      },
+      {
+        "form": "frmVendorSearch",
+        "button": "btnReset",
+        "type": "Open",
+        "legacyPermission": "CanView",
+        "description": "Reset search criteria"
+      },
+      {
+        "form": "frmVendorDetail",
+        "button": "btnSubmit",
+        "type": "Submit",
+        "legacyPermission": "CanCreate/CanModify",
+        "description": "Save vendor changes"
+      },
+      {
+        "form": "frmVendorDetail",
+        "button": "btnCancel",
+        "type": "Cancel",
+        "legacyPermission": "CanView",
+        "description": "Cancel vendor changes"
+      },
+      {
+        "form": "frmVendorDetail",
+        "button": "btnSet",
+        "type": "Submit",
+        "legacyPermission": "CanModify",
+        "description": "Save vendor contact"
+      },
+      {
+        "form": "frmVendorDetail",
+        "button": "btnCancelEdit",
+        "type": "Cancel",
+        "legacyPermission": "CanView",
+        "description": "Cancel contact edit"
+      },
+      {
+        "form": "frmVendorDetail",
+        "button": "btnVbuSet",
+        "type": "Submit",
+        "legacyPermission": "CanModify",
+        "description": "Save vendor business unit"
+      },
+      {
+        "form": "frmVendorDetail",
+        "button": "btnVbuCancel",
+        "type": "Cancel",
+        "legacyPermission": "CanView",
+        "description": "Cancel vendor business unit edit"
+      }
+    ],
+    "toolbarButtons": [
+      {
+        "toolbar": "ContactsToolbarManager",
+        "button": "Add",
+        "type": "Add",
+        "legacyPermission": "CanCreate",
+        "description": "Add vendor contact"
+      },
+      {
+        "toolbar": "ContactsToolbarManager",
+        "button": "Modify",
+        "type": "Open",
+        "legacyPermission": "CanModify",
+        "description": "Modify vendor contact"
+      },
+      {
+        "toolbar": "ContactsToolbarManager",
+        "button": "Remove",
+        "type": "Remove",
+        "legacyPermission": "CanDelete",
+        "description": "Remove vendor contact"
+      },
+      {
+        "toolbar": "ContactsToolbarManager",
+        "button": "ExportContacts",
+        "type": "Open",
+        "legacyPermission": "CanView",
+        "description": "Export contacts to Excel"
+      },
+      {
+        "toolbar": "PortalToolbarManager",
+        "button": "AddPortalGroup",
+        "type": "Add",
+        "legacyPermission": "CanCreate",
+        "description": "Add portal group",
+        "requiresLicense": "Portal"
+      },
+      {
+        "toolbar": "PortalToolbarManager",
+        "button": "ModifyPortalGroup",
+        "type": "Open",
+        "legacyPermission": "CanModify",
+        "description": "Modify portal group",
+        "requiresLicense": "Portal"
+      },
+      {
+        "toolbar": "PortalToolbarManager",
+        "button": "RemovePortalGroup",
+        "type": "Remove",
+        "legacyPermission": "CanDelete",
+        "description": "Remove portal group",
+        "requiresLicense": "Portal"
+      },
+      {
+        "toolbar": "PortalToolbarManager",
+        "button": "CopyPortalGroup",
+        "type": "Add",
+        "legacyPermission": "CanCreate",
+        "description": "Copy portal group",
+        "requiresLicense": "Portal"
+      },
+      {
+        "toolbar": "PortalToolbarManager",
+        "button": "ExportPortalGroup",
+        "type": "Open",
+        "legacyPermission": "CanView",
+        "description": "Export portal groups to Excel",
+        "requiresLicense": "Portal"
+      },
+      {
+        "toolbar": "VendorBusinessUnitsToolbarManager",
+        "button": "AddVbu",
+        "type": "Add",
+        "legacyPermission": "CanCreate",
+        "description": "Add vendor business unit"
+      },
+      {
+        "toolbar": "VendorBusinessUnitsToolbarManager",
+        "button": "ModifyVbu",
+        "type": "Open",
+        "legacyPermission": "CanModify",
+        "description": "Modify vendor business unit"
+      },
+      {
+        "toolbar": "VendorBusinessUnitsToolbarManager",
+        "button": "RemoveVbu",
+        "type": "Remove",
+        "legacyPermission": "CanDelete",
+        "description": "Remove vendor business unit"
+      },
+      {
+        "toolbar": "VendorBusinessUnitsToolbarManager",
+        "button": "ExportVbu",
+        "type": "Open",
+        "legacyPermission": "CanView",
+        "description": "Export vendor business units to Excel"
+      }
+    ],
+    "interfaceActions": [
+      {
+        "interface": "IBaseSearch",
+        "action": "ItemAdd",
+        "requiredPermission": "CanCreate",
+        "description": "Create new vendor"
+      },
+      {
+        "interface": "IBaseSearch",
+        "action": "ItemModify",
+        "requiredPermission": "CanModify",
+        "description": "Modify existing vendor"
+      },
+      {
+        "interface": "IBaseSearch",
+        "action": "ItemRemove",
+        "requiredPermission": "CanDelete",
+        "description": "Delete vendor (soft delete via SetActive)"
+      }
+    ],
+    "licenseBasedFeatures": [
+      {
+        "license": "Portal",
+        "feature": "Portal tab and portal groups",
+        "description": "Vendor portal access management",
+        "uiElements": ["tabPortal", "chkEnablePortalOnly", "chkEnablePortal", "PortalToolbarManager"]
+      },
+      {
+        "license": "UnitTow",
+        "feature": "Liquid broker and tankerman flags",
+        "description": "Unit tow specific vendor types",
+        "uiElements": ["chkLiquidBrokerOnly", "chkTankermanOnly", "chkIsLiquidBroker", "chkIsTankerman", "chkContactIsLiquidBroker"]
+      },
+      {
+        "license": "EnableBargeExBargeLineSupport",
+        "feature": "BargeEx integration",
+        "description": "BargeEx vendor integration settings",
+        "uiElements": ["chkIsBargeExEnabledOnly", "tabBargeExSettings", "chkIsBargeExEnabled", "txtBargeExTradingPartnerNum", "cboBargeExConfigID"]
+      }
+    ]
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "description": "API endpoints use API Key authentication (NOT Windows Auth)",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/Vendor",
+          "action": "GetList",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorView",
+          "description": "Search and list vendors"
+        },
+        {
+          "method": "GET",
+          "route": "api/Vendor/{id}",
+          "action": "GetById",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorView",
+          "description": "Get vendor details"
+        },
+        {
+          "method": "POST",
+          "route": "api/Vendor",
+          "action": "Create",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Create new vendor"
+        },
+        {
+          "method": "PUT",
+          "route": "api/Vendor/{id}",
+          "action": "Update",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Update vendor"
+        },
+        {
+          "method": "PATCH",
+          "route": "api/Vendor/{id}/active",
+          "action": "SetActive",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Activate/deactivate vendor (soft delete)"
+        },
+        {
+          "method": "GET",
+          "route": "api/Vendor/{vendorId}/contacts",
+          "action": "GetContacts",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorView",
+          "description": "Get vendor contacts"
+        },
+        {
+          "method": "POST",
+          "route": "api/Vendor/{vendorId}/contacts",
+          "action": "CreateContact",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Create vendor contact"
+        },
+        {
+          "method": "PUT",
+          "route": "api/Vendor/{vendorId}/contacts/{contactId}",
+          "action": "UpdateContact",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Update vendor contact"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/Vendor/{vendorId}/contacts/{contactId}",
+          "action": "DeleteContact",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Delete vendor contact"
+        },
+        {
+          "method": "GET",
+          "route": "api/Vendor/{vendorId}/business-units",
+          "action": "GetBusinessUnits",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorView",
+          "description": "Get vendor business units"
+        },
+        {
+          "method": "POST",
+          "route": "api/Vendor/{vendorId}/business-units",
+          "action": "CreateBusinessUnit",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Create vendor business unit"
+        },
+        {
+          "method": "PUT",
+          "route": "api/Vendor/{vendorId}/business-units/{businessUnitId}",
+          "action": "UpdateBusinessUnit",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Update vendor business unit"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/Vendor/{vendorId}/business-units/{businessUnitId}",
+          "action": "DeleteBusinessUnit",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Delete vendor business unit"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "description": "UI uses OIDC (Azure AD) in production, DevelopmentAutoSignInMiddleware in development",
+      "permissions": [
+        {
+          "name": "VendorView",
+          "enumValue": "AuthPermissions.VendorView",
+          "description": "View vendors, search, and view details",
+          "granularity": "ReadOnly",
+          "requiredFor": ["Index", "Search", "Details", "GetList", "ExportToExcel"]
+        },
+        {
+          "name": "VendorModify",
+          "enumValue": "AuthPermissions.VendorModify",
+          "description": "Create, update, and deactivate vendors including contacts and business units",
+          "granularity": "Modify",
+          "requiredFor": ["Create", "Edit", "SetActive", "ManageContacts", "ManageBusinessUnits", "ManagePortalGroups"]
+        }
+      ],
+      "controllers": [
+        {
+          "controller": "VendorSearchController",
+          "actions": [
+            {
+              "action": "Index",
+              "httpMethod": "GET",
+              "authorization": "[Authorize]",
+              "requiredPermission": "VendorView",
+              "description": "Display vendor search page"
+            },
+            {
+              "action": "Search",
+              "httpMethod": "POST",
+              "authorization": "[Authorize]",
+              "requiredPermission": "VendorView",
+              "description": "Execute vendor search"
+            }
+          ]
+        },
+        {
+          "controller": "VendorDetailController",
+          "actions": [
+            {
+              "action": "Details",
+              "httpMethod": "GET",
+              "authorization": "[Authorize]",
+              "requiredPermission": "VendorView",
+              "description": "View vendor details"
+            },
+            {
+              "action": "Create",
+              "httpMethod": "GET",
+              "authorization": "[Authorize(Policy = \"VendorModify\")]",
+              "requiredPermission": "VendorModify",
+              "description": "Display create vendor form"
+            },
+            {
+              "action": "Create",
+              "httpMethod": "POST",
+              "authorization": "[Authorize(Policy = \"VendorModify\")]",
+              "requiredPermission": "VendorModify",
+              "description": "Create new vendor"
+            },
+            {
+              "action": "Edit",
+              "httpMethod": "GET",
+              "authorization": "[Authorize(Policy = \"VendorModify\")]",
+              "requiredPermission": "VendorModify",
+              "description": "Display edit vendor form"
+            },
+            {
+              "action": "Edit",
+              "httpMethod": "POST",
+              "authorization": "[Authorize(Policy = \"VendorModify\")]",
+              "requiredPermission": "VendorModify",
+              "description": "Update vendor"
+            },
+            {
+              "action": "SetActive",
+              "httpMethod": "POST",
+              "authorization": "[Authorize(Policy = \"VendorModify\")]",
+              "requiredPermission": "VendorModify",
+              "description": "Activate/deactivate vendor"
+            }
+          ]
+        }
+      ],
+      "uiElementSecurity": [
+        {
+          "element": "Create New Vendor button",
+          "requiredPermission": "VendorModify",
+          "hideIfNotAuthorized": true
+        },
+        {
+          "element": "Edit button",
+          "requiredPermission": "VendorModify",
+          "hideIfNotAuthorized": true
+        },
+        {
+          "element": "Delete/Deactivate button",
+          "requiredPermission": "VendorModify",
+          "hideIfNotAuthorized": true
+        },
+        {
+          "element": "Add Contact button",
+          "requiredPermission": "VendorModify",
+          "hideIfNotAuthorized": true
+        },
+        {
+          "element": "Modify Contact button",
+          "requiredPermission": "VendorModify",
+          "hideIfNotAuthorized": true
+        },
+        {
+          "element": "Remove Contact button",
+          "requiredPermission": "VendorModify",
+          "hideIfNotAuthorized": true
+        },
+        {
+          "element": "Add Business Unit button",
+          "requiredPermission": "VendorModify",
+          "hideIfNotAuthorized": true
+        },
+        {
+          "element": "Modify Business Unit button",
+          "requiredPermission": "VendorModify",
+          "hideIfNotAuthorized": true
+        },
+        {
+          "element": "Remove Business Unit button",
+          "requiredPermission": "VendorModify",
+          "hideIfNotAuthorized": true
+        },
+        {
+          "element": "Portal Group buttons",
+          "requiredPermission": "VendorModify",
+          "requiresLicense": "Portal",
+          "hideIfNotAuthorized": true
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "VendorView",
+          "description": "View vendors and search"
+        },
+        {
+          "name": "VendorModify",
+          "description": "Create, update, and deactivate vendors"
+        }
+      ]
+    }
+  },
+  "implementation_notes": {
+    "soft_delete": "Legacy uses IsActive flag for soft delete. No hard delete permission needed - use VendorModify for SetActive.",
+    "nested_entities": "Vendor has nested entities (VendorContact, VendorBusinessUnit, VendorPortalGroup) that use the same VendorModify permission.",
+    "portal_groups": "Portal groups are license-dependent and require VendorModify permission when Portal license is active.",
+    "license_checks": "UI must check license flags (Portal, UnitTow, EnableBargeExBargeLineSupport) to show/hide features.",
+    "authentication_patterns": {
+      "api": "Use [ApiKey] attribute on API controllers - NOT Windows Auth",
+      "ui": "Use [Authorize] attribute with OIDC for production, DevelopmentAutoSignInMiddleware for development"
+    },
+    "permission_granularity": "Two-tier: VendorView (ReadOnly) and VendorModify (Create/Update/Deactivate). No separate delete permission needed."
+  }
+}

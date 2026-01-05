@@ -1,0 +1,351 @@
+{
+  "formName": "frmBargeConditions",
+  "formType": "MasterDetail",
+  "formTitle": "<BargeNum> - Barge Conditions",
+  "tabControl": null,
+  "hasTabs": false,
+  "layout": "Split Panel Layout",
+  "sections": [
+    {
+      "name": "Main Section",
+      "purpose": "Display list of barge condition reports",
+      "location": "Top Panel (Fill)",
+      "groupBox": "grpBargeConditions",
+      "groupBoxText": "Conditions Reports",
+      "panel": "pnlBargeConditions",
+      "controls": [
+        {
+          "name": "grdBargeConditions",
+          "type": "UltraGrid",
+          "purpose": "Display barge condition reports",
+          "dock": "Fill",
+          "columns": [
+            {
+              "key": "CreateDateTime",
+              "header": "Received",
+              "width": 100,
+              "type": "DateTime",
+              "sortable": true,
+              "defaultSort": "Descending"
+            },
+            {
+              "key": "CreateUser",
+              "header": "Sent By",
+              "width": 100,
+              "type": "String"
+            },
+            {
+              "key": "Note",
+              "header": "Condition",
+              "width": 270,
+              "type": "String"
+            },
+            {
+              "key": "EmailSentDateTime",
+              "header": "Notified",
+              "width": 100,
+              "type": "DateTime",
+              "sortable": true
+            }
+          ],
+          "hasToolbar": true,
+          "toolbar": "tbmBargeCondition",
+          "toolbarButtons": [
+            {
+              "key": "Remove",
+              "caption": "&Remove",
+              "icon": "Remove",
+              "displayStyle": "ImageAndText",
+              "enabledWhen": "itemIsSelected && hasRemovePermission",
+              "action": "Delete selected barge condition and all related photos"
+            },
+            {
+              "key": "Export",
+              "caption": "Export",
+              "icon": "ExportResults",
+              "displayStyle": "ImageAndText",
+              "enabledWhen": "atLeastOneRow && hasOpenPermission",
+              "action": "Export grid to file"
+            }
+          ]
+        }
+      ],
+      "uniqueIdentifier": "BargeConditionID",
+      "onSelectChange": "Load selected condition details and photos"
+    },
+    {
+      "name": "Detail Section",
+      "purpose": "Display details and photos for selected condition report",
+      "location": "Bottom Panel",
+      "groupBox": "grpBargeConditionPhotos",
+      "groupBoxText": "Detail",
+      "dock": "Bottom",
+      "controls": [
+        {
+          "name": "lblCondition",
+          "type": "UltraLabel",
+          "label": "Condition:",
+          "purpose": "Label for condition note"
+        },
+        {
+          "name": "txtNote",
+          "type": "UltraTextEditor",
+          "label": "Condition",
+          "purpose": "Display full condition note text",
+          "readOnly": true,
+          "hasEditorButton": true,
+          "editorButtonAction": "Open text editor dialog for full note viewing",
+          "validation": {
+            "required": false,
+            "type": "String"
+          }
+        },
+        {
+          "name": "pnlPhotos",
+          "type": "UltraPanel",
+          "purpose": "Container for photos grid",
+          "controls": [
+            {
+              "name": "grdBargeConditionPhotos",
+              "type": "UltraGrid",
+              "purpose": "Display photos attached to selected condition report",
+              "dock": "Fill",
+              "columns": [
+                {
+                  "key": "DocumentName",
+                  "header": "Photo Name",
+                  "width": 425,
+                  "type": "String"
+                },
+                {
+                  "key": "DocumentExtension",
+                  "header": "Type",
+                  "width": 100,
+                  "type": "String"
+                }
+              ],
+              "hasToolbar": true,
+              "toolbar": "tbmBargeConditionPhoto",
+              "toolbarButtons": [
+                {
+                  "key": "ViewPhoto",
+                  "caption": "&View Photo",
+                  "icon": "PrintPreview",
+                  "displayStyle": "ImageAndText",
+                  "enabledWhen": "itemIsSelected && hasOpenPermission",
+                  "action": "Open photo in default viewer"
+                },
+                {
+                  "key": "RemovePhoto",
+                  "caption": "Remove Photo",
+                  "icon": "Remove",
+                  "displayStyle": "ImageAndText",
+                  "enabledWhen": "itemIsSelected && hasRemovePermission",
+                  "action": "Delete selected photo"
+                },
+                {
+                  "key": "ExportPhoto",
+                  "caption": "Export",
+                  "icon": "ExportResults",
+                  "displayStyle": "ImageAndText",
+                  "enabledWhen": "atLeastOneRow && hasOpenPermission",
+                  "action": "Export photos grid to file"
+                }
+              ],
+              "onDoubleClick": "View selected photo"
+            }
+          ],
+          "uniqueIdentifier": "BargeConditionPhotoID"
+        }
+      ]
+    }
+  ],
+  "sharedControls": {
+    "location": "Bottom of form",
+    "groupBox": "grpSubmitCancel",
+    "dock": "Bottom",
+    "controls": [
+      {
+        "name": "btnClose",
+        "type": "UltraButton",
+        "text": "&Close",
+        "action": "Close form",
+        "causesValidation": false,
+        "dialogResult": "Cancel"
+      }
+    ]
+  },
+  "statusBar": {
+    "name": "staStatus",
+    "purpose": "Display status messages and export progress"
+  },
+  "dataFlow": {
+    "initialization": [
+      {
+        "order": 1,
+        "action": "Initialize with BargeID and BargeNum parameters",
+        "description": "Set form title to '{BargeNum} - Barge Conditions'"
+      },
+      {
+        "order": 2,
+        "action": "Load barge conditions grid",
+        "source": "BargeConditionList.GetList(BargeID)"
+      },
+      {
+        "order": 3,
+        "action": "Set txtNote to read-only state"
+      }
+    ],
+    "selectionChange": [
+      {
+        "trigger": "User selects row in grdBargeConditions",
+        "actions": [
+          {
+            "order": 1,
+            "action": "Load BargeCondition object",
+            "method": "BargeCondition.GetBargeCondition(bargeConditionID)"
+          },
+          {
+            "order": 2,
+            "action": "Populate txtNote with condition note"
+          },
+          {
+            "order": 3,
+            "action": "Load photos grid",
+            "source": "BargeCondition.BargeConditionPhotoes"
+          }
+        ]
+      }
+    ]
+  },
+  "businessEntities": [
+    {
+      "name": "BargeCondition",
+      "purpose": "Main entity representing a condition report",
+      "key": "BargeConditionID",
+      "properties": [
+        "BargeConditionID",
+        "BargeID",
+        "Note",
+        "EmailSentDateTime",
+        "CreateDateTime",
+        "CreateUser"
+      ],
+      "childCollections": [
+        {
+          "name": "BargeConditionPhotoes",
+          "type": "BargeConditionPhoto",
+          "relationship": "One-to-Many"
+        }
+      ]
+    },
+    {
+      "name": "BargeConditionPhoto",
+      "purpose": "Photos attached to a condition report",
+      "key": "BargeConditionPhotoID",
+      "parentKey": "BargeConditionID",
+      "properties": [
+        "BargeConditionPhotoID",
+        "BargeConditionID",
+        "DocumentName",
+        "DocumentExtension",
+        "Filename",
+        "Document"
+      ],
+      "operations": [
+        {
+          "name": "View",
+          "action": "Open photo file from server path using system default viewer"
+        },
+        {
+          "name": "Delete",
+          "action": "Delete photo from database and server storage",
+          "confirmation": "Yes/No dialog"
+        }
+      ]
+    }
+  ],
+  "securityModel": {
+    "inheritsFrom": "frmBaseDetailEditList",
+    "buttonTypes": {
+      "btnClose": "Cancel",
+      "tbmBargeCondition.Remove": "Remove",
+      "tbmBargeCondition.Export": "Open",
+      "tbmBargeConditionPhoto.ViewPhoto": "Open",
+      "tbmBargeConditionPhoto.RemovePhoto": "Remove",
+      "tbmBargeConditionPhoto.ExportPhoto": "Open"
+    },
+    "authorizationChecks": [
+      "ControlAuthorization.ToolbarButtonCanBeEnabled"
+    ]
+  },
+  "modernImplementation": {
+    "layout": "Master-Detail with Resizable Split",
+    "topSection": {
+      "component": "DataGrid",
+      "purpose": "List of condition reports",
+      "features": [
+        "Sortable columns",
+        "Column resize",
+        "Row selection",
+        "Export to Excel/CSV"
+      ]
+    },
+    "bottomSection": {
+      "component": "Card with nested DataGrid",
+      "purpose": "Selected condition details and photos",
+      "features": [
+        "Read-only condition note field",
+        "Expandable text viewer for long notes",
+        "Photo grid with view/delete operations",
+        "Double-click to view photo"
+      ]
+    },
+    "toolbars": {
+      "mainGrid": [
+        {
+          "button": "Remove",
+          "icon": "trash",
+          "variant": "danger",
+          "tooltip": "Delete selected condition and all photos"
+        },
+        {
+          "button": "Export",
+          "icon": "download",
+          "variant": "secondary",
+          "tooltip": "Export conditions to file"
+        }
+      ],
+      "photosGrid": [
+        {
+          "button": "View Photo",
+          "icon": "eye",
+          "variant": "primary",
+          "tooltip": "View selected photo"
+        },
+        {
+          "button": "Remove Photo",
+          "icon": "trash",
+          "variant": "danger",
+          "tooltip": "Delete selected photo"
+        },
+        {
+          "button": "Export",
+          "icon": "download",
+          "variant": "secondary",
+          "tooltip": "Export photos list"
+        }
+      ]
+    }
+  },
+  "notes": [
+    "This is a read-only form - no editing of conditions or photos is allowed",
+    "Conditions are created via mobile devices and sent to this system",
+    "Users can only view and delete condition reports",
+    "Deleting a condition report also deletes all associated photos from server storage",
+    "Photos are stored on file server and referenced by Document.Filename",
+    "The form is initialized with a specific BargeID to filter conditions",
+    "Email notification timestamp shows when condition was sent to stakeholders",
+    "Form inherits from frmBaseDetailEditList which provides grid management functionality"
+  ]
+}

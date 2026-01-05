@@ -1,0 +1,397 @@
+{
+  "entity": "BargeExVendorDocInbox",
+  "legacy": {
+    "searchForm": {
+      "formName": "frmBargeExVendorDocInboxSearch",
+      "subsystem": "frmBargeExVendorDocInboxSearch",
+      "subsystemLocation": "frmBargeExVendorDocInboxSearch.vb:52",
+      "securityButtons": [
+        {
+          "button": "btnFind",
+          "type": "Open",
+          "legacyPermission": "View",
+          "description": "Search for vendor documents"
+        },
+        {
+          "button": "btnReset",
+          "type": "Open",
+          "legacyPermission": "View",
+          "description": "Reset search criteria"
+        },
+        {
+          "button": "btnImport",
+          "type": "Action",
+          "legacyPermission": "CanExecute",
+          "description": "Import vendor documents into system"
+        },
+        {
+          "button": "btnDiscard",
+          "type": "Action",
+          "legacyPermission": "CanExecute",
+          "description": "Discard/delete vendor documents"
+        }
+      ],
+      "additionalActions": [
+        {
+          "action": "ItemAddBarge",
+          "description": "Add barge to system from BargeEx data",
+          "requiredPermission": "BargeModify"
+        },
+        {
+          "action": "ItemAddServicingBoat",
+          "description": "Add servicing boat from BargeEx data",
+          "requiredPermission": "BoatModify"
+        },
+        {
+          "action": "ItemAddAssistedBoat",
+          "description": "Add assisted boat from BargeEx data",
+          "requiredPermission": "BoatModify"
+        },
+        {
+          "action": "ItemAddStartLocation",
+          "description": "Add start location from BargeEx data",
+          "requiredPermission": "LocationModify"
+        },
+        {
+          "action": "ItemAddEndLocation",
+          "description": "Add end location from BargeEx data",
+          "requiredPermission": "LocationModify"
+        }
+      ]
+    },
+    "importForm": {
+      "formName": "frmBargeExVendorDocInboxImport",
+      "subsystemReference": "Passed from calling form",
+      "subsystemLocation": "frmBargeExVendorDocInboxImport.vb:39",
+      "securityButtons": [
+        {
+          "button": "btnStart",
+          "type": "Action",
+          "legacyPermission": "CanExecute",
+          "description": "Start import process"
+        },
+        {
+          "button": "btnCancel",
+          "type": "Cancel",
+          "legacyPermission": "View",
+          "description": "Cancel/close import form"
+        }
+      ]
+    }
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/BargeExVendorDocInbox",
+          "action": "GetList",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeExVendorDocInboxView",
+          "description": "Retrieve list of vendor documents"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeExVendorDocInbox/{id}",
+          "action": "GetById",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeExVendorDocInboxView",
+          "description": "Retrieve single vendor document"
+        },
+        {
+          "method": "POST",
+          "route": "api/BargeExVendorDocInbox/import",
+          "action": "Import",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeExVendorDocInboxImport",
+          "description": "Import vendor documents into system"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/BargeExVendorDocInbox",
+          "action": "Discard",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeExVendorDocInboxDiscard",
+          "description": "Discard vendor documents"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "permissions": [
+        {
+          "name": "BargeExVendorDocInboxView",
+          "enumValue": "AuthPermissions.BargeExVendorDocInboxView",
+          "description": "View and search BargeEx vendor document inbox",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "Search",
+            "Details"
+          ]
+        },
+        {
+          "name": "BargeExVendorDocInboxImport",
+          "enumValue": "AuthPermissions.BargeExVendorDocInboxImport",
+          "description": "Import BargeEx vendor documents into system (creates BargeEvents and PartsServiceBills)",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Import",
+            "ProcessImport"
+          ]
+        },
+        {
+          "name": "BargeExVendorDocInboxDiscard",
+          "enumValue": "AuthPermissions.BargeExVendorDocInboxDiscard",
+          "description": "Discard (delete) BargeEx vendor documents",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Discard"
+          ]
+        }
+      ],
+      "controllerSecurity": {
+        "searchController": {
+          "name": "BargeExVendorDocInboxSearchController",
+          "baseAuthorization": "[Authorize]",
+          "actions": [
+            {
+              "action": "Index",
+              "httpMethod": "GET",
+              "requiredPermission": "BargeExVendorDocInboxView",
+              "description": "Display search interface"
+            },
+            {
+              "action": "Search",
+              "httpMethod": "POST",
+              "requiredPermission": "BargeExVendorDocInboxView",
+              "description": "Execute search query"
+            },
+            {
+              "action": "Import",
+              "httpMethod": "POST",
+              "requiredPermission": "BargeExVendorDocInboxImport",
+              "description": "Import selected documents"
+            },
+            {
+              "action": "Discard",
+              "httpMethod": "POST",
+              "requiredPermission": "BargeExVendorDocInboxDiscard",
+              "description": "Discard selected documents"
+            }
+          ]
+        },
+        "importController": {
+          "name": "BargeExVendorDocInboxImportController",
+          "baseAuthorization": "[Authorize]",
+          "actions": [
+            {
+              "action": "Index",
+              "httpMethod": "GET",
+              "requiredPermission": "BargeExVendorDocInboxImport",
+              "description": "Display import interface"
+            },
+            {
+              "action": "ProcessImport",
+              "httpMethod": "POST",
+              "requiredPermission": "BargeExVendorDocInboxImport",
+              "description": "Execute import process"
+            }
+          ]
+        }
+      },
+      "uiElementSecurity": [
+        {
+          "element": "Import Button",
+          "requiredPermission": "BargeExVendorDocInboxImport",
+          "hideIfNoPermission": true,
+          "disableIfNoPermission": false,
+          "description": "Show only if user can import documents"
+        },
+        {
+          "element": "Discard Button",
+          "requiredPermission": "BargeExVendorDocInboxDiscard",
+          "hideIfNoPermission": true,
+          "disableIfNoPermission": false,
+          "description": "Show only if user can discard documents"
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BargeExVendorDocInboxView",
+          "description": "View and search BargeEx vendor document inbox"
+        },
+        {
+          "name": "BargeExVendorDocInboxImport",
+          "description": "Import BargeEx vendor documents"
+        },
+        {
+          "name": "BargeExVendorDocInboxDiscard",
+          "description": "Discard BargeEx vendor documents"
+        }
+      ]
+    }
+  },
+  "businessLogicSecurity": {
+    "importProcess": {
+      "description": "Import process creates BargeEvents and PartsServiceBills from vendor documents",
+      "permissions": [
+        {
+          "action": "CreateBargeEvent",
+          "requiredPermission": "BargeEventModify",
+          "description": "Import creates BargeEvents for BargeStatus documents"
+        },
+        {
+          "action": "UpdateBargeEvent",
+          "requiredPermission": "BargeEventModify",
+          "description": "Import updates existing BargeEvents for revision documents"
+        },
+        {
+          "action": "CreatePartsServiceBill",
+          "requiredPermission": "PartsServiceBillModify",
+          "description": "Import creates PartsServiceBills for BoatStatus documents"
+        },
+        {
+          "action": "UpdatePartsServiceBill",
+          "requiredPermission": "PartsServiceBillModify",
+          "description": "Import updates existing PartsServiceBills for revision documents"
+        }
+      ],
+      "validations": [
+        {
+          "check": "NoBargeTicketBargeNums",
+          "description": "Warn if importing would create new tickets without open tickets",
+          "location": "frmBargeExVendorDocInboxSearch.vb:221"
+        },
+        {
+          "check": "HasRevisionWithNoPriorImport",
+          "description": "Warn if importing revisions without original transaction",
+          "location": "frmBargeExVendorDocInboxSearch.vb:238"
+        },
+        {
+          "check": "CheckForVoid",
+          "description": "Prevent updates to voided tickets or events",
+          "location": "frmBargeExVendorDocInboxImport.vb:977"
+        },
+        {
+          "check": "CheckForFinalBillAdjustments",
+          "description": "Prevent adjustments to vendor bills in Final Bill status",
+          "location": "frmBargeExVendorDocInboxImport.vb:1014"
+        }
+      ]
+    },
+    "discardProcess": {
+      "description": "Discard process performs immediate deletion of vendor documents",
+      "method": "BargeExVendorDocumentInbox.MultiDelete",
+      "location": "frmBargeExVendorDocInboxSearch.vb:800",
+      "permissions": [
+        {
+          "action": "DeleteVendorDocuments",
+          "requiredPermission": "BargeExVendorDocInboxDiscard",
+          "description": "Immediate delete of vendor documents"
+        }
+      ],
+      "validations": [
+        {
+          "check": "ConfirmationPrompt",
+          "description": "Require user confirmation before discarding",
+          "location": "frmBargeExVendorDocInboxSearch.vb:272"
+        }
+      ]
+    }
+  },
+  "dataAccessSecurity": {
+    "listAccess": {
+      "method": "GetList",
+      "filters": [
+        {
+          "field": "FleetID",
+          "description": "Restrict to selected fleet"
+        },
+        {
+          "field": "VendorID",
+          "description": "Filter by vendor (optional)"
+        },
+        {
+          "field": "DocumentSubTypeID",
+          "description": "Filter by document sub-type (optional)"
+        },
+        {
+          "field": "ControlNumber",
+          "description": "Filter by control number (optional)"
+        }
+      ],
+      "restrictedDocumentTypes": [
+        "BargeStatus: BreakTow, Clean, CoverHandling, Fleeting, MakeTow, MidstreamIn, MidstreamOut, Pump, Shift",
+        "BoatStatus: Assist"
+      ]
+    }
+  },
+  "specialPermissions": {
+    "crossEntityPermissions": [
+      {
+        "entity": "Barge",
+        "permission": "BargeModify",
+        "description": "Required to add barges from BargeEx data",
+        "action": "ItemAddBarge"
+      },
+      {
+        "entity": "Boat",
+        "permission": "BoatModify",
+        "description": "Required to add boats from BargeEx data",
+        "actions": [
+          "ItemAddServicingBoat",
+          "ItemAddAssistedBoat"
+        ]
+      },
+      {
+        "entity": "Location",
+        "permission": "LocationModify",
+        "description": "Required to add locations from BargeEx data",
+        "actions": [
+          "ItemAddStartLocation",
+          "ItemAddEndLocation"
+        ]
+      },
+      {
+        "entity": "BargeEvent",
+        "permission": "BargeEventModify",
+        "description": "Required for import process to create/update barge events",
+        "action": "Import BargeStatus documents"
+      },
+      {
+        "entity": "PartsServiceBill",
+        "permission": "PartsServiceBillModify",
+        "description": "Required for import process to create/update parts & service bills",
+        "action": "Import BoatStatus documents"
+      }
+    ]
+  },
+  "licenseFeatures": {
+    "features": [
+      {
+        "name": "BargeExIntegration",
+        "description": "BargeEx vendor document integration",
+        "requiredFor": "All BargeExVendorDocInbox functionality"
+      }
+    ]
+  },
+  "notes": [
+    "This entity is part of the BargeEx integration subsystem",
+    "Import process creates BargeEvents for BargeStatus documents and PartsServiceBills for BoatStatus documents",
+    "Import requires additional permissions for creating BargeEvents and PartsServiceBills",
+    "Discard performs immediate deletion (not soft delete)",
+    "Search form supports adding new Barges, Boats, and Locations directly from vendor data",
+    "Import process has complex validation including void checks and final bill status checks",
+    "Import process handles both new transactions and revision/update transactions",
+    "API authentication uses ApiKey (not Windows Auth)",
+    "UI authentication uses OIDC in production, DevelopmentAutoSignInMiddleware in development"
+  ]
+}

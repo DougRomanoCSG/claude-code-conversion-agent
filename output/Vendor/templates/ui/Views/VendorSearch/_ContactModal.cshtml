@@ -1,0 +1,96 @@
+@model VendorContactEditViewModel
+
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="contactModalForm" asp-action="SaveContact" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contactModalLabel">
+                        @(Model.Contact.VendorContactID == 0 ? "Add Contact" : "Edit Contact")
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="Contact.VendorID" />
+                    <input type="hidden" asp-for="Contact.VendorContactID" />
+                    <input type="hidden" asp-for="Contact.PortalUserID" />
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Contact.Name" class="form-label"></label>
+                            <input asp-for="Contact.Name" class="form-control" maxlength="80" required />
+                            <span asp-validation-for="Contact.Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Contact.PhoneNumber" class="form-label"></label>
+                            <input asp-for="Contact.PhoneNumber" class="form-control" maxlength="14" data-mask="(000) 000-0000" />
+                            <span asp-validation-for="Contact.PhoneNumber" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Contact.PhoneExt" class="form-label"></label>
+                            <input asp-for="Contact.PhoneExt" class="form-control" maxlength="7" />
+                            <span asp-validation-for="Contact.PhoneExt" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Contact.FaxNumber" class="form-label"></label>
+                            <input asp-for="Contact.FaxNumber" class="form-control" maxlength="14" data-mask="(000) 000-0000" />
+                            <span asp-validation-for="Contact.FaxNumber" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Contact.EmailAddress" class="form-label"></label>
+                            <input asp-for="Contact.EmailAddress" type="email" class="form-control" maxlength="100" />
+                            <span asp-validation-for="Contact.EmailAddress" class="text-danger"></span>
+                            @if (Model.PortalLicenseActive && !string.IsNullOrWhiteSpace(Model.Contact.PortalUserID))
+                            {
+                                <small class="text-muted">Portal user: @Model.Contact.PortalUserID</small>
+                            }
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-check mt-4">
+                                <input asp-for="Contact.IsPrimary" class="form-check-input" type="checkbox" />
+                                <label asp-for="Contact.IsPrimary" class="form-check-label"></label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check mt-4">
+                                <input asp-for="Contact.IsDispatcher" class="form-check-input" type="checkbox" />
+                                <label asp-for="Contact.IsDispatcher" class="form-check-label"></label>
+                            </div>
+                        </div>
+                        @if (Model.UnitTowLicenseActive)
+                        {
+                            <div class="col-md-4">
+                                <div class="form-check mt-4">
+                                    <input asp-for="Contact.IsLiquidBroker" class="form-check-input" type="checkbox" />
+                                    <label asp-for="Contact.IsLiquidBroker" class="form-check-label"></label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+

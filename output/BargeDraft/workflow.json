@@ -1,0 +1,983 @@
+{
+  "entity": "BargeDraft",
+  "formName": "frmBargeDraft",
+  "formType": "Modal Detail Form",
+  "calledFrom": [
+    "frmBargeDetail (via btnDraftDetail)",
+    "frmBargeEvent (via btnDraftDetail or btnSurveyDraftDetail)"
+  ],
+  "description": "Modal form for entering and managing barge draft measurements at four corners, calculating average drafts, and computing tonnage for draft surveys",
+  "primaryWorkflows": [
+    {
+      "name": "EnterDraftMeasurements",
+      "description": "User enters four corner draft measurements (port/starboard bow/stern)",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenDraftForm",
+          "trigger": "btnDraftDetail (from frmBargeDetail or frmBargeEvent)",
+          "businessLogic": "Draft.NewDraft(...) or Draft.GetDraft(draftID)",
+          "mode": "Modal dialog",
+          "initialization": "LoadControlsForDraft() populates fields from business object"
+        },
+        {
+          "step": 2,
+          "action": "EnterFourCornerDrafts",
+          "controls": [
+            "txtDraftPortBowFeet / txtDraftPortBowInches",
+            "txtDraftStarboardBowFeet / txtDraftStarboardBowInches",
+            "txtDraftPortSternFeet / txtDraftPortSternInches",
+            "txtDraftStarboardSternFeet / txtDraftStarboardSternInches"
+          ],
+          "inputFormat": "Split feet and inches fields",
+          "validation": "Feet: 0-99, Inches: 0-11, precision to nearest inch"
+        },
+        {
+          "step": 3,
+          "action": "AutoCalculateMaxDraft",
+          "trigger": "Any corner draft field .Validated event",
+          "calculation": "Draft = Math.Max(all four corner drafts)",
+          "updates": [
+            "txtDraftFeet",
+            "txtDraftInches"
+          ],
+          "readonly": true,
+          "description": "Maximum draft automatically calculated and displayed"
+        },
+        {
+          "step": 4,
+          "action": "SaveDraftMeasurements",
+          "button": "btnSubmit",
+          "validation": [
+            "Corner draft range validation (0-99.999 feet)",
+            "Inches validation (0-11)",
+            "Draft maximum >= all corner drafts"
+          ],
+          "businessLogic": "_Draft.ApplyEdit()",
+          "result": "Form closes, draft values captured back to calling form"
+        }
+      ],
+      "eventHandlerChain": {
+        "cornerDraftValidated": [
+          "ConvertFromFeetAndInches() - convert to decimal",
+          "Store decimal value in Draft[Location] property",
+          "Trigger MaxDraft() calculation",
+          "ConvertToFeetAndInches() - convert max to feet/inches",
+          "Update txtDraftFeet and txtDraftInches display"
+        ]
+      }
+    },
+    {
+      "name": "PerformDraftSurvey",
+      "description": "User enters four corner drafts and system calculates tonnage for draft survey event",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenDraftSurveyForm",
+          "trigger": "btnSurveyDraftDetail (from frmBargeEvent with EventType = DraftSurvey)",
+          "businessLogic": "Draft.NewDraft(...) with EventTypeEnumVal = DraftSurvey",
+          "initialization": "Form loads with draft survey panel visible"
+        },
+        {
+          "step": 2,
+          "action": "EnterFourCornerDrafts",
+          "controls": [
+            "Four corner draft fields (feet/inches)"
+          ],
+          "validation": "Same as EnterDraftMeasurements workflow"
+        },
+        {
+          "step": 3,
+          "action": "AutoCalculateAverageDraft",
+          "trigger": "Any corner draft field .Validated event AND EventType = DraftSurvey",
+          "method": "CalculateAverageDraft()",
+          "calculation": [
+            "Sum all four corner drafts (converted to inches)",
+            "Divide by 4",
+            "Round to nearest inch (midpoint away from zero)",
+            "Convert back to decimal feet"
+          ],
+          "updates": [
+            "txtDraftAverageFeet",
+            "txtDraftAverageInches"
+          ],
+          "readonly": true,
+          "description": "Average draft calculated and displayed, rounded to nearest inch"
+        },
+        {
+          "step": 4,
+          "action": "CalculateTonnageFromDraft",
+          "trigger": "CalculateAverageDraft() completion",
+          "method": "CalculateTonnageFromAvgDraft(draft, priorOpposingDraftSurveyEvent)",
+          "businessLogic": [
+            "Lookup tonnage from BargeSeries draft tables based on average draft",
+            "Adjust for cover weight (CalculateCoverWeightAdjustment)",
+            "Determine load status (Empty, Load, PartLoad)",
+            "Calculate EstimatedCargoDeadweight and LightshipCorrection based on load status"
+          ],
+          "updates": [
+            "txtEstimatedCargoDeadweight (readonly)",
+            "txtLightshipCorrection (readonly)"
+          ],
+          "description": "Tonnage calculated from average draft using BargeSeries tables"
+        },
+        {
+          "step": 5,
+          "action": "EnterAdjustmentTons",
+          "control": "txtAdjustmentTons",
+          "editable": true,
+          "optional": true,
+          "description": "User can manually enter tonnage adjustment value"
+        },
+        {
+          "step": 6,
+          "action": "CalculateFinalLoadUnloadTons",
+          "trigger": "txtAdjustmentTons .Validated event",
+          "method": "CalculateLoadUnloadTons()",
+          "calculation": "LoadUnloadTons = EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+          "updates": [
+            "txtLoadUnloadTons (readonly, highlighted)"
+          ],
+          "readonly": true,
+          "description": "Final load/unload tonnage calculated and prominently displayed"
+        },
+        {
+          "step": 7,
+          "action": "ViewPriorDraftSurveys",
+          "control": "grdPriorDraftSurveys",
+          "method": "LoadPriorDraftSurveys()",
+          "businessLogic": "BuildDraftSurveyTicketEventsDictionary() filters non-voided draft survey events",
+          "description": "Grid displays historical draft survey events for reference",
+          "columns": [
+            "CompleteDateTime",
+            "LoadStatus",
+            "DraftAverage",
+            "Tonnage",
+            "EventType"
+          ],
+          "sortOrder": "CompleteDateTime descending"
+        },
+        {
+          "step": 8,
+          "action": "SaveDraftSurvey",
+          "button": "btnSubmit",
+          "validation": [
+            "All draft validations from EnterDraftMeasurements",
+            "EventType-specific validations"
+          ],
+          "businessLogic": "_Draft.ApplyEdit()",
+          "result": "Form closes, draft and tonnage values captured back to calling BargeEvent form"
+        }
+      ],
+      "conditionalVisibility": {
+        "draftSurveyPanel": {
+          "visible": "EventTypeEnumVal == DraftSurvey",
+          "hidden": "All other event types",
+          "controls": [
+            "txtDraftAverageFeet/Inches",
+            "txtEstimatedCargoDeadweight",
+            "txtLightshipCorrection",
+            "txtAdjustmentTons",
+            "txtLoadUnloadTons",
+            "grdPriorDraftSurveys"
+          ]
+        }
+      }
+    },
+    {
+      "name": "ViewOnlyDraftDetails",
+      "description": "User views draft details in readonly mode (voided event or readonly access)",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenReadonlyDraftForm",
+          "trigger": "btnDraftDetail with IsVoidOnLoad = True OR AccessLevel = Readonly",
+          "initialization": "LoadControlsForDraft() with all fields disabled"
+        },
+        {
+          "step": 2,
+          "action": "ViewDraftData",
+          "description": "All draft fields displayed as readonly",
+          "enabledControls": [
+            "btnCancel (to close)"
+          ],
+          "disabledControls": [
+            "All input fields",
+            "btnSubmit"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "CloseForm",
+          "button": "btnCancel",
+          "result": "Form closes without changes"
+        }
+      ]
+    },
+    {
+      "name": "CancelDraftEntry",
+      "description": "User cancels draft entry without saving",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickCancel",
+          "button": "btnCancel",
+          "confirmation": "If IsDirty, shows 'Changes not saved. Are you sure?' dialog"
+        },
+        {
+          "step": 2,
+          "action": "ConfirmCancel",
+          "dialog": "Yes/No",
+          "ifYes": "_Draft.CancelEdit(), Form closes",
+          "ifNo": "Dialog closes, remain on form"
+        }
+      ]
+    },
+    {
+      "name": "ConfigureBargeSeries",
+      "description": "User selects BargeSeries to enable draft/tonnage lookups",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectBargeSeries",
+          "control": "cboBargeSeriesID",
+          "dataSource": "Lists.BargeSeriesList.GetList()",
+          "description": "Select barge series for draft table lookups"
+        },
+        {
+          "step": 2,
+          "action": "SelectLoadStatus",
+          "control": "cboLoadStatus",
+          "options": [
+            "Empty",
+            "Load",
+            "PartLoad"
+          ],
+          "description": "Select load status affecting tonnage calculations"
+        },
+        {
+          "step": 3,
+          "action": "SelectEventType",
+          "control": "cboEventType",
+          "dataSource": "Lists.EventTypeList.GetList()",
+          "conditionalEffect": "If DraftSurvey, shows draft survey panel"
+        }
+      ]
+    }
+  ],
+  "formStates": [
+    {
+      "state": "Initial_New",
+      "description": "Form opened for new draft entry",
+      "businessObject": "Draft.NewDraft(...)",
+      "enabledControls": [
+        "All four corner draft fields",
+        "cboBargeSeriesID",
+        "cboLoadStatus",
+        "cboEventType",
+        "btnSubmit",
+        "btnCancel"
+      ],
+      "readonlyControls": [
+        "txtDraftFeet/Inches (calculated max)",
+        "txtDraftAverageFeet/Inches (if draft survey)",
+        "txtEstimatedCargoDeadweight",
+        "txtLightshipCorrection",
+        "txtLoadUnloadTons"
+      ],
+      "hiddenPanels": [
+        "Draft Survey panel (if EventType != DraftSurvey)"
+      ]
+    },
+    {
+      "state": "Initial_Edit",
+      "description": "Form opened for editing existing draft",
+      "businessObject": "Draft.GetDraft(draftID)",
+      "dataLoading": "LoadControlsForDraft() populates all fields from _Draft object",
+      "enabledControls": "Same as Initial_New",
+      "readonlyControls": "Same as Initial_New"
+    },
+    {
+      "state": "DraftSurvey_Active",
+      "description": "Form in draft survey mode with tonnage calculations",
+      "condition": "EventTypeEnumVal == DraftSurvey",
+      "visiblePanels": [
+        "Four corner drafts panel",
+        "Draft survey calculations panel",
+        "Prior draft surveys grid"
+      ],
+      "enabledFields": [
+        "All corner draft fields",
+        "txtAdjustmentTons"
+      ],
+      "calculatedFields": [
+        "txtDraftFeet/Inches (max of corners)",
+        "txtDraftAverageFeet/Inches (average of corners, rounded to inch)",
+        "txtEstimatedCargoDeadweight (from draft tables)",
+        "txtLightshipCorrection (from opposing event)",
+        "txtLoadUnloadTons (cargo - lightship + adjustment)"
+      ]
+    },
+    {
+      "state": "Readonly_Voided",
+      "description": "Form opened for voided event, all fields readonly",
+      "condition": "IsVoidOnLoad = True",
+      "enabledControls": [
+        "btnCancel"
+      ],
+      "disabledControls": [
+        "All input fields",
+        "btnSubmit"
+      ],
+      "formatting": "Fields may appear grayed out or with readonly background"
+    },
+    {
+      "state": "Readonly_Access",
+      "description": "User has readonly access level",
+      "condition": "AccessLevel = Readonly",
+      "enabledControls": [
+        "btnCancel"
+      ],
+      "disabledControls": [
+        "All input fields",
+        "btnSubmit"
+      ]
+    },
+    {
+      "state": "Loading",
+      "description": "Form is loading data from business object",
+      "flag": "_IsStillLoading = True",
+      "purpose": "Prevents event handlers from firing during initialization",
+      "affectedEvents": [
+        "All .Validated events",
+        "All .ValueChanged events"
+      ],
+      "resetTo": "_IsStillLoading = False in LoadControlsForDraft Finally block"
+    },
+    {
+      "state": "Calculating",
+      "description": "Form is performing draft/tonnage calculations",
+      "triggers": [
+        "Corner draft field change",
+        "AdjustmentTons field change",
+        "EventType change"
+      ],
+      "methods": [
+        "MaxDraft() - calculate maximum draft",
+        "CalculateAverageDraft() - calculate average draft",
+        "CalculateTonnageFromAvgDraft() - lookup tonnage",
+        "CalculateLoadUnloadTons() - calculate final tonnage"
+      ],
+      "updates": "Multiple readonly calculated fields"
+    }
+  ],
+  "navigationPatterns": [
+    {
+      "from": "frmBargeDetail",
+      "to": "frmBargeDraft",
+      "trigger": "btnDraftDetail.Click",
+      "method": "btnDraftDetail_Click",
+      "dataPassed": {
+        "callerType": "cTypeBarge",
+        "businessObject": "_Barge",
+        "draftData": "Corner draft values from Barge object"
+      },
+      "mode": "New or Edit draft",
+      "modalDialog": true,
+      "onReturn": "LoadDraftControlsForBarge() to refresh draft display on frmBargeDetail"
+    },
+    {
+      "from": "frmBargeEvent (detail edit mode)",
+      "to": "frmBargeDraft",
+      "trigger": "btnDraftDetail.Click (single barge selected, NOT Draft Survey event)",
+      "method": "btnDraftDetail_Click",
+      "dataPassed": {
+        "callerType": "cTypeBargeEvent",
+        "businessObject": "_ModifyBargeDetails",
+        "draftData": "Draft values from ModifyBargeDetails object"
+      },
+      "mode": "Edit draft for single barge",
+      "modalDialog": true,
+      "onReturn": "Draft values captured back to _ModifyBargeDetails object"
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmBargeDraft",
+      "trigger": "btnSurveyDraftDetail.Click (Draft Survey event type)",
+      "method": "btnSurveyDraftDetail_Click",
+      "dataPassed": {
+        "callerType": "cTypeBargeEvent",
+        "businessObject": "_BargeEvent",
+        "draftData": "Draft survey data from BargeEvent object",
+        "eventType": "DraftSurvey"
+      },
+      "mode": "Edit full draft survey with tonnage calculations",
+      "modalDialog": true,
+      "onReturn": "Draft and tonnage values captured back to _BargeEvent object"
+    }
+  ],
+  "stateManagement": {
+    "sessionVariables": [
+      {
+        "variable": "_Draft",
+        "type": "Draft",
+        "description": "Main business object managing draft measurements and calculations"
+      },
+      {
+        "variable": "_IsStillLoading",
+        "type": "Boolean",
+        "description": "Flag set during LoadControlsForDraft to prevent event handlers from firing",
+        "purpose": "Prevents recursive calls and calculation cascades during initialization"
+      },
+      {
+        "variable": "_IsVoidOnLoad",
+        "type": "Boolean",
+        "description": "Cached state whether event was voided when form loaded",
+        "purpose": "Controls field editability"
+      },
+      {
+        "variable": "_BargeSeriesID",
+        "type": "String",
+        "description": "Selected barge series ID for draft/tonnage lookups",
+        "source": "From Barge or BargeEvent object"
+      },
+      {
+        "variable": "_EventTypeEnumVal",
+        "type": "EventTypeList.EventTypes",
+        "description": "Event type determining calculation behavior",
+        "conditionalLogic": "DraftSurvey shows additional tonnage fields"
+      },
+      {
+        "variable": "_LoadStatus",
+        "type": "String",
+        "description": "Load status (Empty, Load, PartLoad) affecting tonnage calculations"
+      },
+      {
+        "variable": "_TicketEvents",
+        "type": "TicketEvents",
+        "description": "Collection of all ticket events for finding prior draft survey events"
+      },
+      {
+        "variable": "_DraftSurveyEvents",
+        "type": "List<TicketEvent>",
+        "description": "Filtered list of non-voided draft survey events for current ticket",
+        "builMethod": "BuildDraftSurveyTicketEventsDictionary()"
+      },
+      {
+        "variable": "_CoverType",
+        "type": "String",
+        "description": "Cover type affecting tonnage adjustment calculations",
+        "private": true
+      },
+      {
+        "variable": "_CoverSubTypeID",
+        "type": "String",
+        "description": "Cover subtype for weight adjustment",
+        "private": true
+      },
+      {
+        "variable": "_CoverConfig",
+        "type": "String",
+        "description": "Cover configuration (Open, Spread, Stacked) affecting weight adjustment",
+        "private": true
+      }
+    ],
+    "editSession": {
+      "businessObject": "_Draft",
+      "editMode": "_Draft.BeginEdit() on form load",
+      "commitMode": "ApplyEdit() in btnSubmit_Click",
+      "cancelMode": "CancelEdit() in btnCancel_Click"
+    }
+  },
+  "eventHandlerChains": [
+    {
+      "trigger": "txtDraftPortBowFeet_Validated",
+      "chain": [
+        "Skip if _IsStillLoading",
+        "ConvertFromFeetAndInches(txtDraftPortBowFeet, txtDraftPortBowInches)",
+        "_Draft.DraftPortBow = decimal value",
+        "Trigger MaxDraft() calculation",
+        "_Draft.Draft = Math.Max(all corners)",
+        "ConvertToFeetAndInches(_Draft.Draft)",
+        "Update txtDraftFeet.Text and txtDraftInches.Text",
+        "If EventTypeEnumVal = DraftSurvey: Trigger CalculateAverageDraft()"
+      ]
+    },
+    {
+      "trigger": "txtDraftPortBowInches_Validated",
+      "chain": "Same as txtDraftPortBowFeet_Validated"
+    },
+    {
+      "trigger": "txtDraftStarboardBowFeet_Validated",
+      "chain": "Same as txtDraftPortBowFeet_Validated (for Starboard Bow)"
+    },
+    {
+      "trigger": "txtDraftStarboardBowInches_Validated",
+      "chain": "Same as txtDraftPortBowFeet_Validated (for Starboard Bow)"
+    },
+    {
+      "trigger": "txtDraftPortSternFeet_Validated",
+      "chain": "Same as txtDraftPortBowFeet_Validated (for Port Stern)"
+    },
+    {
+      "trigger": "txtDraftPortSternInches_Validated",
+      "chain": "Same as txtDraftPortBowFeet_Validated (for Port Stern)"
+    },
+    {
+      "trigger": "txtDraftStarboardSternFeet_Validated",
+      "chain": "Same as txtDraftPortBowFeet_Validated (for Starboard Stern)"
+    },
+    {
+      "trigger": "txtDraftStarboardSternInches_Validated",
+      "chain": "Same as txtDraftPortBowFeet_Validated (for Starboard Stern)"
+    },
+    {
+      "trigger": "CalculateAverageDraft() (only for Draft Survey)",
+      "chain": [
+        "Convert all four corner drafts to inches",
+        "Sum total inches",
+        "Divide by 4 to get average inches",
+        "Round to nearest inch (Math.Round with MidpointRounding.AwayFromZero)",
+        "Convert average inches back to decimal feet",
+        "_Draft.DraftAverage = decimal value",
+        "ConvertToFeetAndInches(_Draft.DraftAverage)",
+        "Update txtDraftAverageFeet.Text and txtDraftAverageInches.Text",
+        "Trigger CalculateTonnageFromAvgDraft()"
+      ]
+    },
+    {
+      "trigger": "CalculateTonnageFromAvgDraft()",
+      "chain": [
+        "Retrieve BargeSeries draft tables: BargeSeriesDrafts.GetList(_BargeSeriesID)",
+        "Build sorted dictionary: BuildBargeSeriesDraftsDictionary()",
+        "Determine PriorOpposingDraftSurveyEvent()",
+        "Calculate CoverWeightAdjustment based on cover type/config",
+        "Adjust average draft for cover weight",
+        "Lookup tonnage from draft tables by interpolation",
+        "Calculate EstimatedCargoDeadweight based on LoadStatus",
+        "Calculate LightshipCorrection from opposing event",
+        "Update txtEstimatedCargoDeadweight.Text",
+        "Update txtLightshipCorrection.Text",
+        "Trigger CalculateLoadUnloadTons()"
+      ]
+    },
+    {
+      "trigger": "txtAdjustmentTons_Validated",
+      "chain": [
+        "Skip if _IsStillLoading",
+        "_Draft.AdjustmentTons = txtAdjustmentTons.Text",
+        "Trigger CalculateLoadUnloadTons()"
+      ]
+    },
+    {
+      "trigger": "CalculateLoadUnloadTons()",
+      "chain": [
+        "LoadUnloadTons = EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+        "_Draft.LoadUnloadTons = calculated value",
+        "Update txtLoadUnloadTons.Text (formatted with bold/highlight)"
+      ]
+    },
+    {
+      "trigger": "cboEventType_ValueChanged",
+      "chain": [
+        "Skip if _IsStillLoading",
+        "_Draft.EventTypeEnumVal = selected enum value",
+        "If DraftSurvey: pnlDraftSurvey.Visible = True, trigger CalculateAverageDraft()",
+        "Else: pnlDraftSurvey.Visible = False"
+      ]
+    },
+    {
+      "trigger": "btnSubmit_Click",
+      "chain": [
+        "ClearUnusedFields() based on EventType and conditions",
+        "_Draft.IsValid() - check all business rules",
+        "If broken rules: Display BrokenRules form, exit",
+        "_Draft.ApplyEdit() - commit changes",
+        "If called from Barge: Update Barge.Draft* properties",
+        "If called from BargeEvent: Update BargeEvent/ModifyBargeDetails draft properties",
+        "Me.DialogResult = OK",
+        "Me.Close()"
+      ]
+    },
+    {
+      "trigger": "btnCancel_Click",
+      "chain": [
+        "If _Draft.IsDirty: Show confirmation dialog",
+        "If confirmed or not dirty: _Draft.CancelEdit()",
+        "Me.DialogResult = Cancel",
+        "Me.Close()"
+      ]
+    },
+    {
+      "trigger": "frmBargeDraft_Load",
+      "chain": [
+        "_IsStillLoading = True",
+        "FormatControls() - set field properties, readonly states",
+        "LoadControlsForDraft() - populate all fields from _Draft object",
+        "If IsVoidOnLoad: Disable all input fields",
+        "LoadPriorDraftSurveys() - populate prior surveys grid",
+        "_IsStillLoading = False"
+      ]
+    }
+  ],
+  "refreshTriggers": [
+    {
+      "trigger": "LoadControlsForDraft()",
+      "description": "Reloads all draft fields from _Draft business object",
+      "sets": "_IsStillLoading = True during execution",
+      "calledBy": [
+        "frmBargeDraft_Load"
+      ],
+      "populatesFields": [
+        "All four corner draft feet/inches fields",
+        "txtDraftFeet/Inches (max draft)",
+        "txtDraftAverageFeet/Inches (if draft survey)",
+        "txtEstimatedCargoDeadweight",
+        "txtLightshipCorrection",
+        "txtAdjustmentTons",
+        "txtLoadUnloadTons",
+        "cboBargeSeriesID",
+        "cboLoadStatus",
+        "cboEventType"
+      ],
+      "cascades": [
+        "ConvertToFeetAndInches() for all decimal draft values"
+      ]
+    },
+    {
+      "trigger": "LoadPriorDraftSurveys()",
+      "description": "Loads historical draft survey events into grid",
+      "businessLogic": "_Draft.DraftSurveyEvents collection",
+      "filtering": "Non-voided draft survey events only, excludes current event",
+      "sorting": "CompleteDateTime descending",
+      "calledBy": [
+        "frmBargeDraft_Load"
+      ],
+      "gridColumns": [
+        "CompleteDateTime",
+        "LoadStatus",
+        "DraftAverage (formatted to 3 decimals)",
+        "LoadUnloadTons (formatted to 2 decimals)",
+        "EventType"
+      ]
+    },
+    {
+      "trigger": "MaxDraft()",
+      "description": "Recalculates maximum of four corner drafts",
+      "calledBy": [
+        "Any corner draft field .Validated event"
+      ],
+      "calculation": "Math.Max(DraftPortBow, DraftStarboardBow, DraftPortStern, DraftStarboardStern)",
+      "updates": [
+        "_Draft.Draft",
+        "txtDraftFeet.Text",
+        "txtDraftInches.Text"
+      ]
+    },
+    {
+      "trigger": "CalculateAverageDraft()",
+      "description": "Recalculates average draft (only for Draft Survey events)",
+      "calledBy": [
+        "Any corner draft field .Validated event (if EventType = DraftSurvey)",
+        "cboEventType changed to DraftSurvey"
+      ],
+      "calculation": "Average of four corners in inches, rounded to nearest inch, converted to feet",
+      "updates": [
+        "_Draft.DraftAverage",
+        "txtDraftAverageFeet.Text",
+        "txtDraftAverageInches.Text"
+      ],
+      "cascades": [
+        "CalculateTonnageFromAvgDraft()"
+      ]
+    },
+    {
+      "trigger": "CalculateTonnageFromAvgDraft()",
+      "description": "Looks up tonnage from BargeSeries tables and calculates cargo/lightship",
+      "calledBy": [
+        "CalculateAverageDraft() completion"
+      ],
+      "dependencies": [
+        "BargeSeries draft tables",
+        "Prior opposing draft survey event",
+        "Cover weight configuration"
+      ],
+      "updates": [
+        "_Draft.EstimatedCargoDeadweight",
+        "_Draft.LightshipCorrection",
+        "txtEstimatedCargoDeadweight.Text",
+        "txtLightshipCorrection.Text"
+      ],
+      "cascades": [
+        "CalculateLoadUnloadTons()"
+      ]
+    },
+    {
+      "trigger": "CalculateLoadUnloadTons()",
+      "description": "Calculates final load/unload tonnage",
+      "calledBy": [
+        "CalculateTonnageFromAvgDraft() completion",
+        "txtAdjustmentTons .Validated event"
+      ],
+      "calculation": "EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+      "updates": [
+        "_Draft.LoadUnloadTons",
+        "txtLoadUnloadTons.Text (with highlighting)"
+      ]
+    }
+  ],
+  "modalDialogPatterns": [
+    {
+      "pattern": "DraftEntryDialog",
+      "launchMethod": "Using frm As New frmBargeDraft\n  frm.Initialize(callerType, businessObject)\n  frm.ShowDialog(Me)\n  If frm.DialogResult = OK Then\n    [Capture draft values back]",
+      "returnHandling": "Check DialogResult, if OK then update calling form's draft fields",
+      "bidirectional": true,
+      "purpose": "Edit complex draft measurements with immediate auto-calculation feedback"
+    },
+    {
+      "pattern": "BrokenRulesDialog",
+      "example": "Validation errors displayed before save",
+      "usage": "If Not _Draft.IsValid() Then\n  Using frm As New BrokenRules\n    frm.Initialize(_Draft.BrokenRulesCollection)\n    frm.ShowDialog()\n  Exit Sub",
+      "purpose": "Display validation errors preventing save"
+    }
+  ],
+  "validationPoints": [
+    {
+      "point": "Before Save",
+      "method": "_Draft.IsValid()",
+      "showsDialog": "BrokenRules form if validation fails",
+      "preventAction": true,
+      "rules": [
+        "DraftMaximumGreaterThanCorners",
+        "DraftRangeValidation (0-99.999)",
+        "DraftInchesRangeValidation (0-11)",
+        "DraftAverageRangeValidation (if Freight or Towing active)",
+        "All corner draft range and inches validations"
+      ]
+    },
+    {
+      "point": "During Corner Draft Entry",
+      "validation": "Real-time range validation via ValidatorExtender",
+      "rules": [
+        "Feet: 0-99",
+        "Inches: 0-11"
+      ],
+      "displayMethod": "Status bar or validation error provider"
+    },
+    {
+      "point": "Max Draft Validation",
+      "check": "Draft >= Math.Max(all corner drafts)",
+      "message": "Overall draft must be >= the highest corner draft.",
+      "preventAction": true,
+      "ruleKey": "Draft & MAX"
+    },
+    {
+      "point": "Before Cancel",
+      "check": "_Draft.IsDirty",
+      "message": "Changes not saved. Are you sure you want to cancel?",
+      "confirmation": "Yes/No dialog",
+      "preventAction": "If No selected"
+    }
+  ],
+  "businessLogicIntegration": {
+    "autoCalculations": [
+      {
+        "field": "Draft (Max)",
+        "triggers": [
+          "DraftPortBow.Validated",
+          "DraftStarboardBow.Validated",
+          "DraftPortStern.Validated",
+          "DraftStarboardStern.Validated"
+        ],
+        "calculation": "MaxDraft() - returns highest corner draft",
+        "readonly": true
+      },
+      {
+        "field": "DraftAverage",
+        "triggers": [
+          "Any corner draft .Validated (if EventType = DraftSurvey)"
+        ],
+        "calculation": "CalculateAverageDraft() - average of corners rounded to nearest inch",
+        "readonly": true,
+        "conditionalOn": "EventTypeEnumVal == DraftSurvey"
+      },
+      {
+        "field": "EstimatedCargoDeadweight",
+        "triggers": [
+          "DraftAverage calculated"
+        ],
+        "calculation": "CalculateTonnageFromAvgDraft() - lookup from BargeSeries tables",
+        "readonly": true,
+        "conditionalOn": "EventTypeEnumVal == DraftSurvey"
+      },
+      {
+        "field": "LightshipCorrection",
+        "triggers": [
+          "DraftAverage calculated"
+        ],
+        "calculation": "Calculated from prior opposing draft survey event",
+        "readonly": true,
+        "conditionalOn": "EventTypeEnumVal == DraftSurvey"
+      },
+      {
+        "field": "LoadUnloadTons",
+        "triggers": [
+          "EstimatedCargoDeadweight calculated",
+          "LightshipCorrection calculated",
+          "AdjustmentTons.Validated"
+        ],
+        "calculation": "CalculateLoadUnloadTons() - cargo - lightship + adjustment",
+        "readonly": true,
+        "conditionalOn": "EventTypeEnumVal == DraftSurvey"
+      }
+    ],
+    "conditionalClearing": [
+      {
+        "condition": "EventType != DraftSurvey",
+        "clearedOnSubmit": [
+          "DraftAverage",
+          "EstimatedCargoDeadweight",
+          "LightshipCorrection",
+          "AdjustmentTons",
+          "LoadUnloadTons"
+        ]
+      }
+    ],
+    "coverWeightLogic": {
+      "description": "Adjusts tonnage calculations based on barge cover weight",
+      "method": "CalculateCoverWeightAdjustment()",
+      "conditions": [
+        "Only applies to DraftSurvey and Load events",
+        "Cover type must not be 'OT' (Open Top)",
+        "Cover configuration must be 'Stacked' or 'Spread'"
+      ],
+      "calculation": "Lookup cover weight from CoverSubType table",
+      "adjustment": [
+        "DraftSurvey: subtract weight (negative adjustment)",
+        "Load: add weight (positive adjustment)"
+      ]
+    },
+    "priorEventLookup": {
+      "description": "Finds most recent opposing draft survey event for tonnage calculations",
+      "method": "PriorOpposingDraftSurveyEvent()",
+      "filtering": [
+        "Non-voided DraftSurvey events only",
+        "On same ticket",
+        "Excludes current event",
+        "Opposite load status (Empty finds Load/PartLoad, Load finds Empty)"
+      ],
+      "sorting": "Complete date/time descending",
+      "purpose": "Used to calculate lightship correction and cargo deadweight"
+    },
+    "draftTonnageInterpolation": {
+      "description": "Interpolates tonnage from BargeSeries draft tables",
+      "method": "CalculateTonnageFromAvgDraft() or CalculateDraftFromTonnage()",
+      "tables": "BargeSeries draft tables with rows for feet (0-99) and columns for inches (00-11)",
+      "interpolation": "Linear interpolation between table rows/columns",
+      "rounding": "Tonnage lookup rounds up to next inch",
+      "precision": "0.001 feet for draft, 0.01 tons for tonnage"
+    }
+  },
+  "userExperience": {
+    "defaultFocus": "txtDraftPortBowFeet",
+    "enterKeyBehavior": "Moves to next field in tab order",
+    "autoCalculationFeedback": "Immediate - calculated fields update as soon as corner drafts entered",
+    "readonlyFields": {
+      "background": "#e9ecef (grayed out)",
+      "cursor": "not-allowed"
+    },
+    "highlighting": {
+      "txtLoadUnloadTons": "Bold font, light blue background (#d1ecf1), border (#bee5eb)"
+    },
+    "feetInchesEntry": {
+      "layout": "Side-by-side fields for feet and inches",
+      "labels": "Feet | Inches",
+      "validation": "Real-time range checking"
+    },
+    "draftSurveyPanelToggle": {
+      "trigger": "EventType selection",
+      "animation": "Show/hide based on selection",
+      "condition": "Visible only when EventType = DraftSurvey"
+    }
+  },
+  "specialFeatures": {
+    "feetInchesConversion": {
+      "description": "Dual representation of draft values as decimal feet and feet/inches",
+      "methods": [
+        "ConvertToFeetAndInches() - decimal to feet/inches",
+        "ConvertFromFeetAndInches() - feet/inches to decimal"
+      ],
+      "storage": "Database stores decimal feet only",
+      "display": "UI shows separate feet and inches fields",
+      "precision": "0.001 feet (decimal), 1 inch (display)"
+    },
+    "midpointRounding": {
+      "description": "Average draft uses midpoint-away-from-zero rounding",
+      "method": "Math.Round(avgInches, MidpointRounding.AwayFromZero)",
+      "purpose": "Industry standard rounding for draft surveys",
+      "example": "4.5 inches rounds to 5, -4.5 rounds to -5"
+    },
+    "bargeSeriesTables": {
+      "description": "Draft/tonnage conversion tables per barge series",
+      "structure": "Rows for feet (0-99), columns for inches (00-11)",
+      "loading": "BuildBargeSeriesDraftsDictionary() creates sorted dictionary",
+      "interpolation": "InterpolateInches() for values between table entries"
+    },
+    "priorSurveyGrid": {
+      "description": "Historical reference grid showing past draft surveys",
+      "dataSource": "_Draft.DraftSurveyEvents",
+      "filtering": "Non-voided events only",
+      "sorting": "CompleteDateTime descending",
+      "purpose": "Helps user verify tonnage calculations against history"
+    },
+    "conditionalPanelVisibility": {
+      "description": "Draft survey panel only visible for draft survey events",
+      "trigger": "EventType selection",
+      "hiddenFields": [
+        "DraftAverage",
+        "EstimatedCargoDeadweight",
+        "LightshipCorrection",
+        "AdjustmentTons",
+        "LoadUnloadTons",
+        "Prior surveys grid"
+      ]
+    },
+    "cascadingCalculations": {
+      "description": "Chain of calculations triggered by corner draft entry",
+      "cascade": [
+        "Corner draft → Max draft",
+        "Corner draft → Average draft (if survey)",
+        "Average draft → Tonnage lookup",
+        "Tonnage → Cargo/Lightship calculation",
+        "Cargo/Lightship/Adjustment → Final tonnage"
+      ],
+      "optimization": "_IsStillLoading flag prevents cascade during form load"
+    }
+  },
+  "notes": [
+    "frmBargeDraft is a modal dialog form called from Barge or BargeEvent forms",
+    "Form supports both simple draft entry and complex draft survey with tonnage calculations",
+    "All draft values stored as decimal feet but displayed as separate feet/inches fields",
+    "Maximum draft is highest of four corners, readonly, auto-calculated",
+    "Average draft is average of four corners rounded to nearest inch (only for draft surveys)",
+    "Tonnage calculations use BargeSeries draft tables with linear interpolation",
+    "Cover weight adjustments critical for accurate tonnage calculations",
+    "Prior opposing draft survey event used to calculate cargo deadweight and lightship correction",
+    "LoadUnloadTons is final calculated value prominently displayed with highlighting",
+    "Prior draft surveys grid provides historical reference for validation",
+    "Form uses BeginEdit/ApplyEdit/CancelEdit pattern for transaction management",
+    "_IsStillLoading flag prevents event handler cascades during form initialization",
+    "Validation enforces draft ranges (0-99.999 feet, 0-11 inches) and max >= corners",
+    "IsVoidOnLoad flag makes all fields readonly for voided events",
+    "Access level can also enforce readonly mode",
+    "Form returns draft values to caller via business object property updates",
+    "ConvertToFeetAndInches and ConvertFromFeetAndInches handle decimal/display conversion",
+    "CalculateAverageDraft uses midpoint-away-from-zero rounding for industry standard",
+    "BuildBargeSeriesDraftsDictionary creates sorted dictionary for efficient lookup",
+    "InterpolateInches handles tonnage values between table rows (rounds up to next inch)",
+    "IsOppositeLoadStatus determines Empty vs Load/PartLoad for prior event lookup",
+    "CalculateCoverWeightAdjustment adjusts tonnage for cover weight (negative for survey, positive for load)",
+    "LoadPriorDraftSurveys filters to non-voided draft survey events on same ticket",
+    "Form integrates tightly with Barge and BargeEvent parent forms via caller type parameter"
+  ]
+}

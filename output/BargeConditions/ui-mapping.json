@@ -1,0 +1,538 @@
+{
+  "entity": "BargeConditions",
+  "formType": "DetailEditList",
+  "description": "Read-only viewing form for barge conditions with photo management. Conditions are created from the barge/vessel system, not directly by users.",
+  "controlMappings": [
+    {
+      "legacyControl": "UltraGrid (grdBargeConditions)",
+      "purpose": "Display list of barge conditions",
+      "modernEquivalent": "DataTables with Bootstrap styling",
+      "html": "<table id=\"bargeConditionsTable\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\">\n  <thead>\n    <tr>\n      <th>Actions</th>\n      <th>Received</th>\n      <th>Sent By</th>\n      <th>Condition</th>\n      <th>Notified</th>\n    </tr>\n  </thead>\n  <tbody>\n  </tbody>\n</table>",
+      "javascript": "var bargeConditionsTable = $('#bargeConditionsTable').DataTable({\n  processing: true,\n  serverSide: true,\n  stateSave: true,\n  responsive: true,\n  autoWidth: false,\n  ajax: {\n    url: '/BargeConditions/List',\n    type: 'POST',\n    data: function(d) {\n      d.bargeId = $('#BargeId').val();\n    }\n  },\n  columns: [\n    {\n      data: null,\n      name: 'actions',\n      orderable: false,\n      searchable: false,\n      defaultContent: '',\n      className: 'text-center',\n      width: '100px',\n      render: function(data, type, row) {\n        var html = '<div class=\"btn-group btn-group-sm\" role=\"group\">';\n        html += '<button type=\"button\" class=\"btn btn-sm btn-danger btn-delete\" data-id=\"' + row.bargeConditionId + '\" title=\"Delete\"><i class=\"fas fa-trash-alt\"></i></button>';\n        html += '</div>';\n        return html;\n      }\n    },\n    { data: 'createDateTime', name: 'createDateTime', defaultContent: '', width: '100px' },\n    { data: 'createUser', name: 'createUser', defaultContent: '', width: '100px' },\n    { data: 'note', name: 'note', defaultContent: '', width: '270px' },\n    { data: 'emailSentDateTime', name: 'emailSentDateTime', defaultContent: '', width: '100px' }\n  ],\n  order: [[1, 'desc']],\n  pageLength: 25,\n  lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],\n  language: {\n    processing: '<i class=\"fas fa-spinner fa-spin\"></i> Loading...'\n  }\n});",
+      "legacyColumns": [
+        {"name": "CreateDateTime", "heading": "Received", "width": 100, "type": "DateTime"},
+        {"name": "CreateUser", "heading": "Sent By", "width": 100, "type": "String"},
+        {"name": "Note", "heading": "Condition", "width": 270, "type": "String"},
+        {"name": "EmailSentDateTime", "heading": "Notified", "width": 100, "type": "DateTime"}
+      ],
+      "notes": [
+        "Server-side processing required for pagination/sorting/filtering",
+        "DateTimeSortComparer was used for CreateDateTime and EmailSentDateTime columns",
+        "Grid is sorted by CreateDateTime descending by default",
+        "Selection enables/disables toolbar buttons",
+        "Grid settings saved to user preferences on form close"
+      ]
+    },
+    {
+      "legacyControl": "UltraGrid (grdBargeConditionPhotos)",
+      "purpose": "Display photos associated with selected barge condition",
+      "modernEquivalent": "DataTables with Bootstrap styling",
+      "html": "<table id=\"bargeConditionPhotosTable\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\">\n  <thead>\n    <tr>\n      <th>Actions</th>\n      <th>Photo Name</th>\n      <th>Type</th>\n    </tr>\n  </thead>\n  <tbody>\n  </tbody>\n</table>",
+      "javascript": "var bargeConditionPhotosTable = $('#bargeConditionPhotosTable').DataTable({\n  processing: true,\n  serverSide: false,\n  paging: true,\n  responsive: true,\n  autoWidth: false,\n  ajax: {\n    url: '/BargeConditions/GetPhotos',\n    type: 'GET',\n    data: function(d) {\n      d.bargeConditionId = getSelectedConditionId();\n    },\n    dataSrc: ''\n  },\n  columns: [\n    {\n      data: null,\n      name: 'actions',\n      orderable: false,\n      searchable: false,\n      defaultContent: '',\n      className: 'text-center',\n      width: '120px',\n      render: function(data, type, row) {\n        var html = '<div class=\"btn-group btn-group-sm\" role=\"group\">';\n        html += '<button type=\"button\" class=\"btn btn-sm btn-primary btn-view-photo\" data-id=\"' + row.bargeConditionPhotoId + '\" title=\"View Photo\"><i class=\"fas fa-eye\"></i></button>';\n        html += '<button type=\"button\" class=\"btn btn-sm btn-danger btn-delete-photo\" data-id=\"' + row.bargeConditionPhotoId + '\" title=\"Delete Photo\"><i class=\"fas fa-trash-alt\"></i></button>';\n        html += '</div>';\n        return html;\n      }\n    },\n    { data: 'documentName', name: 'documentName', defaultContent: '', width: '425px' },\n    { data: 'documentExtension', name: 'documentExtension', defaultContent: '', width: '100px' }\n  ],\n  pageLength: 10,\n  lengthMenu: [[10, 25, 50], [10, 25, 50]],\n  language: {\n    processing: '<i class=\"fas fa-spinner fa-spin\"></i> Loading...',\n    emptyTable: 'No photos available for this condition'\n  },\n  columnDefs: [\n    { targets: '_all', defaultContent: '' }\n  ]\n});",
+      "legacyColumns": [
+        {"name": "DocumentName", "heading": "Photo Name", "width": 425, "type": "String"},
+        {"name": "DocumentExtension", "heading": "Type", "width": 100, "type": "String"}
+      ],
+      "notes": [
+        "AutoFitStyle set to ExtendLastColumn in legacy form",
+        "Photos reload when parent condition is selected",
+        "Double-click on photo row opens the photo viewer",
+        "Grid settings saved to user preferences on form close"
+      ]
+    },
+    {
+      "legacyControl": "UltraTextEditor (txtNote)",
+      "purpose": "Display condition note (read-only)",
+      "modernEquivalent": "Bootstrap textarea with read-only attribute",
+      "html": "<div class=\"row mb-3\">\n  <div class=\"col-md-12\">\n    <label for=\"txtNote\" class=\"form-label\">Condition:</label>\n    <textarea id=\"txtNote\" class=\"form-control\" rows=\"3\" readonly></textarea>\n  </div>\n</div>",
+      "javascript": "// Populate on row selection\nfunction loadBargeCondition(bargeConditionId) {\n  $.get('/BargeConditions/Details/' + bargeConditionId, function(data) {\n    $('#txtNote').val(data.note);\n    bargeConditionPhotosTable.ajax.reload();\n  });\n}",
+      "legacyProperties": {
+        "readonly": true,
+        "hasEditorButton": true,
+        "editorButtonAction": "Open frmTextEditor dialog with readonly note"
+      },
+      "notes": [
+        "Always read-only (line 96, 200 in legacy code)",
+        "Had an editor button (...) that opened a larger text editor dialog",
+        "Modern implementation could use a modal dialog for expanded view",
+        "Text should not be selectable for editing"
+      ]
+    },
+    {
+      "legacyControl": "UltraToolbarsManager (tbmBargeCondition)",
+      "purpose": "Toolbar buttons for barge conditions grid actions",
+      "modernEquivalent": "Bootstrap button group with Font Awesome icons",
+      "html": "<div class=\"btn-toolbar mb-2\" role=\"toolbar\">\n  <div class=\"btn-group me-2\" role=\"group\">\n    <button type=\"button\" id=\"btnRemoveCondition\" class=\"btn btn-danger\" disabled>\n      <i class=\"fas fa-trash-alt\"></i> Remove\n    </button>\n  </div>\n  <div class=\"btn-group\" role=\"group\">\n    <button type=\"button\" id=\"btnExportConditions\" class=\"btn btn-secondary\">\n      <i class=\"fas fa-file-export\"></i> Export\n    </button>\n  </div>\n</div>",
+      "javascript": "// Enable/disable based on selection\n$('#bargeConditionsTable').on('click', 'tr', function() {\n  var hasSelection = bargeConditionsTable.rows({selected: true}).count() > 0;\n  $('#btnRemoveCondition').prop('disabled', !hasSelection);\n});\n\n// Export button click\n$('#btnExportConditions').on('click', function() {\n  window.location.href = '/BargeConditions/Export';\n});",
+      "buttons": [
+        {
+          "key": "Remove",
+          "caption": "Remove",
+          "buttonType": "Remove",
+          "permission": "BargeConditionsModify",
+          "enabledWhen": "Item is selected",
+          "icon": "fa-trash-alt"
+        },
+        {
+          "key": "Export",
+          "caption": "Export",
+          "buttonType": "Open",
+          "permission": "BargeConditionsView",
+          "enabledWhen": "At least one row exists",
+          "visible": true,
+          "icon": "fa-file-export"
+        }
+      ],
+      "notes": [
+        "Remove button enabled only when row selected AND user has CanDelete permission",
+        "Export button always visible, enabled when grid has rows",
+        "Legacy uses ToolbarButtonCanBeEnabled method for security checks"
+      ]
+    },
+    {
+      "legacyControl": "UltraToolbarsManager (tbmBargeConditionPhoto)",
+      "purpose": "Toolbar buttons for photos grid actions",
+      "modernEquivalent": "Bootstrap button group with Font Awesome icons",
+      "html": "<div class=\"btn-toolbar mb-2\" role=\"toolbar\">\n  <div class=\"btn-group me-2\" role=\"group\">\n    <button type=\"button\" id=\"btnViewPhoto\" class=\"btn btn-primary\" disabled>\n      <i class=\"fas fa-eye\"></i> View Photo\n    </button>\n    <button type=\"button\" id=\"btnRemovePhoto\" class=\"btn btn-danger\" disabled>\n      <i class=\"fas fa-trash-alt\"></i> Remove Photo\n    </button>\n  </div>\n  <div class=\"btn-group\" role=\"group\">\n    <button type=\"button\" id=\"btnExportPhotos\" class=\"btn btn-secondary\">\n      <i class=\"fas fa-file-export\"></i> Export\n    </button>\n  </div>\n</div>",
+      "javascript": "// Enable/disable based on selection\n$('#bargeConditionPhotosTable').on('click', 'tr', function() {\n  var hasSelection = bargeConditionPhotosTable.rows({selected: true}).count() > 0;\n  $('#btnViewPhoto').prop('disabled', !hasSelection);\n  $('#btnRemovePhoto').prop('disabled', !hasSelection);\n});\n\n// View photo button click\n$('#btnViewPhoto').on('click', function() {\n  var selectedRow = bargeConditionPhotosTable.rows({selected: true}).data()[0];\n  window.open('/BargeConditions/ViewPhoto/' + selectedRow.bargeConditionPhotoId, '_blank');\n});\n\n// Export button click\n$('#btnExportPhotos').on('click', function() {\n  window.location.href = '/BargeConditions/ExportPhotos';\n});",
+      "buttons": [
+        {
+          "key": "ViewPhoto",
+          "caption": "View Photo",
+          "buttonType": "Open",
+          "permission": "BargeConditionsView",
+          "enabledWhen": "Photo is selected",
+          "icon": "fa-eye"
+        },
+        {
+          "key": "RemovePhoto",
+          "caption": "Remove Photo",
+          "buttonType": "Remove",
+          "permission": "BargeConditionsModify",
+          "enabledWhen": "Photo is selected",
+          "icon": "fa-trash-alt"
+        },
+        {
+          "key": "ExportPhoto",
+          "caption": "Export",
+          "buttonType": "Open",
+          "permission": "BargeConditionsView",
+          "enabledWhen": "At least one row exists",
+          "visible": true,
+          "icon": "fa-file-export"
+        }
+      ],
+      "notes": [
+        "View/Remove buttons enabled only when photo selected",
+        "Export button always visible, enabled when grid has rows",
+        "All buttons respect permission-based security"
+      ]
+    },
+    {
+      "legacyControl": "UltraGroupBox (grpBargeConditions)",
+      "purpose": "Container for main conditions list",
+      "modernEquivalent": "Bootstrap Card",
+      "html": "<div class=\"card mb-3\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">\n      <i class=\"fas fa-clipboard-list\"></i> Conditions Reports\n    </h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- Toolbar and grid content -->\n  </div>\n</div>",
+      "css": ".card {\n  border: 1px solid rgba(0,0,0,.125);\n}\n.card-header {\n  background-color: #f8f9fa;\n  border-bottom: 1px solid rgba(0,0,0,.125);\n}",
+      "notes": [
+        "GroupBox with Header3D border style becomes Bootstrap card",
+        "Card header replicates the group box caption",
+        "Card body contains the panel content"
+      ]
+    },
+    {
+      "legacyControl": "UltraGroupBox (grpBargeConditionPhotos)",
+      "purpose": "Container for condition detail and photos",
+      "modernEquivalent": "Bootstrap Card",
+      "html": "<div class=\"card\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">\n      <i class=\"fas fa-image\"></i> Detail\n    </h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- Condition note and photos grid -->\n  </div>\n</div>",
+      "notes": [
+        "Contains both the condition note and the photos grid",
+        "Legacy had UltraPanel inside for photos with toolbar",
+        "Modern design can use tabs or accordion if needed"
+      ]
+    },
+    {
+      "legacyControl": "UltraPanel (pnlBargeConditions)",
+      "purpose": "Container for toolbar and grid",
+      "modernEquivalent": "Bootstrap div with flexbox",
+      "html": "<div class=\"d-flex flex-column\">\n  <!-- Toolbar area -->\n  <div class=\"toolbar-area mb-2\">\n    <!-- Toolbar buttons -->\n  </div>\n  <!-- Grid area -->\n  <div class=\"grid-area flex-grow-1\">\n    <!-- DataTable -->\n  </div>\n</div>",
+      "notes": [
+        "UltraPanel was used for docking toolbar areas",
+        "Modern implementation uses flexbox layout",
+        "No special styling needed beyond Bootstrap utilities"
+      ]
+    },
+    {
+      "legacyControl": "UltraPanel (pnlPhotos)",
+      "purpose": "Container for photos toolbar and grid",
+      "modernEquivalent": "Bootstrap div with flexbox",
+      "html": "<div class=\"d-flex flex-column mt-3\">\n  <!-- Photos toolbar area -->\n  <div class=\"toolbar-area mb-2\">\n    <!-- Toolbar buttons -->\n  </div>\n  <!-- Photos grid area -->\n  <div class=\"grid-area flex-grow-1\">\n    <!-- Photos DataTable -->\n  </div>\n</div>",
+      "notes": [
+        "Used for docking photo toolbar",
+        "Modern layout uses flexbox",
+        "Maintains separation between toolbar and grid"
+      ]
+    },
+    {
+      "legacyControl": "UltraButton (btnClose)",
+      "purpose": "Close form button",
+      "modernEquivalent": "Bootstrap button",
+      "html": "<button type=\"button\" id=\"btnClose\" class=\"btn btn-secondary\">\n  <i class=\"fas fa-times\"></i> Close\n</button>",
+      "javascript": "$('#btnClose').on('click', function() {\n  window.location.href = '/BargeSearch/Index';\n});",
+      "legacyProperties": {
+        "buttonType": "Cancel",
+        "permission": "None",
+        "dialogResult": "Cancel",
+        "causesValidation": false
+      },
+      "notes": [
+        "Modern web implementation redirects back to barge search",
+        "No permission check required",
+        "Legacy was anchored bottom-right"
+      ]
+    },
+    {
+      "legacyControl": "UltraStatusBar (staStatus)",
+      "purpose": "Status bar for messages and progress",
+      "modernEquivalent": "Bootstrap alert or toast notifications",
+      "html": "<div id=\"statusBar\" class=\"fixed-bottom bg-light border-top py-2 px-3\" style=\"display: none;\">\n  <div class=\"container-fluid\">\n    <span id=\"statusMessage\" class=\"text-muted\"></span>\n  </div>\n</div>",
+      "javascript": "function showStatusMessage(message, duration = 3000) {\n  $('#statusMessage').text(message);\n  $('#statusBar').fadeIn();\n  setTimeout(function() {\n    $('#statusBar').fadeOut();\n  }, duration);\n}",
+      "notes": [
+        "Legacy status bar used for export progress messages",
+        "Modern implementation could use Bootstrap toasts",
+        "Consider using fixed-bottom positioning",
+        "Alternatively use toast notifications for temporary messages"
+      ]
+    },
+    {
+      "legacyControl": "UltraLabel (lblCondition)",
+      "purpose": "Label for condition note field",
+      "modernEquivalent": "Bootstrap form label",
+      "html": "<label for=\"txtNote\" class=\"form-label\">Condition:</label>",
+      "notes": [
+        "Standard form label with Bootstrap styling",
+        "Use asp-for tag helper in Razor for binding",
+        "Associated with txtNote field"
+      ]
+    }
+  ],
+  "formPatterns": {
+    "layout": {
+      "type": "Master-Detail with Two Grids",
+      "description": "Top grid shows barge conditions, bottom section shows selected condition details and photos",
+      "modernLayout": "Two-panel vertical split using Bootstrap grid system",
+      "responsiveConsiderations": [
+        "Stack grids vertically on mobile",
+        "Use responsive DataTables features",
+        "Collapsible sections for smaller screens"
+      ]
+    },
+    "masterDetailPattern": {
+      "masterGrid": "grdBargeConditions",
+      "detailSection": "Condition note and photos grid",
+      "selectionBehavior": "Single row selection loads detail",
+      "implementation": "AfterSelectChange event handler in legacy, row click event in modern",
+      "modernApproach": "Use row click to trigger AJAX call to load details and photos"
+    },
+    "searchForm": null,
+    "validation": {
+      "required": false,
+      "validatorExtender": true,
+      "modernApproach": "No validation needed - read-only form"
+    },
+    "dataEntry": {
+      "mode": "ReadOnly",
+      "allowCreate": false,
+      "allowModify": false,
+      "allowDelete": true,
+      "notes": [
+        "Barge conditions are created from the barge/vessel system",
+        "Users can only view and delete conditions/photos",
+        "Delete is soft delete using entity.Delete() method"
+      ]
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "serverSide": true,
+      "features": [
+        "Pagination",
+        "Sorting",
+        "Column ordering",
+        "Responsive design",
+        "State saving (user preferences)",
+        "Export to Excel/CSV"
+      ],
+      "selectionMode": "Single row",
+      "notes": [
+        "Main grid uses server-side processing for scalability",
+        "Photos grid can use client-side processing (smaller dataset)",
+        "Both grids save state to localStorage",
+        "Custom date sorting for DateTime columns"
+      ]
+    },
+    "submitPattern": null,
+    "deletePattern": {
+      "confirmationDialog": true,
+      "dialogMessage": "Are you sure you want to delete this Barge Condition and Related Photo(s)?",
+      "method": "POST to /BargeConditions/Delete/{id}",
+      "refreshAfterDelete": true,
+      "notes": [
+        "Deleting a condition deletes all related photos",
+        "Soft delete using entity.Delete() method",
+        "Confirmation dialog required",
+        "Refresh both grids after successful delete"
+      ]
+    },
+    "photoDeletePattern": {
+      "confirmationDialog": true,
+      "dialogMessage": "Are you sure you want to delete this Photo?",
+      "method": "POST to /BargeConditions/DeletePhoto/{photoId}",
+      "refreshAfterDelete": true,
+      "notes": [
+        "Individual photo delete",
+        "Calls BargeConditionPhoto.DeleteBargeConditionPhoto with photoId and filename",
+        "Refresh photos grid after successful delete"
+      ]
+    },
+    "viewPhotoPattern": {
+      "trigger": "Double-click on photo row OR toolbar button",
+      "method": "GET /BargeConditions/ViewPhoto/{photoId}",
+      "implementation": "Download photo file from server storage",
+      "legacyBehavior": "System.Diagnostics.Process.Start to open file from server path",
+      "modernBehavior": "Return FileResult for download or open in new tab",
+      "notes": [
+        "Legacy used GlobalSettingList.DocumentsFilePath for file location",
+        "Modern implementation should use file storage service (Azure Blob, S3, etc.)",
+        "Consider inline viewer modal instead of download"
+      ]
+    }
+  },
+  "permissions": {
+    "view": {
+      "permission": "BargeConditionsView",
+      "appliesTo": ["Index", "List", "Details", "ViewPhoto", "Export"]
+    },
+    "modify": {
+      "permission": "BargeConditionsModify",
+      "appliesTo": ["Delete", "DeletePhoto"],
+      "notes": ["No Create/Edit permissions - conditions created by system"]
+    }
+  },
+  "javascriptLibraries": [
+    {
+      "library": "DataTables",
+      "version": "1.13+",
+      "cdn": "https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js",
+      "plugins": [
+        "Responsive extension",
+        "Buttons extension (for export)",
+        "FixedHeader (optional)"
+      ],
+      "initialization": "Initialize on document ready with server-side processing",
+      "notes": [
+        "Use DataTables with Bootstrap 5 styling",
+        "Enable state saving to localStorage",
+        "Configure custom date sorting for DateTime columns"
+      ]
+    },
+    {
+      "library": "Bootstrap",
+      "version": "5.3+",
+      "components": ["Cards", "Buttons", "Button Groups", "Forms", "Modals"],
+      "notes": ["Use Bootstrap 5 classes for all styling"]
+    },
+    {
+      "library": "Font Awesome",
+      "version": "6.4+",
+      "icons": [
+        "fa-clipboard-list (conditions)",
+        "fa-image (photos)",
+        "fa-trash-alt (delete)",
+        "fa-eye (view)",
+        "fa-file-export (export)",
+        "fa-times (close)",
+        "fa-spinner (loading)"
+      ]
+    },
+    {
+      "library": "jQuery",
+      "version": "3.7+",
+      "usage": "Required for DataTables and general DOM manipulation"
+    },
+    {
+      "library": "SweetAlert2",
+      "version": "11+",
+      "usage": "Confirmation dialogs for delete operations",
+      "example": "Swal.fire({\n  title: 'Delete Condition?',\n  text: 'This will also delete all related photos.',\n  icon: 'warning',\n  showCancelButton: true,\n  confirmButtonText: 'Yes, delete it'\n})"
+    }
+  ],
+  "cssClasses": {
+    "bootstrap": {
+      "card": "card, card-header, card-body, card-title",
+      "buttons": "btn, btn-primary, btn-secondary, btn-danger, btn-group, btn-sm",
+      "forms": "form-label, form-control, form-check, form-check-input, form-check-label",
+      "tables": "table, table-striped, table-bordered, dt-responsive, nowrap",
+      "layout": "container-fluid, row, col-md-*, d-flex, flex-column, flex-grow-1",
+      "utilities": "mb-2, mb-3, mt-3, me-2, text-center, fixed-bottom"
+    },
+    "custom": {
+      "toolbar-area": "Container for toolbar buttons above grids",
+      "grid-area": "Container for DataTables grids"
+    }
+  },
+  "viewFiles": {
+    "indexView": "Views/BargeConditions/Index.cshtml",
+    "partials": [
+      "_ConditionsGrid.cshtml",
+      "_ConditionDetail.cshtml",
+      "_PhotosGrid.cshtml",
+      "_DeleteConfirmModal.cshtml"
+    ],
+    "viewModel": "BargeConditionsViewModel",
+    "viewModelProperties": [
+      "BargeId",
+      "BargeNum",
+      "HasViewPermission",
+      "HasModifyPermission"
+    ]
+  },
+  "controllerActions": [
+    {
+      "action": "Index",
+      "httpMethod": "GET",
+      "parameters": ["bargeId", "bargeNum"],
+      "returnType": "ViewResult",
+      "description": "Main view with empty grids, populated via AJAX"
+    },
+    {
+      "action": "List",
+      "httpMethod": "POST",
+      "parameters": ["DataTables request parameters", "bargeId"],
+      "returnType": "JsonResult",
+      "description": "Server-side DataTables endpoint for conditions grid"
+    },
+    {
+      "action": "Details",
+      "httpMethod": "GET",
+      "parameters": ["id"],
+      "returnType": "JsonResult",
+      "description": "Get single barge condition details"
+    },
+    {
+      "action": "GetPhotos",
+      "httpMethod": "GET",
+      "parameters": ["bargeConditionId"],
+      "returnType": "JsonResult",
+      "description": "Get photos for a specific barge condition"
+    },
+    {
+      "action": "ViewPhoto",
+      "httpMethod": "GET",
+      "parameters": ["photoId"],
+      "returnType": "FileResult",
+      "description": "Download/view photo file"
+    },
+    {
+      "action": "Delete",
+      "httpMethod": "POST",
+      "parameters": ["id"],
+      "returnType": "JsonResult",
+      "description": "Soft delete barge condition and related photos"
+    },
+    {
+      "action": "DeletePhoto",
+      "httpMethod": "POST",
+      "parameters": ["photoId"],
+      "returnType": "JsonResult",
+      "description": "Delete individual photo"
+    },
+    {
+      "action": "Export",
+      "httpMethod": "GET",
+      "parameters": ["bargeId"],
+      "returnType": "FileResult",
+      "description": "Export conditions grid to Excel/CSV"
+    },
+    {
+      "action": "ExportPhotos",
+      "httpMethod": "GET",
+      "parameters": ["bargeConditionId"],
+      "returnType": "FileResult",
+      "description": "Export photos grid to Excel/CSV"
+    }
+  ],
+  "implementationNotes": [
+    "This is a read-only viewing form - no create/edit operations",
+    "Form is accessed from barge search context with bargeId and bargeNum parameters",
+    "Master-detail pattern: selecting condition loads note and photos",
+    "All delete operations require confirmation dialogs",
+    "Delete operations are soft deletes using entity.Delete() method",
+    "Photo file management requires integration with file storage service",
+    "Grid state (sorting, pagination, column order) should be saved per user",
+    "Export functionality for both grids required",
+    "Permission-based security controls button visibility/enable state",
+    "DateTimeSortComparer behavior must be replicated for date columns",
+    "Consider adding email notification tracking UI (EmailSentDateTime field)",
+    "Modern implementation should use Azure Blob Storage or S3 for photos instead of server file path"
+  ],
+  "securityImplementation": {
+    "permissionChecks": [
+      {
+        "element": "Delete button",
+        "permission": "BargeConditionsModify",
+        "implementation": "Hide/disable if user lacks permission using CSG Authorization"
+      },
+      {
+        "element": "DeletePhoto button",
+        "permission": "BargeConditionsModify",
+        "implementation": "Hide/disable if user lacks permission using CSG Authorization"
+      },
+      {
+        "element": "Export buttons",
+        "permission": "BargeConditionsView",
+        "implementation": "Available to all users with view permission"
+      }
+    ],
+    "controllerAuthorization": [
+      {
+        "action": "Index, List, Details, GetPhotos, ViewPhoto, Export, ExportPhotos",
+        "attribute": "[HasPermission(AuthPermissions.BargeConditionsView)]"
+      },
+      {
+        "action": "Delete, DeletePhoto",
+        "attribute": "[HasPermission(AuthPermissions.BargeConditionsModify)]"
+      }
+    ]
+  },
+  "modernizationPriority": "Medium",
+  "estimatedComplexity": "Medium",
+  "complexityFactors": [
+    "Master-detail grid relationship",
+    "Photo file management and storage",
+    "Permission-based button state management",
+    "Export functionality for multiple grids",
+    "Soft delete implementation",
+    "Grid state persistence"
+  ],
+  "legacyFormReference": {
+    "file": "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore/Forms/frmBargeConditions.vb",
+    "designerFile": "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore/Forms/frmBargeConditions.Designer.vb",
+    "baseForm": "frmBaseDetailEditList",
+    "subsystem": "frmBargeSearch"
+  },
+  "extractionMetadata": {
+    "extractedDate": "2025-12-19",
+    "extractedBy": "UI Component Mapper Agent",
+    "sourceFiles": [
+      "frmBargeConditions.vb",
+      "frmBargeConditions.Designer.vb",
+      "BargeConditions_security.json"
+    ],
+    "referenceImplementations": [
+      "C:/Dev/BargeOps.Admin.Mono/src/BargeOps.UI/wwwroot/js/boatLocationSearch.js",
+      "C:/Dev/BargeOps.Admin.Mono/src/BargeOps.UI/Views/BoatLocationSearch/Index.cshtml",
+      "C:/Dev/BargeOps.Admin.Mono/src/BargeOps.UI/Views/BoatLocationSearch/_SearchResults.cshtml",
+      "C:/Dev/BargeOps.Admin.Mono/src/BargeOps.UI/Views/BoatLocationSearch/_Search.cshtml"
+    ]
+  }
+}

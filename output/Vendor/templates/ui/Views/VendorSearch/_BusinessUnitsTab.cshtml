@@ -1,0 +1,86 @@
+@model VendorEditViewModel
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Vendor Business Units</h5>
+        <div>
+            <button type="button" class="btn btn-sm btn-primary" id="btnAddBusinessUnit">
+                <i class="fas fa-plus"></i> Add Business Unit
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <table id="businessUnitsTable" class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Actions</th>
+                    <th>Name</th>
+                    <th>Accounting #</th>
+                    <th>River</th>
+                    <th class="text-center">Mile</th>
+                    <th>Bank</th>
+                    <th class="text-center">Fuel Supplier</th>
+                    <th class="text-center">Default</th>
+                    <th class="text-center">Boat Assist</th>
+                    <th class="text-center">Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Vendor.VendorBusinessUnits?.Any() == true)
+                {
+                    @foreach (var unit in Model.Vendor.VendorBusinessUnits)
+                    {
+                        <tr>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary btn-edit-business-unit" data-id="@unit.VendorBusinessUnitID">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger btn-delete-business-unit" data-id="@unit.VendorBusinessUnitID">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                            <td>@unit.Name</td>
+                            <td>@unit.AccountingCode</td>
+                            <td>@unit.River</td>
+                            <td class="text-center">@unit.Mile</td>
+                            <td>@unit.Bank</td>
+                            <td class="text-center">
+                                @if (unit.IsFuelSupplier)
+                                {
+                                    <i class="fas fa-check text-success"></i>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (unit.IsDefaultFuelSupplier)
+                                {
+                                    <i class="fas fa-star text-warning"></i>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (unit.IsBoatAssistSupplier)
+                                {
+                                    <i class="fas fa-check text-success"></i>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (unit.IsActive)
+                                {
+                                    <i class="fas fa-check text-success"></i>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10" class="text-center text-muted">No business units yet</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Business unit modal will be injected here via JavaScript -->
+<div id="businessUnitModalContainer"></div>

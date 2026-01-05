@@ -1,0 +1,145 @@
+{
+  "parentEntity": "BargeCondition",
+  "relationships": [
+    {
+      "relatedEntity": "BargeConditionPhoto",
+      "relationshipType": "OneToMany",
+      "parentProperty": "BargeConditionPhotoes",
+      "childProperty": "BargeCondition",
+      "foreignKey": "BargeConditionID",
+      "cascadeDelete": true,
+      "gridName": "grdBargeConditionPhotos",
+      "gridColumns": [
+        {
+          "key": "DocumentName",
+          "header": "Photo Name",
+          "type": "String",
+          "width": 425
+        },
+        {
+          "key": "DocumentExtension",
+          "header": "Type",
+          "type": "String",
+          "width": 100
+        }
+      ],
+      "operations": {
+        "view": "ViewPhoto",
+        "delete": "RemovePhoto",
+        "export": "ExportPhoto"
+      },
+      "notes": "Photos are stored via Document entity. Child photos are deleted when parent is deleted (cascade). File deletion handled in SaveNoRefresh override."
+    }
+  ],
+  "lookupRelationships": [
+    {
+      "property": "BargeID",
+      "lookupEntity": "Barge",
+      "displayProperty": "BargeNum",
+      "required": true,
+      "notes": "Parent barge for this condition report"
+    },
+    {
+      "property": "DocumentID",
+      "lookupEntity": "Document",
+      "displayProperty": "Filename",
+      "required": true,
+      "context": "BargeConditionPhoto",
+      "notes": "Each photo references a Document entity for file storage"
+    }
+  ],
+  "parentGrid": {
+    "gridName": "grdBargeConditions",
+    "uniqueIdentifier": "BargeConditionID",
+    "columns": [
+      {
+        "key": "CreateDateTime",
+        "header": "Received",
+        "type": "DateTime",
+        "width": 100,
+        "sortIndicator": "Descending"
+      },
+      {
+        "key": "CreateUser",
+        "header": "Sent By",
+        "type": "String",
+        "width": 100
+      },
+      {
+        "key": "Note",
+        "header": "Condition",
+        "type": "String",
+        "width": 270
+      },
+      {
+        "key": "EmailSentDateTime",
+        "header": "Notified",
+        "type": "DateTime",
+        "width": 100
+      }
+    ],
+    "operations": {
+      "remove": "Remove",
+      "export": "Export"
+    }
+  },
+  "modernDapperPattern": {
+    "entityClass": "BargeCondition",
+    "childEntities": [
+      "BargeConditionPhoto"
+    ],
+    "repositoryMethods": [
+      {
+        "method": "GetByIdAsync",
+        "returns": "BargeCondition",
+        "parameters": ["int id"],
+        "description": "Get single BargeCondition by ID"
+      },
+      {
+        "method": "GetByBargeIdAsync",
+        "returns": "IEnumerable<BargeCondition>",
+        "parameters": ["int bargeId"],
+        "description": "Get all conditions for a specific barge"
+      },
+      {
+        "method": "GetPhotosAsync",
+        "returns": "IEnumerable<BargeConditionPhoto>",
+        "parameters": ["int bargeConditionId"],
+        "description": "Get all photos for a condition report"
+      }
+    ],
+    "serviceLayerComposition": {
+      "description": "Service layer composes BargeCondition with related photos loaded separately",
+      "method": "GetConditionWithPhotosAsync",
+      "returns": "BargeConditionDto with Photos collection populated"
+    },
+    "notes": "Child collections NOT included as entity properties. Loaded via repository methods and composed in service layer."
+  },
+  "dataAccessNotes": {
+    "storedProcedures": {
+      "select": "BargeConditionSelect",
+      "insert": "BargeConditionInsert",
+      "update": "BargeConditionUpdate",
+      "delete": "BargeConditionDelete",
+      "list": "BargeConditionList",
+      "photosList": "BargeConditionPhotoesList",
+      "photoInsert": "BargeConditionPhotoInsert",
+      "photoUpdate": "BargeConditionPhotoUpdate",
+      "photoDelete": "BargeConditionPhotoDelete"
+    },
+    "childLoadingPattern": "Loaded in LoadChildObjects via GetBargeConditionPhotoesChild",
+    "cascadeDeleteImplementation": "SaveNoRefresh override deletes photo files from server when parent deleted"
+  },
+  "securityNotes": {
+    "formAccess": "frmBargeConditions",
+    "parentForm": "frmBargeSearch",
+    "buttonTypes": {
+      "btnClose": "Cancel",
+      "Remove": "Remove (parent)",
+      "Export": "Open",
+      "ViewPhoto": "Open",
+      "RemovePhoto": "Remove (child)",
+      "ExportPhoto": "Open"
+    }
+  }
+}

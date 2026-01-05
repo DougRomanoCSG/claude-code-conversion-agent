@@ -1,0 +1,633 @@
+{
+  "formName": "frmBoatStatus",
+  "formType": "DetailEdit",
+  "implements": ["IBaseDetailEdit"],
+  "inheritsFrom": "frmBaseDetailEditList",
+  "description": "Boat Status maintenance form - manages boat status history including status changes, division/facility changes, and boat role changes",
+  "businessObjects": [
+    {
+      "name": "BoatLocation",
+      "variable": "_BoatLocation",
+      "purpose": "Parent business object representing the boat's location information"
+    },
+    {
+      "name": "BoatMaintenanceLog",
+      "variable": "_BoatMaintenanceLog",
+      "purpose": "Child business object representing a single boat status/maintenance record"
+    }
+  ],
+  "controls": [
+    {
+      "name": "dtStartDate",
+      "type": "UltraDateTimeEditor",
+      "category": "DataEntry",
+      "label": "Start date/time",
+      "dataBinding": "BoatMaintenanceLog.StartDateTime",
+      "validation": [],
+      "required": true,
+      "events": ["Validated"],
+      "tabIndex": 1,
+      "modernPattern": {
+        "type": "SplitDateTime",
+        "dateInput": {
+          "id": "dtStartDate",
+          "type": "date",
+          "label": "Start Date",
+          "required": true
+        },
+        "timeInput": {
+          "id": "dtStartTime",
+          "type": "time",
+          "label": "Start Time (24-hour)",
+          "required": true
+        },
+        "displayFormat": "MM/dd/yyyy HH:mm",
+        "note": "Uses InfragisticsHelper.SetCombinedDateTimeProp to combine date and time"
+      }
+    },
+    {
+      "name": "cboStartTime",
+      "type": "UltraComboEditor",
+      "category": "DataEntry",
+      "label": "Start date/time (time portion)",
+      "dataBinding": "BoatMaintenanceLog.StartDateTime",
+      "populationMethod": "InfragisticsHelper.PopulateTimeCombo",
+      "validation": [],
+      "required": true,
+      "events": ["Validated"],
+      "tabIndex": 2,
+      "modernEquivalent": "time input (24-hour format)",
+      "note": "Combined with dtStartDate to form complete DateTime"
+    },
+    {
+      "name": "optMaintenanceType",
+      "type": "UltraOptionSet",
+      "category": "DataEntry",
+      "label": "Maintenance Type",
+      "dataBinding": "BoatMaintenanceLog.MaintenanceType",
+      "validation": [],
+      "required": true,
+      "events": ["ValueChanged", "Validated"],
+      "tabIndex": 3,
+      "options": [
+        {
+          "value": "Boat Status",
+          "displayText": "Boat Status",
+          "enablesControls": ["cboStatus"]
+        },
+        {
+          "value": "Change Division/Facility",
+          "displayText": "Division / Facility",
+          "enablesControls": ["cboDivision", "cboPortFacilityID"]
+        },
+        {
+          "value": "Change Boat Role",
+          "displayText": "Boat Role",
+          "enablesControls": ["cboBoatRoleID"]
+        }
+      ],
+      "behavior": "When editing existing record, maintenance type cannot be changed (becomes readonly)",
+      "modernEquivalent": "radio button group"
+    },
+    {
+      "name": "cboStatus",
+      "type": "UltraComboEditor",
+      "category": "DataEntry",
+      "label": "Status",
+      "dataBinding": "BoatMaintenanceLog.Status",
+      "populationMethod": "Main.PopulateValidationListCombo(ValidationTypes.BoatStatus)",
+      "dataSource": "ValidationList.BoatStatus",
+      "validation": [],
+      "required": true,
+      "conditionallyEnabled": "Only enabled when optMaintenanceType = 'Boat Status'",
+      "events": ["Validated"],
+      "tabIndex": 5,
+      "modernEquivalent": "select2 dropdown"
+    },
+    {
+      "name": "cboDivision",
+      "type": "UltraComboEditor",
+      "category": "DataEntry",
+      "label": "Division",
+      "dataBinding": "BoatMaintenanceLog.Division",
+      "populationMethod": "Main.PopulateValidationListCombo(ValidationTypes.Division)",
+      "dataSource": "ValidationList.Division",
+      "validation": [],
+      "required": true,
+      "conditionallyEnabled": "Only enabled when optMaintenanceType = 'Change Division/Facility'",
+      "events": ["InitializeRow", "ValueChanged", "Validated"],
+      "tabIndex": 7,
+      "behavior": "On InitializeRow: hides Freight division. On ValueChanged: triggers PopulatePortFacilityCombo",
+      "modernEquivalent": "select2 dropdown"
+    },
+    {
+      "name": "cboPortFacilityID",
+      "type": "UltraComboEditor",
+      "category": "DataEntry",
+      "label": "Port facility",
+      "dataBinding": "BoatMaintenanceLog.PortFacilityID",
+      "populationMethod": "PopulatePortFacilityCombo",
+      "dataSource": "FleetList.Facilities or FacilityLocationList (depends on IsFleetBoat)",
+      "valueField": "LocationID",
+      "displayField": "LocationName",
+      "validation": [],
+      "required": false,
+      "conditionallyEnabled": "Only enabled when optMaintenanceType = 'Change Division/Facility'",
+      "events": ["Validated"],
+      "tabIndex": 9,
+      "behavior": "Population depends on parent BoatLocation.IsFleetBoat and selected Division",
+      "modernEquivalent": "select2 dropdown"
+    },
+    {
+      "name": "cboBoatRoleID",
+      "type": "UltraComboEditor",
+      "category": "DataEntry",
+      "label": "Boat role",
+      "dataBinding": "BoatMaintenanceLog.BoatRoleID",
+      "populationMethod": "Main.PopulateListCombo(Lists.BoatRoleList.GetList())",
+      "dataSource": "BoatRoleList",
+      "validation": [],
+      "required": true,
+      "conditionallyEnabled": "Only enabled when optMaintenanceType = 'Change Boat Role'",
+      "events": ["Validated"],
+      "tabIndex": 11,
+      "modernEquivalent": "select2 dropdown"
+    },
+    {
+      "name": "txtNote",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Note",
+      "dataBinding": "BoatMaintenanceLog.Note",
+      "validation": ["String"],
+      "required": false,
+      "maxLength": "BoatMaintenanceLog.MaxLength.Note",
+      "multiline": true,
+      "acceptsReturn": true,
+      "events": ["Validated"],
+      "tabIndex": 12,
+      "modernEquivalent": "textarea"
+    }
+  ],
+  "grids": [
+    {
+      "name": "grdDetailEditList",
+      "type": "UltraGrid",
+      "uniqueIdentifier": "BoatMaintenanceLogID",
+      "dataSource": "_BoatLocation.BoatMaintenanceLogs",
+      "defaultSortColumn": "StartDateTime",
+      "defaultSortOrder": "Descending",
+      "columns": [
+        {
+          "key": "StartDateTime",
+          "header": "Date",
+          "dataType": "DateTime",
+          "width": 103,
+          "alignment": "Left",
+          "sortable": true,
+          "customSortComparer": "DateTimeSortComparer"
+        },
+        {
+          "key": "MaintenanceType",
+          "header": "Type",
+          "dataType": "String",
+          "width": 142,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "Status",
+          "header": "Status",
+          "dataType": "String",
+          "width": 207,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "Division",
+          "header": "Division",
+          "dataType": "String",
+          "width": 94,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "PortFacility",
+          "header": "Port Facility",
+          "dataType": "String",
+          "width": 150,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "BoatRole",
+          "header": "Boat Role",
+          "dataType": "String",
+          "width": 125,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "Note",
+          "header": "Note",
+          "dataType": "String",
+          "width": 130,
+          "alignment": "Left",
+          "sortable": true
+        }
+      ],
+      "autoFitStyle": "ExtendLastColumn",
+      "events": ["DoubleClick", "AfterSelectChange"],
+      "behavior": "DoubleClick opens record for editing. Grid settings saved/restored via MyAppSettingHelper",
+      "modernEquivalent": "DataTables with server-side processing"
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnSetEdit",
+      "text": "S&et",
+      "type": "Submit",
+      "category": "DetailEdit",
+      "enabled": "When editing child record",
+      "visible": true,
+      "handler": "btnSetEdit_Click",
+      "purpose": "Saves changes to current BoatMaintenanceLog record",
+      "tabIndex": 13
+    },
+    {
+      "name": "btnCancelEdit",
+      "text": "C&ancel",
+      "type": "CancelEdit",
+      "category": "DetailEdit",
+      "enabled": "When editing child record",
+      "visible": true,
+      "handler": "btnCancelEdit_Click",
+      "purpose": "Cancels changes to current BoatMaintenanceLog record",
+      "causesValidation": false,
+      "tabIndex": 14
+    },
+    {
+      "name": "btnClose",
+      "text": "&Close",
+      "type": "Cancel",
+      "category": "FormLevel",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnClose_Click",
+      "purpose": "Closes the form, applies parent BoatLocation edits",
+      "causesValidation": true,
+      "dialogResult": "None",
+      "behavior": "Warns about unsaved child record changes before closing"
+    }
+  ],
+  "toolbarButtons": [
+    {
+      "key": "Add",
+      "caption": "&Add",
+      "type": "Add",
+      "icon": "Resources.Add",
+      "enabled": "When not editing child record and user has Add permission",
+      "handler": "ItemAdd",
+      "purpose": "Creates new BoatMaintenanceLog record"
+    },
+    {
+      "key": "Modify",
+      "caption": "&Modify",
+      "type": "Open",
+      "icon": "Resources.Modify",
+      "enabled": "When grid row selected, not editing, and user has Open permission",
+      "handler": "ItemModify",
+      "purpose": "Opens selected BoatMaintenanceLog record for editing"
+    },
+    {
+      "key": "Remove",
+      "caption": "&Remove",
+      "type": "Remove",
+      "icon": "Resources.Remove",
+      "enabled": "When grid row selected, not editing, and user has Remove permission",
+      "handler": "ItemRemove",
+      "purpose": "Deletes selected BoatMaintenanceLog record with confirmation"
+    },
+    {
+      "key": "Export",
+      "caption": "Export",
+      "type": "Open",
+      "icon": "Resources.ExportResults",
+      "enabled": "When grid has rows and not editing",
+      "handler": "Main.ExportGrid",
+      "purpose": "Exports grid data to file"
+    }
+  ],
+  "panels": [
+    {
+      "name": "pnlBoatStatus",
+      "type": "UltraPanel",
+      "dock": "Fill",
+      "controls": ["grpDetailEditList", "grpSubmitCancel"]
+    },
+    {
+      "name": "grpDetailEditList",
+      "type": "UltraGroupBox",
+      "dock": "Fill",
+      "controls": ["pnlDetailEditList"]
+    },
+    {
+      "name": "pnlDetailEditList",
+      "type": "UltraPanel",
+      "dock": "Fill",
+      "controls": ["grdDetailEditList", "grpDetailEditChild", "ToolbarsManager"]
+    },
+    {
+      "name": "grpDetailEditChild",
+      "type": "UltraGroupBox",
+      "text": "Detail",
+      "dock": "Bottom",
+      "controls": [
+        "dtStartDate",
+        "cboStartTime",
+        "lblStartDateTime",
+        "optMaintenanceType",
+        "cboStatus",
+        "lblStatus",
+        "cboDivision",
+        "lblDivision",
+        "cboPortFacilityID",
+        "lblPortFacilityID",
+        "cboBoatRoleID",
+        "lblBoatRoleID",
+        "txtNote",
+        "lblNote",
+        "btnSetEdit",
+        "btnCancelEdit"
+      ],
+      "behavior": "Enabled/disabled based on IsEditingChild state"
+    },
+    {
+      "name": "grpSubmitCancel",
+      "type": "UltraGroupBox",
+      "dock": "Bottom",
+      "controls": ["btnClose"]
+    }
+  ],
+  "validation": {
+    "extender": "ValidatorExtender",
+    "displayControl": "staStatus",
+    "rules": [
+      {
+        "control": "txtNote",
+        "validationType": "String",
+        "required": false
+      }
+    ],
+    "customValidation": {
+      "method": "ClearUnusedFields",
+      "description": "Before saving, clears fields not applicable to selected MaintenanceType",
+      "rules": [
+        "If MaintenanceType != 'Boat Status', clear Status field",
+        "If MaintenanceType != 'Change Division/Facility', clear Division and PortFacilityID",
+        "If MaintenanceType != 'Change Boat Role', clear BoatRoleID"
+      ]
+    }
+  },
+  "eventHandlers": {
+    "frmDetailEdit_Load": "Formats controls and refreshes grid",
+    "frmDetailEdit_FormClosed": "Saves grid settings to UserAppSettings",
+    "btnClose_Click": "Handles form closure with unsaved changes warning",
+    "btnSetEdit_Click": "Saves child record changes via SetClickListAndDetail",
+    "btnCancelEdit_Click": "Cancels child record changes via CancelClickListAndDetail",
+    "ToolbarsManager_ToolClick": "Routes toolbar button clicks to appropriate handlers",
+    "cboDivision_InitializeRow": "Hides Freight division from dropdown",
+    "cboDivision_ValueChanged": "Repopulates Port Facility combo based on selected Division",
+    "optMaintenanceType_ValueChanged": "Enables/disables controls based on selected type",
+    "optMaintenanceType_Validated": "Saves MaintenanceType to business object",
+    "dtStartDate_Validated": "Combines date and time into StartDateTime property",
+    "cboStartTime_Validated": "Combines date and time into StartDateTime property",
+    "cboStatus_Validated": "Saves Status to business object",
+    "cboDivision_Validated": "Saves Division to business object",
+    "cboPortFacilityID_Validated": "Saves PortFacilityID to business object",
+    "cboBoatRoleID_Validated": "Saves BoatRoleID to business object",
+    "txtNote_Validated": "Saves Note to business object"
+  },
+  "methods": {
+    "public": [
+      {
+        "name": "Initialize",
+        "signature": "Initialize(ByRef businessObject As BusinessLogicBase, ByVal boatName As String)",
+        "purpose": "Initializes form with BoatLocation and sets form title with boat name"
+      }
+    ],
+    "protected": [
+      {
+        "name": "CancelClick",
+        "purpose": "Overrides base to handle unsaved child changes before closing form"
+      },
+      {
+        "name": "SetClickListAndDetail",
+        "purpose": "Saves child record, adds to collection if new, refreshes grid"
+      },
+      {
+        "name": "CancelClickListAndDetail",
+        "purpose": "Cancels child record changes, clears controls, refreshes grid"
+      },
+      {
+        "name": "FormatGridColumns",
+        "purpose": "Defines visible columns, headers, widths, and alignment for grid"
+      },
+      {
+        "name": "FormatGridCustomComparers",
+        "purpose": "Sets custom DateTimeSortComparer for StartDateTime column"
+      },
+      {
+        "name": "ItemModify",
+        "purpose": "Opens selected grid record for editing"
+      },
+      {
+        "name": "SetToolState",
+        "purpose": "Enables/disables toolbar buttons based on grid selection and edit state"
+      }
+    ],
+    "private": [
+      {
+        "name": "FormatControls",
+        "purpose": "Initializes form controls, populates combos, sets validation and max lengths"
+      },
+      {
+        "name": "ItemAdd",
+        "purpose": "Creates new BoatMaintenanceLog record and enters edit mode"
+      },
+      {
+        "name": "ItemRemove",
+        "purpose": "Removes selected record from collection with confirmation dialog"
+      },
+      {
+        "name": "EnableDisableControls",
+        "purpose": "Enables/disables detail edit section based on edit state"
+      },
+      {
+        "name": "ClearControls",
+        "purpose": "Clears all controls in detail edit section"
+      },
+      {
+        "name": "ClearUnusedFields",
+        "purpose": "Clears fields not applicable to selected MaintenanceType before saving"
+      },
+      {
+        "name": "EnableDisableMaintenanceTypes",
+        "purpose": "Conditionally enables/disables controls based on MaintenanceType selection"
+      },
+      {
+        "name": "PopulatePortFacilityCombo",
+        "purpose": "Populates facility list based on IsFleetBoat and FleetID or all facilities"
+      },
+      {
+        "name": "RefreshList",
+        "purpose": "Refreshes grid with BoatMaintenanceLogs collection"
+      },
+      {
+        "name": "SetValidatorExtenderForBoatMaintenanceLog",
+        "purpose": "Configures validator extender for form controls"
+      },
+      {
+        "name": "SetMaxLengthsForBoatMaintenanceLog",
+        "purpose": "Sets maximum length for text entry controls"
+      },
+      {
+        "name": "LoadControlsForBoatMaintenanceLog",
+        "purpose": "Loads business object data into form controls for editing"
+      }
+    ]
+  },
+  "securityAuthorization": {
+    "interface": "IBaseDetailEdit",
+    "buttonTypes": {
+      "btnClose": "Cancel",
+      "btnSetEdit": "Submit",
+      "btnCancelEdit": "CancelEdit",
+      "Add": "Add",
+      "Modify": "Open",
+      "Remove": "Remove",
+      "Export": "Open"
+    },
+    "notes": "Uses ControlAuthorization to enforce security based on user permissions"
+  },
+  "stateMachine": {
+    "states": [
+      {
+        "name": "ViewMode",
+        "description": "Grid visible, detail section disabled, toolbar buttons enabled based on selection",
+        "entryConditions": ["Form loaded", "Child record saved", "Child record cancelled"]
+      },
+      {
+        "name": "EditMode",
+        "description": "Detail section enabled with selected/new record, grid toolbar disabled",
+        "entryConditions": ["Add clicked", "Modify clicked", "Grid row double-clicked"],
+        "exitConditions": ["Set clicked", "Cancel clicked"]
+      }
+    ],
+    "property": "IsEditingChild"
+  },
+  "businessLogicHooks": {
+    "parentObject": "BoatLocation",
+    "childCollection": "BoatMaintenanceLogs",
+    "editCycle": [
+      "BeginEdit called on BoatLocation during Initialize",
+      "BeginEdit called on BoatMaintenanceLog during Add/Modify",
+      "ApplyEdit/CancelEdit called on BoatMaintenanceLog during Set/Cancel",
+      "ApplyEdit called on BoatLocation during form Close"
+    ]
+  },
+  "dataFlow": {
+    "initialization": [
+      "Form receives BoatLocation business object",
+      "BoatLocation.BeginEdit() called",
+      "Grid bound to BoatLocation.BoatMaintenanceLogs collection",
+      "Grid sorted by StartDateTime descending"
+    ],
+    "addRecord": [
+      "BoatMaintenanceLogs.NewBoatMaintenanceLog creates instance",
+      "BoatMaintenanceLog.BeginEdit() called",
+      "LoadControlsForBoatMaintenanceLog populates form",
+      "EnableDisableControls(True) enables detail section"
+    ],
+    "modifyRecord": [
+      "Selected grid row's ListObject retrieved",
+      "BoatMaintenanceLog.BeginEdit() called",
+      "LoadControlsForBoatMaintenanceLog populates form",
+      "EnableDisableControls(True) enables detail section"
+    ],
+    "saveRecord": [
+      "ClearUnusedFields removes non-applicable data",
+      "Base.SetClickListAndDetail validates and saves",
+      "If new, add to BoatMaintenanceLogs collection",
+      "ClearControls and EnableDisableControls(False)",
+      "RefreshList updates grid"
+    ],
+    "cancelRecord": [
+      "Base.CancelClickListAndDetail reverts changes",
+      "ClearControls and EnableDisableControls(False)",
+      "RefreshList updates grid"
+    ]
+  },
+  "specialBehaviors": [
+    {
+      "feature": "Conditional Field Display",
+      "description": "Form shows different fields based on MaintenanceType selection",
+      "types": [
+        {
+          "type": "Boat Status",
+          "visibleFields": ["StartDateTime", "Status", "Note"]
+        },
+        {
+          "type": "Change Division/Facility",
+          "visibleFields": ["StartDateTime", "Division", "PortFacility", "Note"]
+        },
+        {
+          "type": "Change Boat Role",
+          "visibleFields": ["StartDateTime", "BoatRole", "Note"]
+        }
+      ]
+    },
+    {
+      "feature": "Dynamic Facility Population",
+      "description": "PortFacility dropdown populated differently based on boat type",
+      "logic": "If IsFleetBoat and has FleetID: show fleet-specific facilities. Otherwise: show all FacilityLocationList"
+    },
+    {
+      "feature": "MaintenanceType Readonly on Edit",
+      "description": "When editing existing record, MaintenanceType option set becomes readonly"
+    },
+    {
+      "feature": "Split DateTime Entry",
+      "description": "StartDateTime split into separate date picker and time combo controls, combined via InfragisticsHelper.SetCombinedDateTimeProp"
+    },
+    {
+      "feature": "Custom Option Set Positioning",
+      "description": "OptionSetCreationFilter used to position radio buttons at specific pixel coordinates (0,1 / 0,29 / 0,85)"
+    },
+    {
+      "feature": "Grid Settings Persistence",
+      "description": "Grid layout saved to UserAppSettings on form close, restored on load via MyAppSettingHelper"
+    },
+    {
+      "feature": "Freight Division Hidden",
+      "description": "Division dropdown uses InitializeRow event to hide Freight division from list"
+    }
+  ],
+  "modernizationNotes": {
+    "architecture": "Convert to ASP.NET Core MVC with separate Search and Edit views",
+    "viewModels": [
+      "BoatStatusSearchViewModel - for search/list view",
+      "BoatStatusEditViewModel - for add/edit view"
+    ],
+    "controllers": [
+      "BoatStatusSearchController - Index (search), Details (view)"
+    ],
+    "dataTransfer": "Use BoatMaintenanceLogDto for API responses",
+    "gridPattern": "DataTables with server-side processing, Ajax CRUD operations",
+    "splitDateTime": "CRITICAL - Implement separate date and time inputs with 24-hour format",
+    "conditionalFields": "Use JavaScript to show/hide field groups based on maintenance type selection",
+    "validation": "Implement server-side validation in controller, client-side with jQuery Validation",
+    "security": "Use [Authorize] attributes with role-based policies",
+    "stateManagement": "Use modal dialogs for add/edit instead of detail panel"
+  }
+}

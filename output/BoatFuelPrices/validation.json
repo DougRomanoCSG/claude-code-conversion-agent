@@ -1,0 +1,353 @@
+{
+  "entityName": "BoatFuelPrice",
+  "description": "Validation rules for Boat Fuel Prices entity",
+  "fields": [
+    {
+      "fieldName": "EffectiveDate",
+      "propertyName": "EffectiveDate",
+      "displayName": "Effective date",
+      "dataType": "SmartDate",
+      "controlType": "DateTimePicker",
+      "controlName": "dtEffectiveDate",
+      "validations": [
+        {
+          "type": "required",
+          "ruleName": "EffectiveDateIsRequired",
+          "errorMessage": "Effective date is required.",
+          "sourceLocation": "BoatFuelPriceBase.vb:214-217",
+          "businessRuleCheck": "p_EffectiveDate.IsEmpty",
+          "validateOnProperty": true,
+          "validateOnSubmit": true
+        },
+        {
+          "type": "format",
+          "formatType": "date",
+          "description": "Must be a valid date",
+          "validateOnBlur": true
+        }
+      ],
+      "triggers": [
+        "onBlur (dtEffectiveDate_Validated)",
+        "onPropertyChange (CheckBusinessRules)",
+        "onSubmit"
+      ]
+    },
+    {
+      "fieldName": "Price",
+      "propertyName": "Price",
+      "displayName": "Fuel price",
+      "dataType": "Currency",
+      "controlType": "TextBox",
+      "controlName": "txtPrice",
+      "validations": [
+        {
+          "type": "required",
+          "ruleName": "PriceIsRequired",
+          "errorMessage": "Fuel price is required.",
+          "sourceLocation": "BoatFuelPriceBase.vb:219-222",
+          "businessRuleCheck": "String.IsNullOrEmpty(p_Price)",
+          "validateOnProperty": true,
+          "validateOnSubmit": true
+        },
+        {
+          "type": "format",
+          "formatType": "currency",
+          "validatorType": "ValidationTypeConstants.Currency",
+          "sourceLocation": "frmBoatFuelPrices.vb:516",
+          "description": "Must be a valid currency value",
+          "precision": 4,
+          "formatString": "N4",
+          "validateOnBlur": true
+        },
+        {
+          "type": "custom",
+          "description": "Converts to 4 decimal places if value is provided",
+          "sourceLocation": "BoatFuelPrice.vb:23-27",
+          "implementation": "CDec(value).ToString(\"N4\")"
+        }
+      ],
+      "triggers": [
+        "onBlur (txtPrice_Validated)",
+        "onPropertyChange (CheckBusinessRules)",
+        "onSubmit"
+      ]
+    },
+    {
+      "fieldName": "FuelVendorBusinessUnitID",
+      "propertyName": "FuelVendorBusinessUnitID",
+      "displayName": "Fuel vendor",
+      "dataType": "String (Int32)",
+      "controlType": "ComboBox",
+      "controlName": "cboFuelVendorBusinessUnitID",
+      "validations": [
+        {
+          "type": "optional",
+          "description": "No required validation - field is optional"
+        },
+        {
+          "type": "format",
+          "formatType": "int32",
+          "description": "Must be a valid integer when provided",
+          "sourceLocation": "BoatFuelPriceBase.vb:135",
+          "validateOnBlur": true
+        },
+        {
+          "type": "dataSource",
+          "description": "Populated from FuelVendorList.GetList (active vendors only)",
+          "sourceLocation": "frmBoatFuelPrices.vb:46, 66",
+          "allowNulls": true
+        }
+      ],
+      "conditionalBehavior": [
+        {
+          "condition": "FuelVendorBusinessUnitID is empty",
+          "action": "Disable InvoiceNumber field",
+          "sourceLocation": "frmBoatFuelPrices.vb:470-472, 544-546"
+        },
+        {
+          "condition": "FuelVendorBusinessUnitID has value",
+          "action": "Enable InvoiceNumber field",
+          "sourceLocation": "frmBoatFuelPrices.vb:473-474, 547-548"
+        },
+        {
+          "condition": "FuelVendorBusinessUnitID is empty",
+          "action": "Clear InvoiceNumber value before submit",
+          "sourceLocation": "frmBoatFuelPrices.vb:406-408"
+        }
+      ],
+      "triggers": [
+        "onBlur (cboFuelVendorBusinessUnitID_Validated)",
+        "onPropertyChange (CheckBusinessRules)",
+        "onSubmit"
+      ]
+    },
+    {
+      "fieldName": "InvoiceNumber",
+      "propertyName": "InvoiceNumber",
+      "displayName": "Vendor inv#",
+      "dataType": "String",
+      "controlType": "TextBox",
+      "controlName": "txtInvoiceNumber",
+      "validations": [
+        {
+          "type": "maxLength",
+          "maxLength": 50,
+          "ruleName": "InvoiceNumberMaxLength",
+          "errorMessage": "Vendor inv# must be less than 50.",
+          "sourceLocation": "BoatFuelPriceBase.vb:224-228, 318",
+          "businessRuleCheck": "(p_InvoiceNumber.Length > MaxLength.InvoiceNumber)",
+          "validateOnProperty": true,
+          "validateOnSubmit": true
+        },
+        {
+          "type": "format",
+          "formatType": "string",
+          "validatorType": "ValidationTypeConstants.String",
+          "sourceLocation": "frmBoatFuelPrices.vb:517",
+          "description": "Standard string validation",
+          "validateOnBlur": true
+        },
+        {
+          "type": "conditional",
+          "ruleName": "InvoiceNumberBlankWhenNoVendor",
+          "condition": "FuelVendorBusinessUnitID is empty AND InvoiceNumber is not empty",
+          "errorMessage": "Vendor inv# must be blank when Fuel vendor is blank.",
+          "sourceLocation": "BoatFuelPrice.vb:65-68",
+          "businessRuleCheck": "String.IsNullOrEmpty(p_FuelVendorBusinessUnitID) AndAlso (Not String.IsNullOrEmpty(p_InvoiceNumber))",
+          "validateOnProperty": true,
+          "validateOnSubmit": true,
+          "relatedFields": ["FuelVendorBusinessUnitID"]
+        }
+      ],
+      "conditionalBehavior": [
+        {
+          "condition": "FuelVendorBusinessUnitID is empty",
+          "action": "Field is disabled",
+          "sourceLocation": "frmBoatFuelPrices.vb:471"
+        },
+        {
+          "condition": "FuelVendorBusinessUnitID has value",
+          "action": "Field is enabled",
+          "sourceLocation": "frmBoatFuelPrices.vb:473"
+        }
+      ],
+      "triggers": [
+        "onBlur (txtInvoiceNumber_Validated)",
+        "onPropertyChange (CheckBusinessRules)",
+        "onSubmit",
+        "onFuelVendorChange (conditional)"
+      ]
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "InvoiceNumberRequiresVendor",
+      "description": "Invoice number must be blank when fuel vendor is not selected",
+      "ruleType": "conditional_dependency",
+      "sourceLocation": "BoatFuelPrice.vb:64-68",
+      "errorKey": "InvoiceNumberFuelVendorBusinessUnitIDMustBeBlank",
+      "errorMessage": "Vendor inv# must be blank when Fuel vendor is blanc.",
+      "condition": "String.IsNullOrEmpty(p_FuelVendorBusinessUnitID) AndAlso (Not String.IsNullOrEmpty(p_InvoiceNumber))",
+      "affectedFields": ["InvoiceNumber", "FuelVendorBusinessUnitID"],
+      "validateWhen": ["PropertyName = FuelVendorBusinessUnitID", "PropertyName = InvoiceNumber", "PropertyName = String.Empty (all)"],
+      "enforcedBy": [
+        "CheckBusinessRules in BoatFuelPrice.vb",
+        "ClearUnusedFields in frmBoatFuelPrices.vb:404-410",
+        "UI control enable/disable logic in Validated event handlers"
+      ]
+    },
+    {
+      "ruleName": "AllRequiredFieldsPresent",
+      "description": "Effective Date and Price must have values before submission",
+      "ruleType": "required_fields",
+      "sourceLocation": "BoatFuelPriceBase.vb:214-222",
+      "requiredFields": ["EffectiveDate", "Price"],
+      "validateWhen": ["onPropertyChange", "onSubmit"],
+      "enforcedBy": ["CheckBusinessRules in BoatFuelPriceBase"]
+    }
+  ],
+  "validationTriggers": [
+    {
+      "triggerType": "onBlur",
+      "description": "Field validation occurs when user leaves a field",
+      "events": [
+        "dtEffectiveDate_Validated",
+        "txtPrice_Validated",
+        "cboFuelVendorBusinessUnitID_Validated",
+        "txtInvoiceNumber_Validated"
+      ],
+      "sourceLocation": "frmBoatFuelPrices.vb:421-507"
+    },
+    {
+      "triggerType": "onPropertyChange",
+      "description": "Business rules are checked whenever a property value changes",
+      "method": "CheckBusinessRules(propertyName)",
+      "sourceLocation": "BoatFuelPriceBase.vb:108, 123, 138, 153",
+      "callsTo": "BoatFuelPrice.CheckBusinessRules (override)"
+    },
+    {
+      "triggerType": "onSubmit",
+      "description": "Full validation occurs when Submit button is clicked",
+      "method": "SubmitNoRefreshClick",
+      "sourceLocation": "frmBoatFuelPrices.vb:228-243, 291-303",
+      "sequence": [
+        "ClearUnusedFields() - clears invoice if no vendor",
+        "MyBase.SubmitNoRefreshClick() - performs full validation",
+        "RefreshList() - only if validation passes"
+      ]
+    },
+    {
+      "triggerType": "onInitialize",
+      "description": "Initial validation check when object is created or loaded",
+      "method": "CheckBusinessRules(String.Empty)",
+      "sourceLocation": "BoatFuelPriceBase.vb:198",
+      "description": "Validates all rules when String.Empty is passed as property name"
+    }
+  ],
+  "validatorExtender": {
+    "description": "Infragistics ValidatorExtender used for client-side field validation",
+    "sourceLocation": "frmBoatFuelPrices.vb:513-519",
+    "validatedFields": [
+      {
+        "control": "txtPrice",
+        "validationType": "ValidationTypeConstants.Currency"
+      },
+      {
+        "control": "txtInvoiceNumber",
+        "validationType": "ValidationTypeConstants.String"
+      }
+    ],
+    "displayControl": "Main form status bar (via ValidatorExtender_MessageSet event)",
+    "messageEventHandler": "ValidatorExtender_MessageSet",
+    "sourceLocation": "frmBoatFuelPrices.vb:264-283"
+  },
+  "brokenRulesCollection": {
+    "description": "CSG AppFramework BrokenRules collection tracks all validation errors",
+    "assertMethod": "BrokenRules.Assert",
+    "pattern": "BrokenRules.Assert(ruleName, errorMessage, breakCondition)",
+    "examples": [
+      {
+        "rule": "EffectiveDateIsRequired",
+        "assertion": "BrokenRules.Assert(p_dispEffectiveDate & cIsRequiredName, p_dispEffectiveDate & cIsRequiredDesc, (p_EffectiveDate.IsEmpty))",
+        "sourceLocation": "BoatFuelPriceBase.vb:215-216"
+      },
+      {
+        "rule": "InvoiceNumberConditional",
+        "assertion": "BrokenRules.Assert(p_dispInvoiceNumber & p_dispFuelVendorBusinessUnitID & cPropMustBeBlankDesc, String.Format(p_dispInvoiceNumber & cPropBlankForNoFuelVendor, p_dispFuelVendorBusinessUnitID), String.IsNullOrEmpty(p_FuelVendorBusinessUnitID) AndAlso (Not String.IsNullOrEmpty(p_InvoiceNumber)))",
+        "sourceLocation": "BoatFuelPrice.vb:66-67"
+      }
+    ],
+    "isValidProperty": "Object.IsValid returns false if BrokenRules collection has items",
+    "sourceLocation": "BoatFuelPriceBase.vb:161-167"
+  },
+  "dataIntegrity": {
+    "primaryKey": "BoatFuelPriceID",
+    "autoIncrement": true,
+    "storedProcedures": {
+      "select": "BoatFuelPriceSelect",
+      "selectAll": "BoatFuelPricesSelect",
+      "insert": "BoatFuelPriceInsert",
+      "update": "BoatFuelPriceUpdate",
+      "delete": "BoatFuelPriceDelete",
+      "generate": "GenerateBoatFuelPrices"
+    },
+    "sourceLocation": "BoatFuelPriceBase.vb:201-205"
+  },
+  "uiConditionalLogic": [
+    {
+      "description": "Invoice Number field enabled/disabled based on Fuel Vendor selection",
+      "implementation": "Dynamic enable/disable in cboFuelVendorBusinessUnitID_Validated and LoadControlsForBoatFuelPrice",
+      "sourceLocations": [
+        "frmBoatFuelPrices.vb:463-486",
+        "frmBoatFuelPrices.vb:536-549"
+      ]
+    },
+    {
+      "description": "Clear invoice number when vendor is cleared before submit",
+      "implementation": "ClearUnusedFields method called in SubmitNoRefreshClick",
+      "sourceLocation": "frmBoatFuelPrices.vb:404-410"
+    }
+  ],
+  "errorMessages": [
+    {
+      "field": "EffectiveDate",
+      "message": "Effective date is required.",
+      "displayName": "Effective date",
+      "constant": "cIsRequiredDesc",
+      "sourceLocation": "BoatFuelPriceBase.vb:43, 216"
+    },
+    {
+      "field": "Price",
+      "message": "Fuel price is required.",
+      "displayName": "Fuel price",
+      "constant": "cIsRequiredDesc",
+      "sourceLocation": "BoatFuelPriceBase.vb:44, 221"
+    },
+    {
+      "field": "InvoiceNumber",
+      "message": "Vendor inv# must be less than 50.",
+      "displayName": "Vendor inv#",
+      "constant": "cMaxLengthDesc",
+      "maxLength": 50,
+      "sourceLocation": "BoatFuelPriceBase.vb:46, 226"
+    },
+    {
+      "field": "InvoiceNumber",
+      "message": "Vendor inv# must be blank when Fuel vendor is blank.",
+      "displayName": "Vendor inv#",
+      "relatedField": "FuelVendorBusinessUnitID",
+      "constant": "cPropBlankForNoFuelVendor",
+      "sourceLocation": "BoatFuelPrice.vb:11, 66"
+    }
+  ],
+  "notes": [
+    "This form uses CSG AppFramework validation pattern with BrokenRules collection",
+    "Validation occurs at multiple levels: UI (ValidatorExtender), Property setters, and Business Rules",
+    "Field-level validation triggers on blur via Validated events",
+    "Business rule validation triggers on property changes and submit",
+    "Invoice Number has conditional validation based on Fuel Vendor selection",
+    "Price is formatted to 4 decimal places automatically",
+    "The form implements IBaseSearch for search/edit in single panel",
+    "ValidatorExtender messages displayed in main form status bar"
+  ]
+}

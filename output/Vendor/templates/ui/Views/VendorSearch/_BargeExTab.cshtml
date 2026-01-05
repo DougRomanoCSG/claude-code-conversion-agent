@@ -1,0 +1,39 @@
+@model VendorEditViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">BargeEx Configuration</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="form-check">
+                    <input asp-for="Vendor.IsBargeExEnabled" class="form-check-input" type="checkbox" id="chkIsBargeExEnabled" />
+                    <label asp-for="Vendor.IsBargeExEnabled" class="form-check-label"></label>
+                </div>
+                <small class="text-muted">Enable BargeEx integration for this vendor</small>
+            </div>
+
+            <div class="col-md-6" id="bargeExTradingPartnerGroup">
+                <label asp-for="Vendor.BargeExTradingPartnerNum" class="form-label"></label>
+                <input asp-for="Vendor.BargeExTradingPartnerNum" class="form-control" maxlength="8" id="txtBargeExTradingPartnerNum" />
+                <span asp-validation-for="Vendor.BargeExTradingPartnerNum" class="text-danger"></span>
+                <small class="form-text text-muted">Required when BargeEx is enabled. Will be padded to 8 characters.</small>
+            </div>
+
+            <div class="col-md-6" id="bargeExConfigGroup">
+                <label asp-for="Vendor.BargeExConfigID" class="form-label"></label>
+                <select asp-for="Vendor.BargeExConfigID" asp-items="Model.BargeExConfigs" class="form-select select2" id="cboBargeExConfigID">
+                    <option value="">-- Select Configuration --</option>
+                </select>
+                <span asp-validation-for="Vendor.BargeExConfigID" class="text-danger"></span>
+                <small class="form-text text-muted">Required when BargeEx is enabled.</small>
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-3" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Note:</strong> Both Trading Partner Number and Configuration are required when BargeEx is enabled.
+        </div>
+    </div>
+</div>

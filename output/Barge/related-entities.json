@@ -1,0 +1,320 @@
+{
+  "parentEntity": "Barge",
+  "relationships": [
+    {
+      "relatedEntity": "BargeCharter",
+      "relationshipType": "OneToMany",
+      "parentProperty": "BargeCharters",
+      "childProperty": "Barge",
+      "foreignKey": "BargeID",
+      "cascadeDelete": true,
+      "gridName": "grdBargeCharters",
+      "gridColumns": [
+        {
+          "key": "StartDate",
+          "header": "Start Date",
+          "type": "Date",
+          "width": 85
+        },
+        {
+          "key": "EndDate",
+          "header": "End Date",
+          "type": "Date",
+          "width": 85
+        },
+        {
+          "key": "CharterCodeDesc",
+          "header": "Chartered",
+          "type": "String",
+          "width": 70
+        },
+        {
+          "key": "Rate",
+          "header": "Daily Rate",
+          "type": "Currency",
+          "width": 80
+        },
+        {
+          "key": "CustomerName",
+          "header": "Charter Company",
+          "type": "String",
+          "width": 140
+        }
+      ],
+      "operations": {
+        "add": "ItemAdd",
+        "edit": "ItemModify",
+        "delete": "ItemRemove",
+        "formName": "frmBargeCharters"
+      },
+      "notes": "Child collection loaded via lazy loading pattern. Managed through separate form (frmBargeCharters) opened from button (btnBargeCharters) on frmBargeDetail. Requires validation for unique date ranges."
+    },
+    {
+      "relatedEntity": "Ticket",
+      "relationshipType": "OneToOne",
+      "parentProperty": "Ticket",
+      "childProperty": "Barge",
+      "foreignKey": "BargeID",
+      "cascadeDelete": false,
+      "notes": "Single ticket associated with barge. Loaded via lazy loading. Read-only display fields on main form: InspectionStatus, IsOnHold, DestinationInName, LoadFirst, LoadLast, LoadMultipleLots, DestinationOutName, ScheduleInName, IsOnOrder, OnOrderScheduleDateTime, OnOrderTripNumber, ScheduleOutName, IsAwaitingPickup, AwaitingPickupReadyDateTime, ConsignLocationName."
+    },
+    {
+      "relatedEntity": "Alert",
+      "relationshipType": "OneToOne",
+      "parentProperty": "Alert",
+      "childProperty": "Barge",
+      "foreignKey": "BargeID",
+      "cascadeDelete": false,
+      "notes": "Single alert associated with barge. Loaded via lazy loading."
+    }
+  ],
+  "lookupRelationships": [
+    {
+      "property": "CustomerID",
+      "lookupEntity": "Customer",
+      "displayProperty": "CustomerName",
+      "required": false,
+      "notes": "Customer operator - affects cover type/config validation logic"
+    },
+    {
+      "property": "OwnerID",
+      "lookupEntity": "Customer",
+      "displayProperty": "CustomerName",
+      "required": false,
+      "notes": "Equipment owner"
+    },
+    {
+      "property": "LocationID",
+      "lookupEntity": "BargeLocation",
+      "displayProperty": "LocationName",
+      "required": false,
+      "notes": "Current barge location - automatically updates Status when changed"
+    },
+    {
+      "property": "FleetID",
+      "lookupEntity": "Fleet",
+      "displayProperty": "FleetName",
+      "required": false,
+      "notes": "Required when EquipmentType is 'Fleet-owned', auto-set based on SelectedFleetID"
+    },
+    {
+      "property": "CommodityID",
+      "lookupEntity": "Commodity",
+      "displayProperty": "CommodityName",
+      "required": false,
+      "notes": "Current commodity - affects cover type/subtype requirements"
+    },
+    {
+      "property": "BargeSeriesID",
+      "lookupEntity": "BargeSeries",
+      "displayProperty": "BargeSeriesName",
+      "required": false,
+      "notes": "Setting this auto-populates: OwnerID, CustomerID, HullType, ExternalDepth, ExternalLength, ExternalWidth, SizeCategory, CoverType"
+    },
+    {
+      "property": "FleetBoatID",
+      "lookupEntity": "FleetBoat",
+      "displayProperty": "FleetBoatName",
+      "required": false,
+      "notes": "Latest fleet boat activity - auto-updates FleetBoatActivityDateTime when set"
+    },
+    {
+      "property": "TierID",
+      "lookupEntity": "Tier",
+      "displayProperty": "TierName",
+      "required": false,
+      "notes": "Tier position for fleet-owned equipment. Set via LocationID property with tier coordinates (TierX, TierY). Cleared when barge moves locations."
+    },
+    {
+      "property": "FacilityBerthID",
+      "lookupEntity": "FacilityBerth",
+      "displayProperty": "FacilityBerthName",
+      "required": false,
+      "notes": "Berth position with coordinates (FacilityBerthX, FacilityBerthY). Must match barge's current LocationID or gets cleared. Set via LocationID property."
+    },
+    {
+      "property": "ColorPairID",
+      "lookupEntity": "ColorPair",
+      "displayProperty": "ColorPairDescription",
+      "required": false,
+      "notes": "Enabled only for 'Fleet-owned' or 'Customer-owned' equipment types"
+    },
+    {
+      "property": "CoverSubTypeID",
+      "lookupEntity": "CoverSubType",
+      "displayProperty": "CoverSubTypeName",
+      "required": false,
+      "notes": "Dynamically required based on commodity and cover type. Filtered by CoverType value."
+    },
+    {
+      "property": "HullType",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "HullType",
+      "required": false,
+      "validationType": "HullType"
+    },
+    {
+      "property": "SizeCategory",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "SizeCategory",
+      "required": false,
+      "validationType": "BargeSizeCategory",
+      "notes": "Auto-calculated from ExternalLength and ExternalWidth"
+    },
+    {
+      "property": "CoverConfig",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "CoverConfig",
+      "required": false,
+      "validationType": "CoverConfiguration",
+      "notes": "Required when CoverType is not null/OT and barge is company-operated (per EnableCoverTypeSpecialLogic)"
+    },
+    {
+      "property": "LoadStatus",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "LoadStatus",
+      "required": false,
+      "validationType": "LoadStatus"
+    },
+    {
+      "property": "CleanStatus",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "CleanStatus",
+      "required": false,
+      "validationType": "CleanStatus"
+    },
+    {
+      "property": "RepairStatus",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "RepairStatus",
+      "required": false,
+      "validationType": "RepairStatus"
+    },
+    {
+      "property": "DamageLevel",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "DamageLevel",
+      "required": false,
+      "validationType": "BargeDamageLevel"
+    },
+    {
+      "property": "FreeboardRange",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "FreeboardRange",
+      "required": false,
+      "validationType": "FreeboardRange",
+      "notes": "Enabled only when HasInsufficientFreeboard is true"
+    },
+    {
+      "property": "BargeType",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "BargeType",
+      "required": false,
+      "validationType": "BargeType"
+    },
+    {
+      "property": "CoverType",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "CoverType",
+      "required": false,
+      "validationType": "CoverType",
+      "notes": "Required when commodity requires cover and barge is company-operated. Affects CoverSubType list and CoverConfig state."
+    },
+    {
+      "property": "EquipmentType",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "EquipmentType",
+      "required": true,
+      "validationType": "BargeEquipmentType",
+      "notes": "Controls which fields are enabled/disabled (Status, Damage/Repair groups)"
+    }
+  ],
+  "computedFields": [
+    {
+      "property": "Status",
+      "computedFrom": ["LocationID"],
+      "notes": "Auto-updated when LocationID changes"
+    },
+    {
+      "property": "FleetBoatActivityDateTime",
+      "computedFrom": ["FleetBoatID"],
+      "notes": "Auto-set to DateTime.Now when FleetBoatID changes"
+    },
+    {
+      "property": "LocationDateTime",
+      "computedFrom": ["LocationID"],
+      "notes": "Tracks when location was last updated. Updated via LocationID property setter."
+    },
+    {
+      "property": "SizeCategory",
+      "computedFrom": ["ExternalLength", "ExternalWidth"],
+      "notes": "Auto-calculated when dimensions change"
+    },
+    {
+      "property": "DraftFeet",
+      "computedFrom": ["Draft"],
+      "notes": "Calculated feet portion of overall draft"
+    },
+    {
+      "property": "DraftInches",
+      "computedFrom": ["Draft"],
+      "notes": "Calculated inches portion of overall draft"
+    },
+    {
+      "property": "DraftCalculatedFeet",
+      "computedFrom": ["DraftCalculated"],
+      "notes": "Calculated from corner drafts (freight license feature)"
+    },
+    {
+      "property": "DraftCalculatedInches",
+      "computedFrom": ["DraftCalculated"],
+      "notes": "Calculated from corner drafts (freight license feature)"
+    }
+  ],
+  "specialButtons": [
+    {
+      "buttonName": "btnBargeCharters",
+      "action": "Opens frmBargeCharters to manage BargeCharters collection",
+      "visible": "Only if BargeCharterSupportCustomization is enabled"
+    },
+    {
+      "buttonName": "btnDraftDetail",
+      "action": "Opens frmBargeDraft to manage draft measurements",
+      "visible": "Always"
+    },
+    {
+      "buttonName": "btnDefineColors",
+      "action": "Opens frmBargeTokenColors to manage color pairs for fleet",
+      "visible": "Always"
+    },
+    {
+      "buttonName": "btnMapColors",
+      "action": "Opens frmBargeTokenMap to map damage levels to colors",
+      "visible": "Always"
+    },
+    {
+      "buttonName": "btnViewPhotos",
+      "action": "Opens frmBargeConditions to view/manage barge condition photos",
+      "visible": "Always"
+    },
+    {
+      "buttonName": "btnEditBargeNumber",
+      "action": "Enables editing of BargeNum field (normally readonly after creation)",
+      "visible": "Always"
+    },
+    {
+      "buttonName": "btnClearLocationDateTime",
+      "action": "Clears LocationDateTime while keeping LocationID",
+      "visible": "Always"
+    }
+  ],
+  "implementationNotes": {
+    "serviceLayerPattern": "Dapper-based repositories should NOT include child collections as entity properties. Load related data through separate repository methods.",
+    "lazyLoading": "Original VB.NET uses lazy loading for BargeCharters, Ticket, and Alert. Modern implementation should use explicit service layer methods.",
+    "complexLocationProperty": "LocationID has special signature requiring DateTime and optional tier/berth coordinates. Implements business logic for clearing tier/berth when location changes.",
+    "equipmentTypeRules": "EquipmentType value controls large portions of form behavior - many fields disabled for 'Fleet-owned' equipment.",
+    "coverTypeLogic": "Complex conditional requirements based on CoverType, CommodityID, and CustomerID (operator). EnableCoverTypeSpecialLogic global setting affects validation.",
+    "validationDependencies": "Many properties have interdependent validation rules (e.g., CoverConfig depends on CoverType and operator)",
+    "readOnlyCalculatedFields": "Several fields are read-only and calculated from Ticket relationship: Status fields, IsOnHold, LoadFirst/Last, etc."
+  }
+}

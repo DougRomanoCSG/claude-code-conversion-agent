@@ -1,0 +1,812 @@
+{
+  "formName": "frmBargeDraft",
+  "formTitle": "Barge Draft Detail",
+  "inheritsFrom": "frmBaseDetailEdit",
+  "implements": ["IBaseDetailEdit"],
+  "formType": "DetailEdit",
+  "businessObject": "Draft",
+  "businessLogicNamespace": "BargeOps.Onshore.BusinessLogic",
+  "controls": [
+    {
+      "name": "txtDraftPortBowFeet",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Port (ft/in)",
+      "groupBox": "grpBow",
+      "dataBinding": "DraftPortBowFeet",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 1,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Port bow draft in feet"
+    },
+    {
+      "name": "txtDraftPortBowInches",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Port (ft/in)",
+      "groupBox": "grpBow",
+      "dataBinding": "DraftPortBowInches",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 2,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Port bow draft in inches"
+    },
+    {
+      "name": "txtDraftStarboardBowFeet",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Starboard (ft/in)",
+      "groupBox": "grpBow",
+      "dataBinding": "DraftStarboardBowFeet",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 4,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Starboard bow draft in feet"
+    },
+    {
+      "name": "txtDraftStarboardBowInches",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Starboard (ft/in)",
+      "groupBox": "grpBow",
+      "dataBinding": "DraftStarboardBowInches",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 5,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Starboard bow draft in inches"
+    },
+    {
+      "name": "txtDraftPortSternFeet",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Port (ft/in)",
+      "groupBox": "grpStern",
+      "dataBinding": "DraftPortSternFeet",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 1,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Port stern draft in feet"
+    },
+    {
+      "name": "txtDraftPortSternInches",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Port (ft/in)",
+      "groupBox": "grpStern",
+      "dataBinding": "DraftPortSternInches",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 2,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Port stern draft in inches"
+    },
+    {
+      "name": "txtDraftStarboardSternFeet",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Starboard (ft/in)",
+      "groupBox": "grpStern",
+      "dataBinding": "DraftStarboardSternFeet",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 4,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Starboard stern draft in feet"
+    },
+    {
+      "name": "txtDraftStarboardSternInches",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Starboard (ft/in)",
+      "groupBox": "grpStern",
+      "dataBinding": "DraftStarboardSternInches",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 5,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Starboard stern draft in inches"
+    },
+    {
+      "name": "txtDraftFeet",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Deepest (ft/in)",
+      "groupBox": "grpOverall",
+      "dataBinding": "DraftFeet",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 1,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Maximum draft in feet - automatically calculated from corner drafts"
+    },
+    {
+      "name": "txtDraftInches",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Deepest (ft/in)",
+      "groupBox": "grpOverall",
+      "dataBinding": "DraftInches",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 2,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "notes": "Maximum draft in inches - automatically calculated from corner drafts"
+    },
+    {
+      "name": "txtDraftAverageFeet",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Average (ft/in)",
+      "groupBox": "grpOverall",
+      "dataBinding": "DraftAverageFeet",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 4,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "visible": "Conditional - only visible for DraftSurvey event type",
+      "notes": "Average draft in feet - automatically calculated from corner drafts"
+    },
+    {
+      "name": "txtDraftAverageInches",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Average (ft/in)",
+      "groupBox": "grpOverall",
+      "dataBinding": "DraftAverageInches",
+      "validation": {
+        "type": "Int32",
+        "required": false
+      },
+      "defaultValue": "0",
+      "tabIndex": 5,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "visible": "Conditional - only visible for DraftSurvey event type",
+      "notes": "Average draft in inches - automatically calculated from corner drafts"
+    },
+    {
+      "name": "txtEstimatedCargoDeadweight",
+      "type": "UltraTextEditor",
+      "category": "CalculatedField",
+      "label": "Est. cargo deadweight",
+      "groupBox": "grpTonnage",
+      "dataBinding": "EstimatedCargoDeadweight",
+      "validation": {
+        "type": "Decimal",
+        "required": false
+      },
+      "defaultValue": "9,999.99",
+      "tabIndex": 1,
+      "events": [],
+      "readonly": true,
+      "enabled": true,
+      "visible": "Conditional - only visible for DraftSurvey event type",
+      "alignment": "Right",
+      "notes": "Calculated based on average draft or draft when loaded (depends on load status)"
+    },
+    {
+      "name": "txtLightshipCorrection",
+      "type": "UltraTextEditor",
+      "category": "CalculatedField",
+      "label": "Lightship correction",
+      "groupBox": "grpTonnage",
+      "dataBinding": "LightshipCorrection",
+      "validation": {
+        "type": "Decimal",
+        "required": false
+      },
+      "defaultValue": "0.00",
+      "tabIndex": 5,
+      "events": ["Validated"],
+      "readonly": true,
+      "enabled": true,
+      "visible": "Conditional - only visible for DraftSurvey event type",
+      "alignment": "Right",
+      "notes": "Calculated based on average draft or draft when empty (depends on load status)"
+    },
+    {
+      "name": "txtAdjustmentTons",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Adjustment",
+      "groupBox": "grpTonnage",
+      "dataBinding": "AdjustmentTons",
+      "validation": {
+        "type": "Decimal",
+        "required": false
+      },
+      "defaultValue": "0.00",
+      "tabIndex": 9,
+      "events": ["Validated"],
+      "readonly": false,
+      "enabled": true,
+      "visible": "Conditional - only visible for DraftSurvey event type",
+      "alignment": "Right",
+      "notes": "Manual adjustment to tonnage calculation"
+    },
+    {
+      "name": "txtLoadUnloadTons",
+      "type": "UltraTextEditor",
+      "category": "CalculatedField",
+      "label": "Calculated quantity",
+      "groupBox": "grpTonnage",
+      "dataBinding": "LoadUnloadTons",
+      "validation": {
+        "type": "Decimal",
+        "required": false
+      },
+      "defaultValue": "9,999.99",
+      "tabIndex": 12,
+      "events": [],
+      "readonly": true,
+      "enabled": true,
+      "visible": "Conditional - only visible for DraftSurvey event type",
+      "alignment": "Right",
+      "notes": "Calculated as: Est. Cargo Deadweight - Lightship Correction + Adjustment"
+    }
+  ],
+  "labels": [
+    {
+      "name": "lblDraftPortBow",
+      "text": "Port (ft/in):",
+      "groupBox": "grpBow",
+      "associatedControl": "txtDraftPortBowFeet"
+    },
+    {
+      "name": "lblDraftBowStarboard",
+      "text": "Starboard (ft/in):",
+      "groupBox": "grpBow",
+      "associatedControl": "txtDraftStarboardBowFeet"
+    },
+    {
+      "name": "lblDraftPortStern",
+      "text": "Port (ft/in):",
+      "groupBox": "grpStern",
+      "associatedControl": "txtDraftPortSternFeet"
+    },
+    {
+      "name": "lblDraftPortStarboard",
+      "text": "Starboard (ft/in):",
+      "groupBox": "grpStern",
+      "associatedControl": "txtDraftStarboardSternFeet"
+    },
+    {
+      "name": "lblDraft",
+      "text": "Deepest (ft/in):",
+      "groupBox": "grpOverall",
+      "associatedControl": "txtDraftFeet"
+    },
+    {
+      "name": "lblDraftAverage",
+      "text": "Average (ft/in):",
+      "groupBox": "grpOverall",
+      "associatedControl": "txtDraftAverageFeet",
+      "visible": "Conditional - only visible for DraftSurvey event type"
+    },
+    {
+      "name": "lblEstCargoDeadweight",
+      "text": "Est. cargo deadweight:",
+      "groupBox": "grpTonnage",
+      "associatedControl": "txtEstimatedCargoDeadweight"
+    },
+    {
+      "name": "lblEstCargoDeadweightBasedOn",
+      "text": "Dynamic - changes based on LoadStatus",
+      "groupBox": "grpTonnage",
+      "notes": "Shows '(based on average draft)' or '(based on draft when loaded)'"
+    },
+    {
+      "name": "lblLightshipCorrection",
+      "text": "Lightship correction:",
+      "groupBox": "grpTonnage",
+      "associatedControl": "txtLightshipCorrection"
+    },
+    {
+      "name": "lblLightshipCorrectionBasedOn",
+      "text": "Dynamic - changes based on LoadStatus",
+      "groupBox": "grpTonnage",
+      "notes": "Shows '(based on average draft)' or '(based on draft when empty)'"
+    },
+    {
+      "name": "lblAdjustmentTons",
+      "text": "Adjustment:",
+      "groupBox": "grpTonnage",
+      "associatedControl": "txtAdjustmentTons"
+    },
+    {
+      "name": "lblLoadUnloadTons",
+      "text": "Calculated quantity:",
+      "groupBox": "grpTonnage",
+      "associatedControl": "txtLoadUnloadTons"
+    },
+    {
+      "name": "lblMinus",
+      "text": "-",
+      "groupBox": "grpTonnage",
+      "notes": "Operator symbol for calculation display"
+    },
+    {
+      "name": "lblPlus",
+      "text": "+",
+      "groupBox": "grpTonnage",
+      "notes": "Operator symbol for calculation display"
+    },
+    {
+      "name": "lblEquals",
+      "text": "=",
+      "groupBox": "grpTonnage",
+      "notes": "Operator symbol for calculation display"
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnSet",
+      "text": "&Set",
+      "type": "Submit",
+      "enabled": true,
+      "visible": true,
+      "tabIndex": 4,
+      "handler": "btnSet_Click",
+      "causesValidation": true,
+      "notes": "Validates and saves draft data to Barge or BargeEvent"
+    },
+    {
+      "name": "btnCancel",
+      "text": "&Cancel",
+      "type": "Cancel",
+      "enabled": true,
+      "visible": true,
+      "tabIndex": 5,
+      "handler": "btnCancel_Click",
+      "causesValidation": false,
+      "notes": "Text changes to '&Close' when form is in readonly mode (voided records)"
+    },
+    {
+      "name": "btnClearAll",
+      "text": "C&lear All",
+      "type": "Action",
+      "enabled": true,
+      "visible": true,
+      "tabIndex": 6,
+      "handler": "btnClearAll_Click",
+      "causesValidation": false,
+      "notes": "Clears all draft input fields"
+    }
+  ],
+  "groupBoxes": [
+    {
+      "name": "grpBow",
+      "text": "Bow",
+      "dockStyle": "Top",
+      "visible": true,
+      "controls": [
+        "lblDraftPortBow",
+        "txtDraftPortBowFeet",
+        "txtDraftPortBowInches",
+        "lblDraftBowStarboard",
+        "txtDraftStarboardBowFeet",
+        "txtDraftStarboardBowInches"
+      ],
+      "notes": "Contains bow draft measurements for port and starboard"
+    },
+    {
+      "name": "grpStern",
+      "text": "Stern",
+      "dockStyle": "Top",
+      "visible": true,
+      "controls": [
+        "lblDraftPortStern",
+        "txtDraftPortSternFeet",
+        "txtDraftPortSternInches",
+        "lblDraftPortStarboard",
+        "txtDraftStarboardSternFeet",
+        "txtDraftStarboardSternInches"
+      ],
+      "notes": "Contains stern draft measurements for port and starboard"
+    },
+    {
+      "name": "grpOverall",
+      "text": "Overall",
+      "dockStyle": "Top",
+      "visible": true,
+      "controls": [
+        "lblDraft",
+        "txtDraftFeet",
+        "txtDraftInches",
+        "lblDraftAverage",
+        "txtDraftAverageFeet",
+        "txtDraftAverageInches"
+      ],
+      "notes": "Contains calculated overall draft (deepest) and average draft"
+    },
+    {
+      "name": "grpTonnage",
+      "text": "Quantity",
+      "dockStyle": "Top",
+      "visible": "Conditional - only visible for DraftSurvey event type",
+      "controls": [
+        "lblEstCargoDeadweight",
+        "txtEstimatedCargoDeadweight",
+        "lblEstCargoDeadweightBasedOn",
+        "lblMinus",
+        "lblLightshipCorrection",
+        "txtLightshipCorrection",
+        "lblLightshipCorrectionBasedOn",
+        "lblPlus",
+        "lblAdjustmentTons",
+        "txtAdjustmentTons",
+        "lblEquals",
+        "lblLoadUnloadTons",
+        "txtLoadUnloadTons"
+      ],
+      "notes": "Contains tonnage calculations - only visible for DraftSurvey events. Form height is reduced by 126 pixels when hidden."
+    }
+  ],
+  "panels": [
+    {
+      "name": "pnlBargeDraftDetail",
+      "dockStyle": "Fill",
+      "controls": [
+        "grpBow",
+        "grpStern",
+        "grpOverall",
+        "grpTonnage",
+        "btnClearAll",
+        "btnSet",
+        "btnCancel"
+      ]
+    }
+  ],
+  "statusBar": [
+    {
+      "name": "staStatus",
+      "type": "UltraStatusBar",
+      "notes": "Used by ValidatorExtender for displaying validation messages"
+    }
+  ],
+  "validation": {
+    "extender": "ValidatorExtender",
+    "displayControl": "staStatus",
+    "businessObjectValidation": true,
+    "rules": [
+      {
+        "control": "txtDraftFeet",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftInches",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftPortBowFeet",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftPortBowInches",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftStarboardBowFeet",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftStarboardBowInches",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftPortSternFeet",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftPortSternInches",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftStarboardSternFeet",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftStarboardSternInches",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftAverageFeet",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtDraftAverageInches",
+        "type": "Int32",
+        "required": false
+      },
+      {
+        "control": "txtEstimatedCargoDeadweight",
+        "type": "Decimal",
+        "required": false
+      },
+      {
+        "control": "txtLightshipCorrection",
+        "type": "Decimal",
+        "required": false
+      },
+      {
+        "control": "txtAdjustmentTons",
+        "type": "Decimal",
+        "required": false
+      },
+      {
+        "control": "txtLoadUnloadTons",
+        "type": "Decimal",
+        "required": false
+      }
+    ],
+    "notes": "Validation is performed through Draft.IsValid and broken rules are displayed in a BrokenRules dialog"
+  },
+  "eventHandlers": {
+    "frmBargeDraft_Load": "Initializes form - calls FormatControls() and LoadControlsForDraft(), adjusts height if grpTonnage is hidden",
+    "btnSet_Click": "Validates Draft object, applies changes to Barge or BargeEvent, closes form with OK result. Shows BrokenRules dialog if validation fails.",
+    "btnCancel_Click": "Cancels edit, closes form",
+    "btnClearAll_Click": "Clears all draft fields and resets to empty values",
+    "txtDraftFeet_Validated": "Updates Draft.DraftFeet, recalculates average draft and tonnage fields",
+    "txtDraftInches_Validated": "Updates Draft.DraftInches, recalculates average draft and tonnage fields",
+    "txtDraftPortBowFeet_Validated": "Updates Draft.DraftPortBowFeet, recalculates overall draft, average draft, and tonnage fields",
+    "txtDraftPortBowInches_Validated": "Updates Draft.DraftPortBowInches, recalculates overall draft, average draft, and tonnage fields",
+    "txtDraftStarboardBowFeet_Validated": "Updates Draft.DraftStarboardBowFeet, recalculates overall draft, average draft, and tonnage fields",
+    "txtDraftStarboardBowInches_Validated": "Updates Draft.DraftStarboardBowInches, recalculates overall draft, average draft, and tonnage fields",
+    "txtDraftPortSternFeet_Validated": "Updates Draft.DraftPortSternFeet, recalculates overall draft, average draft, and tonnage fields",
+    "txtDraftPortSternInches_Validated": "Updates Draft.DraftPortSternInches, recalculates overall draft, average draft, and tonnage fields",
+    "txtDraftStarboardSternFeet_Validated": "Updates Draft.DraftStarboardSternFeet, recalculates overall draft, average draft, and tonnage fields",
+    "txtDraftStarboardSternInches_Validated": "Updates Draft.DraftStarboardSternInches, recalculates overall draft, average draft, and tonnage fields",
+    "txtDraftAverageFeet_Validated": "Updates Draft.DraftAverageFeet, recalculates tonnage fields",
+    "txtDraftAverageInches_Validated": "Updates Draft.DraftAverageInches, recalculates tonnage fields",
+    "txtLightshipCorrection_Validated": "Updates Draft.LightshipCorrection, recalculates LoadUnloadTons",
+    "txtAdjustmentTons_Validated": "Updates Draft.AdjustmentTons, recalculates LoadUnloadTons"
+  },
+  "businessLogic": {
+    "objectTypes": {
+      "barge": {
+        "constant": "cTypeBarge",
+        "businessObject": "Barge",
+        "behavior": "Creates new Draft from Barge draft properties, applies changes back to Barge on save"
+      },
+      "bargeEvent": {
+        "constant": "cTypeBargeEvent",
+        "businessObject": "BargeEvent",
+        "behavior": "Edits Draft directly, applies changes to BargeEvent on save"
+      }
+    },
+    "calculations": {
+      "overallDraft": "Automatically calculated from the four corner drafts (port/starboard bow/stern)",
+      "averageDraft": "Automatically calculated from the four corner drafts - only visible for DraftSurvey events",
+      "estimatedCargoDeadweight": "Calculated based on average draft or draft when loaded (depends on LoadStatus)",
+      "lightshipCorrection": "Calculated based on average draft or draft when empty (depends on LoadStatus)",
+      "loadUnloadTons": "Formula: EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons"
+    },
+    "loadStatusBehavior": {
+      "Empty": {
+        "lblEstCargoDeadweightBasedOn": "(based on draft when loaded)",
+        "lblLightshipCorrectionBasedOn": "(based on average draft)"
+      },
+      "Load": {
+        "lblEstCargoDeadweightBasedOn": "(based on average draft)",
+        "lblLightshipCorrectionBasedOn": "(based on draft when empty)"
+      },
+      "PartLoad": {
+        "lblEstCargoDeadweightBasedOn": "(based on average draft)",
+        "lblLightshipCorrectionBasedOn": "(based on draft when empty)"
+      }
+    },
+    "eventTypeBehavior": {
+      "DraftSurvey": {
+        "averageDraftVisible": true,
+        "tonnageGroupVisible": true,
+        "formHeight": "Full height"
+      },
+      "Other": {
+        "averageDraftVisible": false,
+        "tonnageGroupVisible": false,
+        "formHeight": "Reduced by 126 pixels"
+      }
+    }
+  },
+  "security": {
+    "functionalArea": "Referenced via Me.FunctionalAreaOfForm",
+    "accessLevels": {
+      "Full": {
+        "canEdit": true,
+        "voidedRecordsBehavior": "All fields readonly, Set and Clear All buttons disabled, Cancel becomes 'Close'"
+      },
+      "CreateAndUpdate": {
+        "canEdit": true,
+        "voidedRecordsBehavior": "All fields readonly, Set and Clear All buttons disabled, Cancel becomes 'Close'"
+      },
+      "Other": {
+        "canEdit": false,
+        "notes": "Default security restrictions apply"
+      }
+    },
+    "buttonSecurity": {
+      "btnSet": "Submit type - security managed by ControlAuthorization",
+      "btnCancel": "Cancel type - security managed by ControlAuthorization",
+      "btnClearAll": "Action type - security managed by ControlAuthorization"
+    },
+    "readonlyFields": [
+      "txtEstimatedCargoDeadweight",
+      "txtLightshipCorrection",
+      "txtLoadUnloadTons"
+    ],
+    "notes": "Uses Csg.Windows.Forms.Security.ControlAuthorizationBase for security management"
+  },
+  "initialization": {
+    "Initialize_IBaseDetailEdit": "Sets up business object (Barge or Draft) and calls InitializeBase on parent form",
+    "Initialize_Custom": "Accepts objectType ('barge' or 'barge event') and businessObject, initializes Draft object",
+    "SetButtonTypes": "Configures button types for security: btnClearAll=Action, btnSet=Submit, btnCancel=Cancel",
+    "FormatControls": "Sets up validation, max lengths, dynamic labels based on LoadStatus, enables/disables controls",
+    "LoadControlsForDraft": "Populates all text boxes from Draft object properties",
+    "EnableDisableControls": "Applies security and voided status restrictions, hides average draft and tonnage for non-DraftSurvey events"
+  },
+  "dataFlow": {
+    "load": [
+      "Initialize() called with objectType and businessObject",
+      "If objectType='barge': Create new Draft from Barge properties",
+      "If objectType='barge event': Use existing Draft from BargeEvent",
+      "BeginEdit() on Draft object",
+      "frmBargeDraft_Load: FormatControls() and LoadControlsForDraft()",
+      "Form height adjusted if not DraftSurvey event"
+    ],
+    "userInput": [
+      "User modifies corner draft values (bow/stern, port/starboard)",
+      "Validated event fires on focus loss",
+      "Draft property updated",
+      "Overall draft recalculated",
+      "Average draft recalculated (if visible)",
+      "Tonnage fields recalculated (if visible)"
+    ],
+    "save": [
+      "User clicks Set button",
+      "Draft.IsValid checked",
+      "If valid and objectType='barge': Apply draft values to Barge object",
+      "If valid and objectType='barge event': ApplyEdit on Draft",
+      "Close form with DialogResult.OK",
+      "If invalid: Show BrokenRules dialog"
+    ],
+    "cancel": [
+      "User clicks Cancel button",
+      "Draft.CancelEdit() to discard changes",
+      "Close form"
+    ]
+  },
+  "modernEquivalents": {
+    "formType": "Modal dialog / Partial view",
+    "controls": {
+      "UltraTextEditor": "<input type=\"number\" class=\"form-control\">",
+      "UltraButton": "<button type=\"button\" class=\"btn btn-primary\">",
+      "UltraGroupBox": "<div class=\"card\"> or <fieldset class=\"border p-3\">",
+      "UltraLabel": "<label class=\"form-label\">",
+      "UltraStatusBar": "Toast notifications or inline validation messages"
+    },
+    "layout": {
+      "approach": "Bootstrap grid or CSS Grid",
+      "groupBoxes": "Card components with headers",
+      "docking": "Flexbox or Grid layout"
+    },
+    "validation": {
+      "clientSide": "jQuery Validation or native HTML5 validation",
+      "serverSide": "FluentValidation on Draft DTO",
+      "display": "Bootstrap form validation classes and messages"
+    },
+    "calculations": {
+      "approach": "JavaScript for immediate UI updates, server-side API for validation",
+      "events": "Input event listeners with debouncing"
+    }
+  },
+  "implementationNotes": {
+    "keyFeatures": [
+      "Four-corner draft measurement system (port/starboard, bow/stern)",
+      "Automatic calculation of overall draft (deepest) from corner values",
+      "Automatic calculation of average draft (for DraftSurvey events)",
+      "Tonnage calculations with adjustments (for DraftSurvey events)",
+      "Dynamic UI based on event type (DraftSurvey vs others)",
+      "Dynamic labels based on LoadStatus",
+      "Separate feet and inches inputs for all draft measurements",
+      "Cascading recalculations on any draft value change",
+      "Read-only mode for voided records",
+      "Business rule validation with user-friendly error display"
+    ],
+    "complexities": [
+      "Multiple business object types (Barge vs BargeEvent)",
+      "Complex calculation dependencies between fields",
+      "Conditional visibility based on EventType",
+      "Dynamic label text based on LoadStatus",
+      "Feet/inches split input pattern for all draft fields",
+      "Form height adjustment based on visible sections"
+    ],
+    "modernizationConsiderations": [
+      "Consider single numeric input with unit selector instead of separate feet/inches fields",
+      "Use real-time calculation updates with debouncing",
+      "Implement responsive design for mobile/tablet use",
+      "Consider side-by-side comparison view for before/after draft surveys",
+      "Add visual representation of barge with draft measurements",
+      "Use modern validation with inline error messages",
+      "Implement auto-save or draft persistence",
+      "Consider graphical input for draft measurements"
+    ],
+    "securityConsiderations": [
+      "Enforce read-only mode for voided records",
+      "Apply functional area-based access control",
+      "Prevent modification of calculated fields",
+      "Validate all inputs server-side despite client validation"
+    ]
+  }
+}

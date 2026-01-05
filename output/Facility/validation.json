@@ -1,0 +1,754 @@
+{
+  "entity": "Facility",
+  "description": "Validation rules for Facility and related entities (Location, FacilityLocation, FacilityBerth, FacilityStatus)",
+  "validationSources": {
+    "formValidation": "frmFacilityDetail.vb (lines 970-1580)",
+    "businessRules": [
+      "Location.vb (lines 421-484)",
+      "FacilityLocation.vb (lines 80-140)",
+      "FacilityBerth.vb (lines 48-54)",
+      "FacilityStatus.vb (lines 45-61)"
+    ]
+  },
+  "entities": {
+    "Location": {
+      "description": "Base location entity for facilities",
+      "fields": {
+        "Name": {
+          "dataType": "String",
+          "maxLength": 100,
+          "required": true,
+          "validationType": "String",
+          "validationTrigger": "Validated event (txtName_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:842-861, LocationBase.vb:127",
+          "businessRules": [
+            {
+              "rule": "Required",
+              "message": "Name cannot be blank.",
+              "sourceFile": "LocationBase.vb:404-407"
+            },
+            {
+              "rule": "MaxLength",
+              "message": "Name exceeds maximum length of 100 characters.",
+              "sourceFile": "LocationBase.vb:404-407"
+            }
+          ]
+        },
+        "ShortName": {
+          "dataType": "String",
+          "maxLength": 50,
+          "required": false,
+          "validationType": "String",
+          "validationTrigger": "Validated event (txtShortName_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:863-882, LocationBase.vb:232",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "ShortName exceeds maximum length of 50 characters.",
+              "sourceFile": "LocationBase.vb:414-417"
+            }
+          ]
+        },
+        "Note": {
+          "dataType": "String",
+          "maxLength": 255,
+          "required": false,
+          "validationType": "String",
+          "validationTrigger": "Validated event (txtLocationNote_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:884-903, LocationBase.vb:157",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "Note exceeds maximum length of 255 characters.",
+              "sourceFile": "LocationBase.vb:410-413"
+            }
+          ]
+        },
+        "IsActive": {
+          "dataType": "Boolean",
+          "required": true,
+          "validationTrigger": "Validated event (chkIsActive_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:905-923, LocationBase.vb:172"
+        },
+        "River": {
+          "dataType": "String (Char)",
+          "maxLength": 3,
+          "required": false,
+          "validationTrigger": "Validated event (cboRiver_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:925-943, LocationBase.vb:187",
+          "businessRules": [
+            {
+              "rule": "RiverMileRequired",
+              "message": "Cannot have River value without Mile value, or vice versa.",
+              "condition": "If BoatLocation not defined",
+              "sourceFile": "Location.vb:433-470"
+            },
+            {
+              "rule": "PositionRequired",
+              "message": "All four position fields (River, Mile, Direction, PositionUpdatedDateTime) must have values if at least one does.",
+              "condition": "If BoatLocation is defined",
+              "sourceFile": "Location.vb:433-470"
+            }
+          ]
+        },
+        "Mile": {
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "validationTrigger": "Validated event (txtMile_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:945-964, LocationBase.vb:202",
+          "businessRules": [
+            {
+              "rule": "ReasonableValue",
+              "message": "Mile {value} is not reasonable for Mile.",
+              "condition": "Mile must be <= 2000.0",
+              "sourceFile": "Location.vb:427-431"
+            },
+            {
+              "rule": "RiverMileRequired",
+              "message": "Cannot have River value without Mile value, or vice versa.",
+              "condition": "If BoatLocation not defined",
+              "sourceFile": "Location.vb:433-470"
+            },
+            {
+              "rule": "MileRange",
+              "message": "Mile {value} must be between {MinMile} to {MaxMile}",
+              "condition": "Mile must be >= MinMile and <= MaxMile for selected river",
+              "sourceFile": "Location.vb:472-482"
+            }
+          ]
+        }
+      }
+    },
+    "FacilityLocation": {
+      "description": "Facility-specific location properties",
+      "fields": {
+        "BargeExCode": {
+          "dataType": "String",
+          "maxLength": 10,
+          "required": false,
+          "validationType": "String",
+          "validationTrigger": "Validated event (txtBargeExCode_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1020-1039, FacilityLocationBase.vb:182",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "BargeExCode exceeds maximum length of 10 characters.",
+              "sourceFile": "FacilityLocationBase.vb:705-709"
+            }
+          ]
+        },
+        "Bank": {
+          "dataType": "String (ValidationList)",
+          "maxLength": 50,
+          "required": false,
+          "validationTrigger": "Validated event (cboBank_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1041-1059, FacilityLocationBase.vb:196",
+          "validationList": "RiverBank",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "Bank exceeds maximum length of 50 characters.",
+              "sourceFile": "FacilityLocationBase.vb:711-715"
+            }
+          ]
+        },
+        "BargeExLocationType": {
+          "dataType": "String (ValidationList)",
+          "maxLength": 20,
+          "required": false,
+          "validationTrigger": "Validated event and ValueChanged event (cboBargeExLocationType_Validated, cboBargeExLocationType_ValueChanged)",
+          "sourceFile": "frmFacilityDetail.vb:1061-1099, FacilityLocationBase.vb:211",
+          "validationList": "BargeExLocationType",
+          "displayName": "Facility type",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "Facility type exceeds maximum length of 20 characters.",
+              "sourceFile": "FacilityLocationBase.vb:717-721"
+            },
+            {
+              "rule": "ConditionalEnableDisable",
+              "message": "Lock-specific fields enabled only when type is 'Lock' or 'Gauge Location'",
+              "sourceFile": "frmFacilityDetail.vb:687-715, FacilityLocation.vb:86-90"
+            }
+          ]
+        },
+        "LockUsaceName": {
+          "dataType": "String",
+          "maxLength": 50,
+          "required": false,
+          "validationType": "String",
+          "validationTrigger": "Validated event (txtLockUsaceName_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1101-1120, FacilityLocationBase.vb:466",
+          "displayName": "USACE name",
+          "conditionalValidation": {
+            "enabledWhen": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "sourceFile": "frmFacilityDetail.vb:687-715"
+          },
+          "businessRules": [
+            {
+              "rule": "MustBeBlank",
+              "message": "USACE name must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+              "sourceFile": "FacilityLocation.vb:92-96"
+            },
+            {
+              "rule": "MaxLength",
+              "message": "LockUsaceName exceeds maximum length of 50 characters.",
+              "sourceFile": "FacilityLocationBase.vb:801-805"
+            }
+          ]
+        },
+        "LockFloodStage": {
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "validationTrigger": "Validated event (txtLockFloodStage_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1122-1141, FacilityLocationBase.vb:481",
+          "displayName": "Flood stage",
+          "conditionalValidation": {
+            "enabledWhen": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "sourceFile": "frmFacilityDetail.vb:687-715"
+          },
+          "businessRules": [
+            {
+              "rule": "MustBeBlank",
+              "message": "Flood stage must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+              "sourceFile": "FacilityLocation.vb:98-102"
+            }
+          ]
+        },
+        "LockPoolStage": {
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "validationTrigger": "Validated event (txtLockPoolStage_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1143-1162, FacilityLocationBase.vb:496",
+          "displayName": "Pool stage",
+          "conditionalValidation": {
+            "enabledWhen": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "sourceFile": "frmFacilityDetail.vb:687-715"
+          },
+          "businessRules": [
+            {
+              "rule": "MustBeBlank",
+              "message": "Pool stage must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+              "sourceFile": "FacilityLocation.vb:104-108"
+            }
+          ]
+        },
+        "LockLowWater": {
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "validationTrigger": "Validated event (txtLockLowWater_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1164-1183, FacilityLocationBase.vb:511",
+          "displayName": "Low water",
+          "conditionalValidation": {
+            "enabledWhen": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "sourceFile": "frmFacilityDetail.vb:687-715"
+          },
+          "businessRules": [
+            {
+              "rule": "MustBeBlank",
+              "message": "Low water must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+              "sourceFile": "FacilityLocation.vb:110-114"
+            }
+          ]
+        },
+        "LockNormalCurrent": {
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "validationTrigger": "Validated event (txtLockNormalCurrent_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1185-1204, FacilityLocationBase.vb:526",
+          "displayName": "Normal current",
+          "conditionalValidation": {
+            "enabledWhen": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "sourceFile": "frmFacilityDetail.vb:687-715"
+          },
+          "businessRules": [
+            {
+              "rule": "MustBeBlank",
+              "message": "Normal current must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+              "sourceFile": "FacilityLocation.vb:116-120"
+            }
+          ]
+        },
+        "LockHighFlow": {
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "validationTrigger": "Validated event (txtLockHighFlow_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1206-1225, FacilityLocationBase.vb:542",
+          "displayName": "High flow",
+          "conditionalValidation": {
+            "enabledWhen": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "sourceFile": "frmFacilityDetail.vb:687-715"
+          },
+          "businessRules": [
+            {
+              "rule": "MustBeBlank",
+              "message": "High flow must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+              "sourceFile": "FacilityLocation.vb:122-126"
+            }
+          ]
+        },
+        "LockHighWater": {
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "validationTrigger": "Validated event (txtLockHighWater_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1227-1246, FacilityLocationBase.vb:557",
+          "displayName": "High water",
+          "conditionalValidation": {
+            "enabledWhen": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "sourceFile": "frmFacilityDetail.vb:687-715"
+          },
+          "businessRules": [
+            {
+              "rule": "MustBeBlank",
+              "message": "High water must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+              "sourceFile": "FacilityLocation.vb:128-132"
+            }
+          ]
+        },
+        "LockCatastrophicLevel": {
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "validationTrigger": "Validated event (txtLockCatastrophicLevel_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1248-1267, FacilityLocationBase.vb:572",
+          "displayName": "Catastrophic level",
+          "conditionalValidation": {
+            "enabledWhen": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "sourceFile": "frmFacilityDetail.vb:687-715"
+          },
+          "businessRules": [
+            {
+              "rule": "MustBeBlank",
+              "message": "Catastrophic level must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+              "sourceFile": "FacilityLocation.vb:134-138"
+            }
+          ]
+        },
+        "NdcName": {
+          "dataType": "String",
+          "maxLength": 200,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcName exceeds maximum length of 200 characters.",
+              "sourceFile": "FacilityLocationBase.vb:723-727"
+            }
+          ]
+        },
+        "NdcLocationDescription": {
+          "dataType": "String",
+          "maxLength": 200,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcLocationDescription exceeds maximum length of 200 characters.",
+              "sourceFile": "FacilityLocationBase.vb:729-733"
+            }
+          ]
+        },
+        "NdcAddress": {
+          "dataType": "String",
+          "maxLength": 50,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcAddress exceeds maximum length of 50 characters.",
+              "sourceFile": "FacilityLocationBase.vb:735-739"
+            }
+          ]
+        },
+        "NdcCounty": {
+          "dataType": "String",
+          "maxLength": 30,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcCounty exceeds maximum length of 30 characters.",
+              "sourceFile": "FacilityLocationBase.vb:741-745"
+            }
+          ]
+        },
+        "NdcCountyFips": {
+          "dataType": "String (Char)",
+          "maxLength": 3,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcCountyFips exceeds maximum length of 3 characters.",
+              "sourceFile": "FacilityLocationBase.vb:747-751"
+            }
+          ]
+        },
+        "NdcTown": {
+          "dataType": "String",
+          "maxLength": 30,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcTown exceeds maximum length of 30 characters.",
+              "sourceFile": "FacilityLocationBase.vb:753-757"
+            }
+          ]
+        },
+        "NdcState": {
+          "dataType": "String (Char)",
+          "maxLength": 2,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcState exceeds maximum length of 2 characters.",
+              "sourceFile": "FacilityLocationBase.vb:759-763"
+            }
+          ]
+        },
+        "NdcWaterway": {
+          "dataType": "String",
+          "maxLength": 50,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcWaterway exceeds maximum length of 50 characters.",
+              "sourceFile": "FacilityLocationBase.vb:765-769"
+            }
+          ]
+        },
+        "NdcPort": {
+          "dataType": "String",
+          "maxLength": 25,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcPort exceeds maximum length of 25 characters.",
+              "sourceFile": "FacilityLocationBase.vb:771-775"
+            }
+          ]
+        },
+        "NdcLatitude": {
+          "dataType": "Double",
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596"
+        },
+        "NdcLongitude": {
+          "dataType": "Double",
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596"
+        },
+        "NdcOperator": {
+          "dataType": "String",
+          "maxLength": 150,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcOperator exceeds maximum length of 150 characters.",
+              "sourceFile": "FacilityLocationBase.vb:777-781"
+            }
+          ]
+        },
+        "NdcOwner": {
+          "dataType": "String",
+          "maxLength": 150,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcOwner exceeds maximum length of 150 characters.",
+              "sourceFile": "FacilityLocationBase.vb:783-787"
+            }
+          ]
+        },
+        "NdcPurpose": {
+          "dataType": "String",
+          "maxLength": 255,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcPurpose exceeds maximum length of 255 characters.",
+              "sourceFile": "FacilityLocationBase.vb:789-793"
+            }
+          ]
+        },
+        "NdcRemark": {
+          "dataType": "String",
+          "maxLength": 1200,
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:582-596",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "NdcRemark exceeds maximum length of 1200 characters.",
+              "sourceFile": "FacilityLocationBase.vb:795-799"
+            }
+          ]
+        }
+      }
+    },
+    "FacilityBerth": {
+      "description": "Berth/docking locations within a facility",
+      "fields": {
+        "Name": {
+          "dataType": "String",
+          "maxLength": 50,
+          "required": true,
+          "validationType": "String",
+          "validationTrigger": "Validated event (txtBerthName_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1348-1367, FacilityBerthBase.vb:119",
+          "businessRules": [
+            {
+              "rule": "Required",
+              "message": "Name cannot be blank.",
+              "sourceFile": "FacilityBerthBase.vb:192-195"
+            },
+            {
+              "rule": "MaxLength",
+              "message": "Name exceeds maximum length of 50 characters.",
+              "sourceFile": "FacilityBerthBase.vb:192-195"
+            }
+          ]
+        },
+        "ShipName": {
+          "dataType": "String",
+          "required": false,
+          "readOnly": true,
+          "sourceFile": "frmFacilityDetail.vb:666-673, FacilityBerth.vb:16-20",
+          "description": "Current ship at berth (read-only, loaded from database)"
+        }
+      }
+    },
+    "FacilityStatus": {
+      "description": "Time-based status records for facilities",
+      "fields": {
+        "StartDateTime": {
+          "dataType": "DateTime",
+          "required": true,
+          "validationTrigger": "Validated event (dtStartDate_Validated, cboStartTime_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1414-1452, FacilityStatusBase.vb:125",
+          "displayName": "Start date/time",
+          "businessRules": [
+            {
+              "rule": "Required",
+              "message": "Start date/time cannot be blank.",
+              "sourceFile": "FacilityStatusBase.vb:233-236"
+            }
+          ]
+        },
+        "EndDateTime": {
+          "dataType": "DateTime",
+          "required": false,
+          "validationTrigger": "Validated event (dtEndDate_Validated, cboEndTime_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1495-1533, FacilityStatusBase.vb:170",
+          "displayName": "End date/time",
+          "businessRules": [
+            {
+              "rule": "LaterThanStartDate",
+              "message": "End date/time must be later than or equal to Start date/time.",
+              "sourceFile": "FacilityStatus.vb:51-59"
+            }
+          ]
+        },
+        "Status": {
+          "dataType": "String (ValidationList)",
+          "maxLength": 20,
+          "required": true,
+          "validationTrigger": "Validated event (cboFacilityStatus_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1454-1472, FacilityStatusBase.vb:140",
+          "validationList": "FacilityStatus",
+          "businessRules": [
+            {
+              "rule": "Required",
+              "message": "Status cannot be blank.",
+              "sourceFile": "FacilityStatusBase.vb:238-241"
+            },
+            {
+              "rule": "MaxLength",
+              "message": "Status exceeds maximum length of 20 characters.",
+              "sourceFile": "FacilityStatusBase.vb:238-241"
+            }
+          ]
+        },
+        "Note": {
+          "dataType": "String",
+          "maxLength": 4000,
+          "required": false,
+          "validationType": "String",
+          "validationTrigger": "Validated event (txtStatusNote_Validated)",
+          "sourceFile": "frmFacilityDetail.vb:1474-1493, FacilityStatusBase.vb:155",
+          "textEditor": true,
+          "textEditorMaxLength": 4000,
+          "sourceFile_textEditor": "frmFacilityDetail.vb:293-321",
+          "businessRules": [
+            {
+              "rule": "MaxLength",
+              "message": "Note exceeds maximum length of 4000 characters.",
+              "sourceFile": "FacilityStatusBase.vb:243-246"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "formBehaviors": {
+    "submitValidation": {
+      "description": "Validation performed on form submit",
+      "method": "btnSubmit_Click",
+      "sourceFile": "frmFacilityDetail.vb:133-157",
+      "steps": [
+        "Clear unused fields (ClearUnusedFields)",
+        "Submit with SubmitNoRefreshClick()",
+        "Notify main form of fleet list changes",
+        "Notify main form of berth changes"
+      ]
+    },
+    "clearUnusedFields": {
+      "description": "Clears lock-specific fields when facility type is not Lock or Gauge Location",
+      "method": "ClearUnusedFields",
+      "sourceFile": "frmFacilityDetail.vb:742-767",
+      "fieldsCleared": [
+        "LockUsaceName",
+        "LockFloodStage",
+        "LockPoolStage",
+        "LockLowWater",
+        "LockNormalCurrent",
+        "LockHighFlow",
+        "LockHighWater",
+        "LockCatastrophicLevel"
+      ]
+    },
+    "conditionalEnableDisable": {
+      "description": "Lock fields enabled only when facility type is Lock or Gauge Location",
+      "method": "EnableDisableLockControls",
+      "sourceFile": "frmFacilityDetail.vb:687-715",
+      "trigger": "BargeExLocationType ValueChanged event"
+    },
+    "childObjectValidation": {
+      "description": "Child objects (FacilityBerths, Alert) must also be valid",
+      "sourceFile": "FacilityLocationBase.vb:625-633",
+      "isValid": "MyBase.IsValid AndAlso p_FacilityBerths.IsValid AndAlso ((p_Alert Is Nothing) OrElse p_Alert.IsValid)"
+    }
+  },
+  "validationTriggers": {
+    "onFieldChange": {
+      "description": "Validation triggered on field value change",
+      "events": [
+        "Validated event for text boxes",
+        "Validated event for combo boxes",
+        "Validated event for date pickers",
+        "ValueChanged event for BargeExLocationType (to enable/disable lock fields)"
+      ]
+    },
+    "onSubmit": {
+      "description": "Validation triggered when user clicks Submit button",
+      "method": "btnSubmit_Click",
+      "sourceFile": "frmFacilityDetail.vb:133-157"
+    },
+    "businessRuleCheck": {
+      "description": "Business rules checked via CheckBusinessRules method",
+      "callSites": [
+        "Property setters in business objects",
+        "Initialize methods",
+        "Custom validation methods"
+      ]
+    }
+  },
+  "validatorExtender": {
+    "description": "ValidatorExtender control used for client-side validation display",
+    "displayControl": "staStatus (status bar)",
+    "validationTypes": {
+      "String": "Used for text fields",
+      "Decimal": "Used for numeric fields like Mile, Lock stage fields"
+    },
+    "setupMethods": [
+      "SetValidatorExtenderForLocation (frmFacilityDetail.vb:970-981)",
+      "SetValidatorExtenderForFacilityLocation (frmFacilityDetail.vb:1273-1289)",
+      "SetValidatorExtenderForFacilityBerth (frmFacilityDetail.vb:1373-1381)",
+      "SetValidatorExtenderForFacilityStatus (frmFacilityDetail.vb:1540-1550)"
+    ]
+  },
+  "maxLengths": {
+    "description": "MaxLength constraints set on form controls",
+    "setupMethods": [
+      "SetMaxLengthsForLocation (frmFacilityDetail.vb:987-994)",
+      "SetMaxLengthsForFacilityLocation (frmFacilityDetail.vb:1295-1301)",
+      "SetMaxLengthsForFacilityBerth (frmFacilityDetail.vb:1387-1392)",
+      "SetMaxLengthsForFacilityStatus (frmFacilityDetail.vb:1556-1561)"
+    ]
+  },
+  "errorMessages": {
+    "Location": {
+      "Name_Required": "Name cannot be blank.",
+      "Name_MaxLength": "Name exceeds maximum length of 100 characters.",
+      "ShortName_MaxLength": "ShortName exceeds maximum length of 50 characters.",
+      "Note_MaxLength": "Note exceeds maximum length of 255 characters.",
+      "Mile_Reasonable": "Mile {value} is not reasonable for Mile.",
+      "Mile_RiverMileRequired": "Cannot have River value without Mile value, or vice versa.",
+      "Mile_PositionRequired": "All four position fields (River, Mile, Direction, PositionUpdatedDateTime) must have values if at least one does.",
+      "Mile_Range": "Mile {value} must be between {MinMile} to {MaxMile}"
+    },
+    "FacilityLocation": {
+      "LockUsaceName_MustBeBlank": "USACE name must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "LockFloodStage_MustBeBlank": "Flood stage must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "LockPoolStage_MustBeBlank": "Pool stage must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "LockLowWater_MustBeBlank": "Low water must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "LockNormalCurrent_MustBeBlank": "Normal current must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "LockHighFlow_MustBeBlank": "High flow must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "LockHighWater_MustBeBlank": "High water must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "LockCatastrophicLevel_MustBeBlank": "Catastrophic level must be blank if Facility type is not 'Lock' or 'Gauge Location'."
+    },
+    "FacilityBerth": {
+      "Name_Required": "Name cannot be blank.",
+      "Name_MaxLength": "Name exceeds maximum length of 50 characters."
+    },
+    "FacilityStatus": {
+      "StartDateTime_Required": "Start date/time cannot be blank.",
+      "EndDateTime_LaterThanStart": "End date/time must be later than or equal to Start date/time.",
+      "Status_Required": "Status cannot be blank.",
+      "Status_MaxLength": "Status exceeds maximum length of 20 characters.",
+      "Note_MaxLength": "Note exceeds maximum length of 4000 characters."
+    }
+  }
+}

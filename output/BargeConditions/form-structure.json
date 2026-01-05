@@ -1,0 +1,610 @@
+{
+  "formName": "frmBargeConditions",
+  "formTitle": "{BargeNum} - Barge Conditions",
+  "inherits": "frmBaseDetailEditList",
+  "implements": ["IBaseDetailEdit"],
+  "formType": "DetailEditList",
+  "businessObject": "BargeCondition",
+  "parentForm": "frmBargeSearch",
+  "initializationParameters": {
+    "bargeID": {
+      "type": "Integer",
+      "description": "The ID of the barge"
+    },
+    "bargeNum": {
+      "type": "String",
+      "description": "The barge number for display in title"
+    }
+  },
+  "controls": [
+    {
+      "name": "txtNote",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Condition",
+      "dataBinding": "_BargeCondition.Note",
+      "readOnly": true,
+      "maxLength": null,
+      "required": false,
+      "validation": [],
+      "events": ["EditorButtonClick"],
+      "features": {
+        "hasEditorButton": true,
+        "opensTextEditor": true,
+        "textEditorTitle": "Barge Condition Note",
+        "accessLevel": "Readonly"
+      },
+      "modernEquivalent": {
+        "type": "textarea",
+        "class": "form-control",
+        "readonly": true,
+        "attributes": {
+          "rows": "3"
+        }
+      }
+    },
+    {
+      "name": "lblCondition",
+      "type": "UltraLabel",
+      "category": "Label",
+      "text": "Condition:",
+      "location": {
+        "x": 6,
+        "y": 20
+      },
+      "size": {
+        "width": 63,
+        "height": 21
+      }
+    },
+    {
+      "name": "btnClose",
+      "type": "UltraButton",
+      "category": "Navigation",
+      "text": "&Close",
+      "buttonType": "Cancel",
+      "causesValidation": false,
+      "dialogResult": "Cancel",
+      "events": ["Click"],
+      "handler": "btnClose_Click",
+      "purpose": "Close the form via CancelClick()",
+      "modernEquivalent": {
+        "type": "button",
+        "class": "btn btn-secondary",
+        "text": "Close"
+      }
+    },
+    {
+      "name": "staStatus",
+      "type": "UltraStatusBar",
+      "category": "StatusBar",
+      "purpose": "Display status messages and export feedback",
+      "modernEquivalent": {
+        "type": "div",
+        "class": "alert alert-info",
+        "role": "status bar for messages"
+      }
+    }
+  ],
+  "grids": [
+    {
+      "name": "grdBargeConditions",
+      "type": "UltraGrid",
+      "category": "DataGrid",
+      "uniqueIdentifier": "BargeConditionID",
+      "dataSource": "Lists.BargeConditionList.GetList(_BargeID).List",
+      "defaultSort": {
+        "column": "CreateDateTime",
+        "direction": "Descending"
+      },
+      "columns": [
+        {
+          "key": "CreateDateTime",
+          "header": "Received",
+          "dataType": "DateTime",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "customComparer": "DateTimeSortComparer",
+          "modernPattern": {
+            "type": "SplitDateTime",
+            "displayFormat": "MM/dd/yyyy HH:mm",
+            "note": "Display only - no input controls needed for grid column"
+          }
+        },
+        {
+          "key": "CreateUser",
+          "header": "Sent By",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "Note",
+          "header": "Condition",
+          "dataType": "String",
+          "width": 270,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "EmailSentDateTime",
+          "header": "Notified",
+          "dataType": "DateTime",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "customComparer": "DateTimeSortComparer",
+          "modernPattern": {
+            "type": "SplitDateTime",
+            "displayFormat": "MM/dd/yyyy HH:mm",
+            "note": "Display only - no input controls needed for grid column"
+          }
+        }
+      ],
+      "events": [
+        {
+          "name": "AfterSelectChange",
+          "handler": "grdBargeConditions_AfterSelectChange",
+          "purpose": "Load selected BargeCondition details and refresh photos grid"
+        }
+      ],
+      "toolbar": "tbmBargeCondition",
+      "modernEquivalent": {
+        "type": "DataTables",
+        "serverSide": true,
+        "ajax": "/api/BargeConditions/GetList",
+        "columns": [
+          {"data": "createDateTime", "title": "Received", "render": "datetime"},
+          {"data": "createUser", "title": "Sent By"},
+          {"data": "note", "title": "Condition"},
+          {"data": "emailSentDateTime", "title": "Notified", "render": "datetime"}
+        ],
+        "order": [[0, "desc"]],
+        "select": "single"
+      }
+    },
+    {
+      "name": "grdBargeConditionPhotos",
+      "type": "UltraGrid",
+      "category": "DataGrid",
+      "uniqueIdentifier": "BargeConditionPhotoID",
+      "dataSource": "_BargeCondition.BargeConditionPhotoes",
+      "autoFitStyle": "ExtendLastColumn",
+      "columns": [
+        {
+          "key": "DocumentName",
+          "header": "Photo Name",
+          "dataType": "String",
+          "width": 425,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "DocumentExtension",
+          "header": "Type",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true
+        }
+      ],
+      "events": [
+        {
+          "name": "DoubleClickRow",
+          "handler": "grdBargeConditionPhotos_DoubleClickRow",
+          "purpose": "Open photo viewer for selected photo"
+        }
+      ],
+      "toolbar": "tbmBargeConditionPhoto",
+      "modernEquivalent": {
+        "type": "DataTables",
+        "serverSide": false,
+        "columns": [
+          {"data": "documentName", "title": "Photo Name"},
+          {"data": "documentExtension", "title": "Type"}
+        ],
+        "select": "single",
+        "events": {
+          "rowDblClick": "Open photo viewer"
+        }
+      }
+    }
+  ],
+  "toolbars": [
+    {
+      "name": "tbmBargeCondition",
+      "type": "UltraToolbarsManager",
+      "style": "VisualStudio2005",
+      "dockWithinContainer": "pnlBargeConditions",
+      "tools": [
+        {
+          "key": "Remove",
+          "type": "ButtonTool",
+          "caption": "&Remove",
+          "displayStyle": "ImageAndText",
+          "image": "Resources.Remove",
+          "buttonType": "Remove",
+          "enabledCondition": "itemIsSelected && HasPermission",
+          "handler": "ItemRemove(grdBargeConditions)",
+          "purpose": "Delete selected barge condition and related photos with confirmation",
+          "confirmationMessage": "Barge Condition and Related Photo(s)",
+          "modernEquivalent": {
+            "type": "button",
+            "class": "btn btn-danger btn-sm",
+            "icon": "fa-trash",
+            "text": "Remove"
+          }
+        },
+        {
+          "key": "Export",
+          "type": "ButtonTool",
+          "caption": "Export",
+          "displayStyle": "ImageAndText",
+          "image": "Resources.ExportResults",
+          "buttonType": "Open",
+          "enabledCondition": "atLeastOneRow && HasPermission",
+          "handler": "Main.ExportGrid(grdBargeConditions, staStatus, Me.Text)",
+          "purpose": "Export grid data to Excel or other format",
+          "modernEquivalent": {
+            "type": "button",
+            "class": "btn btn-secondary btn-sm",
+            "icon": "fa-download",
+            "text": "Export"
+          }
+        }
+      ]
+    },
+    {
+      "name": "tbmBargeConditionPhoto",
+      "type": "UltraToolbarsManager",
+      "style": "VisualStudio2005",
+      "dockWithinContainer": "pnlPhotos.ClientArea",
+      "tools": [
+        {
+          "key": "ViewPhoto",
+          "type": "ButtonTool",
+          "caption": "&View Photo",
+          "displayStyle": "ImageAndText",
+          "image": "Resources.PrintPreview",
+          "buttonType": "Open",
+          "enabledCondition": "itemIsSelected && HasPermission",
+          "handler": "ViewPhoto(CType(grdBargeConditionPhotos.Selected.Rows(0).ListObject, BargeConditionPhoto))",
+          "purpose": "Open selected photo in default viewer using server path",
+          "modernEquivalent": {
+            "type": "button",
+            "class": "btn btn-primary btn-sm",
+            "icon": "fa-eye",
+            "text": "View Photo"
+          }
+        },
+        {
+          "key": "RemovePhoto",
+          "type": "ButtonTool",
+          "caption": "Remove Photo",
+          "displayStyle": "ImageAndText",
+          "image": "Resources.Remove",
+          "buttonType": "Remove",
+          "enabledCondition": "itemIsSelected && HasPermission",
+          "handler": "ItemRemove(grdBargeConditionPhotos)",
+          "purpose": "Delete selected photo with confirmation",
+          "confirmationMessage": "Photo",
+          "modernEquivalent": {
+            "type": "button",
+            "class": "btn btn-danger btn-sm",
+            "icon": "fa-trash",
+            "text": "Remove Photo"
+          }
+        },
+        {
+          "key": "ExportPhoto",
+          "type": "ButtonTool",
+          "caption": "Export",
+          "displayStyle": "ImageAndText",
+          "image": "Resources.ExportResults",
+          "buttonType": "Open",
+          "enabledCondition": "atLeastOneRow && HasPermission",
+          "handler": "Main.ExportGrid(grdBargeConditionPhotos, staStatus, $\"{_BargeNum} - Barge Condition Photos\")",
+          "purpose": "Export photos grid data",
+          "modernEquivalent": {
+            "type": "button",
+            "class": "btn btn-secondary btn-sm",
+            "icon": "fa-download",
+            "text": "Export"
+          }
+        }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "name": "grpSubmitCancel",
+      "type": "UltraGroupBox",
+      "label": null,
+      "borderStyle": "Header3D",
+      "dock": "Bottom",
+      "controls": ["btnClose"]
+    },
+    {
+      "name": "grpBargeConditions",
+      "type": "UltraGroupBox",
+      "label": "Conditions Reports",
+      "borderStyle": "Header3D",
+      "dock": "Fill",
+      "controls": ["pnlBargeConditions"]
+    },
+    {
+      "name": "pnlBargeConditions",
+      "type": "UltraPanel",
+      "dock": "Fill",
+      "controls": ["grdBargeConditions", "grpBargeConditionPhotos"],
+      "toolbar": "tbmBargeCondition"
+    },
+    {
+      "name": "grpBargeConditionPhotos",
+      "type": "UltraGroupBox",
+      "label": "Detail",
+      "borderStyle": "Header3D",
+      "dock": "Bottom",
+      "controls": ["lblCondition", "txtNote", "pnlPhotos"]
+    },
+    {
+      "name": "pnlPhotos",
+      "type": "UltraPanel",
+      "dock": "None",
+      "controls": ["grdBargeConditionPhotos"],
+      "toolbar": "tbmBargeConditionPhoto"
+    }
+  ],
+  "validation": {
+    "method": null,
+    "rules": [],
+    "notes": "No explicit validation - form is read-only detail view"
+  },
+  "eventHandlers": {
+    "frmDetailEdit_Load": {
+      "purpose": "Initialize form: FormatControls, RefreshList for both grids, SetToolState, set txtNote readonly",
+      "calls": [
+        "FormatControls()",
+        "RefreshList(True, grdBargeConditions)",
+        "SetToolState(grdBargeConditions)",
+        "SetToolState(grdBargeConditionPhotos)",
+        "SetState(txtNote, ControlState.Readonly)"
+      ]
+    },
+    "frmDetailEdit_FormClosed": {
+      "purpose": "Save grid settings using MyAppSettingHelper for both grids",
+      "calls": [
+        "MyAppSettingHelper.SaveGrid(Me, grdBargeConditions, True)",
+        "MyAppSettingHelper.SaveGrid(Me, grdBargeConditionPhotos, True)"
+      ]
+    },
+    "btnClose_Click": {
+      "purpose": "Close form without saving via CancelClick()",
+      "calls": ["CancelClick()"]
+    },
+    "tbmBargeCondtion_ToolClick": {
+      "purpose": "Handle toolbar button clicks for BargeConditions grid",
+      "cases": {
+        "Remove": "ItemRemove(grdBargeConditions)",
+        "Export": "Main.ExportGrid(grdBargeConditions, staStatus, Me.Text)"
+      }
+    },
+    "tbmBargeConditionPhoto_ToolClick": {
+      "purpose": "Handle toolbar button clicks for Photos grid",
+      "cases": {
+        "ViewPhoto": "ViewPhoto(CType(grdBargeConditionPhotos.Selected.Rows(0).ListObject, BargeConditionPhoto))",
+        "RemovePhoto": "ItemRemove(grdBargeConditionPhotos)",
+        "ExportPhoto": "Main.ExportGrid(grdBargeConditionPhotos, staStatus, $\"{_BargeNum} - Barge Condition Photos\")"
+      }
+    },
+    "txtNote_EditorButtonClick": {
+      "purpose": "Open frmTextEditor in readonly mode to view full note text",
+      "calls": [
+        "frmTextEditor.Initialize(txtNote.Text, \"Barge Condition Note\", AccessLevel.Readonly, txtNote.MaxLength)",
+        "frmTextEditor.ShowDialog()"
+      ]
+    },
+    "grdBargeConditions_AfterSelectChange": {
+      "purpose": "When row selected, load BargeCondition by ID, populate txtNote, refresh photos grid",
+      "calls": [
+        "InfragisticsHelper.GetSelectedRowID(grdBargeConditions, \"BargeConditionID\")",
+        "BargeCondition.GetBargeCondition(bargeConditionID)",
+        "LoadControlsForBargeCondition()",
+        "RefreshList(True, grdBargeConditionPhotos)"
+      ]
+    },
+    "grdBargeConditionPhotos_DoubleClickRow": {
+      "purpose": "Open photo viewer for double-clicked photo",
+      "calls": [
+        "ViewPhoto(CType(grdBargeConditionPhotos.Selected.Rows(0).ListObject, BargeConditionPhoto))"
+      ]
+    }
+  },
+  "businessLogicMethods": {
+    "FormatControls": {
+      "purpose": "Set grid unique identifiers and initial sort order",
+      "operations": [
+        "GridControlUniqueIdentifierCol(grdBargeConditions) = \"BargeConditionID\"",
+        "GridControlUniqueIdentifierCol(grdBargeConditionPhotos) = \"BargeConditionPhotoID\"",
+        "AddToInitialColumnSortOrder(grdBargeConditions, \"CreateDateTime\", Descending, True)"
+      ]
+    },
+    "FormatGridColumns": {
+      "purpose": "Define visible grid columns with headers, widths, and alignment",
+      "overrides": "Base form method called during grid initialization"
+    },
+    "FormatGridCustomComparers": {
+      "purpose": "Set custom DateTime comparers for sorting CreateDateTime and EmailSentDateTime columns",
+      "overrides": "Base form method called during grid initialization"
+    },
+    "SetToolState": {
+      "purpose": "Enable/disable toolbar buttons based on grid selection and permissions",
+      "overrides": "Base form method called on selection change",
+      "conditions": {
+        "itemIsSelected": "InfragisticsHelper.HasRowSelected(gridControl)",
+        "atLeastOneRow": "gridControl.Rows.Count > 0"
+      }
+    },
+    "ItemRemove": {
+      "purpose": "Delete selected item with confirmation dialog",
+      "parameters": ["grid As UltraGrid"],
+      "logic": [
+        "Show confirmation dialog",
+        "If confirmed and grid is grdBargeConditions: Delete BargeCondition and photos via bc.Delete() and bc.SaveNoRefresh()",
+        "If confirmed and grid is grdBargeConditionPhotos: Delete photo via BargeConditionPhoto.DeleteBargeConditionPhoto()",
+        "Refresh affected grids"
+      ]
+    },
+    "RefreshList": {
+      "purpose": "Reload grid data from business logic layer",
+      "parameters": ["selectFirstRow As Boolean", "grid As UltraGrid"],
+      "logic": [
+        "For grdBargeConditions: Lists.BargeConditionList.GetList(_BargeID).List",
+        "For grdBargeConditionPhotos: _BargeCondition.BargeConditionPhotoes"
+      ]
+    },
+    "ViewPhoto": {
+      "purpose": "Open photo file using default system viewer",
+      "parameters": ["bargeConditionPhoto As BargeConditionPhoto"],
+      "logic": [
+        "Get serverPath from Lists.GlobalSettingList.DocumentsFilePath",
+        "System.Diagnostics.Process.Start(Path.Combine(serverPath, bargeConditionPhoto.Document.Filename))"
+      ]
+    },
+    "LoadControlsForBargeCondition": {
+      "purpose": "Populate form controls from selected _BargeCondition object",
+      "logic": ["txtNote.Text = _BargeCondition.Note"]
+    },
+    "Initialize (IBaseDetailEdit)": {
+      "purpose": "Implement IBaseDetailEdit.Initialize - calls InitializeBase with businessObject and parent form",
+      "parameters": ["businessObject As BusinessLogicBase"],
+      "calls": ["InitializeBase(businessObject, SubSystem.frmBargeSearch)"]
+    },
+    "Initialize (Public overload)": {
+      "purpose": "Public initialization with BargeID and BargeNum parameters",
+      "parameters": ["bargeID As Integer", "bargeNum As String"],
+      "logic": [
+        "Set _BargeID and _BargeNum member variables",
+        "Set form title to \"{_BargeNum} - Barge Conditions\"",
+        "Call Initialize(Nothing)"
+      ]
+    },
+    "SetButtonTypes": {
+      "purpose": "Implement IBaseDetailEdit.SetButtonTypes - configure button types for security",
+      "logic": [
+        "Set btnClose as ButtonType.Cancel",
+        "Create _ToolbarButtonTypes hashtable",
+        "Map toolbar buttons to ButtonTypes for security authorization"
+      ]
+    }
+  },
+  "securityFeatures": {
+    "controlAuthorization": true,
+    "buttonTypes": {
+      "btnClose": "Cancel",
+      "Remove": "Remove",
+      "Export": "Open",
+      "ViewPhoto": "Open",
+      "RemovePhoto": "Remove",
+      "ExportPhoto": "Open"
+    },
+    "toolbarButtonCanBeEnabled": "Checks permissions via ControlAuthorization.ToolbarButtonCanBeEnabled",
+    "implementsIBaseDetailEdit": true
+  },
+  "dataFlow": {
+    "initialization": [
+      "Form loads with BargeID and BargeNum parameters",
+      "Populate grdBargeConditions from Lists.BargeConditionList.GetList(_BargeID)",
+      "Set txtNote to readonly state"
+    ],
+    "selectionChange": [
+      "User selects row in grdBargeConditions",
+      "Load BargeCondition by BargeConditionID",
+      "Populate txtNote with Note field",
+      "Refresh grdBargeConditionPhotos with BargeConditionPhotoes collection"
+    ],
+    "deletion": [
+      "User clicks Remove on grdBargeConditions -> Delete BargeCondition and all related photos",
+      "User clicks RemovePhoto on grdBargeConditionPhotos -> Delete single photo file and database record"
+    ],
+    "photoViewing": [
+      "User double-clicks photo row or clicks View Photo button",
+      "Retrieve server file path from GlobalSettingList.DocumentsFilePath",
+      "Open photo using System.Diagnostics.Process.Start"
+    ]
+  },
+  "modernizationNotes": {
+    "formType": "Master-Detail with nested child grid",
+    "recommendedPattern": "ASP.NET Core MVC with DataTables for both grids",
+    "viewStructure": {
+      "searchView": "Not applicable - this is a detail form opened from frmBargeSearch",
+      "detailView": "BargeConditions/Index.cshtml with two DataTables grids",
+      "modalDialogs": {
+        "textEditor": "Replace frmTextEditor with Bootstrap modal containing readonly textarea",
+        "photoViewer": "Replace Process.Start with modal image viewer or download link"
+      }
+    },
+    "apiEndpoints": [
+      "GET /api/BargeConditions/GetList/{bargeId} - Returns list of barge conditions",
+      "DELETE /api/BargeConditions/Delete/{bargeConditionId} - Deletes condition and photos",
+      "GET /api/BargeConditionPhotos/GetList/{bargeConditionId} - Returns photos for selected condition",
+      "DELETE /api/BargeConditionPhotos/Delete/{bargeConditionPhotoId} - Deletes single photo",
+      "GET /api/BargeConditionPhotos/View/{bargeConditionPhotoId} - Returns photo file for viewing"
+    ],
+    "viewModels": [
+      "BargeConditionsViewModel - Contains BargeID, BargeNum, list of conditions",
+      "BargeConditionDto - CreateDateTime, CreateUser, Note, EmailSentDateTime, BargeConditionID",
+      "BargeConditionPhotoDto - DocumentName, DocumentExtension, BargeConditionPhotoID, Filename"
+    ],
+    "gridReplacements": {
+      "grdBargeConditions": "DataTables with server-side processing, single select, row click updates details",
+      "grdBargeConditionPhotos": "DataTables client-side, single select, double-click or View button opens modal/download"
+    },
+    "fileHandling": "Replace Process.Start with web-based file download or inline viewer using secure file streaming",
+    "layoutRecommendations": [
+      "Top section: DataTables grid for BargeConditions (60% height)",
+      "Bottom section: Condition detail panel with readonly textarea (20% height)",
+      "Bottom section: Photos DataTables grid (20% height)",
+      "All sections in single page view, no tabs needed"
+    ],
+    "securityMigration": [
+      "Use [Authorize] attributes on controllers",
+      "Check permissions in controller actions before delete operations",
+      "Implement role-based access for Remove vs View-only operations"
+    ],
+    "criticalDateTimeFields": [
+      {
+        "fieldName": "CreateDateTime",
+        "location": "grdBargeConditions column",
+        "handling": "Display only in grid - format as MM/dd/yyyy HH:mm in DataTables render function"
+      },
+      {
+        "fieldName": "EmailSentDateTime",
+        "location": "grdBargeConditions column",
+        "handling": "Display only in grid - format as MM/dd/yyyy HH:mm in DataTables render function, nullable field"
+      }
+    ]
+  },
+  "dependencies": {
+    "businessLogicClasses": [
+      "BargeCondition",
+      "BargeConditionPhoto"
+    ],
+    "listClasses": [
+      "Lists.BargeConditionList",
+      "Lists.GlobalSettingList"
+    ],
+    "helperClasses": [
+      "InfragisticsHelper",
+      "MyAppSettingHelper",
+      "ExceptionManager",
+      "Main"
+    ],
+    "relatedForms": [
+      "frmBargeSearch (parent form)",
+      "frmTextEditor (for viewing full note text)"
+    ]
+  }
+}

@@ -1,0 +1,116 @@
+@model RiverDetailsViewModel
+@{
+    ViewData["Title"] = "River Details";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-water"></i> River/Waterway Details
+                    </h5>
+                    <span class="@Model.StatusBadgeClass">@Model.StatusDisplay</span>
+                </div>
+
+                <div class="card-body">
+                    <!-- Basic Information Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-muted border-bottom pb-2 mb-3">
+                                <i class="fas fa-info-circle"></i> Basic Information
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.River.Name)</label>
+                            <p class="form-control-plaintext fw-bold">@Model.River.Name</p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.River.Code)</label>
+                            <p class="form-control-plaintext fw-bold">@Model.River.Code</p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.River.BargeExCode)</label>
+                            <p class="form-control-plaintext">@(Model.River.BargeExCode ?? "N/A")</p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.StatusDisplay)</label>
+                            <p class="form-control-plaintext">
+                                <span class="@Model.StatusBadgeClass">@Model.StatusDisplay</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mile Markers Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-muted border-bottom pb-2 mb-3">
+                                <i class="fas fa-ruler"></i> Mile Markers
+                            </h6>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.StartMileFormatted)</label>
+                            <p class="form-control-plaintext">@Model.StartMileFormatted</p>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.EndMileFormatted)</label>
+                            <p class="form-control-plaintext">@Model.EndMileFormatted</p>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.MileRange)</label>
+                            <p class="form-control-plaintext">@Model.MileRange</p>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.DirectionDisplay)</label>
+                            <p class="form-control-plaintext">
+                                <i class="fas @(Model.River.IsLowToHighDirection ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                @Model.DirectionDisplay
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Directional Labels Section -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h6 class="text-muted border-bottom pb-2 mb-3">
+                                <i class="fas fa-compass"></i> Directional Labels
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.River.UpLabel)</label>
+                            <p class="form-control-plaintext">
+                                <i class="fas fa-arrow-up"></i> @Model.River.UpLabel
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">@Html.DisplayNameFor(m => m.River.DownLabel)</label>
+                            <p class="form-control-plaintext">
+                                <i class="fas fa-arrow-down"></i> @Model.River.DownLabel
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <a href="@Url.Action("Edit", new { id = Model.River.RiverID })" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="fas fa-list"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

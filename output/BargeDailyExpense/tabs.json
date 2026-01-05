@@ -1,0 +1,266 @@
+{
+  "formName": "frmBargeDailyExpenseDetail",
+  "hasTabControl": false,
+  "formType": "DetailEditList",
+  "baseClass": "frmBaseDetailEditList",
+  "description": "This form uses in-grid editing without tabs. It manages daily expenses for barges organized by effective date.",
+  "layout": {
+    "topPanel": {
+      "name": "pnlDetailEdit",
+      "purpose": "Header section with effective date selection",
+      "controls": [
+        {
+          "name": "dtEffectiveDate",
+          "type": "UltraDateTimeEditor",
+          "label": "Effective date:",
+          "required": true,
+          "purpose": "Selects the date for which daily expenses are being managed"
+        }
+      ]
+    },
+    "mainSection": {
+      "name": "grpDetailEditList",
+      "text": "Daily Expenses",
+      "purpose": "Contains grid for managing child entity records",
+      "hasGrid": true,
+      "grid": {
+        "name": "grdBargeDailyExpenses",
+        "childEntity": "BargeDailyExpense",
+        "parentEntity": "BargeDailyExpenseDate",
+        "parentKey": "EffectiveDate",
+        "editMode": "InlineEditing",
+        "operations": ["Add", "Remove"],
+        "columns": [
+          {
+            "key": "SizeCategoryUnbound",
+            "header": "Size Category",
+            "type": "Dropdown",
+            "validationList": "BargeSizeCategory",
+            "width": 100,
+            "alignment": "Left",
+            "editable": true,
+            "nullable": true
+          },
+          {
+            "key": "CoverTypeUnbound",
+            "header": "Cover Type",
+            "type": "Dropdown",
+            "validationList": "CoverType",
+            "width": 100,
+            "alignment": "Left",
+            "editable": true,
+            "nullable": true,
+            "cascading": {
+              "affects": "CoverSubTypeIDUnbound",
+              "behavior": "Clears dependent dropdown when changed"
+            }
+          },
+          {
+            "key": "CoverSubTypeIDUnbound",
+            "header": "Sub Type",
+            "type": "Dropdown",
+            "dynamicList": true,
+            "dependsOn": "CoverTypeUnbound",
+            "width": 100,
+            "alignment": "Left",
+            "editable": true,
+            "nullable": true
+          },
+          {
+            "key": "IsCharteredInUnbound",
+            "header": "Chartered-In",
+            "type": "Boolean",
+            "width": 100,
+            "alignment": "Center",
+            "editable": true
+          },
+          {
+            "key": "DailyExpenseUnbound",
+            "header": "Daily Expense",
+            "type": "Decimal",
+            "format": "Currency",
+            "width": 100,
+            "alignment": "Right",
+            "editable": true,
+            "nullable": true,
+            "validation": {
+              "dataType": "Decimal",
+              "customSortComparer": "NumericSortComparer"
+            }
+          }
+        ],
+        "gridBehavior": {
+          "updateMode": "OnCellChangeOrLostFocus",
+          "allowUpdate": true,
+          "cellClickAction": "EditAndSelectText",
+          "selectTypeRow": "Single",
+          "selectTypeCell": "Single",
+          "tabNavigation": "NextControlOnLastCell",
+          "keyboardNavigation": {
+            "rightArrow": "Move to next cell and enter edit mode",
+            "leftArrow": "Move to previous cell and enter edit mode",
+            "downArrow": "Move to cell below and enter edit mode",
+            "upArrow": "Move to cell above and enter edit mode"
+          },
+          "autoEnterEditMode": "First cell on tab into grid",
+          "unboundColumns": true,
+          "unboundColumnsReason": "Standard business object collections don't allow cell editing when bound directly"
+        },
+        "dataFlow": {
+          "description": "Uses unbound columns pattern for inline editing",
+          "boundColumns": [
+            "SizeCategory",
+            "CoverType",
+            "CoverSubTypeID",
+            "IsCharteredIn",
+            "DailyExpense"
+          ],
+          "unboundColumns": [
+            "SizeCategoryUnbound",
+            "CoverTypeUnbound",
+            "CoverSubTypeIDUnbound",
+            "IsCharteredInUnbound",
+            "DailyExpenseUnbound"
+          ],
+          "transferFlow": [
+            "OnLoad: Bound -> Unbound (InitializeRow)",
+            "OnEdit: User edits Unbound columns",
+            "OnExitEditMode: Unbound -> Bound -> Business Object"
+          ]
+        }
+      },
+      "toolbar": {
+        "name": "ToolbarsManager",
+        "toolbarName": "ChildEditToolbar",
+        "location": "Top of grid panel",
+        "buttons": [
+          {
+            "key": "Add",
+            "text": "&Add",
+            "icon": "Add",
+            "displayStyle": "ImageAndText",
+            "action": "Create new BargeDailyExpense child object"
+          },
+          {
+            "key": "Remove",
+            "text": "&Remove",
+            "icon": "Remove",
+            "displayStyle": "ImageAndText",
+            "action": "Remove selected BargeDailyExpense from collection",
+            "requiresSelection": true,
+            "confirmationDialog": "Barge Daily Expense"
+          }
+        ],
+        "notes": "Modify button intentionally omitted - editing happens directly in grid cells"
+      }
+    }
+  },
+  "sharedControls": {
+    "location": "Bottom of form",
+    "groupBox": "grpSubmitCancel",
+    "controls": [
+      {
+        "name": "btnSubmit",
+        "type": "Button",
+        "text": "&Submit",
+        "action": "Save all changes to BargeDailyExpenseDate and child expenses",
+        "dialogResult": "OK",
+        "tabIndex": 0
+      },
+      {
+        "name": "btnCancel",
+        "type": "Button",
+        "text": "&Cancel",
+        "action": "Cancel all changes and close form",
+        "dialogResult": "Cancel",
+        "causesValidation": false,
+        "tabIndex": 1
+      }
+    ]
+  },
+  "formBehavior": {
+    "formBorderStyle": "Fixed3D",
+    "startPosition": "CenterParent",
+    "showInTaskbar": false,
+    "maximizeBox": false,
+    "minimizeBox": false,
+    "modal": true,
+    "titleFormat": "<date> - Barge Daily Expense Detail",
+    "titleFormatNew": "New - Barge Daily Expense Detail"
+  },
+  "validationBehavior": {
+    "validatorExtender": {
+      "displayControl": "staStatus",
+      "purpose": "Display validation messages in status bar"
+    },
+    "cellValidation": {
+      "invalidValueBehavior": "RetainValueAndFocus",
+      "supportDataErrorInfo": "CellsOnly",
+      "nullText": "",
+      "hideBuiltInErrorDialog": true,
+      "stayInEditModeOnError": true
+    }
+  },
+  "securityModel": {
+    "interface": "IBaseDetailEdit",
+    "buttonTypes": {
+      "btnSubmit": "Submit",
+      "btnCancel": "Cancel",
+      "Add": "Add",
+      "Remove": "Remove"
+    },
+    "toolbarButtonAuthorization": "Uses ControlAuthorization.ToolbarButtonCanBeEnabled"
+  },
+  "businessObjects": {
+    "parentEntity": {
+      "name": "BargeDailyExpenseDate",
+      "key": "EffectiveDate",
+      "editMode": "BeginEdit/ApplyEdit/CancelEdit pattern"
+    },
+    "childEntity": {
+      "name": "BargeDailyExpense",
+      "collection": "BargeDailyExpenses",
+      "relationship": "One-to-Many from BargeDailyExpenseDate"
+    }
+  },
+  "modernImplementationNotes": {
+    "layoutApproach": "Single-page form without tabs - use card layout with header section and data grid",
+    "gridComponent": "Use modern data grid (e.g., AG Grid, DevExtreme) with inline editing",
+    "toolbar": "Implement as floating action buttons or toolbar above grid",
+    "validation": "Real-time validation with status messages",
+    "responsiveDesign": "Stack header controls on mobile, full-width grid with horizontal scroll",
+    "stateManagement": {
+      "pattern": "Parent-child entity management",
+      "optimisticUI": "Immediate UI updates with validation",
+      "dirtyTracking": "Track changes at cell level"
+    },
+    "bootstrapEquivalent": {
+      "topPanel": "card with card-header",
+      "mainSection": "card with card-body containing data grid",
+      "toolbar": "btn-group or individual buttons",
+      "sharedControls": "card-footer with button group"
+    }
+  },
+  "specialFeatures": {
+    "unboundColumnPattern": {
+      "description": "Uses unbound columns to enable inline editing of business objects",
+      "reason": "Standard CSLA business object collections don't support direct cell editing when bound to grids",
+      "implementation": [
+        "Hidden bound columns store actual business object properties",
+        "Visible unbound columns allow user editing",
+        "Data transferred from bound to unbound on row initialization",
+        "Data transferred from unbound to bound on exit edit mode",
+        "Business object updated when data transferred to bound property"
+      ]
+    },
+    "cascadingDropdowns": {
+      "trigger": "CoverTypeUnbound change",
+      "effect": "CoverSubTypeIDUnbound cleared and repopulated",
+      "implementation": "Dynamic combo creation based on parent value"
+    },
+    "gridSettings": {
+      "persistence": "SaveGrid/LoadGrid via MyAppSettingHelper",
+      "sortOrder": "Default sort by SizeCategory ascending"
+    }
+  }
+}

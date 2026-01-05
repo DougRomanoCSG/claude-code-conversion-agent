@@ -1,0 +1,301 @@
+{
+  "entityName": "BoatFuelPrice",
+  "legacyStoredProcedures": {
+    "note": "All stored procedures will be CONVERTED to Dapper parameterized SQL queries, NOT database stored procedures",
+    "search": {
+      "spName": "BoatFuelPriceSearch",
+      "description": "Search boat fuel prices by effective date and fuel vendor",
+      "parameters": [
+        {
+          "name": "@EffectiveDate",
+          "type": "DateTime",
+          "required": true,
+          "description": "Filter by effective date of fuel price"
+        },
+        {
+          "name": "@FuelVendorBusinessUnitID",
+          "type": "VarChar",
+          "required": false,
+          "description": "Filter by fuel vendor business unit ID"
+        }
+      ],
+      "resultColumns": [
+        {
+          "name": "BoatFuelPriceID",
+          "type": "Int32",
+          "description": "Primary key"
+        },
+        {
+          "name": "EffectiveDate",
+          "type": "SmartDate",
+          "description": "Effective date of the fuel price"
+        },
+        {
+          "name": "Price",
+          "type": "String (Currency)",
+          "format": "Currency with 4 decimal places",
+          "description": "Fuel price amount"
+        },
+        {
+          "name": "FuelVendor",
+          "type": "String",
+          "description": "Fuel vendor name (from BusinessUnit join)"
+        },
+        {
+          "name": "InvoiceNumber",
+          "type": "String",
+          "maxLength": 50,
+          "description": "Vendor invoice number"
+        }
+      ],
+      "convertToSql": "SELECT bfp.BoatFuelPriceID, bfp.EffectiveDate, bfp.Price, bu.Name as FuelVendor, bfp.InvoiceNumber FROM BoatFuelPrice bfp LEFT JOIN BusinessUnit bu ON bfp.FuelVendorBusinessUnitID = bu.BusinessUnitID WHERE (@EffectiveDate IS NULL OR bfp.EffectiveDate = @EffectiveDate) AND (@FuelVendorBusinessUnitID IS NULL OR bfp.FuelVendorBusinessUnitID = @FuelVendorBusinessUnitID)"
+    },
+    "getById": {
+      "spName": "BoatFuelPriceSelect",
+      "description": "Get a single boat fuel price by ID",
+      "parameters": [
+        {
+          "name": "@BoatFuelPriceID",
+          "type": "Int",
+          "required": true,
+          "description": "Primary key of the boat fuel price"
+        }
+      ],
+      "resultColumns": [
+        {
+          "name": "BoatFuelPriceID",
+          "type": "Int32",
+          "description": "Primary key"
+        },
+        {
+          "name": "EffectiveDate",
+          "type": "DateTime",
+          "description": "Effective date of the fuel price"
+        },
+        {
+          "name": "Price",
+          "type": "Money",
+          "description": "Fuel price amount"
+        },
+        {
+          "name": "FuelVendorBusinessUnitID",
+          "type": "Int",
+          "nullable": true,
+          "description": "Foreign key to BusinessUnit table"
+        },
+        {
+          "name": "InvoiceNumber",
+          "type": "VarChar(50)",
+          "nullable": true,
+          "description": "Vendor invoice number"
+        }
+      ],
+      "convertToSql": "SELECT BoatFuelPriceID, EffectiveDate, Price, FuelVendorBusinessUnitID, InvoiceNumber FROM BoatFuelPrice WHERE BoatFuelPriceID = @BoatFuelPriceID"
+    },
+    "getAll": {
+      "spName": "BoatFuelPricesSelect",
+      "description": "Get all boat fuel prices",
+      "parameters": [],
+      "convertToSql": "SELECT BoatFuelPriceID, EffectiveDate, Price, FuelVendorBusinessUnitID, InvoiceNumber FROM BoatFuelPrice ORDER BY EffectiveDate DESC"
+    },
+    "insert": {
+      "spName": "BoatFuelPriceInsert",
+      "description": "Insert a new boat fuel price",
+      "parameters": [
+        {
+          "name": "@BoatFuelPriceID",
+          "type": "Int",
+          "direction": "InputOutput",
+          "description": "Primary key (output after insert)"
+        },
+        {
+          "name": "@EffectiveDate",
+          "type": "DateTime",
+          "required": true,
+          "description": "Effective date of the fuel price"
+        },
+        {
+          "name": "@Price",
+          "type": "Money",
+          "required": true,
+          "description": "Fuel price amount"
+        },
+        {
+          "name": "@FuelVendorBusinessUnitID",
+          "type": "Int",
+          "nullable": true,
+          "description": "Foreign key to BusinessUnit table"
+        },
+        {
+          "name": "@InvoiceNumber",
+          "type": "VarChar(50)",
+          "nullable": true,
+          "description": "Vendor invoice number"
+        }
+      ],
+      "convertToSql": "INSERT INTO BoatFuelPrice (EffectiveDate, Price, FuelVendorBusinessUnitID, InvoiceNumber, CreateDateTime, CreateUser, ModifyDateTime, ModifyUser) OUTPUT INSERTED.BoatFuelPriceID VALUES (@EffectiveDate, @Price, @FuelVendorBusinessUnitID, @InvoiceNumber, GETDATE(), @CreateUser, GETDATE(), @ModifyUser)"
+    },
+    "update": {
+      "spName": "BoatFuelPriceUpdate",
+      "description": "Update an existing boat fuel price",
+      "parameters": [
+        {
+          "name": "@BoatFuelPriceID",
+          "type": "Int",
+          "required": true,
+          "description": "Primary key"
+        },
+        {
+          "name": "@EffectiveDate",
+          "type": "DateTime",
+          "required": true,
+          "description": "Effective date of the fuel price"
+        },
+        {
+          "name": "@Price",
+          "type": "Money",
+          "required": true,
+          "description": "Fuel price amount"
+        },
+        {
+          "name": "@FuelVendorBusinessUnitID",
+          "type": "Int",
+          "nullable": true,
+          "description": "Foreign key to BusinessUnit table"
+        },
+        {
+          "name": "@InvoiceNumber",
+          "type": "VarChar(50)",
+          "nullable": true,
+          "description": "Vendor invoice number"
+        }
+      ],
+      "convertToSql": "UPDATE BoatFuelPrice SET EffectiveDate = @EffectiveDate, Price = @Price, FuelVendorBusinessUnitID = @FuelVendorBusinessUnitID, InvoiceNumber = @InvoiceNumber, ModifyDateTime = GETDATE(), ModifyUser = @ModifyUser WHERE BoatFuelPriceID = @BoatFuelPriceID"
+    },
+    "delete": {
+      "spName": "BoatFuelPriceDelete",
+      "description": "Delete a boat fuel price (likely soft delete with IsActive flag)",
+      "parameters": [
+        {
+          "name": "@BoatFuelPriceID",
+          "type": "Int",
+          "required": true,
+          "description": "Primary key"
+        }
+      ],
+      "convertToSql": "DELETE FROM BoatFuelPrice WHERE BoatFuelPriceID = @BoatFuelPriceID",
+      "note": "Check if table has IsActive column for soft delete pattern"
+    }
+  },
+  "customOperations": [
+    {
+      "name": "GenerateBoatFuelPrices",
+      "spName": "GenerateBoatFuelPrices",
+      "description": "Public method to generate daily boat fuel prices based on a given date. Used by Generate Vendor Fuel Prices form and OpisFuelPriceImport SSIS package.",
+      "parameters": [
+        {
+          "name": "@PriceDate",
+          "type": "DateTime",
+          "required": true,
+          "description": "Date of boat fuel prices to generate"
+        }
+      ],
+      "returns": {
+        "type": "Int32",
+        "description": "Number of rows inserted"
+      },
+      "convertToSql": "This will need to be analyzed from the stored procedure implementation to convert to C# business logic or a SQL query",
+      "implementationNote": "Called via DirectAccess.ExecuteScalar in VB.NET code (BoatFuelPrice.vb:84-104)"
+    }
+  ],
+  "dataFormatting": {
+    "Price": {
+      "displayFormat": "Currency with 4 decimal places (FmtCurrencyFourDecimalExact)",
+      "storageType": "Money",
+      "getter": "GetCurrencyProp(p_Price, FmtCurrencyFourDecimalExact)",
+      "setter": "CDec(value).ToString(\"N4\")",
+      "note": "Search results display with 4 decimals, internal storage as Money"
+    },
+    "EffectiveDate": {
+      "displayFormat": "SmartDate with configured format",
+      "storageType": "SmartDate",
+      "note": "Uses SmartDate for date handling and formatting"
+    }
+  },
+  "childEntities": {
+    "none": "No child entities identified"
+  },
+  "businessRules": {
+    "validation": [
+      {
+        "field": "EffectiveDate",
+        "rule": "Required",
+        "message": "Effective date is required"
+      },
+      {
+        "field": "Price",
+        "rule": "Required",
+        "message": "Fuel price is required"
+      },
+      {
+        "field": "InvoiceNumber",
+        "rule": "MaxLength",
+        "value": 50,
+        "message": "Vendor inv# maximum length is 50"
+      },
+      {
+        "field": "InvoiceNumber",
+        "rule": "Custom - ConditionalRequired",
+        "message": "Vendor inv# must be blank when Fuel vendor is blank",
+        "condition": "If FuelVendorBusinessUnitID is empty, InvoiceNumber must also be empty",
+        "implementationNote": "BoatFuelPrice.vb:64-68"
+      }
+    ]
+  },
+  "foreignKeys": {
+    "FuelVendorBusinessUnitID": {
+      "referencedTable": "BusinessUnit",
+      "referencedColumn": "BusinessUnitID",
+      "nullable": true,
+      "description": "Reference to fuel vendor"
+    }
+  },
+  "auditFields": {
+    "tracked": true,
+    "fields": [
+      "BoatFuelPriceID",
+      "EffectiveDate",
+      "Price",
+      "FuelVendorBusinessUnitID",
+      "InvoiceNumber"
+    ],
+    "note": "Field-level auditing is implemented via AuditFieldEvent system (BoatFuelPriceBase.vb:527-597)"
+  },
+  "conversionNotes": {
+    "targetDto": "BoatFuelPriceDto (needs to be created in BargeOps.Shared/Dto)",
+    "repositoryPattern": "Follow FacilityRepository.cs and BoatLocationRepository.cs patterns with Dapper",
+    "searchDto": "BoatFuelPriceSearchDto with properties: BoatFuelPriceID, EffectiveDate, Price (as decimal with 4 decimals), FuelVendor (string), InvoiceNumber",
+    "detailDto": "BoatFuelPriceDetailDto with full entity properties including FuelVendorBusinessUnitID",
+    "createDto": "BoatFuelPriceCreateDto with: EffectiveDate, Price, FuelVendorBusinessUnitID, InvoiceNumber",
+    "updateDto": "BoatFuelPriceUpdateDto with: BoatFuelPriceID, EffectiveDate, Price, FuelVendorBusinessUnitID, InvoiceNumber",
+    "searchCriteria": "BoatFuelPriceSearchCriteria with: EffectiveDate, FuelVendorBusinessUnitID",
+    "specialConsiderations": [
+      "Price must support 4 decimal places for precision",
+      "InvoiceNumber validation depends on FuelVendorBusinessUnitID presence",
+      "GenerateBoatFuelPrices custom operation needs analysis of stored procedure logic",
+      "Search results include FuelVendor name from BusinessUnit join",
+      "No DTO currently exists in BargeOps.Shared - needs to be created"
+    ]
+  },
+  "fileReferences": {
+    "legacy": {
+      "search": "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Lists\\BoatFuelPriceSearch.vb",
+      "businessObject": "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\BoatFuelPrice.vb",
+      "baseClass": "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\Base Classes\\BoatFuelPriceBase.vb"
+    },
+    "modernPatterns": {
+      "dtoReference": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.Shared\\BargeOps.Shared\\Dto\\BoatLocationDto.cs",
+      "repositoryReference": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.API\\src\\Admin.Infrastructure\\Repositories\\BoatLocationRepository.cs"
+    }
+  }
+}

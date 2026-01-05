@@ -1,0 +1,1013 @@
+{
+  "entityName": "Facility",
+  "conversionDate": "2025-12-11",
+  "sourceApplication": "WinForms (Infragistics UltraWinGrid)",
+  "targetApplication": "ASP.NET Core MVC (Bootstrap 5, DataTables, Select2)",
+  "referenceImplementations": {
+    "crewingUI": {
+      "javascript": "C:\\source\\BargeOps.Crewing.UI\\wwwroot\\js\\crewingSearch.js",
+      "views": "C:\\source\\BargeOps.Crewing.UI\\Views\\CrewingSearch\\Index.cshtml",
+      "css": "C:\\source\\BargeOps.Crewing.UI\\wwwroot\\css\\crewingSearch.css"
+    },
+    "adminUI": {
+      "javascript": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js",
+      "views": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\Index.cshtml"
+    }
+  },
+  "controlMappings": {
+    "global": [
+      {
+        "legacyControl": "UltraGrid",
+        "modernControl": "DataTables",
+        "description": "Server-side DataTables grid with AJAX loading",
+        "implementationPattern": {
+          "library": "DataTables 1.x with Bootstrap 5 styling",
+          "initialization": "$(document).ready() with DataTable configuration",
+          "features": [
+            "Server-side processing (serverSide: true)",
+            "State saving in localStorage (stateSave: true)",
+            "Responsive design (responsive: true)",
+            "Custom column rendering",
+            "Action buttons column (Edit/View/Delete)",
+            "Default sorting and pagination",
+            "Custom search parameter passing"
+          ],
+          "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js",
+          "keyPatterns": {
+            "initialization": "Lines 32-214",
+            "ajaxConfiguration": "Lines 42-57",
+            "columnDefinitions": "Lines 58-203",
+            "eventHandlers": "Lines 216-246"
+          }
+        },
+        "notes": [
+          "Legacy UltraGrid custom comparers (e.g., NumericSortComparer) handled server-side",
+          "Column state saved to localStorage with versioned keys",
+          "Actions column placed first by default",
+          "Legacy column chooser replaced with DataTables colVis extension"
+        ]
+      },
+      {
+        "legacyControl": "UltraCombo",
+        "modernControl": "Select2",
+        "description": "Enhanced dropdown with search and remote data loading",
+        "implementationPattern": {
+          "library": "Select2 4.x with Bootstrap 5 theme",
+          "initialization": "$('#elementId').select2({ theme: 'bootstrap-5' })",
+          "features": [
+            "Type-ahead search",
+            "Remote data loading (AJAX)",
+            "Placeholder text",
+            "Clear button",
+            "Bootstrap 5 styling integration"
+          ]
+        },
+        "notes": [
+          "UltraCombo population methods converted to controller actions",
+          "IncludeBlank parameter maps to placeholder option",
+          "IncludeAll parameter maps to additional 'All' option"
+        ]
+      },
+      {
+        "legacyControl": "UltraTextEditor",
+        "modernControl": "Bootstrap Form Input",
+        "description": "Standard HTML input with Bootstrap styling",
+        "implementationPattern": {
+          "html": "<input type=\"text\" class=\"form-control\" />",
+          "validation": "ASP.NET Core validation attributes + jQuery validation",
+          "features": [
+            "Client-side validation",
+            "Server-side validation",
+            "Validation error display",
+            "MaxLength attribute enforcement"
+          ]
+        },
+        "notes": [
+          "Multiline UltraTextEditor maps to <textarea class=\"form-control\">",
+          "EditorButton functionality replaced with modal dialogs"
+        ]
+      },
+      {
+        "legacyControl": "UltraCheckEditor",
+        "modernControl": "Bootstrap Checkbox",
+        "description": "Bootstrap form checkbox with label",
+        "implementationPattern": {
+          "html": "<div class=\"form-check\"><input type=\"checkbox\" class=\"form-check-input\" /><label class=\"form-check-label\"></label></div>",
+          "binding": "asp-for attribute for model binding"
+        }
+      },
+      {
+        "legacyControl": "UltraDateTimeEditor",
+        "modernControl": "Bootstrap Datepicker or HTML5 Date Input",
+        "description": "Date picker with calendar dropdown",
+        "implementationPattern": {
+          "library": "Bootstrap Datepicker or native HTML5",
+          "html": "<input type=\"date\" class=\"form-control\" />",
+          "features": [
+            "Calendar popup",
+            "Date format validation",
+            "Min/max date constraints"
+          ]
+        },
+        "notes": [
+          "Paired date/time combos (e.g., dtStartDate + cboStartTime) combined into single datetime-local input or separate date/time inputs",
+          "Time combo populated with 15-minute intervals"
+        ]
+      },
+      {
+        "legacyControl": "UltraPanel",
+        "modernControl": "Bootstrap Card",
+        "description": "Content container with optional header/footer",
+        "implementationPattern": {
+          "html": "<div class=\"card\"><div class=\"card-header\"></div><div class=\"card-body\"></div></div>",
+          "variants": [
+            "card-primary for main content",
+            "card-secondary for nested content",
+            "card with collapse for expandable sections"
+          ]
+        }
+      },
+      {
+        "legacyControl": "UltraTabControl",
+        "modernControl": "Bootstrap Nav Tabs",
+        "description": "Tabbed navigation for multi-section forms",
+        "implementationPattern": {
+          "html": "<ul class=\"nav nav-tabs\"><li class=\"nav-item\"><a class=\"nav-link\" data-bs-toggle=\"tab\" href=\"#tab1\"></a></li></ul><div class=\"tab-content\"><div class=\"tab-pane\" id=\"tab1\"></div></div>",
+          "javascript": "Bootstrap 5 tab component with show.bs.tab events",
+          "features": [
+            "Tab switching with history support",
+            "Lazy loading tab content",
+            "Active tab highlighting",
+            "Tab validation state indicators"
+          ]
+        }
+      },
+      {
+        "legacyControl": "UltraGroupBox",
+        "modernControl": "Bootstrap Card or Fieldset",
+        "description": "Grouped controls with border and title",
+        "implementationPattern": {
+          "html": "<fieldset class=\"border p-3\"><legend class=\"w-auto px-2\">Title</legend><!-- controls --></fieldset>",
+          "alternativeHtml": "<div class=\"card\"><div class=\"card-header\">Title</div><div class=\"card-body\"><!-- controls --></div></div>"
+        }
+      },
+      {
+        "legacyControl": "UltraButton",
+        "modernControl": "Bootstrap Button",
+        "description": "Styled button with icons",
+        "implementationPattern": {
+          "html": "<button type=\"button\" class=\"btn btn-primary\"><i class=\"fas fa-icon\"></i> Text</button>",
+          "variants": [
+            "btn-primary for main actions",
+            "btn-secondary for secondary actions",
+            "btn-danger for delete actions",
+            "btn-sm for compact buttons",
+            "btn-group for button groups"
+          ]
+        }
+      },
+      {
+        "legacyControl": "UltraToolbarsManager",
+        "modernControl": "Bootstrap Button Group or Toolbar",
+        "description": "Button toolbar with icons",
+        "implementationPattern": {
+          "html": "<div class=\"btn-toolbar\" role=\"toolbar\"><div class=\"btn-group\" role=\"group\"><button class=\"btn btn-primary\"><i class=\"fas fa-plus\"></i> Add</button></div></div>",
+          "placement": "Above grid or within card header"
+        }
+      }
+    ]
+  },
+  "searchForm": {
+    "formName": "frmFacilitySearch",
+    "targetController": "FacilitySearchController",
+    "targetView": "Views/FacilitySearch/Index.cshtml",
+    "viewModel": "FacilitySearchViewModel",
+    "javascript": "wwwroot/js/facilitySearch.js",
+    "css": "wwwroot/css/facilitySearch.css",
+    "controls": [
+      {
+        "legacyName": "lblContextTitle",
+        "legacyType": "UltraLabel",
+        "modernType": "HTML Heading",
+        "html": "<h2>Facilities</h2>",
+        "cssClass": "mb-3",
+        "notes": "Legacy blue banner with white text converted to h2 with bottom margin"
+      },
+      {
+        "legacyName": "txtName",
+        "legacyType": "UltraTextEditor",
+        "modernType": "Bootstrap Form Input",
+        "htmlId": "FacilityName",
+        "viewModelProperty": "FacilityName",
+        "label": "Facility name:",
+        "html": "<div class=\"mb-3\"><label for=\"FacilityName\" class=\"form-label\">Facility name:</label><input type=\"text\" class=\"form-control\" id=\"FacilityName\" name=\"FacilityName\" /></div>",
+        "validationRules": [],
+        "searchParameter": "facilityName"
+      },
+      {
+        "legacyName": "txtShortName",
+        "legacyType": "UltraTextEditor",
+        "modernType": "Bootstrap Form Input",
+        "htmlId": "ShortName",
+        "viewModelProperty": "ShortName",
+        "label": "Short name:",
+        "html": "<div class=\"mb-3\"><label for=\"ShortName\" class=\"form-label\">Short name:</label><input type=\"text\" class=\"form-control\" id=\"ShortName\" name=\"ShortName\" /></div>",
+        "validationRules": [],
+        "searchParameter": "shortName"
+      },
+      {
+        "legacyName": "cboBargeExLocationType",
+        "legacyType": "UltraCombo",
+        "modernType": "Select2 Dropdown",
+        "htmlId": "BargeExLocationTypeId",
+        "viewModelProperty": "BargeExLocationTypeId",
+        "label": "Facility type:",
+        "html": "<div class=\"mb-3\"><label for=\"BargeExLocationTypeId\" class=\"form-label\">Facility type:</label><select class=\"form-select\" id=\"BargeExLocationTypeId\" name=\"BargeExLocationTypeId\"><option value=\"\">-- Select --</option></select></div>",
+        "populationMethod": "PopulateValidationListCombo(BargeExLocationType)",
+        "modernPopulationMethod": "GET /api/ValidationLists/BargeExLocationType",
+        "select2Config": {
+          "theme": "bootstrap-5",
+          "placeholder": "-- Select --",
+          "allowClear": true
+        },
+        "searchParameter": "facilityType"
+      },
+      {
+        "legacyName": "txtBargeExCode",
+        "legacyType": "UltraTextEditor",
+        "modernType": "Bootstrap Form Input",
+        "htmlId": "BargeExCode",
+        "viewModelProperty": "BargeExCode",
+        "label": "BargeEx code:",
+        "html": "<div class=\"mb-3\"><label for=\"BargeExCode\" class=\"form-label\">BargeEx code:</label><input type=\"text\" class=\"form-control\" id=\"BargeExCode\" name=\"BargeExCode\" /></div>",
+        "validationRules": [],
+        "searchParameter": "bargeExCode"
+      },
+      {
+        "legacyName": "cboRiver",
+        "legacyType": "UltraCombo",
+        "modernType": "Select2 Dropdown",
+        "htmlId": "RiverId",
+        "viewModelProperty": "RiverId",
+        "label": "River:",
+        "html": "<div class=\"mb-3\"><label for=\"RiverId\" class=\"form-label\">River:</label><select class=\"form-select\" id=\"RiverId\" name=\"RiverId\"><option value=\"\">-- Select --</option></select></div>",
+        "populationMethod": "PopulateRiverCombo(includeBlank: true, includeAll: false)",
+        "modernPopulationMethod": "GET /api/Rivers",
+        "select2Config": {
+          "theme": "bootstrap-5",
+          "placeholder": "-- Select --",
+          "allowClear": true
+        },
+        "validationRules": [
+          {
+            "rule": "RequiredIfMileSpecified",
+            "message": "A beginning or ending mile was specified, but no river was selected.",
+            "condition": "StartMile or EndMile has value",
+            "implementation": "Custom jQuery validation rule"
+          }
+        ],
+        "searchParameter": "river"
+      },
+      {
+        "legacyName": "txtStartMile",
+        "legacyType": "UltraTextEditor",
+        "modernType": "Bootstrap Form Input",
+        "htmlId": "StartMile",
+        "viewModelProperty": "StartMile",
+        "label": "Mile:",
+        "html": "<div class=\"mb-3\"><label for=\"StartMile\" class=\"form-label\">Mile:</label><input type=\"number\" step=\"0.01\" class=\"form-control\" id=\"StartMile\" name=\"StartMile\" /></div>",
+        "validationRules": [
+          {
+            "rule": "MustBeLessThanEndMile",
+            "message": "The ending mile is less than the beginning mile.",
+            "condition": "StartMile > EndMile when both have values",
+            "implementation": "Custom jQuery validation rule"
+          }
+        ],
+        "searchParameter": "startMile"
+      },
+      {
+        "legacyName": "txtEndMile",
+        "legacyType": "UltraTextEditor",
+        "modernType": "Bootstrap Form Input",
+        "htmlId": "EndMile",
+        "viewModelProperty": "EndMile",
+        "label": "to",
+        "html": "<div class=\"mb-3\"><label for=\"EndMile\" class=\"form-label\">to</label><input type=\"number\" step=\"0.01\" class=\"form-control\" id=\"EndMile\" name=\"EndMile\" /></div>",
+        "validationRules": [],
+        "searchParameter": "endMile"
+      },
+      {
+        "legacyName": "chkActiveOnly",
+        "legacyType": "UltraCheckEditor",
+        "modernType": "Bootstrap Checkbox",
+        "htmlId": "ActiveOnly",
+        "viewModelProperty": "ActiveOnly",
+        "label": "Active only",
+        "html": "<div class=\"form-check mb-3\"><input type=\"checkbox\" class=\"form-check-input\" id=\"ActiveOnly\" name=\"ActiveOnly\" checked /><label class=\"form-check-label\" for=\"ActiveOnly\">Active only</label></div>",
+        "defaultValue": true,
+        "searchParameter": "activeOnly"
+      },
+      {
+        "legacyName": "btnFind",
+        "legacyType": "UltraButton",
+        "modernType": "Bootstrap Button",
+        "htmlId": "btnSearch",
+        "text": "Find",
+        "html": "<button type=\"button\" class=\"btn btn-primary\" id=\"btnSearch\"><i class=\"fas fa-search\"></i> Find</button>",
+        "eventHandler": "btnFind_Click -> RefreshList(True)",
+        "modernEventHandler": "JavaScript click handler -> dataTable.ajax.reload()",
+        "referenceImplementation": "boatLocationSearch.js:217-219"
+      },
+      {
+        "legacyName": "btnReset",
+        "legacyType": "UltraButton",
+        "modernType": "Bootstrap Button",
+        "htmlId": "btnReset",
+        "text": "Reset",
+        "html": "<button type=\"button\" class=\"btn btn-secondary\" id=\"btnReset\"><i class=\"fas fa-undo\"></i> Reset</button>",
+        "eventHandler": "btnReset_Click -> ResetControls()",
+        "modernEventHandler": "JavaScript click handler -> form.reset() + select2 reset + dataTable.ajax.reload()",
+        "referenceImplementation": "boatLocationSearch.js:222-228"
+      }
+    ],
+    "grid": {
+      "legacyName": "grdFacilities",
+      "legacyType": "UltraGrid",
+      "modernType": "DataTables",
+      "htmlId": "facilityTable",
+      "html": "<table id=\"facilityTable\" class=\"table table-striped table-bordered table-hover\" style=\"width:100%\"><thead><tr><th>Actions</th><th>Facility Name</th><th>Short Name</th><th>River</th><th>Mile</th><th>Bank</th><th>Facility Type</th><th>BargeEx Code</th><th>Active</th></tr></thead></table>",
+      "dataTablesConfiguration": {
+        "processing": true,
+        "serverSide": true,
+        "stateSave": true,
+        "stateKey": "facilityTable_v1",
+        "responsive": true,
+        "autoWidth": false,
+        "ajax": {
+          "url": "/FacilitySearch/FacilityTable",
+          "type": "POST",
+          "data": "function(d) { return search criteria from form }"
+        },
+        "order": [[1, "asc"]],
+        "pageLength": 25,
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]]
+      },
+      "columns": [
+        {
+          "legacyKey": "Actions",
+          "modernKey": "actions",
+          "header": "Actions",
+          "orderable": false,
+          "searchable": false,
+          "width": "80px",
+          "className": "text-center",
+          "render": "Action buttons (Edit, View, Delete)",
+          "renderFunction": "function(data, type, row) { return '<div class=\"btn-group btn-group-sm\" role=\"group\"><a href=\"/FacilitySearch/Edit/' + row.locationId + '\" class=\"btn btn-sm btn-primary\" title=\"Edit\"><i class=\"fas fa-edit\"></i></a></div>'; }",
+          "referenceImplementation": "boatLocationSearch.js:68-74"
+        },
+        {
+          "legacyKey": "Name",
+          "modernKey": "name",
+          "header": "Facility Name",
+          "width": "275px",
+          "alignment": "left",
+          "dataProperty": "name"
+        },
+        {
+          "legacyKey": "ShortName",
+          "modernKey": "shortName",
+          "header": "Short Name",
+          "width": "70px",
+          "alignment": "left",
+          "dataProperty": "shortName"
+        },
+        {
+          "legacyKey": "River",
+          "modernKey": "river",
+          "header": "River",
+          "width": "40px",
+          "alignment": "left",
+          "dataProperty": "river"
+        },
+        {
+          "legacyKey": "Mile",
+          "modernKey": "mile",
+          "header": "Mile",
+          "width": "40px",
+          "alignment": "right",
+          "dataProperty": "mile",
+          "customComparer": "NumericSortComparer (legacy)",
+          "modernSorting": "Server-side numeric sorting",
+          "render": "function(data) { return data != null ? parseFloat(data).toFixed(2) : ''; }"
+        },
+        {
+          "legacyKey": "Bank",
+          "modernKey": "bank",
+          "header": "Bank",
+          "width": "47px",
+          "alignment": "left",
+          "dataProperty": "bank"
+        },
+        {
+          "legacyKey": "BargeExLocationType",
+          "modernKey": "bargeExLocationType",
+          "header": "Facility Type",
+          "width": "75px",
+          "alignment": "left",
+          "dataProperty": "bargeExLocationType"
+        },
+        {
+          "legacyKey": "BargeExCode",
+          "modernKey": "bargeExCode",
+          "header": "BargeEx Code",
+          "width": "82px",
+          "alignment": "left",
+          "dataProperty": "bargeExCode"
+        },
+        {
+          "legacyKey": "IsActive",
+          "modernKey": "isActive",
+          "header": "Active",
+          "width": "53px",
+          "alignment": "center",
+          "dataProperty": "isActive",
+          "render": "function(data) { return '<input type=\"checkbox\" ' + (data ? 'checked' : '') + ' disabled />'; }",
+          "referenceImplementation": "boatLocationSearch.js:187-192"
+        }
+      ],
+      "businessLogicCall": "BusinessLogic.Lists.FacilityLocationSearch.GetList",
+      "modernEndpoint": "POST /FacilitySearch/FacilityTable",
+      "referenceImplementation": "boatLocationSearch.js:32-214"
+    },
+    "layoutStructure": {
+      "container": "div.container-fluid",
+      "searchSection": {
+        "type": "Bootstrap Card",
+        "html": "<div class=\"card mb-3\"><div class=\"card-header\"><h5>Search Criteria</h5></div><div class=\"card-body\"><!-- search controls --></div></div>"
+      },
+      "resultsSection": {
+        "type": "Bootstrap Card",
+        "html": "<div class=\"card\"><div class=\"card-header\"><h5>Search Results</h5></div><div class=\"card-body\"><table id=\"facilityTable\"></table></div></div>"
+      }
+    }
+  },
+  "detailForm": {
+    "formName": "frmFacilityDetail",
+    "targetController": "FacilityController",
+    "targetViews": [
+      "Views/Facility/Edit.cshtml",
+      "Views/Facility/Create.cshtml"
+    ],
+    "viewModel": "FacilityViewModel",
+    "javascript": "wwwroot/js/facility.js",
+    "tabs": [
+      {
+        "legacyName": "tabPageDetails",
+        "modernId": "tab-details",
+        "displayName": "Details",
+        "isDefault": true,
+        "html": "<li class=\"nav-item\"><a class=\"nav-link active\" data-bs-toggle=\"tab\" href=\"#tab-details\">Details</a></li>"
+      },
+      {
+        "legacyName": "tabPageStatus",
+        "modernId": "tab-status",
+        "displayName": "Status",
+        "html": "<li class=\"nav-item\"><a class=\"nav-link\" data-bs-toggle=\"tab\" href=\"#tab-status\">Status</a></li>"
+      },
+      {
+        "legacyName": "tabPageBertsh",
+        "modernId": "tab-berths",
+        "displayName": "Berths",
+        "html": "<li class=\"nav-item\"><a class=\"nav-link\" data-bs-toggle=\"tab\" href=\"#tab-berths\">Berths</a></li>"
+      },
+      {
+        "legacyName": "tabPageNdcData",
+        "modernId": "tab-ndc-data",
+        "displayName": "NDC Data",
+        "html": "<li class=\"nav-item\"><a class=\"nav-link\" data-bs-toggle=\"tab\" href=\"#tab-ndc-data\">NDC Data</a></li>"
+      }
+    ],
+    "controlsByTab": {
+      "details": [
+        {
+          "legacyName": "txtName",
+          "legacyType": "UltraTextEditor",
+          "modernType": "Bootstrap Form Input",
+          "htmlId": "Name",
+          "viewModelProperty": "Name",
+          "label": "Name",
+          "dataBinding": "_Location.Name",
+          "html": "<div class=\"mb-3\"><label for=\"Name\" class=\"form-label fw-bold\">Name <span class=\"text-danger\">*</span></label><input type=\"text\" class=\"form-control\" id=\"Name\" name=\"Name\" required maxlength=\"100\" asp-for=\"Name\" /><span asp-validation-for=\"Name\" class=\"text-danger\"></span></div>",
+          "validationRules": [
+            {
+              "type": "required",
+              "message": "Facility name is required"
+            },
+            {
+              "type": "maxlength",
+              "value": 100
+            }
+          ],
+          "isBold": true,
+          "required": true
+        },
+        {
+          "legacyName": "txtShortName",
+          "legacyType": "UltraTextEditor",
+          "modernType": "Bootstrap Form Input",
+          "htmlId": "ShortName",
+          "viewModelProperty": "ShortName",
+          "label": "Short name",
+          "dataBinding": "_Location.ShortName",
+          "html": "<div class=\"mb-3\"><label for=\"ShortName\" class=\"form-label\">Short name</label><input type=\"text\" class=\"form-control\" id=\"ShortName\" name=\"ShortName\" maxlength=\"50\" asp-for=\"ShortName\" /><span asp-validation-for=\"ShortName\" class=\"text-danger\"></span></div>",
+          "required": false
+        },
+        {
+          "legacyName": "cboRiver",
+          "legacyType": "UltraCombo",
+          "modernType": "Select2 Dropdown",
+          "htmlId": "RiverId",
+          "viewModelProperty": "RiverId",
+          "label": "River",
+          "dataBinding": "_Location.River",
+          "html": "<div class=\"mb-3\"><label for=\"RiverId\" class=\"form-label\">River</label><select class=\"form-select\" id=\"RiverId\" name=\"RiverId\" asp-for=\"RiverId\"><option value=\"\">-- Select --</option></select><span asp-validation-for=\"RiverId\" class=\"text-danger\"></span></div>",
+          "populationMethod": "PopulateRiverCombo",
+          "modernPopulationMethod": "GET /api/Rivers",
+          "select2Config": {
+            "theme": "bootstrap-5",
+            "placeholder": "-- Select --",
+            "allowClear": true
+          }
+        },
+        {
+          "legacyName": "txtMile",
+          "legacyType": "UltraTextEditor",
+          "modernType": "Bootstrap Form Input",
+          "htmlId": "Mile",
+          "viewModelProperty": "Mile",
+          "label": "Mile",
+          "dataBinding": "_Location.Mile",
+          "html": "<div class=\"mb-3\"><label for=\"Mile\" class=\"form-label\">Mile</label><input type=\"number\" step=\"0.01\" class=\"form-control\" id=\"Mile\" name=\"Mile\" asp-for=\"Mile\" /><span asp-validation-for=\"Mile\" class=\"text-danger\"></span></div>",
+          "validationRules": [
+            {
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "legacyName": "txtBargeExCode",
+          "legacyType": "UltraTextEditor",
+          "modernType": "Bootstrap Form Input",
+          "htmlId": "BargeExCode",
+          "viewModelProperty": "BargeExCode",
+          "label": "BargeEx code",
+          "dataBinding": "_Location.FacilityLocation.BargeExCode",
+          "html": "<div class=\"mb-3\"><label for=\"BargeExCode\" class=\"form-label\">BargeEx code</label><input type=\"text\" class=\"form-control\" id=\"BargeExCode\" name=\"BargeExCode\" maxlength=\"50\" asp-for=\"BargeExCode\" /><span asp-validation-for=\"BargeExCode\" class=\"text-danger\"></span></div>"
+        },
+        {
+          "legacyName": "cboBargeExLocationType",
+          "legacyType": "UltraCombo",
+          "modernType": "Select2 Dropdown",
+          "htmlId": "BargeExLocationTypeId",
+          "viewModelProperty": "BargeExLocationTypeId",
+          "label": "Facility type",
+          "dataBinding": "_Location.FacilityLocation.BargeExLocationType",
+          "html": "<div class=\"mb-3\"><label for=\"BargeExLocationTypeId\" class=\"form-label\">Facility type</label><select class=\"form-select\" id=\"BargeExLocationTypeId\" name=\"BargeExLocationTypeId\" asp-for=\"BargeExLocationTypeId\"><option value=\"\">-- Select --</option></select><span asp-validation-for=\"BargeExLocationTypeId\" class=\"text-danger\"></span></div>",
+          "populationMethod": "PopulateValidationListCombo(BargeExLocationType)",
+          "modernPopulationMethod": "GET /api/ValidationLists/BargeExLocationType",
+          "eventHandlers": [
+            {
+              "event": "change",
+              "action": "Enable/disable Lock/Gauge Location controls",
+              "condition": "Value = 'Lock' OR 'Gauge Location'",
+              "affectedControls": [
+                "txtLockUsaceName",
+                "txtLockFloodStage",
+                "txtLockPoolStage",
+                "txtLockLowWater",
+                "txtLockNormalCurrent",
+                "txtLockHighFlow",
+                "txtLockHighWater",
+                "txtLockCatastrophicLevel"
+              ]
+            }
+          ]
+        },
+        {
+          "legacyName": "cboBank",
+          "legacyType": "UltraCombo",
+          "modernType": "Select2 Dropdown",
+          "htmlId": "BankId",
+          "viewModelProperty": "BankId",
+          "label": "Bank",
+          "dataBinding": "_Location.FacilityLocation.Bank",
+          "html": "<div class=\"mb-3\"><label for=\"BankId\" class=\"form-label\">Bank</label><select class=\"form-select\" id=\"BankId\" name=\"BankId\" asp-for=\"BankId\"><option value=\"\">-- Select --</option></select><span asp-validation-for=\"BankId\" class=\"text-danger\"></span></div>",
+          "populationMethod": "PopulateValidationListCombo(RiverBank)",
+          "modernPopulationMethod": "GET /api/ValidationLists/RiverBank"
+        },
+        {
+          "legacyName": "chkIsActive",
+          "legacyType": "UltraCheckEditor",
+          "modernType": "Bootstrap Checkbox",
+          "htmlId": "IsActive",
+          "viewModelProperty": "IsActive",
+          "label": "Is Active",
+          "dataBinding": "_Location.IsActive",
+          "html": "<div class=\"form-check mb-3\"><input type=\"checkbox\" class=\"form-check-input\" id=\"IsActive\" name=\"IsActive\" asp-for=\"IsActive\" /><label class=\"form-check-label\" for=\"IsActive\">Is Active</label></div>"
+        },
+        {
+          "legacyName": "txtLocationNote",
+          "legacyType": "UltraTextEditor",
+          "modernType": "Bootstrap Textarea",
+          "htmlId": "Note",
+          "viewModelProperty": "Note",
+          "label": "Note",
+          "dataBinding": "_Location.Note",
+          "html": "<div class=\"mb-3\"><label for=\"Note\" class=\"form-label\">Note</label><textarea class=\"form-control\" id=\"Note\" name=\"Note\" rows=\"4\" maxlength=\"500\" asp-for=\"Note\"></textarea><span asp-validation-for=\"Note\" class=\"text-danger\"></span></div>",
+          "multiline": true,
+          "groupBox": "grpNote"
+        },
+        {
+          "groupBox": {
+            "legacyName": "grpLockGaugeLocation",
+            "legacyType": "UltraGroupBox",
+            "modernType": "Bootstrap Card",
+            "caption": "Lock/Gauge Location Information",
+            "html": "<div class=\"card mb-3\" id=\"grpLockGaugeLocation\"><div class=\"card-header\">Lock/Gauge Location Information</div><div class=\"card-body\"><!-- Lock/Gauge controls --></div></div>",
+            "conditionalEnabled": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "controls": [
+              {
+                "legacyName": "txtLockUsaceName",
+                "modernId": "LockUsaceName",
+                "label": "USACE Name",
+                "type": "text"
+              },
+              {
+                "legacyName": "txtLockFloodStage",
+                "modernId": "LockFloodStage",
+                "label": "Flood Stage",
+                "type": "number"
+              },
+              {
+                "legacyName": "txtLockPoolStage",
+                "modernId": "LockPoolStage",
+                "label": "Pool Stage",
+                "type": "number"
+              },
+              {
+                "legacyName": "txtLockLowWater",
+                "modernId": "LockLowWater",
+                "label": "Low Water",
+                "type": "number"
+              },
+              {
+                "legacyName": "txtLockNormalCurrent",
+                "modernId": "LockNormalCurrent",
+                "label": "Normal Current",
+                "type": "number"
+              },
+              {
+                "legacyName": "txtLockHighFlow",
+                "modernId": "LockHighFlow",
+                "label": "High Flow",
+                "type": "number"
+              },
+              {
+                "legacyName": "txtLockHighWater",
+                "modernId": "LockHighWater",
+                "label": "High Water",
+                "type": "number"
+              },
+              {
+                "legacyName": "txtLockCatastrophicLevel",
+                "modernId": "LockCatastrophicLevel",
+                "label": "Catastrophic Level",
+                "type": "number"
+              }
+            ]
+          }
+        }
+      ],
+      "status": {
+        "grid": {
+          "legacyName": "grdFacilityStatus",
+          "legacyType": "UltraGrid",
+          "modernType": "DataTables",
+          "htmlId": "facilityStatusTable",
+          "dataSource": "_Location.FacilityStatuses",
+          "html": "<table id=\"facilityStatusTable\" class=\"table table-striped table-bordered\" style=\"width:100%\"><thead><tr><th>Start Date/Time</th><th>End Date/Time</th><th>Status</th><th>Note</th></tr></thead></table>",
+          "columns": [
+            {
+              "key": "startDateTime",
+              "header": "Start Date/Time",
+              "width": "110px",
+              "type": "datetime"
+            },
+            {
+              "key": "endDateTime",
+              "header": "End Date/Time",
+              "width": "110px",
+              "type": "datetime"
+            },
+            {
+              "key": "status",
+              "header": "Status",
+              "width": "150px"
+            },
+            {
+              "key": "note",
+              "header": "Note",
+              "width": "150px"
+            }
+          ],
+          "defaultSort": {
+            "column": "startDateTime",
+            "direction": "desc"
+          }
+        },
+        "toolbar": {
+          "legacyName": "StatusToolbarsManager",
+          "modernType": "Bootstrap Button Group",
+          "html": "<div class=\"btn-toolbar mb-3\" role=\"toolbar\"><div class=\"btn-group\" role=\"group\"><button type=\"button\" class=\"btn btn-primary\" id=\"btnAddStatus\"><i class=\"fas fa-plus\"></i> Add</button><button type=\"button\" class=\"btn btn-secondary\" id=\"btnModifyStatus\"><i class=\"fas fa-edit\"></i> Modify</button><button type=\"button\" class=\"btn btn-danger\" id=\"btnRemoveStatus\"><i class=\"fas fa-trash\"></i> Remove</button><button type=\"button\" class=\"btn btn-info\" id=\"btnExportStatus\"><i class=\"fas fa-file-export\"></i> Export</button></div></div>"
+        },
+        "editControls": [
+          {
+            "legacyName": "dtStartDate",
+            "legacyType": "UltraDateTimeEditor",
+            "modernType": "HTML5 Date Input",
+            "htmlId": "StartDate",
+            "label": "Start Date/Time",
+            "html": "<div class=\"mb-3\"><label for=\"StartDate\" class=\"form-label\">Start Date <span class=\"text-danger\">*</span></label><input type=\"date\" class=\"form-control\" id=\"StartDate\" name=\"StartDate\" required /></div>",
+            "pairedControl": "cboStartTime"
+          },
+          {
+            "legacyName": "cboStartTime",
+            "legacyType": "UltraCombo",
+            "modernType": "HTML5 Time Input or Select2",
+            "htmlId": "StartTime",
+            "label": "Start Time",
+            "html": "<div class=\"mb-3\"><label for=\"StartTime\" class=\"form-label\">Start Time</label><input type=\"time\" class=\"form-control\" id=\"StartTime\" name=\"StartTime\" /></div>",
+            "alternativeHtml": "<select class=\"form-select\" id=\"StartTime\" name=\"StartTime\"><!-- populated with 15-minute intervals --></select>",
+            "pairedControl": "dtStartDate"
+          },
+          {
+            "legacyName": "cboFacilityStatus",
+            "legacyType": "UltraCombo",
+            "modernType": "Select2 Dropdown",
+            "htmlId": "FacilityStatusId",
+            "label": "Status",
+            "html": "<div class=\"mb-3\"><label for=\"FacilityStatusId\" class=\"form-label\">Status <span class=\"text-danger\">*</span></label><select class=\"form-select\" id=\"FacilityStatusId\" name=\"FacilityStatusId\" required><option value=\"\">-- Select --</option></select></div>",
+            "populationMethod": "PopulateValidationListCombo(FacilityStatus)",
+            "modernPopulationMethod": "GET /api/ValidationLists/FacilityStatus",
+            "required": true
+          },
+          {
+            "legacyName": "txtStatusNote",
+            "legacyType": "UltraTextEditor",
+            "modernType": "Bootstrap Textarea with Modal",
+            "htmlId": "StatusNote",
+            "label": "Note",
+            "html": "<div class=\"mb-3\"><label for=\"StatusNote\" class=\"form-label\">Note</label><div class=\"input-group\"><textarea class=\"form-control\" id=\"StatusNote\" name=\"StatusNote\" rows=\"2\" maxlength=\"500\"></textarea><button class=\"btn btn-outline-secondary\" type=\"button\" data-bs-toggle=\"modal\" data-bs-target=\"#noteModal\"><i class=\"fas fa-expand\"></i></button></div></div>",
+            "hasEditorButton": true,
+            "editorButtonAction": "Opens modal dialog for multi-line editing"
+          },
+          {
+            "legacyName": "dtEndDate",
+            "legacyType": "UltraDateTimeEditor",
+            "modernType": "HTML5 Date Input",
+            "htmlId": "EndDate",
+            "label": "End Date/Time",
+            "html": "<div class=\"mb-3\"><label for=\"EndDate\" class=\"form-label\">End Date</label><input type=\"date\" class=\"form-control\" id=\"EndDate\" name=\"EndDate\" /></div>",
+            "pairedControl": "cboEndTime"
+          },
+          {
+            "legacyName": "cboEndTime",
+            "legacyType": "UltraCombo",
+            "modernType": "HTML5 Time Input or Select2",
+            "htmlId": "EndTime",
+            "label": "End Time",
+            "html": "<div class=\"mb-3\"><label for=\"EndTime\" class=\"form-label\">End Time</label><input type=\"time\" class=\"form-control\" id=\"EndTime\" name=\"EndTime\" /></div>",
+            "pairedControl": "dtEndDate"
+          }
+        ]
+      },
+      "berths": {
+        "grid": {
+          "legacyName": "grdBerths",
+          "legacyType": "UltraGrid",
+          "modernType": "DataTables",
+          "htmlId": "berthsTable",
+          "dataSource": "_Location.FacilityLocation.FacilityBerths",
+          "html": "<table id=\"berthsTable\" class=\"table table-striped table-bordered\" style=\"width:100%\"><thead><tr><th>Berth Name</th><th>Current Ship</th></tr></thead></table>",
+          "columns": [
+            {
+              "key": "name",
+              "header": "Berth Name",
+              "width": "200px"
+            },
+            {
+              "key": "shipName",
+              "header": "Current Ship",
+              "width": "211px"
+            }
+          ],
+          "defaultSort": {
+            "column": "name",
+            "direction": "asc"
+          }
+        },
+        "toolbar": {
+          "legacyName": "BerthToolbarManager",
+          "modernType": "Bootstrap Button Group",
+          "html": "<div class=\"btn-toolbar mb-3\" role=\"toolbar\"><div class=\"btn-group\" role=\"group\"><button type=\"button\" class=\"btn btn-primary\" id=\"btnAddBerth\"><i class=\"fas fa-plus\"></i> Add</button><button type=\"button\" class=\"btn btn-secondary\" id=\"btnModifyBerth\"><i class=\"fas fa-edit\"></i> Modify</button><button type=\"button\" class=\"btn btn-danger\" id=\"btnRemoveBerth\"><i class=\"fas fa-trash\"></i> Remove</button></div></div>"
+        },
+        "editControls": [
+          {
+            "legacyName": "txtBerthName",
+            "legacyType": "UltraTextEditor",
+            "modernType": "Bootstrap Form Input",
+            "htmlId": "BerthName",
+            "label": "Berth Name",
+            "html": "<div class=\"mb-3\"><label for=\"BerthName\" class=\"form-label\">Berth Name <span class=\"text-danger\">*</span></label><input type=\"text\" class=\"form-control\" id=\"BerthName\" name=\"BerthName\" required maxlength=\"100\" /></div>",
+            "required": true
+          },
+          {
+            "legacyName": "txtShipName",
+            "legacyType": "UltraTextEditor",
+            "modernType": "Bootstrap Form Input",
+            "htmlId": "ShipName",
+            "label": "Current Ship",
+            "html": "<div class=\"mb-3\"><label for=\"ShipName\" class=\"form-label\">Current Ship</label><input type=\"text\" class=\"form-control\" id=\"ShipName\" name=\"ShipName\" readonly /></div>",
+            "readonly": true
+          }
+        ]
+      },
+      "ndcData": {
+        "groupBoxes": [
+          {
+            "legacyName": "grpAddress",
+            "modernType": "Bootstrap Card",
+            "caption": "Address Information",
+            "html": "<div class=\"card mb-3\"><div class=\"card-header\">Address Information</div><div class=\"card-body\"><!-- NDC address fields --></div></div>",
+            "controls": [
+              "txtNdcName",
+              "txtNdcLocationDescription",
+              "txtNdcAddress",
+              "txtNdcTown",
+              "txtNdcState",
+              "txtNdcCounty",
+              "txtNdcCountyFips",
+              "txtNdcWaterway",
+              "txtNdcPort",
+              "txtNdcLatitude",
+              "txtNdcLongitude"
+            ],
+            "allReadonly": true
+          },
+          {
+            "legacyName": "grpOperator",
+            "modernType": "Bootstrap Card",
+            "caption": "Operator Information",
+            "html": "<div class=\"card mb-3\"><div class=\"card-header\">Operator Information</div><div class=\"card-body\"><!-- NDC operator fields --></div></div>",
+            "controls": ["txtNdcOperator", "txtNdcOwner"],
+            "allReadonly": true
+          },
+          {
+            "legacyName": "grpPurpose",
+            "modernType": "Bootstrap Card",
+            "caption": "Purpose Information",
+            "html": "<div class=\"card mb-3\"><div class=\"card-header\">Purpose Information</div><div class=\"card-body\"><!-- NDC purpose fields --></div></div>",
+            "controls": ["txtNdcPurpose", "txtNdcRemark"],
+            "allReadonly": true
+          }
+        ],
+        "note": "All NDC (National Data Center) fields are read-only reference data"
+      }
+    },
+    "mainButtons": [
+      {
+        "legacyName": "btnSubmit",
+        "legacyType": "UltraButton",
+        "modernType": "Bootstrap Button",
+        "htmlId": "btnSubmit",
+        "text": "Submit",
+        "html": "<button type=\"submit\" class=\"btn btn-primary\" id=\"btnSubmit\"><i class=\"fas fa-save\"></i> Submit</button>",
+        "buttonType": "Submit",
+        "action": "Save facility and refresh related data"
+      },
+      {
+        "legacyName": "btnCancel",
+        "legacyType": "UltraButton",
+        "modernType": "Bootstrap Button",
+        "htmlId": "btnCancel",
+        "text": "Cancel",
+        "html": "<button type=\"button\" class=\"btn btn-secondary\" id=\"btnCancel\"><i class=\"fas fa-times\"></i> Cancel</button>",
+        "buttonType": "Cancel",
+        "action": "Return to search without saving"
+      }
+    ]
+  },
+  "javascriptPatterns": {
+    "dataTablesInitialization": {
+      "description": "Initialize DataTables with server-side processing",
+      "referenceFile": "boatLocationSearch.js:32-214",
+      "pattern": "$(document).ready(function() { $('#tableId').DataTable({ serverSide: true, ajax: { url: '/Controller/Action', type: 'POST', data: function(d) { /* add search params */ } }, columns: [...], order: [[1, 'asc']], ... }); });"
+    },
+    "select2Initialization": {
+      "description": "Initialize Select2 dropdowns",
+      "pattern": "$('#selectId').select2({ theme: 'bootstrap-5', placeholder: '-- Select --', allowClear: true, ajax: { url: '/api/endpoint', dataType: 'json' } });"
+    },
+    "formValidation": {
+      "description": "Custom jQuery validation rules",
+      "pattern": "$.validator.addMethod('ruleName', function(value, element, params) { /* validation logic */ }, 'Error message');"
+    },
+    "tabLazyLoading": {
+      "description": "Load tab content when first accessed",
+      "pattern": "$('a[data-bs-toggle=\"tab\"]').on('shown.bs.tab', function(e) { var target = $(e.target).attr('href'); if (!$(target).data('loaded')) { /* load content */ $(target).data('loaded', true); } });"
+    },
+    "conditionalFieldEnabling": {
+      "description": "Enable/disable fields based on dropdown selection",
+      "pattern": "$('#BargeExLocationTypeId').on('change', function() { var value = $(this).val(); if (value === 'Lock' || value === 'Gauge Location') { $('#grpLockGaugeLocation input').prop('disabled', false); } else { $('#grpLockGaugeLocation input').prop('disabled', true).val(''); } });"
+    },
+    "childCollectionManagement": {
+      "description": "Add/Edit/Remove items in child grids",
+      "pattern": "Use modal dialogs or inline editing with AJAX calls to controller actions"
+    }
+  },
+  "cssPatterns": {
+    "cardSpacing": ".card { margin-bottom: 1rem; }",
+    "requiredFieldIndicator": ".form-label .text-danger { font-weight: bold; }",
+    "readOnlyFieldStyling": "input[readonly], textarea[readonly] { background-color: #e9ecef; cursor: not-allowed; }",
+    "buttonGroupSpacing": ".btn-toolbar { margin-bottom: 1rem; }",
+    "tabContentPadding": ".tab-content { padding: 1rem; border: 1px solid #dee2e6; border-top: none; }"
+  },
+  "conversionNotes": {
+    "general": [
+      "All UltraGrid controls converted to DataTables with server-side processing",
+      "All UltraCombo controls converted to Select2 with Bootstrap 5 theme",
+      "All UltraTextEditor controls converted to Bootstrap form-control inputs",
+      "All UltraCheckEditor controls converted to Bootstrap form-check checkboxes",
+      "All UltraPanel controls converted to Bootstrap cards",
+      "All UltraGroupBox controls converted to Bootstrap cards or fieldsets",
+      "All UltraTabControl converted to Bootstrap nav-tabs",
+      "All UltraButton controls converted to Bootstrap buttons with Font Awesome icons"
+    ],
+    "dataTablesSpecific": [
+      "State saving implemented using localStorage with versioned keys",
+      "Custom comparers (NumericSortComparer, DateTimeSortComparer) handled server-side",
+      "Column chooser replaced with DataTables colVis extension",
+      "Actions column placed first with Edit/View/Delete button group",
+      "Checkbox columns rendered as disabled checkboxes for display only",
+      "Numeric columns formatted with toFixed(2) for consistent decimal display"
+    ],
+    "validationSpecific": [
+      "Legacy ValidatorExtender replaced with ASP.NET Core validation attributes",
+      "Client-side validation uses jQuery unobtrusive validation",
+      "Custom validation rules implemented as jQuery validator methods",
+      "Validation messages displayed using asp-validation-for tag helpers",
+      "Validation error styling provided by Bootstrap and jQuery validation"
+    ],
+    "childCollectionManagement": [
+      "Legacy in-form child editing replaced with modal dialogs",
+      "Add/Edit/Remove operations use AJAX calls to controller actions",
+      "Child grids refresh after successful add/edit/remove",
+      "BeginEdit/CancelEdit pattern replaced with modal form reset",
+      "SetClickListAndDetail replaced with AJAX POST to save child items"
+    ],
+    "conditionalLogic": [
+      "Legacy ValueChanged events replaced with jQuery change handlers",
+      "Conditional field enabling/disabling implemented in JavaScript",
+      "Tab lazy loading implemented using shown.bs.tab event",
+      "Before-submit field clearing handled in form submit event handler"
+    ],
+    "businessLogicCalls": [
+      "Legacy BusinessLogic.Lists.FacilityLocationSearch.GetList -> POST /FacilitySearch/FacilityTable",
+      "Legacy BusinessLogic.Location.GetLocation -> GET /Facility/Edit/{id}",
+      "Legacy BusinessLogic.Location.NewLocation -> GET /Facility/Create",
+      "Legacy BusinessLogic.Location.DeleteLocation -> DELETE /Facility/Delete/{id}",
+      "Legacy PopulateRiverCombo -> GET /api/Rivers",
+      "Legacy PopulateValidationListCombo -> GET /api/ValidationLists/{type}"
+    ]
+  },
+  "implementationChecklist": [
+    "Create FacilitySearchViewModel with all search criteria properties",
+    "Create FacilityViewModel with nested properties for FacilityLocation, FacilityBerths, FacilityStatuses",
+    "Create FacilityDto in BargeOps.Shared/Dto for data transfer",
+    "Implement FacilitySearchController with Index, FacilityTable, Edit, Create actions",
+    "Create Index.cshtml view with search form and DataTables grid",
+    "Create Edit.cshtml and Create.cshtml views with tabbed layout",
+    "Create facilitySearch.js with DataTables initialization and search logic",
+    "Create facility.js with tab lazy loading, conditional logic, and child collection management",
+    "Implement server-side DataTables processing for search results",
+    "Implement API endpoints for dropdown population (Rivers, ValidationLists)",
+    "Implement custom jQuery validation rules for cross-field validation",
+    "Create modal dialogs for child collection editing (Berths, Status)",
+    "Implement AJAX endpoints for child collection CRUD operations",
+    "Add Font Awesome icons for all buttons and actions",
+    "Style with Bootstrap 5 and custom CSS as needed",
+    "Implement security authorization for controller actions",
+    "Add unit tests for controllers and validation logic",
+    "Add integration tests for search and CRUD operations"
+  ]
+}

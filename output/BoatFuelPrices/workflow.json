@@ -1,0 +1,709 @@
+{
+  "formName": "frmBoatFuelPrices",
+  "formType": "SearchEditPanel",
+  "baseClass": "frmBaseSearchEdit",
+  "interface": "IBaseSearch",
+  "subsystem": "frmBoatFuelPrices",
+  "formTitle": "Boat Fuel Prices",
+  "businessObject": "BoatFuelPrice",
+
+  "lifecycle": {
+    "initialization": {
+      "event": "pnlSearch.HandleCreated",
+      "location": "frmBoatFuelPrices.vb:152",
+      "sequence": [
+        {
+          "order": 1,
+          "method": "Initialize",
+          "description": "Called by main form - sets up security and authorization",
+          "location": "frmBoatFuelPrices.vb:28",
+          "calls": ["InitializeBase", "SetButtonTypes"]
+        },
+        {
+          "order": 2,
+          "method": "FormatControls",
+          "description": "Formats Infragistics controls and sets up grid",
+          "location": "frmBoatFuelPrices.vb:344",
+          "actions": [
+            "Set GridControlUniqueIdentifierCol to 'BoatFuelPriceID'",
+            "Set initial sort order (EffectiveDate DESC, FuelVendor ASC)",
+            "Populate FuelVendor search combo",
+            "Set default EffectiveDate to today"
+          ]
+        },
+        {
+          "order": 3,
+          "method": "MyAppSettingHelper.RestoreGrid",
+          "description": "Restores user's saved grid settings from database",
+          "location": "frmBoatFuelPrices.vb:162"
+        }
+      ]
+    },
+    "destruction": {
+      "event": "pnlSearch.HandleDestroyed",
+      "location": "frmBoatFuelPrices.vb:174",
+      "actions": [
+        {
+          "method": "MyAppSettingHelper.SaveGrid",
+          "description": "Persists user's grid settings to database",
+          "location": "frmBoatFuelPrices.vb:180"
+        }
+      ]
+    }
+  },
+
+  "stateManagement": {
+    "editMode": {
+      "property": "SetIsEditing",
+      "description": "Tracks whether form is in edit mode - prevents navigation and warns on form exit",
+      "setLocations": [
+        "frmBoatFuelPrices.vb:382"
+      ]
+    },
+    "businessObjectState": {
+      "variable": "_BoatFuelPrice",
+      "type": "BoatFuelPrice",
+      "location": "frmBoatFuelPrices.vb:9",
+      "stateTracking": {
+        "beginEdit": {
+          "description": "Starts edit tracking on business object",
+          "calledIn": ["ItemAdd", "ItemModify"],
+          "locations": ["frmBoatFuelPrices.vb:43", "frmBoatFuelPrices.vb:63"]
+        },
+        "cancelEdit": {
+          "description": "Reverts changes via MyBase.CancelClick",
+          "location": "frmBoatFuelPrices.vb:305"
+        },
+        "applyEdit": {
+          "description": "Commits changes via MyBase.SubmitNoRefreshClick",
+          "location": "frmBoatFuelPrices.vb:291"
+        }
+      }
+    },
+    "gridState": {
+      "uniqueIdentifier": "BoatFuelPriceID",
+      "persistence": "UserAppSettings database table",
+      "sortOrder": [
+        {
+          "column": "EffectiveDate",
+          "direction": "Descending",
+          "primary": true
+        },
+        {
+          "column": "FuelVendor",
+          "direction": "Ascending",
+          "primary": false
+        }
+      ]
+    }
+  },
+
+  "userFlows": {
+    "search": {
+      "trigger": "btnFind.Click",
+      "location": "frmBoatFuelPrices.vb:192",
+      "eventChain": [
+        {
+          "order": 1,
+          "action": "User clicks Find button",
+          "handler": "btnFind_Click"
+        },
+        {
+          "order": 2,
+          "action": "Calls RefreshList(true)",
+          "location": "frmBoatFuelPrices.vb:198"
+        },
+        {
+          "order": 3,
+          "action": "Builds search criteria from controls",
+          "location": "frmBoatFuelPrices.vb:115-120",
+          "criteria": [
+            "dtEffectiveDateSearch.DateTime",
+            "cboFuelVendorSearch.Value"
+          ]
+        },
+        {
+          "order": 4,
+          "action": "Calls BoatFuelPriceSearch.GetList",
+          "location": "frmBoatFuelPrices.vb:120",
+          "dataAccess": "Lists.BoatFuelPriceSearch.GetList"
+        },
+        {
+          "order": 5,
+          "action": "Populates grid via RefreshListBase",
+          "selectFirstRow": true
+        }
+      ],
+      "searchCriteria": {
+        "effectiveDate": {
+          "control": "dtEffectiveDateSearch",
+          "type": "DateTime",
+          "optional": true,
+          "defaultValue": "Date.Today"
+        },
+        "fuelVendor": {
+          "control": "cboFuelVendorSearch",
+          "type": "BusinessUnitID",
+          "optional": true
+        }
+      }
+    },
+
+    "reset": {
+      "trigger": "btnReset.Click",
+      "location": "frmBoatFuelPrices.vb:210",
+      "eventChain": [
+        {
+          "order": 1,
+          "action": "User clicks Reset button",
+          "handler": "btnReset_Click"
+        },
+        {
+          "order": 2,
+          "action": "Calls ResetControls",
+          "location": "frmBoatFuelPrices.vb:216"
+        },
+        {
+          "order": 3,
+          "action": "Resets search criteria to defaults",
+          "location": "frmBoatFuelPrices.vb:386-390",
+          "values": {
+            "dtEffectiveDateSearch": "Date.Today",
+            "cboFuelVendorSearch": "Empty"
+          }
+        }
+      ]
+    },
+
+    "add": {
+      "trigger": "Main form Add button (via IBaseSearch.ItemAdd)",
+      "location": "frmBoatFuelPrices.vb:39",
+      "eventChain": [
+        {
+          "order": 1,
+          "action": "Create new BoatFuelPrice object",
+          "method": "BoatFuelPrice.NewBoatFuelPrice",
+          "location": "frmBoatFuelPrices.vb:42"
+        },
+        {
+          "order": 2,
+          "action": "Begin edit tracking",
+          "method": "_BoatFuelPrice.BeginEdit()",
+          "location": "frmBoatFuelPrices.vb:43"
+        },
+        {
+          "order": 3,
+          "action": "Populate FuelVendor combo with active vendors",
+          "location": "frmBoatFuelPrices.vb:46"
+        },
+        {
+          "order": 4,
+          "action": "Load controls from empty object",
+          "method": "LoadControlsForBoatFuelPrice",
+          "location": "frmBoatFuelPrices.vb:49"
+        },
+        {
+          "order": 5,
+          "action": "Enable detail section, disable search section",
+          "method": "EnableDisableControls(true)",
+          "location": "frmBoatFuelPrices.vb:52"
+        },
+        {
+          "order": 6,
+          "action": "Set focus to first detail field",
+          "control": "dtEffectiveDate",
+          "location": "frmBoatFuelPrices.vb:55"
+        }
+      ]
+    },
+
+    "modify": {
+      "trigger": "Main form Modify button or grid double-click (via IBaseSearch.ItemModify)",
+      "location": "frmBoatFuelPrices.vb:59",
+      "eventChain": [
+        {
+          "order": 1,
+          "action": "Get selected row ID from grid",
+          "property": "GridControlIndex",
+          "location": "frmBoatFuelPrices.vb:21-25"
+        },
+        {
+          "order": 2,
+          "action": "Load BoatFuelPrice object from database",
+          "method": "BoatFuelPrice.GetBoatFuelPrice",
+          "location": "frmBoatFuelPrices.vb:62"
+        },
+        {
+          "order": 3,
+          "action": "Begin edit tracking",
+          "method": "_BoatFuelPrice.BeginEdit()",
+          "location": "frmBoatFuelPrices.vb:63"
+        },
+        {
+          "order": 4,
+          "action": "Populate FuelVendor combo with active vendors",
+          "location": "frmBoatFuelPrices.vb:66"
+        },
+        {
+          "order": 5,
+          "action": "Load controls from object",
+          "method": "LoadControlsForBoatFuelPrice",
+          "location": "frmBoatFuelPrices.vb:69"
+        },
+        {
+          "order": 6,
+          "action": "Enable detail section, disable search section",
+          "method": "EnableDisableControls(true)",
+          "location": "frmBoatFuelPrices.vb:72"
+        },
+        {
+          "order": 7,
+          "action": "Set focus to first detail field",
+          "control": "dtEffectiveDate",
+          "location": "frmBoatFuelPrices.vb:75"
+        }
+      ]
+    },
+
+    "delete": {
+      "trigger": "Main form Remove button (via IBaseSearch.ItemRemove)",
+      "location": "frmBoatFuelPrices.vb:79",
+      "eventChain": [
+        {
+          "order": 1,
+          "action": "Show confirmation dialog",
+          "method": "Main.ItemRemoveDialog",
+          "message": "Boat Fuel Price",
+          "location": "frmBoatFuelPrices.vb:81"
+        },
+        {
+          "order": 2,
+          "action": "If confirmed, delete from database",
+          "method": "BoatFuelPrice.DeleteBoatFuelPrice",
+          "parameter": "GridControlIndex",
+          "location": "frmBoatFuelPrices.vb:84"
+        },
+        {
+          "order": 3,
+          "action": "Refresh grid without selecting row",
+          "method": "RefreshList(false)",
+          "location": "frmBoatFuelPrices.vb:85"
+        }
+      ],
+      "requiresConfirmation": true
+    },
+
+    "submit": {
+      "trigger": "btnSubmit.Click",
+      "location": "frmBoatFuelPrices.vb:228",
+      "eventChain": [
+        {
+          "order": 1,
+          "action": "User clicks Submit button",
+          "handler": "btnSubmit_Click"
+        },
+        {
+          "order": 2,
+          "action": "Clear unused fields based on business rules",
+          "method": "ClearUnusedFields",
+          "location": "frmBoatFuelPrices.vb:293",
+          "rule": "InvoiceNumber must be blank when FuelVendor is blank"
+        },
+        {
+          "order": 3,
+          "action": "Validate and save via base class",
+          "method": "MyBase.SubmitNoRefreshClick",
+          "location": "frmBoatFuelPrices.vb:295",
+          "validation": "BusinessObject.IsValid and BrokenRules checks"
+        },
+        {
+          "order": 4,
+          "action": "If successful, clear detail controls",
+          "method": "ClearControls",
+          "location": "frmBoatFuelPrices.vb:298"
+        },
+        {
+          "order": 5,
+          "action": "Exit edit mode",
+          "method": "EnableDisableControls(false)",
+          "location": "frmBoatFuelPrices.vb:299"
+        },
+        {
+          "order": 6,
+          "action": "Refresh grid without selecting row",
+          "method": "RefreshList(false)",
+          "location": "frmBoatFuelPrices.vb:300"
+        }
+      ],
+      "validationRules": [
+        {
+          "field": "EffectiveDate",
+          "rule": "Required",
+          "message": "Effective date is required.",
+          "location": "BoatFuelPriceBase.vb:214-217"
+        },
+        {
+          "field": "Price",
+          "rule": "Required",
+          "message": "Fuel price is required.",
+          "validationType": "Currency",
+          "location": "BoatFuelPriceBase.vb:219-222"
+        },
+        {
+          "field": "InvoiceNumber",
+          "rule": "MaxLength",
+          "maxLength": 50,
+          "location": "BoatFuelPriceBase.vb:224-228"
+        },
+        {
+          "field": "InvoiceNumber",
+          "rule": "ConditionalBlank",
+          "condition": "Must be blank when FuelVendor is blank",
+          "location": "BoatFuelPrice.vb:65-68"
+        }
+      ]
+    },
+
+    "cancel": {
+      "trigger": "btnCancel.Click",
+      "location": "frmBoatFuelPrices.vb:246",
+      "eventChain": [
+        {
+          "order": 1,
+          "action": "User clicks Cancel button",
+          "handler": "btnCancel_Click"
+        },
+        {
+          "order": 2,
+          "action": "Cancel edit via base class",
+          "method": "MyBase.CancelClick",
+          "location": "frmBoatFuelPrices.vb:307",
+          "description": "Calls business object's CancelEdit to revert changes"
+        },
+        {
+          "order": 3,
+          "action": "If successful, clear detail controls",
+          "method": "ClearControls",
+          "location": "frmBoatFuelPrices.vb:309"
+        },
+        {
+          "order": 4,
+          "action": "Exit edit mode",
+          "method": "EnableDisableControls(false)",
+          "location": "frmBoatFuelPrices.vb:310"
+        }
+      ]
+    }
+  },
+
+  "fieldValidation": {
+    "validatorExtender": {
+      "component": "ValidatorExtender",
+      "location": "frmBoatFuelPrices.Designer.vb:51",
+      "messageSetEvent": {
+        "handler": "ValidatorExtender_MessageSet",
+        "location": "frmBoatFuelPrices.vb:264",
+        "action": "Raises event to update main form status bar"
+      }
+    },
+
+    "validatedEvents": [
+      {
+        "control": "dtEffectiveDate",
+        "event": "Validated",
+        "location": "frmBoatFuelPrices.vb:421",
+        "action": "Updates _BoatFuelPrice.EffectiveDate, triggers CheckBusinessRules"
+      },
+      {
+        "control": "txtPrice",
+        "event": "Validated",
+        "location": "frmBoatFuelPrices.vb:442",
+        "validationType": "Currency",
+        "action": "Updates _BoatFuelPrice.Price, triggers CheckBusinessRules"
+      },
+      {
+        "control": "cboFuelVendorBusinessUnitID",
+        "event": "Validated",
+        "location": "frmBoatFuelPrices.vb:463",
+        "action": "Updates _BoatFuelPrice.FuelVendorBusinessUnitID, enables/disables InvoiceNumber field",
+        "conditionalLogic": {
+          "description": "Invoice field enabled only when FuelVendor is selected",
+          "location": "frmBoatFuelPrices.vb:470-474"
+        }
+      },
+      {
+        "control": "txtInvoiceNumber",
+        "event": "Validated",
+        "location": "frmBoatFuelPrices.vb:488",
+        "validationType": "String",
+        "maxLength": 50,
+        "action": "Updates _BoatFuelPrice.InvoiceNumber, triggers CheckBusinessRules"
+      }
+    ]
+  },
+
+  "dataBinding": {
+    "loadControls": {
+      "method": "LoadControlsForBoatFuelPrice",
+      "location": "frmBoatFuelPrices.vb:536",
+      "mappings": [
+        {
+          "control": "dtEffectiveDate",
+          "property": "_BoatFuelPrice.EffectiveDate",
+          "type": "Date"
+        },
+        {
+          "control": "txtPrice",
+          "property": "_BoatFuelPrice.Price",
+          "type": "Currency"
+        },
+        {
+          "control": "cboFuelVendorBusinessUnitID",
+          "property": "_BoatFuelPrice.FuelVendorBusinessUnitID",
+          "type": "ComboBox"
+        },
+        {
+          "control": "txtInvoiceNumber",
+          "property": "_BoatFuelPrice.InvoiceNumber",
+          "type": "String",
+          "conditionalEnable": "Enabled when FuelVendor is not empty"
+        }
+      ]
+    },
+
+    "clearControls": {
+      "method": "ClearControls",
+      "location": "frmBoatFuelPrices.vb:394",
+      "controls": [
+        "dtEffectiveDate",
+        "txtPrice",
+        "cboFuelVendorBusinessUnitID",
+        "txtInvoiceNumber"
+      ]
+    }
+  },
+
+  "modalDialogs": {
+    "confirmationDialogs": [
+      {
+        "type": "DeleteConfirmation",
+        "method": "Main.ItemRemoveDialog",
+        "location": "frmBoatFuelPrices.vb:81",
+        "message": "Boat Fuel Price",
+        "expectedResponse": "DialogResult.Yes",
+        "triggeredBy": "ItemRemove operation"
+      }
+    ],
+    "childForms": []
+  },
+
+  "refreshTriggers": {
+    "manual": [
+      {
+        "trigger": "Find button click",
+        "method": "RefreshList(true)",
+        "location": "frmBoatFuelPrices.vb:198",
+        "selectFirstRow": true
+      }
+    ],
+
+    "automatic": [
+      {
+        "trigger": "After successful Submit",
+        "method": "RefreshList(false)",
+        "location": "frmBoatFuelPrices.vb:300",
+        "selectFirstRow": false
+      },
+      {
+        "trigger": "After successful Delete",
+        "method": "RefreshList(false)",
+        "location": "frmBoatFuelPrices.vb:85",
+        "selectFirstRow": false
+      }
+    ],
+
+    "fleetChange": {
+      "method": "OnChangeOfFleet",
+      "location": "frmBoatFuelPrices.vb:104",
+      "implementation": "Empty - no fleet-specific filtering required"
+    }
+  },
+
+  "gridConfiguration": {
+    "control": "grdSearch",
+    "dataSource": "Lists.BoatFuelPriceSearch",
+    "uniqueIdentifier": "BoatFuelPriceID",
+
+    "columns": [
+      {
+        "name": "EffectiveDate",
+        "header": "Effective Date",
+        "width": 100,
+        "alignment": "Left",
+        "sortable": true,
+        "customComparer": "DateTimeSortComparer",
+        "location": "frmBoatFuelPrices.vb:323"
+      },
+      {
+        "name": "Price",
+        "header": "Fuel Price",
+        "width": 100,
+        "alignment": "Right",
+        "sortable": true,
+        "customComparer": "NumericSortComparer",
+        "format": "Currency with 4 decimals",
+        "location": "frmBoatFuelPrices.vb:324"
+      },
+      {
+        "name": "FuelVendor",
+        "header": "Fuel Vendor",
+        "width": 250,
+        "alignment": "Left",
+        "sortable": true,
+        "location": "frmBoatFuelPrices.vb:325"
+      },
+      {
+        "name": "InvoiceNumber",
+        "header": "Invoice",
+        "width": 100,
+        "alignment": "Left",
+        "sortable": true,
+        "location": "frmBoatFuelPrices.vb:326"
+      }
+    ],
+
+    "sorting": {
+      "default": [
+        {
+          "column": "EffectiveDate",
+          "direction": "Descending",
+          "location": "frmBoatFuelPrices.vb:354"
+        },
+        {
+          "column": "FuelVendor",
+          "direction": "Ascending",
+          "location": "frmBoatFuelPrices.vb:355"
+        }
+      ]
+    }
+  },
+
+  "securityAuthorization": {
+    "subsystem": "frmBoatFuelPrices",
+    "controlAuthorization": "ControlAuthorizationBase",
+    "buttonTypes": {
+      "btnFind": "ButtonType.Open",
+      "btnReset": "ButtonType.Open",
+      "btnSubmit": "ButtonType.Submit",
+      "btnCancel": "ButtonType.Cancel"
+    },
+    "location": "frmBoatFuelPrices.vb:124-135"
+  },
+
+  "dataAccess": {
+    "searchStoredProc": "BoatFuelPriceSearch",
+    "searchClass": "Lists.BoatFuelPriceSearch",
+    "searchLocation": "BoatFuelPriceSearch.vb:14",
+
+    "crudStoredProcs": {
+      "select": "BoatFuelPriceSelect",
+      "insert": "BoatFuelPriceInsert",
+      "update": "BoatFuelPriceUpdate",
+      "delete": "BoatFuelPriceDelete"
+    },
+
+    "additionalMethods": [
+      {
+        "method": "GenerateBoatFuelPrices",
+        "storedProc": "GenerateBoatFuelPrices",
+        "description": "Public method to generate daily boat fuel prices",
+        "location": "BoatFuelPrice.vb:84-104",
+        "parameters": [
+          {
+            "name": "priceDate",
+            "type": "String (DateTime)",
+            "description": "Date of boat fuel prices"
+          }
+        ],
+        "returns": "Int32 - number of rows inserted",
+        "usedBy": [
+          "Generate Vendor Fuel Prices form",
+          "OpisFuelPriceImport SSIS package"
+        ]
+      }
+    ]
+  },
+
+  "businessRules": {
+    "conditionalFieldLogic": [
+      {
+        "rule": "InvoiceNumber enabled only when FuelVendor is selected",
+        "implementedIn": [
+          "cboFuelVendorBusinessUnitID.Validated",
+          "LoadControlsForBoatFuelPrice"
+        ],
+        "locations": [
+          "frmBoatFuelPrices.vb:470-474",
+          "frmBoatFuelPrices.vb:544-548"
+        ]
+      },
+      {
+        "rule": "InvoiceNumber must be blank when FuelVendor is blank",
+        "implementedIn": "ClearUnusedFields",
+        "location": "frmBoatFuelPrices.vb:404-409",
+        "validatedIn": "BoatFuelPrice.CheckBusinessRules",
+        "validationLocation": "BoatFuelPrice.vb:65-68"
+      }
+    ]
+  },
+
+  "uiLayout": {
+    "sections": [
+      {
+        "name": "lblContextTitle",
+        "type": "Header",
+        "text": "Boat Fuel Prices",
+        "dock": "Top"
+      },
+      {
+        "name": "pnlCriteria",
+        "type": "SearchPanel",
+        "dock": "Top",
+        "controls": [
+          "dtEffectiveDateSearch",
+          "cboFuelVendorSearch",
+          "btnFind",
+          "btnReset"
+        ]
+      },
+      {
+        "name": "grdSearch",
+        "type": "Grid",
+        "dock": "Fill"
+      },
+      {
+        "name": "grpDetail",
+        "type": "DetailEditPanel",
+        "dock": "Bottom",
+        "text": "Detail",
+        "controls": [
+          "dtEffectiveDate",
+          "txtPrice",
+          "cboFuelVendorBusinessUnitID",
+          "txtInvoiceNumber",
+          "btnSubmit",
+          "btnCancel"
+        ]
+      }
+    ]
+  },
+
+  "notes": {
+    "formPattern": "This is a specialized SearchEdit form that combines list/search and detail-edit functionality in a single panel. It implements IBaseSearch and is loaded into the main form's explorer panel.",
+    "editBehavior": "Form remains open during add/edit operations. Detail section is enabled/disabled based on edit mode. Search section is disabled during edit to prevent navigation.",
+    "stateTracking": "Uses BeginEdit/CancelEdit pattern on business object. SetIsEditing property notifies main form to prevent navigation and warn on form exit.",
+    "validationStrategy": "Field-level validation on Validated events, business rule validation on CheckBusinessRules, final validation on Submit via IsValid property.",
+    "dataRefresh": "Grid refreshes automatically after Submit and Delete operations. Manual refresh via Find button. Grid state persisted to UserAppSettings.",
+    "securityModel": "Button types set for authorization system. ControlAuthorization object manages permissions for all controls based on user role."
+  }
+}

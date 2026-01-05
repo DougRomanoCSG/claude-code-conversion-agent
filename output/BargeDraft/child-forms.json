@@ -1,0 +1,8 @@
+{
+  "mainForm": "frmBargeDraft",
+  "entity": "BargeDraft",
+  "childForms": [
+    "frmBrokenRules"
+  ],
+  "detectedAt": "2025-12-18T19:59:11.303Z"
+}

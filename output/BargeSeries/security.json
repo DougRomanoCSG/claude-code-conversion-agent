@@ -1,0 +1,365 @@
+{
+  "entity": "BargeSeries",
+  "legacy": {
+    "searchForm": "frmBargeSeriesSearch",
+    "detailForm": "frmBargeSeriesDetail",
+    "subsystem": "frmBargeSeriesSearch",
+    "securityButtons": {
+      "search": [
+        {
+          "button": "btnFind",
+          "type": "Open",
+          "legacyPermission": "CanOpen",
+          "description": "Execute search for barge series",
+          "location": "frmBargeSeriesSearch:99"
+        },
+        {
+          "button": "btnReset",
+          "type": "Open",
+          "legacyPermission": "CanOpen",
+          "description": "Reset search criteria",
+          "location": "frmBargeSeriesSearch:100"
+        }
+      ],
+      "detail": [
+        {
+          "button": "btnSubmit",
+          "type": "Submit",
+          "legacyPermission": "CanModify",
+          "description": "Save barge series changes",
+          "location": "frmBargeSeriesDetail:66"
+        },
+        {
+          "button": "btnCancel",
+          "type": "Cancel",
+          "legacyPermission": "CanOpen",
+          "description": "Cancel editing and close form",
+          "location": "frmBargeSeriesDetail:67"
+        }
+      ],
+      "toolbar": [
+        {
+          "button": "Paste",
+          "type": "Action",
+          "legacyPermission": "CanModify",
+          "description": "Paste draft tonnage data from clipboard",
+          "location": "frmBargeSeriesDetail:78"
+        },
+        {
+          "button": "Export",
+          "type": "Open",
+          "legacyPermission": "CanOpen",
+          "description": "Export draft tonnage grid to file",
+          "location": "frmBargeSeriesDetail:79"
+        }
+      ]
+    },
+    "searchInterface": "IBaseSearch",
+    "detailInterface": "IBaseDetailEdit",
+    "permissionMethods": {
+      "ItemAdd": {
+        "method": "ItemAdd",
+        "requiredPermission": "CanCreate",
+        "description": "Create new barge series",
+        "location": "frmBargeSeriesSearch:37-43"
+      },
+      "ItemModify": {
+        "method": "ItemModify",
+        "requiredPermission": "CanModify",
+        "description": "Edit existing barge series",
+        "location": "frmBargeSeriesSearch:46-52"
+      },
+      "ItemRemove": {
+        "method": "ItemRemove",
+        "requiredPermission": "CanDelete",
+        "description": "Delete barge series (hard delete)",
+        "location": "frmBargeSeriesSearch:55-63"
+      },
+      "ItemView": {
+        "method": "ItemView",
+        "requiredPermission": "CanOpen",
+        "description": "Not implemented for this form",
+        "location": "frmBargeSeriesSearch:70-72"
+      },
+      "RefreshList": {
+        "method": "RefreshList",
+        "requiredPermission": "CanOpen",
+        "description": "Execute search and display results",
+        "location": "frmBargeSeriesSearch:80-91"
+      }
+    },
+    "businessObjectMethods": {
+      "NewBargeSeries": {
+        "method": "BargeSeries.NewBargeSeries",
+        "requiredPermission": "CanCreate",
+        "location": "frmBargeSeriesSearch:40"
+      },
+      "GetBargeSeries": {
+        "method": "BargeSeries.GetBargeSeries",
+        "requiredPermission": "CanOpen",
+        "location": "frmBargeSeriesSearch:49"
+      },
+      "DeleteBargeSeries": {
+        "method": "BargeSeries.DeleteBargeSeries",
+        "requiredPermission": "CanDelete",
+        "location": "frmBargeSeriesSearch:60"
+      },
+      "GetList": {
+        "method": "BargeSeriesSearch.GetList",
+        "requiredPermission": "CanOpen",
+        "location": "frmBargeSeriesSearch:88-89"
+      }
+    }
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "description": "All API endpoints use API Key authentication (NOT Windows Auth)",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/BargeSeries",
+          "action": "GetList",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeSeriesView",
+          "description": "Search and list barge series with filters"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeSeries/{id}",
+          "action": "GetById",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeSeriesView",
+          "description": "Get specific barge series by ID"
+        },
+        {
+          "method": "POST",
+          "route": "api/BargeSeries",
+          "action": "Create",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeSeriesModify",
+          "description": "Create new barge series with draft tonnages"
+        },
+        {
+          "method": "PUT",
+          "route": "api/BargeSeries/{id}",
+          "action": "Update",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeSeriesModify",
+          "description": "Update existing barge series"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/BargeSeries/{id}",
+          "action": "Delete",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeSeriesFullControl",
+          "description": "Hard delete barge series (legacy behavior)"
+        },
+        {
+          "method": "PATCH",
+          "route": "api/BargeSeries/{id}/active",
+          "action": "SetActive",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeSeriesModify",
+          "description": "Activate or deactivate barge series (soft delete)"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "description": "UI uses OIDC in production, DevelopmentAutoSignInMiddleware in development",
+      "permissions": [
+        {
+          "name": "BargeSeriesView",
+          "enumValue": "AuthPermissions.BargeSeriesView",
+          "description": "View and search barge series",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "Search",
+            "Details"
+          ],
+          "buttonTypes": [
+            "Open"
+          ],
+          "actions": [
+            "Execute search queries",
+            "View barge series details",
+            "Export grid data",
+            "Reset search filters"
+          ]
+        },
+        {
+          "name": "BargeSeriesModify",
+          "enumValue": "AuthPermissions.BargeSeriesModify",
+          "description": "Create, update, and deactivate barge series",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Create",
+            "Edit",
+            "SetActive"
+          ],
+          "buttonTypes": [
+            "Submit",
+            "Action"
+          ],
+          "actions": [
+            "Create new barge series",
+            "Edit existing barge series",
+            "Update series attributes (name, customer, hull type, cover type, dimensions)",
+            "Update draft tonnage tables",
+            "Paste draft tonnage data from clipboard",
+            "Activate/deactivate barge series (IsActive flag)",
+            "Manage child BargeSeriesDraft records"
+          ]
+        },
+        {
+          "name": "BargeSeriesFullControl",
+          "enumValue": "AuthPermissions.BargeSeriesFullControl",
+          "description": "Delete barge series (hard delete)",
+          "granularity": "FullControl",
+          "requiredFor": [
+            "Delete"
+          ],
+          "buttonTypes": [],
+          "actions": [
+            "Hard delete barge series records (legacy behavior)",
+            "WARNING: Modern apps should use soft delete (IsActive) instead"
+          ],
+          "notes": "Hard delete is legacy behavior. Modern implementation should prefer soft delete via BargeSeriesModify permission."
+        }
+      ],
+      "controllerActions": [
+        {
+          "controller": "BargeSeriesSearchController",
+          "action": "Index",
+          "requiredPermission": "BargeSeriesView",
+          "description": "Display search interface"
+        },
+        {
+          "controller": "BargeSeriesSearchController",
+          "action": "Search",
+          "requiredPermission": "BargeSeriesView",
+          "description": "Execute search and return results"
+        },
+        {
+          "controller": "BargeSeriesSearchController",
+          "action": "Create",
+          "requiredPermission": "BargeSeriesModify",
+          "description": "Display create form"
+        },
+        {
+          "controller": "BargeSeriesSearchController",
+          "action": "Edit",
+          "requiredPermission": "BargeSeriesModify",
+          "description": "Display edit form"
+        },
+        {
+          "controller": "BargeSeriesSearchController",
+          "action": "Details",
+          "requiredPermission": "BargeSeriesView",
+          "description": "Display read-only details"
+        },
+        {
+          "controller": "BargeSeriesSearchController",
+          "action": "Delete",
+          "requiredPermission": "BargeSeriesFullControl",
+          "description": "Hard delete barge series"
+        },
+        {
+          "controller": "BargeSeriesSearchController",
+          "action": "SetActive",
+          "requiredPermission": "BargeSeriesModify",
+          "description": "Soft delete via IsActive toggle"
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BargeSeriesView",
+          "description": "View and search barge series"
+        },
+        {
+          "name": "BargeSeriesModify",
+          "description": "Create, update, and deactivate barge series"
+        },
+        {
+          "name": "BargeSeriesFullControl",
+          "description": "Delete barge series (hard delete - legacy)"
+        }
+      ]
+    }
+  },
+  "implementation": {
+    "notes": [
+      "Legacy form uses hard delete (DeleteBargeSeries). Modern implementation should prefer soft delete via IsActive flag.",
+      "BargeSeriesDraft child records are managed through the parent BargeSeries object.",
+      "Paste functionality allows importing draft tonnage data from clipboard (CSV or tab-delimited).",
+      "Grid export functionality should be available to all users with View permission.",
+      "Toolbar buttons (Paste, Export) have separate button types and permissions.",
+      "Search form implements IBaseSearch interface with standard CRUD operations.",
+      "Detail form implements IBaseDetailEdit interface with Submit/Cancel pattern.",
+      "SubSystem identifier is 'frmBargeSeriesSearch' for both search and detail forms."
+    ],
+    "securityPatterns": {
+      "apiAuthentication": {
+        "pattern": "[ApiKey]",
+        "appliedTo": "Controller class level",
+        "example": "[ApiController]\n[ApiKey]\npublic class BargeSeriesController : ApiControllerBase"
+      },
+      "uiAuthentication": {
+        "pattern": "[Authorize]",
+        "appliedTo": "Controller class level and action level",
+        "example": "[Authorize]\npublic class BargeSeriesSearchController : AppController"
+      },
+      "uiAuthorization": {
+        "pattern": "[Authorize(Policy = \"PermissionName\")]",
+        "appliedTo": "Action level",
+        "example": "[Authorize(Policy = \"BargeSeriesModify\")]\npublic IActionResult Create()"
+      },
+      "viewPermissionChecks": {
+        "pattern": "User.HasPermission(AuthPermissions.PermissionName)",
+        "appliedTo": "View-level button visibility",
+        "example": "@if (User.HasPermission(AuthPermissions.BargeSeriesModify))\n{\n    <button>Create New</button>\n}"
+      }
+    },
+    "childEntitySecurity": {
+      "entity": "BargeSeriesDraft",
+      "securityInheritance": "Inherits security from parent BargeSeries",
+      "notes": [
+        "BargeSeriesDraft records are always managed through parent BargeSeries object.",
+        "No separate permissions needed for BargeSeriesDraft operations.",
+        "Grid editing of draft tonnages requires BargeSeriesModify permission.",
+        "Draft records are created/updated when parent BargeSeries is saved."
+      ]
+    }
+  },
+  "migrationConsiderations": {
+    "hardDelete": {
+      "legacy": "Uses hard delete via DeleteBargeSeries method",
+      "modern": "Should use soft delete via IsActive flag",
+      "recommendation": "Implement SetActive endpoint and deprecate hard delete, or restrict hard delete to FullControl permission"
+    },
+    "buttonSecurity": {
+      "legacy": "Uses ButtonType enum (Open, Submit, Cancel, Action)",
+      "modern": "Uses permission-based authorization policies",
+      "mapping": {
+        "Open": "Maps to View permission",
+        "Submit": "Maps to Modify permission",
+        "Cancel": "Maps to View permission (no data change)",
+        "Action": "Maps to Modify permission (for Paste button)"
+      }
+    },
+    "subsystemMapping": {
+      "legacy": "SubSystem.frmBargeSeriesSearch",
+      "modern": "BargeSeriesView, BargeSeriesModify, BargeSeriesFullControl permissions",
+      "notes": "Single SubSystem identifier maps to multiple granular permissions"
+    }
+  }
+}

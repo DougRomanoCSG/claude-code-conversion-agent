@@ -1,0 +1,349 @@
+{
+  "formName": "frmBargeDailyExpenseSearch",
+  "formTitle": "Barge Daily Expenses",
+  "inherits": "frmBaseSearch",
+  "implements": ["IBaseSearch"],
+  "subsystem": "frmBargeDailyExpenseSearch",
+  "businessLogicReferences": [
+    "BargeOps.Onshore.BusinessLogic.Lists.BargeDailyExpenseDateSearch",
+    "BargeOps.Onshore.BusinessLogic.BargeDailyExpenseDate"
+  ],
+  "architecture": {
+    "pattern": "SearchForm",
+    "mainContainer": "pnlSearch",
+    "criteriaPanel": "pnlCriteria",
+    "resultGrid": "grdSearch"
+  },
+  "controls": [
+    {
+      "name": "dtEffectiveDate",
+      "type": "UltraDateTimeEditor",
+      "category": "SearchCriteria",
+      "label": "Effective date",
+      "labelControl": "lblEffectiveDate",
+      "dataBinding": null,
+      "defaultValue": "Date.Today.Date.ToString",
+      "validation": [],
+      "events": [],
+      "location": {
+        "x": 90,
+        "y": 6
+      },
+      "size": {
+        "width": 88,
+        "height": 21
+      },
+      "tabIndex": 1,
+      "required": false,
+      "focusFirst": true,
+      "modernPattern": {
+        "type": "DateOnly",
+        "htmlType": "date",
+        "note": "Single date picker - no time component needed",
+        "displayFormat": "MM/dd/yyyy"
+      },
+      "notes": "Primary search criterion - defaults to today's date, used to filter BargeDailyExpenseDate records"
+    }
+  ],
+  "labels": [
+    {
+      "name": "lblContextTitle",
+      "text": "Barge Daily Expenses",
+      "type": "Title",
+      "dock": "Top",
+      "font": "Arial, 12pt, Bold",
+      "styleSet": "SearchCaption",
+      "appearance": "Highlight background with HighlightText color",
+      "size": {
+        "width": 779,
+        "height": 24
+      }
+    },
+    {
+      "name": "lblEffectiveDate",
+      "text": "Effective date:",
+      "type": "FieldLabel",
+      "linkedControl": "dtEffectiveDate",
+      "location": {
+        "x": 4,
+        "y": 6
+      },
+      "size": {
+        "width": 81,
+        "height": 21
+      },
+      "tabIndex": 0
+    }
+  ],
+  "grids": [
+    {
+      "name": "grdSearch",
+      "type": "UltraGrid",
+      "uniqueIdentifier": "BargeDailyExpenseDateID",
+      "dock": "Fill",
+      "location": {
+        "x": 0,
+        "y": 82
+      },
+      "size": {
+        "width": 779,
+        "height": 500
+      },
+      "tabIndex": 2,
+      "columns": [
+        {
+          "key": "BargeDailyExpenseDateID",
+          "header": "ID",
+          "dataType": "Integer",
+          "width": 0,
+          "visible": false,
+          "sortable": false,
+          "filterable": false,
+          "purpose": "Unique identifier for grid row selection"
+        },
+        {
+          "key": "EffectiveDate",
+          "header": "Effective Date",
+          "dataType": "Date",
+          "width": 100,
+          "align": "Left",
+          "sortable": true,
+          "filterable": true,
+          "defaultSort": "Descending",
+          "format": "MM/dd/yyyy"
+        }
+      ],
+      "autoFitStyle": "ExtendLastColumn",
+      "events": [
+        "DoubleClick - Opens detail form for editing",
+        "AfterSelectChange - Updates toolbar button states"
+      ],
+      "dataSource": "Lists.BargeDailyExpenseDateSearch.GetList(CType(dtEffectiveDate.Value, String)).List",
+      "sorting": {
+        "initialColumn": "EffectiveDate",
+        "initialDirection": "Descending"
+      },
+      "userSettings": {
+        "saveOnDestroy": true,
+        "restoreOnLoad": true,
+        "method": "MyAppSettingHelper"
+      },
+      "modernEquivalent": {
+        "library": "DataTables",
+        "serverSide": true,
+        "ajax": "/BargeDailyExpense/Search",
+        "features": ["sorting", "filtering", "pagination", "responsive"]
+      }
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnFind",
+      "text": "F&ind",
+      "type": "Search",
+      "buttonType": "Open",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnFind_Click",
+      "location": {
+        "x": 699,
+        "y": 6
+      },
+      "size": {
+        "width": 75,
+        "height": 23
+      },
+      "anchor": "Top, Right",
+      "tabIndex": 7,
+      "isAcceptButton": true,
+      "purpose": "Executes search using dtEffectiveDate value, calls RefreshList(True)",
+      "modernEquivalent": {
+        "type": "submit",
+        "class": "btn btn-primary",
+        "icon": "search"
+      }
+    },
+    {
+      "name": "btnReset",
+      "text": "Reset",
+      "type": "Reset",
+      "buttonType": "Open",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnReset_Click",
+      "causesValidation": false,
+      "location": {
+        "x": 699,
+        "y": 30
+      },
+      "size": {
+        "width": 75,
+        "height": 23
+      },
+      "anchor": "Top, Right",
+      "tabIndex": 8,
+      "purpose": "Resets dtEffectiveDate to today's date",
+      "modernEquivalent": {
+        "type": "button",
+        "class": "btn btn-secondary",
+        "icon": "undo"
+      }
+    }
+  ],
+  "panels": [
+    {
+      "name": "pnlSearch",
+      "type": "UltraPanel",
+      "dock": "Fill",
+      "size": {
+        "width": 779,
+        "height": 582
+      },
+      "controls": [
+        "lblContextTitle",
+        "pnlCriteria",
+        "grdSearch"
+      ],
+      "purpose": "Main container panel for entire search interface"
+    },
+    {
+      "name": "pnlCriteria",
+      "type": "UltraPanel",
+      "dock": "Top",
+      "location": {
+        "x": 0,
+        "y": 24
+      },
+      "size": {
+        "width": 779,
+        "height": 58
+      },
+      "tabIndex": 1,
+      "controls": [
+        "lblEffectiveDate",
+        "dtEffectiveDate",
+        "btnFind",
+        "btnReset"
+      ],
+      "purpose": "Search criteria panel containing date filter and action buttons"
+    }
+  ],
+  "eventHandlers": {
+    "pnlSearch_HandleCreated": "Form initialization - calls FormatControls() and restores grid settings",
+    "pnlSearch_HandleDestroyed": "Cleanup - saves current grid settings to database",
+    "btnFind_Click": "Executes search by calling RefreshList(True) with current dtEffectiveDate value",
+    "btnReset_Click": "Resets dtEffectiveDate to Date.Today and clears any user inputs",
+    "grdSearch_DoubleClick": "Opens frmBargeDailyExpenseDetail for selected record (ItemModify)",
+    "grdSearch_AfterSelectChange": "Updates toolbar button states based on selection"
+  },
+  "interfaceMethods": {
+    "Initialize": {
+      "purpose": "Initializes form with SubSystem.frmBargeDailyExpenseSearch, sets security permissions",
+      "calls": "InitializeBase(SubSystem.frmBargeDailyExpenseSearch)"
+    },
+    "FocusFirstField": {
+      "purpose": "Sets focus to dtEffectiveDate when panel loads",
+      "control": "dtEffectiveDate"
+    },
+    "RefreshList": {
+      "purpose": "Refreshes grid with search results based on dtEffectiveDate",
+      "dataSource": "Lists.BargeDailyExpenseDateSearch.GetList(CType(dtEffectiveDate.Value, String)).List",
+      "parameters": ["selectFirstRow: Boolean"]
+    },
+    "ItemAdd": {
+      "purpose": "Opens detail form for creating new BargeDailyExpenseDate",
+      "form": "frmBargeDailyExpenseDetail",
+      "businessObject": "BargeDailyExpenseDate.NewBargeDailyExpenseDate"
+    },
+    "ItemModify": {
+      "purpose": "Opens detail form for editing selected BargeDailyExpenseDate",
+      "form": "frmBargeDailyExpenseDetail",
+      "businessObject": "BargeDailyExpenseDate.GetBargeDailyExpenseDate(GridControlIndex)"
+    },
+    "ItemRemove": {
+      "purpose": "Deletes selected BargeDailyExpenseDate after confirmation",
+      "confirmation": "Barge Daily Expense Date",
+      "businessMethod": "BargeDailyExpenseDate.DeleteBargeDailyExpenseDate(GridControlIndex)"
+    },
+    "ItemView": {
+      "purpose": "Not implemented",
+      "implementation": "None"
+    },
+    "ItemRun": {
+      "purpose": "Not implemented",
+      "implementation": "None"
+    },
+    "SetButtonTypes": {
+      "purpose": "Sets security button types for authorization",
+      "buttonTypes": {
+        "btnFind": "ButtonType.Open",
+        "btnReset": "ButtonType.Open"
+      }
+    },
+    "OnChangeOfFleet": {
+      "purpose": "Not implemented - no fleet-specific logic",
+      "implementation": "Empty"
+    }
+  },
+  "validation": {
+    "method": "None",
+    "rules": [],
+    "notes": "No client-side validation - dtEffectiveDate defaults to today if empty"
+  },
+  "businessLogic": {
+    "searchMethod": "Lists.BargeDailyExpenseDateSearch.GetList",
+    "searchParameters": ["effectiveDate: String"],
+    "entityClass": "BargeDailyExpenseDate",
+    "crudMethods": {
+      "new": "BargeDailyExpenseDate.NewBargeDailyExpenseDate",
+      "get": "BargeDailyExpenseDate.GetBargeDailyExpenseDate(id: Integer)",
+      "delete": "BargeDailyExpenseDate.DeleteBargeDailyExpenseDate(id: Integer)"
+    }
+  },
+  "security": {
+    "controlAuthorization": true,
+    "subsystem": "SubSystem.frmBargeDailyExpenseSearch",
+    "buttonSecurity": {
+      "btnFind": "Open",
+      "btnReset": "Open"
+    }
+  },
+  "modernizationNotes": {
+    "searchPattern": "Single date criterion search - very simple pattern",
+    "gridPattern": "Single column display (EffectiveDate only) - unique pattern",
+    "dateHandling": "Date only (no time) - use simple date picker",
+    "complexity": "Low - minimal search criteria, single grid column",
+    "referenceImplementation": "BoatLocationSearchController.cs for search pattern, DataTables for grid",
+    "viewModelStructure": {
+      "search": "BargeDailyExpenseSearchViewModel with EffectiveDate filter",
+      "result": "BargeDailyExpenseDateDto with ID and EffectiveDate properties"
+    },
+    "controllerActions": [
+      "Index() - GET search page",
+      "Search(effectiveDate) - POST/GET JSON results for DataTables",
+      "Edit(id) - GET detail page",
+      "Details(id) - GET read-only detail page",
+      "Delete(id) - POST delete action"
+    ],
+    "javascriptComponents": [
+      "bargeDailyExpenseSearch.js - DataTables initialization",
+      "Date picker initialization for effectiveDate filter",
+      "Search form submission handler",
+      "Grid double-click handler for edit navigation"
+    ]
+  },
+  "relatedForms": {
+    "detail": "frmBargeDailyExpenseDetail",
+    "base": "frmBaseSearch"
+  },
+  "formSize": {
+    "width": 779,
+    "height": 582
+  },
+  "layout": {
+    "header": "lblContextTitle (24px height)",
+    "criteria": "pnlCriteria (58px height) - single date filter",
+    "results": "grdSearch (fills remaining space)",
+    "responsive": false
+  }
+}

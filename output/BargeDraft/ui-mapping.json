@@ -1,0 +1,438 @@
+{
+  "entity": "BargeDraft",
+  "description": "UI component mapping for Barge Draft measurements - captures four-corner draft readings (port/starboard bow/stern), calculates average draft, and computes tonnage for draft survey events",
+  "formType": "Detail",
+  "hasSearchGrid": false,
+  "notes": [
+    "Draft is a standalone entity but typically embedded in TicketEvent/BargeEvent forms",
+    "No search grid - Draft is accessed through TicketEvent Draft Survey events",
+    "Draft measurements use feet/inches split inputs pattern",
+    "DateTime fields MUST be split into separate date and time inputs with 24-hour format",
+    "Calculations are performed client-side based on corner draft entries",
+    "Tonnage calculations only visible for Draft Survey event types"
+  ],
+  "controlMappings": [
+    {
+      "legacyControl": "UltraTextEditor",
+      "modernEquivalent": "Bootstrap Text Input",
+      "html": "<input type=\"text\" class=\"form-control\" />",
+      "bootstrapClasses": ["form-control"],
+      "accessibility": {
+        "required": "Use asp-for for label association",
+        "validation": "Add data-val attributes for client-side validation",
+        "aria": "Use aria-describedby for validation messages"
+      }
+    },
+    {
+      "legacyControl": "UltraNumericEditor (Draft measurements)",
+      "modernEquivalent": "Bootstrap Number Input - SPLIT Feet/Inches Pattern",
+      "html": "<div class=\"row\">\n    <div class=\"col-md-6\">\n        <label class=\"form-label\">Feet</label>\n        <input type=\"number\" class=\"form-control\" min=\"0\" max=\"99\" step=\"1\" />\n    </div>\n    <div class=\"col-md-6\">\n        <label class=\"form-label\">Inches</label>\n        <input type=\"number\" class=\"form-control\" min=\"0\" max=\"11\" step=\"1\" />\n    </div>\n</div>",
+      "bootstrapClasses": ["form-control"],
+      "validation": {
+        "feet": "min=\"0\" max=\"99\"",
+        "inches": "min=\"0\" max=\"11\"",
+        "clientSide": "Use jquery.validate for range validation"
+      },
+      "javascript": {
+        "onLoad": "Split decimal draft value into feet and inches on page load",
+        "onSubmit": "Combine feet and inches into decimal value before form submit",
+        "calculation": "Convert feet/inches to decimal: (feet + inches/12).toFixed(3)"
+      }
+    },
+    {
+      "legacyControl": "UltraComboEditor",
+      "modernEquivalent": "Select2 Dropdown",
+      "html": "<select class=\"form-select\" data-select2=\"true\">\n    <option value=\"\">-- Select --</option>\n</select>",
+      "bootstrapClasses": ["form-select"],
+      "javascript": "$('#selector').select2({ placeholder: 'Select...', allowClear: true });",
+      "accessibility": {
+        "required": "Use asp-for and asp-items for tag helpers",
+        "aria": "Select2 provides built-in ARIA support"
+      }
+    },
+    {
+      "legacyControl": "UltraCheckEditor",
+      "modernEquivalent": "Bootstrap Checkbox",
+      "html": "<div class=\"form-check\">\n    <input type=\"checkbox\" class=\"form-check-input\" id=\"checkboxId\" />\n    <label class=\"form-check-label\" for=\"checkboxId\">Label</label>\n</div>",
+      "bootstrapClasses": ["form-check", "form-check-input", "form-check-label"]
+    },
+    {
+      "legacyControl": "UltraPanel",
+      "modernEquivalent": "Bootstrap Card",
+      "html": "<div class=\"card mb-3\">\n    <div class=\"card-header\">\n        <h5 class=\"card-title mb-0\"><i class=\"fas fa-icon\"></i> Title</h5>\n    </div>\n    <div class=\"card-body\">\n        <!-- Content -->\n    </div>\n</div>",
+      "bootstrapClasses": ["card", "card-header", "card-body", "card-title"],
+      "usage": "Group related draft measurements (e.g., Corner Drafts, Tonnage Calculations)"
+    },
+    {
+      "legacyControl": "UltraGrid",
+      "modernEquivalent": "NOT APPLICABLE - Draft has no child grids",
+      "notes": "Draft is a leaf entity with no child collections. Any grids showing drafts would be on parent entities (TicketEvent history, etc.)"
+    }
+  ],
+  "formSections": {
+    "cornerDrafts": {
+      "title": "Corner Draft Measurements",
+      "description": "Four-corner draft readings in feet and inches",
+      "layout": "Bootstrap row/col grid (2x2 layout for bow/stern, port/starboard)",
+      "fields": [
+        {
+          "fieldName": "DraftPortBow",
+          "label": "Port Bow",
+          "controlType": "Feet/Inches Split Input",
+          "row": 1,
+          "col": 1,
+          "validation": {
+            "range": "0-99 feet, 0-11 inches",
+            "message": "Draft Port Bow must be between 0 and 99 ft 11 in"
+          },
+          "htmlPattern": "<div class=\"col-md-6\">\n    <label class=\"form-label\">Port Bow</label>\n    <div class=\"row\">\n        <div class=\"col-6\">\n            <input type=\"number\" id=\"draftPortBowFeet\" class=\"form-control\" min=\"0\" max=\"99\" placeholder=\"Feet\" />\n        </div>\n        <div class=\"col-6\">\n            <input type=\"number\" id=\"draftPortBowInches\" class=\"form-control\" min=\"0\" max=\"11\" placeholder=\"Inches\" />\n        </div>\n    </div>\n</div>"
+        },
+        {
+          "fieldName": "DraftStarboardBow",
+          "label": "Starboard Bow",
+          "controlType": "Feet/Inches Split Input",
+          "row": 1,
+          "col": 2,
+          "validation": {
+            "range": "0-99 feet, 0-11 inches",
+            "message": "Draft Starboard Bow must be between 0 and 99 ft 11 in"
+          }
+        },
+        {
+          "fieldName": "DraftPortStern",
+          "label": "Port Stern",
+          "controlType": "Feet/Inches Split Input",
+          "row": 2,
+          "col": 1,
+          "validation": {
+            "range": "0-99 feet, 0-11 inches",
+            "message": "Draft Port Stern must be between 0 and 99 ft 11 in"
+          }
+        },
+        {
+          "fieldName": "DraftStarboardStern",
+          "label": "Starboard Stern",
+          "controlType": "Feet/Inches Split Input",
+          "row": 2,
+          "col": 2,
+          "validation": {
+            "range": "0-99 feet, 0-11 inches",
+            "message": "Draft Starboard Stern Inches must be between 0 and 11"
+          }
+        }
+      ],
+      "javascript": {
+        "onChange": "Calculate maximum draft and average draft when any corner changes",
+        "calculationTrigger": "Real-time calculation on blur/change events"
+      }
+    },
+    "overallDraft": {
+      "title": "Overall Draft",
+      "description": "Maximum draft automatically calculated from four corners",
+      "fields": [
+        {
+          "fieldName": "Draft",
+          "label": "Overall Draft (Maximum)",
+          "controlType": "Feet/Inches Split Input",
+          "isCalculated": true,
+          "readonly": true,
+          "calculation": "Max(DraftPortBow, DraftStarboardBow, DraftPortStern, DraftStarboardStern)",
+          "validation": {
+            "rule": "Must be >= highest corner draft",
+            "message": "Overall draft must be >= the highest corner draft"
+          }
+        }
+      ]
+    },
+    "averageDraft": {
+      "title": "Average Draft (Draft Survey Only)",
+      "description": "Average of four corner drafts - only visible for Draft Survey events",
+      "visibilityCondition": "EventTypeEnumVal === 'DraftSurvey'",
+      "fields": [
+        {
+          "fieldName": "DraftAverage",
+          "label": "Average Draft",
+          "controlType": "Feet/Inches Split Input",
+          "isCalculated": true,
+          "readonly": true,
+          "calculation": "Average of four corners rounded to nearest inch",
+          "validation": {
+            "range": "0-99 feet, 0-11 inches",
+            "condition": "IsFreightActive OR IsTowingActive"
+          },
+          "notes": [
+            "Calculated by converting each corner to inches, averaging, rounding to nearest inch with midpoint away from zero",
+            "Result converted back to decimal feet for storage",
+            "Displayed as feet and inches in UI"
+          ]
+        }
+      ]
+    },
+    "tonnageCalculations": {
+      "title": "Tonnage Calculations (Draft Survey Only)",
+      "description": "Cargo tonnage calculations based on draft and load status",
+      "visibilityCondition": "EventTypeEnumVal === 'DraftSurvey'",
+      "fields": [
+        {
+          "fieldName": "EstimatedCargoDeadweight",
+          "label": "Estimated Cargo Deadweight",
+          "controlType": "Text Input (readonly)",
+          "isCalculated": true,
+          "readonly": true,
+          "format": "0.00 tons",
+          "calculation": "For Load/PartLoad: from DraftAverage using BargeSeries tables. For Empty: from prior Load survey",
+          "notes": "Requires BargeSeries draft table lookup and cover weight adjustment"
+        },
+        {
+          "fieldName": "LightshipCorrection",
+          "label": "Lightship Correction",
+          "controlType": "Text Input (readonly)",
+          "isCalculated": true,
+          "readonly": true,
+          "format": "0.00 tons",
+          "calculation": "For Load/PartLoad: from prior Empty survey draft. For Empty: from current DraftAverage"
+        },
+        {
+          "fieldName": "AdjustmentTons",
+          "label": "Adjustment Tons",
+          "controlType": "Number Input",
+          "format": "0.00 tons",
+          "editable": true,
+          "notes": "Manual adjustment value entered by user"
+        },
+        {
+          "fieldName": "LoadUnloadTons",
+          "label": "Load/Unload Tons",
+          "controlType": "Text Input (readonly)",
+          "isCalculated": true,
+          "readonly": true,
+          "format": "0.00 tons",
+          "calculation": "EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+          "notes": "Final calculated tonnage - recalculates when any input changes"
+        }
+      ],
+      "javascript": {
+        "dependencies": [
+          "BargeSeries draft tables must be loaded",
+          "Prior opposing draft survey events must be available",
+          "Cover type, subtype, and configuration from TicketEvent"
+        ],
+        "calculationFlow": [
+          "1. User enters four corner drafts",
+          "2. Calculate average draft (rounded to nearest inch)",
+          "3. Determine load status from TicketEvent",
+          "4. Find prior opposing draft survey event",
+          "5. Call API to calculate tonnage using BargeSeries tables",
+          "6. Apply cover weight adjustments",
+          "7. Calculate LoadUnloadTons = EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+          "8. Update readonly fields with calculated values"
+        ]
+      }
+    }
+  },
+  "javascriptPatterns": {
+    "initialization": {
+      "description": "Initialize draft form with split inputs and calculations",
+      "code": "$(function() {\n    // Split all draft decimal values into feet/inches on load\n    splitDraftValue($('#DraftPortBow').val(), 'draftPortBowFeet', 'draftPortBowInches');\n    splitDraftValue($('#DraftStarboardBow').val(), 'draftStarboardBowFeet', 'draftStarboardBowInches');\n    splitDraftValue($('#DraftPortStern').val(), 'draftPortSternFeet', 'draftPortSternInches');\n    splitDraftValue($('#DraftStarboardStern').val(), 'draftStarboardSternFeet', 'draftStarboardSternInches');\n    \n    // Attach change handlers for calculations\n    $('.draft-corner-input').on('change blur', calculateDrafts);\n    $('#AdjustmentTons').on('change blur', calculateLoadUnloadTons);\n});"
+    },
+    "feetInchesConversion": {
+      "description": "Convert between decimal feet and feet/inches",
+      "splitFunction": "function splitDraftValue(decimalFeet, feetFieldId, inchesFieldId) {\n    if (decimalFeet && decimalFeet !== '') {\n        var feet = Math.floor(decimalFeet);\n        var inches = Math.round((decimalFeet - feet) * 12);\n        if (inches === 12) { feet++; inches = 0; }\n        $('#' + feetFieldId).val(feet);\n        $('#' + inchesFieldId).val(inches);\n    }\n}",
+      "combineFunction": "function combineDraftValue(feetFieldId, inchesFieldId) {\n    var feet = parseInt($('#' + feetFieldId).val()) || 0;\n    var inches = parseInt($('#' + inchesFieldId).val()) || 0;\n    if (feet === 0 && inches === 0) return null;\n    return (feet + inches / 12).toFixed(3);\n}"
+    },
+    "draftCalculations": {
+      "description": "Calculate maximum and average drafts from corner measurements",
+      "calculateMaxDraft": "function calculateMaxDraft() {\n    var portBow = parseFloat(combineDraftValue('draftPortBowFeet', 'draftPortBowInches')) || 0;\n    var stbdBow = parseFloat(combineDraftValue('draftStarboardBowFeet', 'draftStarboardBowInches')) || 0;\n    var portStern = parseFloat(combineDraftValue('draftPortSternFeet', 'draftPortSternInches')) || 0;\n    var stbdStern = parseFloat(combineDraftValue('draftStarboardSternFeet', 'draftStarboardSternInches')) || 0;\n    \n    var maxDraft = Math.max(portBow, stbdBow, portStern, stbdStern);\n    if (maxDraft > 0) {\n        $('#Draft').val(maxDraft.toFixed(3));\n        splitDraftValue(maxDraft.toFixed(3), 'draftFeet', 'draftInches');\n    }\n    return maxDraft;\n}",
+      "calculateAverageDraft": "function calculateAverageDraft() {\n    if ($('#EventTypeEnumVal').val() !== 'DraftSurvey') return;\n    \n    var portBow = parseFloat(combineDraftValue('draftPortBowFeet', 'draftPortBowInches')) || 0;\n    var stbdBow = parseFloat(combineDraftValue('draftStarboardBowFeet', 'draftStarboardBowInches')) || 0;\n    var portStern = parseFloat(combineDraftValue('draftPortSternFeet', 'draftPortSternInches')) || 0;\n    var stbdStern = parseFloat(combineDraftValue('draftStarboardSternFeet', 'draftStarboardSternInches')) || 0;\n    \n    // Convert to inches for precise averaging\n    var portBowInches = portBow * 12;\n    var stbdBowInches = stbdBow * 12;\n    var portSternInches = portStern * 12;\n    var stbdSternInches = stbdStern * 12;\n    \n    // Average and round to nearest inch (midpoint away from zero)\n    var avgInches = (portBowInches + stbdBowInches + portSternInches + stbdSternInches) / 4;\n    avgInches = Math.round(avgInches); // Rounds .5 up\n    \n    // Convert back to decimal feet\n    var avgFeet = (avgInches / 12).toFixed(3);\n    $('#DraftAverage').val(avgFeet);\n    splitDraftValue(avgFeet, 'draftAverageFeet', 'draftAverageInches');\n    \n    return avgFeet;\n}"
+    },
+    "tonnageCalculations": {
+      "description": "Calculate tonnage from draft using server-side API",
+      "calculateTonnage": "function calculateTonnage() {\n    if ($('#EventTypeEnumVal').val() !== 'DraftSurvey') return;\n    \n    var avgDraft = calculateAverageDraft();\n    if (!avgDraft || avgDraft === '0.000') return;\n    \n    // Call API to calculate tonnage\n    $.ajax({\n        url: '/Draft/CalculateTonnage',\n        type: 'POST',\n        data: {\n            draftAverage: avgDraft,\n            bargeSeriesId: $('#BargeSeriesID').val(),\n            loadStatus: $('#LoadStatus').val(),\n            eventType: $('#EventTypeEnumVal').val(),\n            ticketId: $('#TicketId').val(),\n            eventId: $('#EventId').val(),\n            coverType: $('#CoverType').val(),\n            coverSubTypeId: $('#CoverSubTypeID').val(),\n            coverConfig: $('#CoverConfig').val()\n        },\n        success: function(result) {\n            $('#EstimatedCargoDeadweight').val(result.estimatedCargoDeadweight.toFixed(2));\n            $('#LightshipCorrection').val(result.lightshipCorrection.toFixed(2));\n            calculateLoadUnloadTons();\n        },\n        error: function(xhr, status, error) {\n            console.error('Tonnage calculation failed:', error);\n        }\n    });\n}",
+      "calculateLoadUnloadTons": "function calculateLoadUnloadTons() {\n    var cargo = parseFloat($('#EstimatedCargoDeadweight').val()) || 0;\n    var lightship = parseFloat($('#LightshipCorrection').val()) || 0;\n    var adjustment = parseFloat($('#AdjustmentTons').val()) || 0;\n    \n    var loadUnloadTons = cargo - lightship + adjustment;\n    $('#LoadUnloadTons').val(loadUnloadTons.toFixed(2));\n}"
+    },
+    "formSubmit": {
+      "description": "Combine split inputs before form submission",
+      "code": "$('form').on('submit', function() {\n    // Combine all feet/inches into decimal values\n    $('#DraftPortBow').val(combineDraftValue('draftPortBowFeet', 'draftPortBowInches'));\n    $('#DraftStarboardBow').val(combineDraftValue('draftStarboardBowFeet', 'draftStarboardBowInches'));\n    $('#DraftPortStern').val(combineDraftValue('draftPortSternFeet', 'draftPortSternInches'));\n    $('#DraftStarboardStern').val(combineDraftValue('draftStarboardSternFeet', 'draftStarboardSternInches'));\n    $('#Draft').val(combineDraftValue('draftFeet', 'draftInches'));\n    \n    if ($('#EventTypeEnumVal').val() === 'DraftSurvey') {\n        $('#DraftAverage').val(combineDraftValue('draftAverageFeet', 'draftAverageInches'));\n    }\n    \n    return true;\n});"
+    },
+    "validation": {
+      "description": "Client-side validation using jquery.validate",
+      "code": "$('form').validate({\n    rules: {\n        draftPortBowFeet: { min: 0, max: 99 },\n        draftPortBowInches: { min: 0, max: 11 },\n        draftStarboardBowFeet: { min: 0, max: 99 },\n        draftStarboardBowInches: { min: 0, max: 11 },\n        draftPortSternFeet: { min: 0, max: 99 },\n        draftPortSternInches: { min: 0, max: 11 },\n        draftStarboardSternFeet: { min: 0, max: 99 },\n        draftStarboardSternInches: { min: 0, max: 11 },\n        draftAverageFeet: { min: 0, max: 99 },\n        draftAverageInches: { min: 0, max: 11 }\n    },\n    messages: {\n        draftPortBowFeet: 'Feet must be between 0 and 99',\n        draftPortBowInches: 'Inches must be between 0 and 11'\n        // ... other messages\n    }\n});"
+    }
+  },
+  "razorViewPatterns": {
+    "cornerDraftsSection": {
+      "description": "Bootstrap card for four-corner draft measurements",
+      "html": "<div class=\"card mb-3\">\n    <div class=\"card-header\">\n        <h5 class=\"card-title mb-0\"><i class=\"fas fa-ruler-vertical\"></i> Corner Draft Measurements</h5>\n    </div>\n    <div class=\"card-body\">\n        <div class=\"row mb-3\">\n            <!-- Port Bow -->\n            <div class=\"col-md-6\">\n                <label class=\"form-label\">Port Bow</label>\n                <div class=\"row\">\n                    <div class=\"col-6\">\n                        <input type=\"number\" id=\"draftPortBowFeet\" class=\"form-control draft-corner-input\" min=\"0\" max=\"99\" placeholder=\"Feet\" aria-label=\"Port Bow Feet\" />\n                    </div>\n                    <div class=\"col-6\">\n                        <input type=\"number\" id=\"draftPortBowInches\" class=\"form-control draft-corner-input\" min=\"0\" max=\"11\" placeholder=\"Inches\" aria-label=\"Port Bow Inches\" />\n                    </div>\n                </div>\n                <span class=\"text-danger field-validation-valid\" data-valmsg-for=\"DraftPortBow\"></span>\n            </div>\n            <!-- Starboard Bow -->\n            <div class=\"col-md-6\">\n                <label class=\"form-label\">Starboard Bow</label>\n                <div class=\"row\">\n                    <div class=\"col-6\">\n                        <input type=\"number\" id=\"draftStarboardBowFeet\" class=\"form-control draft-corner-input\" min=\"0\" max=\"99\" placeholder=\"Feet\" aria-label=\"Starboard Bow Feet\" />\n                    </div>\n                    <div class=\"col-6\">\n                        <input type=\"number\" id=\"draftStarboardBowInches\" class=\"form-control draft-corner-input\" min=\"0\" max=\"11\" placeholder=\"Inches\" aria-label=\"Starboard Bow Inches\" />\n                    </div>\n                </div>\n                <span class=\"text-danger field-validation-valid\" data-valmsg-for=\"DraftStarboardBow\"></span>\n            </div>\n        </div>\n        <div class=\"row mb-3\">\n            <!-- Port Stern -->\n            <div class=\"col-md-6\">\n                <label class=\"form-label\">Port Stern</label>\n                <div class=\"row\">\n                    <div class=\"col-6\">\n                        <input type=\"number\" id=\"draftPortSternFeet\" class=\"form-control draft-corner-input\" min=\"0\" max=\"99\" placeholder=\"Feet\" aria-label=\"Port Stern Feet\" />\n                    </div>\n                    <div class=\"col-6\">\n                        <input type=\"number\" id=\"draftPortSternInches\" class=\"form-control draft-corner-input\" min=\"0\" max=\"11\" placeholder=\"Inches\" aria-label=\"Port Stern Inches\" />\n                    </div>\n                </div>\n                <span class=\"text-danger field-validation-valid\" data-valmsg-for=\"DraftPortStern\"></span>\n            </div>\n            <!-- Starboard Stern -->\n            <div class=\"col-md-6\">\n                <label class=\"form-label\">Starboard Stern</label>\n                <div class=\"row\">\n                    <div class=\"col-6\">\n                        <input type=\"number\" id=\"draftStarboardSternFeet\" class=\"form-control draft-corner-input\" min=\"0\" max=\"99\" placeholder=\"Feet\" aria-label=\"Starboard Stern Feet\" />\n                    </div>\n                    <div class=\"col-6\">\n                        <input type=\"number\" id=\"draftStarboardSternInches\" class=\"form-control draft-corner-input\" min=\"0\" max=\"11\" placeholder=\"Inches\" aria-label=\"Starboard Stern Inches\" />\n                    </div>\n                </div>\n                <span class=\"text-danger field-validation-valid\" data-valmsg-for=\"DraftStarboardStern\"></span>\n            </div>\n        </div>\n        <!-- Hidden fields for decimal values -->\n        <input type=\"hidden\" asp-for=\"DraftPortBow\" id=\"DraftPortBow\" />\n        <input type=\"hidden\" asp-for=\"DraftStarboardBow\" id=\"DraftStarboardBow\" />\n        <input type=\"hidden\" asp-for=\"DraftPortStern\" id=\"DraftPortStern\" />\n        <input type=\"hidden\" asp-for=\"DraftStarboardStern\" id=\"DraftStarboardStern\" />\n    </div>\n</div>"
+    },
+    "tonnageSection": {
+      "description": "Tonnage calculations section (Draft Survey events only)",
+      "html": "@if (Model.EventTypeEnumVal == EventTypeList.EventTypes.DraftSurvey)\n{\n    <div class=\"card mb-3\">\n        <div class=\"card-header\">\n            <h5 class=\"card-title mb-0\"><i class=\"fas fa-calculator\"></i> Tonnage Calculations</h5>\n        </div>\n        <div class=\"card-body\">\n            <div class=\"row mb-3\">\n                <div class=\"col-md-6\">\n                    <label class=\"form-label\">Average Draft (Calculated)</label>\n                    <div class=\"row\">\n                        <div class=\"col-6\">\n                            <input type=\"number\" id=\"draftAverageFeet\" class=\"form-control\" readonly />\n                        </div>\n                        <div class=\"col-6\">\n                            <input type=\"number\" id=\"draftAverageInches\" class=\"form-control\" readonly />\n                        </div>\n                    </div>\n                    <input type=\"hidden\" asp-for=\"DraftAverage\" id=\"DraftAverage\" />\n                </div>\n            </div>\n            <div class=\"row mb-3\">\n                <div class=\"col-md-6\">\n                    <label asp-for=\"EstimatedCargoDeadweight\" class=\"form-label\"></label>\n                    <input asp-for=\"EstimatedCargoDeadweight\" class=\"form-control\" readonly />\n                </div>\n                <div class=\"col-md-6\">\n                    <label asp-for=\"LightshipCorrection\" class=\"form-label\"></label>\n                    <input asp-for=\"LightshipCorrection\" class=\"form-control\" readonly />\n                </div>\n            </div>\n            <div class=\"row mb-3\">\n                <div class=\"col-md-6\">\n                    <label asp-for=\"AdjustmentTons\" class=\"form-label\"></label>\n                    <input asp-for=\"AdjustmentTons\" class=\"form-control\" type=\"number\" step=\"0.01\" />\n                </div>\n                <div class=\"col-md-6\">\n                    <label asp-for=\"LoadUnloadTons\" class=\"form-label\"></label>\n                    <input asp-for=\"LoadUnloadTons\" class=\"form-control\" readonly />\n                </div>\n            </div>\n        </div>\n    </div>\n}"
+    }
+  },
+  "viewModelStructure": {
+    "namespace": "BargeOpsAdmin.ViewModels",
+    "className": "DraftViewModel",
+    "properties": [
+      {
+        "name": "DraftID",
+        "type": "int",
+        "display": "[HiddenInput]"
+      },
+      {
+        "name": "DraftPortBow",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Port Bow\")]",
+        "validation": "[Range(0, 99.999, ErrorMessage = \"Draft Port Bow must be between 0 and 99 ft 11 in\")]"
+      },
+      {
+        "name": "DraftStarboardBow",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Starboard Bow\")]",
+        "validation": "[Range(0, 99.999)]"
+      },
+      {
+        "name": "DraftPortStern",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Port Stern\")]",
+        "validation": "[Range(0, 99.999)]"
+      },
+      {
+        "name": "DraftStarboardStern",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Starboard Stern\")]",
+        "validation": "[Range(0, 99.999)]"
+      },
+      {
+        "name": "Draft",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Overall Draft (Maximum)\")]",
+        "validation": "[Range(0, 99.999)]"
+      },
+      {
+        "name": "DraftAverage",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Average Draft\")]",
+        "validation": "[Range(0, 99.999)]"
+      },
+      {
+        "name": "EstimatedCargoDeadweight",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Estimated Cargo Deadweight\")]",
+        "format": "[DisplayFormat(DataFormatString = \"{0:N2}\", ApplyFormatInEditMode = true)]"
+      },
+      {
+        "name": "LightshipCorrection",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Lightship Correction\")]",
+        "format": "[DisplayFormat(DataFormatString = \"{0:N2}\")]"
+      },
+      {
+        "name": "AdjustmentTons",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Adjustment Tons\")]",
+        "format": "[DisplayFormat(DataFormatString = \"{0:N2}\")]"
+      },
+      {
+        "name": "LoadUnloadTons",
+        "type": "decimal?",
+        "display": "[Display(Name = \"Load/Unload Tons\")]",
+        "format": "[DisplayFormat(DataFormatString = \"{0:N2}\")]"
+      },
+      {
+        "name": "EventTypeEnumVal",
+        "type": "string",
+        "description": "Hidden field to determine if Draft Survey calculations should display"
+      },
+      {
+        "name": "LoadStatus",
+        "type": "string",
+        "description": "Empty, Load, or PartLoad - affects tonnage calculations"
+      },
+      {
+        "name": "BargeSeriesID",
+        "type": "string",
+        "description": "Reference to BargeSeries for draft/tonnage tables"
+      }
+    ]
+  },
+  "cssPatterns": {
+    "draftInputGroup": ".draft-input-group {\n    display: flex;\n    gap: 0.5rem;\n}\n\n.draft-input-group input {\n    flex: 1;\n}\n\n.draft-input-group label {\n    font-weight: 600;\n    margin-bottom: 0.25rem;\n}",
+    "readonlyFields": ".form-control[readonly] {\n    background-color: #e9ecef;\n    cursor: not-allowed;\n}",
+    "calculatedField": ".calculated-field {\n    background-color: #f8f9fa;\n    border-left: 3px solid #0d6efd;\n    padding-left: 0.5rem;\n}"
+  },
+  "accessibilityRequirements": {
+    "labels": "All inputs MUST have associated labels using asp-for or for attributes",
+    "ariaLabels": "Split feet/inches inputs require aria-label for screen readers",
+    "ariaDescribedby": "Validation messages linked via aria-describedby",
+    "ariaRequired": "Required fields marked with aria-required=\"true\"",
+    "keyboardNavigation": "Tab order flows logically through feet/inches pairs",
+    "screenReaderAnnouncements": "Calculated fields announce updates via aria-live regions"
+  },
+  "validationStrategy": {
+    "clientSide": {
+      "library": "jquery.validate with unobtrusive validation",
+      "rules": [
+        "Feet: min=0, max=99",
+        "Inches: min=0, max=11",
+        "Overall draft >= max(corner drafts)",
+        "Number format validation for tonnage fields"
+      ]
+    },
+    "serverSide": {
+      "library": "FluentValidation",
+      "validator": "DraftValidator",
+      "rules": [
+        "RuleFor(x => x.Draft).InclusiveBetween(0, 99.999m)",
+        "RuleFor(x => x.DraftPortBowInches).InclusiveBetween(0, 11)",
+        "Custom validator for Draft >= Max(corners)",
+        "Conditional validation for Draft Survey fields"
+      ]
+    }
+  },
+  "deploymentNotes": {
+    "jsLocation": "src/BargeOps.UI/wwwroot/js/draftEdit.js",
+    "cssLocation": "src/BargeOps.UI/wwwroot/css/draftEdit.css",
+    "viewLocation": "src/BargeOps.UI/Views/Draft/_DraftEditor.cshtml (partial view)",
+    "controllerLocation": "src/BargeOps.UI/Controllers/DraftController.cs",
+    "apiEndpoints": [
+      "POST /Draft/CalculateTonnage - Calculate tonnage from draft",
+      "GET /Draft/GetPriorDraftSurveys/{ticketId} - Get prior surveys for calculations"
+    ]
+  },
+  "commonMistakes": [
+    "❌ Using single datetime-local input instead of split date/time",
+    "❌ Using 12-hour time format instead of 24-hour (HH:mm)",
+    "❌ Not splitting draft decimal values into feet/inches on page load",
+    "❌ Not combining feet/inches before form submit",
+    "❌ Showing tonnage calculations for non-DraftSurvey events",
+    "❌ Not using Select2 for dropdowns",
+    "❌ Using inline styles instead of Bootstrap classes",
+    "❌ Missing validation for inches range (0-11)",
+    "❌ Not making calculated fields readonly",
+    "❌ Not triggering recalculation when corner drafts change"
+  ],
+  "criticalPatterns": {
+    "feetInchesPattern": {
+      "importance": "CRITICAL",
+      "description": "Draft measurements MUST use split feet/inches inputs with proper conversion",
+      "onLoad": "Split decimal draft into separate feet and inches inputs",
+      "onChange": "Recalculate dependent fields when any input changes",
+      "onSubmit": "Combine feet/inches back to decimal before POST",
+      "validation": "Feet: 0-99, Inches: 0-11"
+    },
+    "calculationTriggers": {
+      "importance": "CRITICAL",
+      "description": "Automatic calculations must trigger on input change",
+      "triggers": [
+        "Corner draft change → Calculate max draft and average draft",
+        "Average draft change → Calculate tonnage (Draft Survey only)",
+        "Tonnage/adjustment change → Calculate LoadUnloadTons"
+      ]
+    },
+    "conditionalVisibility": {
+      "importance": "HIGH",
+      "description": "Tonnage section only visible for Draft Survey events",
+      "implementation": "@if (Model.EventTypeEnumVal == EventTypeList.EventTypes.DraftSurvey) { ... }"
+    }
+  }
+}

@@ -1,0 +1,688 @@
+{
+  "formName": "frmBoatStatus",
+  "formTitle": "Boat Status",
+  "baseClass": "frmBaseDetailEditList",
+  "implements": ["IBaseDetailEdit"],
+  "businessObjects": [
+    {
+      "name": "BoatLocation",
+      "type": "BusinessLogic.BoatLocation",
+      "description": "Parent business object representing the boat location"
+    },
+    {
+      "name": "BoatMaintenanceLog",
+      "type": "BusinessLogic.BoatMaintenanceLog",
+      "description": "Child business object for maintenance log entries"
+    }
+  ],
+  "formType": "DetailEditList",
+  "description": "Master-detail form for managing boat status maintenance logs including status changes, division/facility changes, and boat role changes",
+  "layout": {
+    "type": "MasterDetail",
+    "masterSection": "grdDetailEditList",
+    "detailSection": "grpDetailEditChild",
+    "orientation": "Vertical"
+  },
+  "controls": [
+    {
+      "name": "dtStartDate",
+      "type": "UltraDateTimeEditor",
+      "category": "DataEntry",
+      "section": "grpDetailEditChild",
+      "label": "Start date/time",
+      "labelControl": "lblStartDateTime",
+      "dataBinding": "BoatMaintenanceLog.StartDateTime",
+      "required": true,
+      "validation": [],
+      "events": ["Validated"],
+      "tabIndex": 1,
+      "modernPattern": {
+        "type": "SplitDateTime",
+        "dateInput": {
+          "id": "StartDate",
+          "type": "date",
+          "label": "Start Date",
+          "required": true
+        },
+        "timeInput": {
+          "id": "StartTime",
+          "type": "time",
+          "label": "Start Time (24-hour)",
+          "required": true,
+          "linkedControl": "cboStartTime"
+        },
+        "displayFormat": "MM/dd/yyyy HH:mm",
+        "note": "CRITICAL: Requires split input pattern with military time (24-hour format)"
+      },
+      "location": {
+        "x": 126,
+        "y": 19,
+        "width": 88,
+        "height": 21
+      }
+    },
+    {
+      "name": "cboStartTime",
+      "type": "UltraCombo",
+      "category": "DataEntry",
+      "section": "grpDetailEditChild",
+      "label": null,
+      "dataBinding": "BoatMaintenanceLog.StartDateTime",
+      "populationMethod": "InfragisticsHelper.PopulateTimeCombo",
+      "required": true,
+      "validation": [],
+      "events": ["Validated"],
+      "tabIndex": 2,
+      "note": "Time component of StartDateTime - MUST convert to 24-hour military time format",
+      "location": {
+        "x": 216,
+        "y": 19,
+        "width": 60,
+        "height": 22
+      }
+    },
+    {
+      "name": "optMaintenanceType",
+      "type": "UltraOptionSet",
+      "category": "DataEntry",
+      "section": "grpDetailEditChild",
+      "label": null,
+      "dataBinding": "BoatMaintenanceLog.MaintenanceType",
+      "required": true,
+      "validation": [],
+      "events": ["ValueChanged", "Validated"],
+      "tabIndex": 3,
+      "options": [
+        {
+          "value": "Boat Status",
+          "displayText": "Boat Status",
+          "description": "Change boat status"
+        },
+        {
+          "value": "Change Division/Facility",
+          "displayText": "Division / Facility",
+          "description": "Change division and port facility assignment"
+        },
+        {
+          "value": "Change Boat Role",
+          "displayText": "Boat Role",
+          "description": "Change boat role assignment"
+        }
+      ],
+      "behavior": {
+        "readonlyWhenNotNew": true,
+        "controlsVisibility": true,
+        "description": "Selection controls which other fields are enabled/required"
+      },
+      "location": {
+        "x": 9,
+        "y": 41,
+        "width": 111,
+        "height": 111
+      }
+    },
+    {
+      "name": "cboStatus",
+      "type": "UltraCombo",
+      "category": "DataEntry",
+      "section": "grpDetailEditChild",
+      "label": "Status",
+      "labelControl": "lblStatus",
+      "labelBold": true,
+      "dataBinding": "BoatMaintenanceLog.Status",
+      "populationMethod": "Main.PopulateValidationListCombo(Lists.ValidationList.ValidationTypes.BoatStatus)",
+      "valueField": null,
+      "displayField": null,
+      "required": false,
+      "conditionallyEnabled": true,
+      "enabledWhen": "optMaintenanceType = 'Boat Status'",
+      "validation": [],
+      "events": ["Validated"],
+      "tabIndex": 5,
+      "location": {
+        "x": 192,
+        "y": 47,
+        "width": 234,
+        "height": 22
+      }
+    },
+    {
+      "name": "cboDivision",
+      "type": "UltraCombo",
+      "category": "DataEntry",
+      "section": "grpDetailEditChild",
+      "label": "Division",
+      "labelControl": "lblDivision",
+      "labelBold": true,
+      "dataBinding": "BoatMaintenanceLog.Division",
+      "populationMethod": "Main.PopulateValidationListCombo(Lists.ValidationList.ValidationTypes.Division)",
+      "valueField": null,
+      "displayField": null,
+      "required": false,
+      "conditionallyEnabled": true,
+      "enabledWhen": "optMaintenanceType = 'Change Division/Facility'",
+      "validation": [],
+      "events": ["InitializeRow", "ValueChanged", "Validated"],
+      "tabIndex": 7,
+      "behavior": {
+        "hidesFreightDivision": true,
+        "triggersPortFacilityPopulation": true
+      },
+      "location": {
+        "x": 192,
+        "y": 75,
+        "width": 152,
+        "height": 22
+      }
+    },
+    {
+      "name": "cboPortFacilityID",
+      "type": "UltraCombo",
+      "category": "DataEntry",
+      "section": "grpDetailEditChild",
+      "label": "Port facility",
+      "labelControl": "lblPortFacilityID",
+      "dataBinding": "BoatMaintenanceLog.PortFacilityID",
+      "populationMethod": "PopulatePortFacilityCombo",
+      "populationLogic": "Conditional based on IsFleetBoat and FleetID",
+      "valueField": "LocationID",
+      "displayField": "LocationName",
+      "required": false,
+      "conditionallyEnabled": true,
+      "enabledWhen": "optMaintenanceType = 'Change Division/Facility'",
+      "validation": [],
+      "events": ["Validated"],
+      "tabIndex": 9,
+      "dependencies": ["cboDivision"],
+      "location": {
+        "x": 192,
+        "y": 103,
+        "width": 234,
+        "height": 22
+      }
+    },
+    {
+      "name": "cboBoatRoleID",
+      "type": "UltraCombo",
+      "category": "DataEntry",
+      "section": "grpDetailEditChild",
+      "label": "Boat role",
+      "labelControl": "lblBoatRoleID",
+      "labelBold": true,
+      "dataBinding": "BoatMaintenanceLog.BoatRoleID",
+      "populationMethod": "Main.PopulateListCombo(Lists.BoatRoleList.GetList())",
+      "valueField": null,
+      "displayField": null,
+      "required": false,
+      "conditionallyEnabled": true,
+      "enabledWhen": "optMaintenanceType = 'Change Boat Role'",
+      "validation": [],
+      "events": ["Validated"],
+      "tabIndex": 11,
+      "location": {
+        "x": 192,
+        "y": 131,
+        "width": 234,
+        "height": 22
+      }
+    },
+    {
+      "name": "txtNote",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "section": "grpDetailEditChild",
+      "label": "Note",
+      "labelControl": "lblNote",
+      "dataBinding": "BoatMaintenanceLog.Note",
+      "required": false,
+      "multiline": true,
+      "acceptsReturn": true,
+      "maxLength": "BoatMaintenanceLog.MaxLength.Note",
+      "validation": ["String"],
+      "events": ["Validated"],
+      "tabIndex": 12,
+      "location": {
+        "x": 496,
+        "y": 19,
+        "width": 491,
+        "height": 105
+      }
+    }
+  ],
+  "grids": [
+    {
+      "name": "grdDetailEditList",
+      "type": "UltraGrid",
+      "category": "DataDisplay",
+      "section": "grpDetailEditList",
+      "uniqueIdentifier": "BoatMaintenanceLogID",
+      "dataBinding": "BoatLocation.BoatMaintenanceLogs",
+      "dock": "Fill",
+      "columns": [
+        {
+          "key": "StartDateTime",
+          "header": "Date",
+          "dataType": "DateTime",
+          "width": 103,
+          "alignment": "Left",
+          "sortable": true,
+          "customComparer": "DateTimeSortComparer",
+          "defaultSort": "Descending"
+        },
+        {
+          "key": "MaintenanceType",
+          "header": "Type",
+          "dataType": "String",
+          "width": 142,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "Status",
+          "header": "Status",
+          "dataType": "String",
+          "width": 207,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "Division",
+          "header": "Division",
+          "dataType": "String",
+          "width": 94,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "PortFacility",
+          "header": "Port Facility",
+          "dataType": "String",
+          "width": 150,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "BoatRole",
+          "header": "Boat Role",
+          "dataType": "String",
+          "width": 125,
+          "alignment": "Left",
+          "sortable": true
+        },
+        {
+          "key": "Note",
+          "header": "Note",
+          "dataType": "String",
+          "width": 130,
+          "alignment": "Left",
+          "sortable": true
+        }
+      ],
+      "autoFitStyle": "ExtendLastColumn",
+      "events": ["DoubleClick", "AfterSelectChange"],
+      "interactions": {
+        "doubleClick": "Opens detail edit for selected row",
+        "selection": "Enables/disables toolbar buttons"
+      },
+      "location": {
+        "x": 0,
+        "y": 26,
+        "width": 994,
+        "height": 386
+      }
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnClose",
+      "type": "UltraButton",
+      "text": "&Close",
+      "section": "grpSubmitCancel",
+      "buttonType": "Cancel",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnClose_Click",
+      "causesValidation": true,
+      "dialogResult": "None",
+      "tabIndex": 1,
+      "anchor": "Bottom,Right",
+      "purpose": "Close form with unsaved changes validation",
+      "location": {
+        "x": 917,
+        "y": 7,
+        "width": 76,
+        "height": 24
+      }
+    },
+    {
+      "name": "btnSetEdit",
+      "type": "UltraButton",
+      "text": "S&et",
+      "section": "grpDetailEditChild",
+      "buttonType": "Submit",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnSetEdit_Click",
+      "tabIndex": 13,
+      "anchor": "Bottom,Right",
+      "purpose": "Save changes to current maintenance log entry",
+      "location": {
+        "x": 832,
+        "y": 148,
+        "width": 76,
+        "height": 24
+      }
+    },
+    {
+      "name": "btnCancelEdit",
+      "type": "UltraButton",
+      "text": "C&ancel",
+      "section": "grpDetailEditChild",
+      "buttonType": "CancelEdit",
+      "enabled": true,
+      "visible": true,
+      "causesValidation": false,
+      "handler": "btnCancelEdit_Click",
+      "tabIndex": 14,
+      "anchor": "Bottom,Right",
+      "purpose": "Cancel editing current maintenance log entry",
+      "location": {
+        "x": 915,
+        "y": 148,
+        "width": 76,
+        "height": 24
+      }
+    }
+  ],
+  "toolbarButtons": [
+    {
+      "key": "Add",
+      "text": "&Add",
+      "type": "ButtonTool",
+      "buttonType": "Add",
+      "icon": "Add",
+      "displayStyle": "ImageAndText",
+      "enabled": "Conditional",
+      "enabledWhen": "Not IsEditingChild AND Security Allows",
+      "handler": "ItemAdd",
+      "purpose": "Create new maintenance log entry"
+    },
+    {
+      "key": "Modify",
+      "text": "&Modify",
+      "type": "ButtonTool",
+      "buttonType": "Open",
+      "icon": "Modify",
+      "displayStyle": "ImageAndText",
+      "enabled": "Conditional",
+      "enabledWhen": "Row selected AND Not IsEditingChild AND Security Allows",
+      "handler": "ItemModify",
+      "purpose": "Edit selected maintenance log entry"
+    },
+    {
+      "key": "Remove",
+      "text": "&Remove",
+      "type": "ButtonTool",
+      "buttonType": "Remove",
+      "icon": "Remove",
+      "displayStyle": "ImageAndText",
+      "enabled": "Conditional",
+      "enabledWhen": "Row selected AND Not IsEditingChild AND Security Allows",
+      "handler": "ItemRemove",
+      "purpose": "Delete selected maintenance log entry with confirmation"
+    },
+    {
+      "key": "Export",
+      "text": "Export",
+      "type": "ButtonTool",
+      "buttonType": "Open",
+      "icon": "ExportResults",
+      "displayStyle": "ImageAndText",
+      "enabled": "Conditional",
+      "enabledWhen": "At least one row AND Not IsEditingChild AND Security Allows",
+      "handler": "Main.ExportGrid",
+      "purpose": "Export grid data to Excel"
+    }
+  ],
+  "panels": [
+    {
+      "name": "pnlBoatStatus",
+      "type": "UltraPanel",
+      "dock": "Fill",
+      "controls": ["grpSubmitCancel", "grpDetailEditList"]
+    },
+    {
+      "name": "grpDetailEditList",
+      "type": "UltraGroupBox",
+      "label": null,
+      "dock": "Fill",
+      "controls": ["pnlDetailEditList"]
+    },
+    {
+      "name": "pnlDetailEditList",
+      "type": "UltraPanel",
+      "dock": "Fill",
+      "controls": ["grdDetailEditList", "grpDetailEditChild", "ToolbarsManager"]
+    },
+    {
+      "name": "grpDetailEditChild",
+      "type": "UltraGroupBox",
+      "label": "Detail",
+      "dock": "Bottom",
+      "borderStyle": "Header3D",
+      "controls": [
+        "lblStartDateTime",
+        "dtStartDate",
+        "cboStartTime",
+        "optMaintenanceType",
+        "lblStatus",
+        "cboStatus",
+        "lblDivision",
+        "cboDivision",
+        "lblPortFacilityID",
+        "cboPortFacilityID",
+        "lblBoatRoleID",
+        "cboBoatRoleID",
+        "lblNote",
+        "txtNote",
+        "btnSetEdit",
+        "btnCancelEdit"
+      ],
+      "location": {
+        "x": 0,
+        "y": 412,
+        "width": 994,
+        "height": 211
+      }
+    },
+    {
+      "name": "grpSubmitCancel",
+      "type": "UltraGroupBox",
+      "label": null,
+      "dock": "Bottom",
+      "borderStyle": "Header3D",
+      "controls": ["btnClose"],
+      "location": {
+        "x": 0,
+        "y": 593,
+        "width": 1000,
+        "height": 36
+      }
+    }
+  ],
+  "validation": {
+    "extender": "ValidatorExtender",
+    "displayControl": "staStatus",
+    "rules": [
+      {
+        "control": "txtNote",
+        "validationType": "String",
+        "required": false,
+        "maxLength": "BoatMaintenanceLog.MaxLength.Note"
+      },
+      {
+        "control": "dtStartDate",
+        "validationType": "DateTime",
+        "required": true,
+        "description": "Start date is required"
+      },
+      {
+        "control": "cboStartTime",
+        "validationType": "Time",
+        "required": true,
+        "description": "Start time is required"
+      },
+      {
+        "control": "optMaintenanceType",
+        "validationType": "Required",
+        "required": true,
+        "description": "Maintenance type must be selected"
+      }
+    ],
+    "conditionalRules": [
+      {
+        "condition": "optMaintenanceType = 'Boat Status'",
+        "rules": [
+          {
+            "control": "cboStatus",
+            "validationType": "Required",
+            "required": true,
+            "description": "Status is required when maintenance type is Boat Status"
+          }
+        ]
+      },
+      {
+        "condition": "optMaintenanceType = 'Change Division/Facility'",
+        "rules": [
+          {
+            "control": "cboDivision",
+            "validationType": "Required",
+            "required": true,
+            "description": "Division is required when maintenance type is Change Division/Facility"
+          },
+          {
+            "control": "cboPortFacilityID",
+            "validationType": "Required",
+            "required": true,
+            "description": "Port facility is required when maintenance type is Change Division/Facility"
+          }
+        ]
+      },
+      {
+        "condition": "optMaintenanceType = 'Change Boat Role'",
+        "rules": [
+          {
+            "control": "cboBoatRoleID",
+            "validationType": "Required",
+            "required": true,
+            "description": "Boat role is required when maintenance type is Change Boat Role"
+          }
+        ]
+      }
+    ]
+  },
+  "eventHandlers": {
+    "frmDetailEdit_Load": "Initializes form, formats controls, and populates grid",
+    "frmDetailEdit_FormClosed": "Saves grid settings to user preferences",
+    "btnClose_Click": "Handles form close with validation of unsaved changes",
+    "btnSetEdit_Click": "Saves current maintenance log entry",
+    "btnCancelEdit_Click": "Cancels editing of current maintenance log entry",
+    "ToolbarsManager_ToolClick": "Routes toolbar button clicks to appropriate handlers",
+    "cboDivision_InitializeRow": "Hides Freight division from dropdown list",
+    "cboDivision_ValueChanged": "Triggers re-population of port facility dropdown",
+    "cboDivision_Validated": "Updates BoatMaintenanceLog.Division property",
+    "cboPortFacilityID_Validated": "Updates BoatMaintenanceLog.PortFacilityID property",
+    "optMaintenanceType_ValueChanged": "Enables/disables conditional controls based on selection",
+    "optMaintenanceType_Validated": "Updates BoatMaintenanceLog.MaintenanceType property",
+    "dtStartDate_Validated": "Updates StartDateTime with combined date and time",
+    "cboStartTime_Validated": "Updates StartDateTime with combined date and time",
+    "cboStatus_Validated": "Updates BoatMaintenanceLog.Status property",
+    "txtNote_Validated": "Updates BoatMaintenanceLog.Note property",
+    "cboBoatRoleID_Validated": "Updates BoatMaintenanceLog.BoatRoleID property",
+    "grdDetailEditList_DoubleClick": "Opens selected row for editing via ItemModify",
+    "grdDetailEditList_AfterSelectChange": "Updates toolbar button states via SetToolState"
+  },
+  "businessLogic": {
+    "initialization": {
+      "method": "Initialize",
+      "parameters": ["BoatLocation businessObject", "string boatName"],
+      "description": "Initializes form with boat location and sets form title"
+    },
+    "saveLogic": {
+      "method": "SetClickListAndDetail",
+      "preprocessing": "ClearUnusedFields",
+      "description": "Clears fields not applicable to selected maintenance type before saving",
+      "postprocessing": "RefreshList and EnableDisableControls"
+    },
+    "cancelLogic": {
+      "method": "CancelClickListAndDetail",
+      "dirtyCheck": "ChangedThisEdit",
+      "description": "Validates unsaved changes before canceling"
+    },
+    "deleteLogic": {
+      "method": "ItemRemove",
+      "confirmation": "ItemRemoveDialog with 'Boat Status' message",
+      "description": "Removes maintenance log entry from collection"
+    },
+    "fieldClearing": {
+      "method": "ClearUnusedFields",
+      "rules": [
+        {
+          "condition": "MaintenanceType != 'Boat Status'",
+          "action": "Clear Status field"
+        },
+        {
+          "condition": "MaintenanceType != 'Change Division/Facility'",
+          "action": "Clear Division and PortFacilityID fields"
+        },
+        {
+          "condition": "MaintenanceType != 'Change Boat Role'",
+          "action": "Clear BoatRoleID field"
+        }
+      ]
+    }
+  },
+  "security": {
+    "interface": "IBaseDetailEdit",
+    "authorizationProvider": "ControlAuthorization",
+    "buttonTypes": {
+      "btnClose": "Cancel",
+      "btnSetEdit": "Submit",
+      "btnCancelEdit": "CancelEdit",
+      "Add": "Add",
+      "Modify": "Open",
+      "Remove": "Remove",
+      "Export": "Open"
+    },
+    "securityChecks": "ToolbarButtonCanBeEnabled method validates security for each toolbar button"
+  },
+  "dependencies": {
+    "lists": [
+      "Lists.ValidationList.BoatStatus",
+      "Lists.ValidationList.Division",
+      "Lists.FacilityLocationList",
+      "Lists.FleetList.Facilities",
+      "Lists.BoatRoleList"
+    ],
+    "helpers": [
+      "InfragisticsHelper.PopulateTimeCombo",
+      "InfragisticsHelper.SetCombinedDateTimeProp",
+      "InfragisticsHelper.HideValidationListRow",
+      "InfragisticsHelper.FormatColumn",
+      "InfragisticsHelper.SetGridCustomComparer"
+    ]
+  },
+  "modernizationNotes": {
+    "formType": "Convert to ASP.NET Core MVC with master-detail layout",
+    "gridComponent": "Use DataTables with server-side processing for maintenance log list",
+    "dateTimeInputs": "CRITICAL: Split dtStartDate and cboStartTime into separate date and time inputs with 24-hour military time format",
+    "optionSet": "Convert optMaintenanceType to radio button group with conditional field visibility using JavaScript",
+    "dropdowns": "Use Select2 for all combo boxes with AJAX loading where appropriate",
+    "validation": "Implement client-side validation with jQuery Validation and server-side validation in controller",
+    "toolbar": "Convert toolbar buttons to Bootstrap button group in page header",
+    "statusBar": "Convert to Bootstrap toast notifications for validation messages",
+    "conditionalLogic": "Implement JavaScript to show/hide and enable/disable fields based on maintenance type selection",
+    "savePattern": "Use AJAX POST for save operations with optimistic locking",
+    "gridSavePattern": "Persist grid settings (column widths, sort order) in user preferences"
+  }
+}

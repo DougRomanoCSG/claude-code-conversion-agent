@@ -1,0 +1,166 @@
+{
+  "generatedAt": "2025-12-22T20:11:20.004Z",
+  "audits": [
+    {
+      "folder": "Barge",
+      "entity": "Barge",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": true,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargeConditions",
+      "entity": "BargeConditions",
+      "formName": "frmBargeConditions",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": false,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargeDailyExpense",
+      "entity": "BargeDailyExpense",
+      "formName": "frmBargeDailyExpenseSearch",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": false,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargeDraft",
+      "entity": "BargeDraft",
+      "formName": "frmBargeDraft",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": false,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargeEvent",
+      "entity": "BargeEvent",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": true,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargeExVendorDocInbox",
+      "entity": "BargeExVendorDocInbox",
+      "formName": "frmBargeExVendorDocInboxSearch",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": false,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargeExVendorDocInboxImport",
+      "entity": "BargeExVendorDocInboxImport",
+      "formName": "frmBargeExVendorDocInboxImport",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": false,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargePositionHistory",
+      "entity": "BargePositionHistory",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": true,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargePositions",
+      "entity": "BargePositions",
+      "formName": "frmBargePositions",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": false,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargeSeries",
+      "entity": "BargeSeries",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": true,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargeTokenColors",
+      "entity": "BargeTokenColors",
+      "formName": "frmBargeTokenColors",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": false,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BargeTokenMap",
+      "entity": "BargeTokenMap",
+      "formName": "frmBargeTokenMap",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": false,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BoatFuelPrices",
+      "entity": "BoatFuelPrices",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": true,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "BoatStatus",
+      "entity": "BoatStatus",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": true,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "River",
+      "entity": "River",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": true,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "RiverArea",
+      "entity": "RiverArea",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": true,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    },
+    {
+      "folder": "Vendor",
+      "entity": "Vendor",
+      "overallStatus": "completed",
+      "hasTemplatesFolder": true,
+      "problemSteps": [],
+      "missingStepOutputs": [],
+      "missingForTemplateGen": []
+    }
+  ]
+}

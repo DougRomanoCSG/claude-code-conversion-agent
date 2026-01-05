@@ -1,0 +1,263 @@
+{
+  "entityName": "BoatFuelPrices",
+  "primaryKey": "BoatFuelPriceID",
+  "hasChildCollections": false,
+  "hasParentRelationships": true,
+  "childCollections": [],
+  "parentRelationships": [
+    {
+      "parentEntity": "VendorBusinessUnit",
+      "relationshipType": "ManyToOne",
+      "foreignKey": "FuelVendorBusinessUnitID",
+      "parentKey": "VendorBusinessUnitID",
+      "isRequired": false,
+      "description": "References the fuel vendor/supplier business unit",
+      "displayProperty": "FuelVendor",
+      "notes": [
+        "FuelVendorBusinessUnitID is nullable in the BoatFuelPrice table",
+        "References VendorBusinessUnit table where IsFuelSupplier = true",
+        "Foreign key constraint: FK_BoatFuelPrice_FuelVendorBusinessUnitID",
+        "InvoiceNumber field is conditionally required based on FuelVendorBusinessUnitID presence",
+        "Business rule: InvoiceNumber must be blank when FuelVendorBusinessUnitID is blank"
+      ],
+      "uiControls": [
+        {
+          "controlName": "cboFuelVendorBusinessUnitID",
+          "controlType": "UltraCombo",
+          "location": "grpDetail",
+          "dataSource": "Lists.FuelVendorList.GetList",
+          "isSearchCriteria": false
+        },
+        {
+          "controlName": "cboFuelVendorSearch",
+          "controlType": "UltraCombo",
+          "location": "pnlCriteria",
+          "dataSource": "Lists.FuelVendorList.GetList",
+          "isSearchCriteria": true
+        }
+      ]
+    }
+  ],
+  "relatedEntities": [
+    {
+      "entityName": "BoatFuel",
+      "relationshipType": "Sibling",
+      "description": "Related entity that also references VendorBusinessUnit via FuelVendorBusinessUnitID",
+      "notes": [
+        "BoatFuel and BoatFuelPrice are sibling entities both using fuel vendor references",
+        "BoatFuelPrice defines pricing, while BoatFuel tracks actual fuel consumption",
+        "Both entities share the same foreign key pattern to VendorBusinessUnit"
+      ]
+    }
+  ],
+  "gridStructure": {
+    "gridControl": "grdSearch",
+    "location": "frmBoatFuelPrices.vb",
+    "dataSource": "Lists.BoatFuelPriceSearch.GetList",
+    "uniqueIdentifier": "BoatFuelPriceID",
+    "columns": [
+      {
+        "columnName": "EffectiveDate",
+        "heading": "Effective Date",
+        "width": 100,
+        "alignment": "Left",
+        "dataType": "SmartDate",
+        "sortable": true,
+        "customComparer": "DateTimeSortComparer",
+        "defaultSortOrder": "Descending",
+        "defaultSortPriority": 1
+      },
+      {
+        "columnName": "Price",
+        "heading": "Fuel Price",
+        "width": 100,
+        "alignment": "Right",
+        "dataType": "Currency",
+        "format": "FmtCurrencyFourDecimalExact",
+        "sortable": true,
+        "customComparer": "NumericSortComparer"
+      },
+      {
+        "columnName": "FuelVendor",
+        "heading": "Fuel Vendor",
+        "width": 250,
+        "alignment": "Left",
+        "dataType": "String",
+        "sortable": true,
+        "defaultSortOrder": "Ascending",
+        "defaultSortPriority": 2,
+        "notes": "Display name from VendorBusinessUnit relationship"
+      },
+      {
+        "columnName": "InvoiceNumber",
+        "heading": "Invoice",
+        "width": 100,
+        "alignment": "Left",
+        "dataType": "String",
+        "sortable": true
+      }
+    ],
+    "searchParameters": [
+      {
+        "parameterName": "effectiveDate",
+        "controlName": "dtEffectiveDateSearch",
+        "dataType": "DateTime",
+        "isRequired": false,
+        "defaultValue": "Date.Today"
+      },
+      {
+        "parameterName": "fuelVendorBusinessUnitID",
+        "controlName": "cboFuelVendorSearch",
+        "dataType": "String",
+        "isRequired": false
+      }
+    ],
+    "storedProcedure": "BoatFuelPriceSearch"
+  },
+  "crudMethods": {
+    "create": {
+      "methodName": "ItemAdd",
+      "location": "frmBoatFuelPrices.vb:39-57",
+      "factoryMethod": "BoatFuelPrice.NewBoatFuelPrice",
+      "permission": "CreateAndUpdate",
+      "modernPermission": "[Authorize(Policy = \"BoatFuelPrices.Create\")]",
+      "description": "Creates new BoatFuelPrice object and enters edit mode"
+    },
+    "read": {
+      "methodName": "RefreshList",
+      "location": "frmBoatFuelPrices.vb:108-122",
+      "dataMethod": "Lists.BoatFuelPriceSearch.GetList",
+      "permission": "Readonly",
+      "modernPermission": "[Authorize(Policy = \"BoatFuelPrices.View\")]",
+      "description": "Searches and displays BoatFuelPrice records based on criteria"
+    },
+    "update": {
+      "methodName": "ItemModify",
+      "location": "frmBoatFuelPrices.vb:59-77",
+      "loadMethod": "BoatFuelPrice.GetBoatFuelPrice",
+      "permission": "CreateAndUpdate",
+      "modernPermission": "[Authorize(Policy = \"BoatFuelPrices.Edit\")]",
+      "description": "Loads existing BoatFuelPrice by ID and enters edit mode"
+    },
+    "delete": {
+      "methodName": "ItemRemove",
+      "location": "frmBoatFuelPrices.vb:79-88",
+      "deleteMethod": "BusinessLogic.BoatFuelPrice.DeleteBoatFuelPrice",
+      "permission": "Full",
+      "modernPermission": "[Authorize(Policy = \"BoatFuelPrices.Delete\")]",
+      "description": "Deletes BoatFuelPrice record with confirmation dialog"
+    }
+  },
+  "customMethods": [
+    {
+      "methodName": "GenerateBoatFuelPrices",
+      "location": "BoatFuelPrice.vb:84-104",
+      "returnType": "Int32",
+      "parameters": [
+        {
+          "name": "priceDate",
+          "type": "String",
+          "description": "Date of boat fuel prices"
+        }
+      ],
+      "storedProcedure": "GenerateBoatFuelPrices",
+      "description": "Public method to generate daily boat fuel prices",
+      "notes": [
+        "Used by both the Generate Vendor Fuel Prices form and OpisFuelPriceImport SSIS package",
+        "Returns number of rows inserted"
+      ]
+    }
+  ],
+  "dataAccessPatterns": {
+    "storedProcedures": {
+      "select": "BoatFuelPriceSelect",
+      "selectAll": "BoatFuelPricesSelect",
+      "insert": "BoatFuelPriceInsert",
+      "update": "BoatFuelPriceUpdate",
+      "delete": "BoatFuelPriceDelete",
+      "search": "BoatFuelPriceSearch",
+      "generate": "GenerateBoatFuelPrices"
+    },
+    "lists": {
+      "fuelVendorList": "Lists.FuelVendorList.GetList",
+      "searchList": "Lists.BoatFuelPriceSearch.GetList"
+    }
+  },
+  "businessRules": [
+    {
+      "rule": "InvoiceNumber conditional requirement",
+      "description": "InvoiceNumber must be blank when FuelVendorBusinessUnitID is blank",
+      "location": "BoatFuelPrice.vb:64-68",
+      "validationMessage": "Vendor inv# must be blank when Fuel vendor is blank."
+    },
+    {
+      "rule": "Unique constraint",
+      "description": "EffectiveDate and FuelVendor combination must be unique",
+      "databaseConstraint": "IX_BoatFuelPrice_Unique",
+      "columns": ["EffectiveDate", "FuelVendor"]
+    },
+    {
+      "rule": "Required fields",
+      "fields": [
+        {
+          "fieldName": "EffectiveDate",
+          "validation": "Cannot be empty"
+        },
+        {
+          "fieldName": "Price",
+          "validation": "Cannot be empty",
+          "format": "Currency with 4 decimal places"
+        }
+      ]
+    }
+  ],
+  "modernConversionNotes": {
+    "entityStructure": "Simple entity with no child collections",
+    "relationships": [
+      "Implements optional Many-to-One relationship with VendorBusinessUnit",
+      "FuelVendorBusinessUnitID should be modeled as nullable foreign key in modern Entity Framework model"
+    ],
+    "viewModelConsiderations": [
+      "ViewModel should include FuelVendorBusinessUnitID as nullable int",
+      "Include FuelVendorName as display property from VendorBusinessUnit",
+      "Separate search ViewModel for filtering by effective date and vendor"
+    ],
+    "apiEndpoints": [
+      "GET /api/boatfuelprices - List with filtering by effectiveDate and fuelVendorBusinessUnitID",
+      "GET /api/boatfuelprices/{id} - Get single record",
+      "POST /api/boatfuelprices - Create new record",
+      "PUT /api/boatfuelprices/{id} - Update existing record",
+      "DELETE /api/boatfuelprices/{id} - Delete record",
+      "POST /api/boatfuelprices/generate - Generate daily fuel prices"
+    ],
+    "validationRules": [
+      "Implement conditional validation for InvoiceNumber based on FuelVendorBusinessUnitID",
+      "Unique constraint validation for EffectiveDate + FuelVendorBusinessUnitID combination",
+      "Currency format validation for Price with 4 decimal places"
+    ],
+    "securityMapping": {
+      "legacySubsystem": "SubSystem.frmBoatFuelPrices (Enum: 130)",
+      "modernPolicies": [
+        "BoatFuelPrices.View",
+        "BoatFuelPrices.Create",
+        "BoatFuelPrices.Edit",
+        "BoatFuelPrices.Delete"
+      ],
+      "functionalArea": "GroupGlobalAdmin"
+    }
+  },
+  "extractionMetadata": {
+    "extractedFrom": [
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore\\Forms\\frmBoatFuelPrices.vb",
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\BoatFuelPrice.vb",
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\Base Classes\\BoatFuelPriceBase.vb",
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Lists\\BoatFuelPriceSearch.vb"
+    ],
+    "databaseSchema": [
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\database\\Onshore\\schema\\0134-CreateBoatFuelPriceTable.sql",
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\database\\Onshore\\schema\\0141-UpdatesForCTC-075.sql"
+    ],
+    "extractionDate": "2025-12-11",
+    "agentVersion": "Related Entity Analyzer v1.0"
+  }
+}

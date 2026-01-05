@@ -1,0 +1,730 @@
+{
+  "entity": "BargeTokenColors",
+  "actualTableName": "ColorPair",
+  "legacyForm": {
+    "formName": "frmBargeTokenColors",
+    "formType": "Master-Detail (Single Form)",
+    "baseClass": "frmBaseDetailEditList",
+    "description": "Define Colors for Barge Token - manages color pairs with inline editing",
+    "layout": "Fixed dialog with toolbar, grid, detail panel, and close panel",
+    "formSize": "362 x 428 pixels (fixed size dialog)"
+  },
+  "controlMappings": [
+    {
+      "legacyControl": "UltraGrid (grdColorPair)",
+      "legacyType": "Infragistics.Win.UltraWinGrid.UltraGrid",
+      "legacySource": "frmBargeTokenColors.Designer.vb:43, 73, 123-130",
+      "modernEquivalent": "DataTables with Server-Side Processing",
+      "modernLibrary": "DataTables",
+      "html": "<table id=\"colorPairTable\" class=\"table table-striped table-hover\"></table>",
+      "javascript": {
+        "initialization": "dataTable = $('#colorPairTable').DataTable({ serverSide: true, processing: true, stateSave: true, ajax: { url: '/BargeTokenColors/ColorPairTable', type: 'POST' } });",
+        "columns": [
+          "{ data: 'colorPairID', name: 'colorPairID', visible: false }",
+          "{ data: null, name: 'actions', orderable: false, searchable: false, render: actionButtons }",
+          "{ data: 'name', name: 'name', title: 'Color Name', width: '35%' }",
+          "{ data: 'textColor', name: 'textColor', title: 'Text Color', width: '25%', render: colorPreview }",
+          "{ data: 'backColor', name: 'backColor', title: 'Back Color', width: '25%', render: colorPreview }",
+          "{ data: null, name: 'sample', title: 'Sample', orderable: false, width: '15%', render: sampleCell }"
+        ],
+        "pattern": "Follow boatLocationSearch.js DataTables pattern with server-side processing",
+        "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js"
+      },
+      "gridColumns": [
+        {
+          "legacyColumn": "Name",
+          "legacyWidth": 142,
+          "legacyAlign": "Left",
+          "modernColumn": "name",
+          "modernTitle": "Color Name",
+          "sortable": true,
+          "filterable": true,
+          "width": "35%"
+        },
+        {
+          "legacyColumn": "TextColor",
+          "legacyWidth": 100,
+          "legacyAlign": "Left",
+          "modernColumn": "textColor",
+          "modernTitle": "Text Color",
+          "sortable": true,
+          "filterable": true,
+          "width": "25%",
+          "customRender": "Display color name with color preview swatch"
+        },
+        {
+          "legacyColumn": "BackColor",
+          "legacyWidth": 100,
+          "legacyAlign": "Left",
+          "modernColumn": "backColor",
+          "modernTitle": "Back Color",
+          "sortable": true,
+          "filterable": true,
+          "width": "25%",
+          "customRender": "Display color name with color preview swatch"
+        }
+      ],
+      "gridFeatures": {
+        "sorting": "Default sort: Name ASC",
+        "selection": "Single row selection",
+        "doubleClick": "Opens edit mode for selected color pair",
+        "autoFitStyle": "ExtendLastColumn",
+        "cellActivation": "NoEdit (read-only grid)"
+      },
+      "notes": "Grid is read-only, editing happens in detail panel below"
+    },
+    {
+      "legacyControl": "UltraToolbarsManager (ToolbarColorPair)",
+      "legacyType": "Infragistics.Win.UltraWinToolbars.UltraToolbarsManager",
+      "legacySource": "frmBargeTokenColors.Designer.vb:35, 88, 280-317",
+      "modernEquivalent": "Bootstrap Button Group Toolbar",
+      "modernLibrary": "Bootstrap 5",
+      "html": "<div class=\"btn-toolbar mb-3\" role=\"toolbar\">\n  <div class=\"btn-group me-2\" role=\"group\">\n    <button type=\"button\" class=\"btn btn-success\" id=\"btnAdd\" title=\"Add new color pair\"><i class=\"fas fa-plus\"></i> Add</button>\n    <button type=\"button\" class=\"btn btn-primary\" id=\"btnModify\" title=\"Modify selected color pair\" disabled><i class=\"fas fa-edit\"></i> Modify</button>\n    <button type=\"button\" class=\"btn btn-danger\" id=\"btnRemove\" title=\"Remove selected color pair\" disabled><i class=\"fas fa-trash\"></i> Remove</button>\n  </div>\n  <div class=\"btn-group\" role=\"group\">\n    <button type=\"button\" class=\"btn btn-secondary\" id=\"btnExport\" title=\"Export color pairs\" disabled><i class=\"fas fa-file-export\"></i> Export</button>\n  </div>\n</div>",
+      "toolbarButtons": [
+        {
+          "legacyButton": "Add",
+          "legacyKey": "c_BtnKeyAdd",
+          "legacyIcon": "Resources.Add",
+          "modernButton": "btnAdd",
+          "modernClass": "btn btn-success",
+          "modernIcon": "fas fa-plus",
+          "caption": "Add",
+          "enabledLogic": "Not in edit mode AND user has BargeTokenColorsModify permission",
+          "action": "Shows detail panel in add mode with empty fields"
+        },
+        {
+          "legacyButton": "Modify",
+          "legacyKey": "c_BtnKeyModify",
+          "legacyIcon": "Resources.Modify",
+          "modernButton": "btnModify",
+          "modernClass": "btn btn-primary",
+          "modernIcon": "fas fa-edit",
+          "caption": "Modify",
+          "enabledLogic": "Row selected AND not in edit mode AND user has BargeTokenColorsModify permission",
+          "action": "Shows detail panel in edit mode with selected row data"
+        },
+        {
+          "legacyButton": "Remove",
+          "legacyKey": "c_BtnKeyRemove",
+          "legacyIcon": "Resources.Remove",
+          "modernButton": "btnRemove",
+          "modernClass": "btn btn-danger",
+          "modernIcon": "fas fa-trash",
+          "caption": "Remove",
+          "enabledLogic": "Row selected AND not in edit mode AND user has BargeTokenColorsModify permission",
+          "action": "Shows confirmation dialog, then hard deletes selected color pair",
+          "confirmationRequired": true,
+          "confirmationMessage": "Are you sure you want to delete this Color Pair?"
+        },
+        {
+          "legacyButton": "Export",
+          "legacyKey": "c_BtnKeyExport",
+          "legacyIcon": "Resources.ExportResults",
+          "modernButton": "btnExport",
+          "modernClass": "btn btn-secondary",
+          "modernIcon": "fas fa-file-export",
+          "caption": "Export",
+          "enabledLogic": "At least one row exists AND not in edit mode AND user has BargeTokenColorsExport permission",
+          "action": "Exports grid data to Excel or CSV format"
+        }
+      ]
+    },
+    {
+      "legacyControl": "UltraPanel (pnlMain)",
+      "legacyType": "Infragistics.Win.Misc.UltraPanel",
+      "legacySource": "frmBargeTokenColors.Designer.vb:32, 72, 108-121",
+      "modernEquivalent": "Bootstrap Container Div",
+      "modernLibrary": "Bootstrap 5",
+      "html": "<div class=\"container-fluid\">\n  <!-- Content goes here -->\n</div>",
+      "notes": "Main container panel - replace with Bootstrap container-fluid div"
+    },
+    {
+      "legacyControl": "UltraGroupBox (grpDetail)",
+      "legacyType": "Infragistics.Win.Misc.UltraGroupBox",
+      "legacySource": "frmBargeTokenColors.Designer.vb:36, 74, 132-149",
+      "modernEquivalent": "Bootstrap Card",
+      "modernLibrary": "Bootstrap 5",
+      "html": "<div class=\"card mt-3\" id=\"cardDetail\" style=\"display: none;\">\n  <div class=\"card-header\">\n    <h5 class=\"mb-0\">Color Pair Detail</h5>\n  </div>\n  <div class=\"card-body\">\n    <!-- Detail form fields go here -->\n  </div>\n  <div class=\"card-footer text-end\">\n    <button type=\"button\" class=\"btn btn-primary\" id=\"btnDetailSubmit\">Submit</button>\n    <button type=\"button\" class=\"btn btn-secondary\" id=\"btnDetailCancel\">Cancel</button>\n  </div>\n</div>",
+      "behavior": {
+        "initialState": "Hidden (display: none)",
+        "showWhen": "User clicks Add or Modify button",
+        "hideWhen": "User clicks Submit, Cancel, or Close",
+        "dockStyle": "Bottom in legacy, use mt-3 margin-top in modern"
+      },
+      "notes": "Detail panel is initially hidden and shown when editing/adding a color pair"
+    },
+    {
+      "legacyControl": "UltraTextEditor (txtName)",
+      "legacyType": "Infragistics.Win.UltraWinEditors.UltraTextEditor",
+      "legacySource": "frmBargeTokenColors.Designer.vb:47, 81, 213-223",
+      "modernEquivalent": "Bootstrap Text Input",
+      "modernLibrary": "Bootstrap 5",
+      "html": "<div class=\"mb-3\">\n  <label for=\"txtName\" class=\"form-label\">Color name:</label>\n  <input type=\"text\" class=\"form-control\" id=\"txtName\" name=\"Name\" maxlength=\"50\" required />\n  <div class=\"invalid-feedback\">Please enter a color name.</div>\n</div>",
+      "validation": {
+        "validationType": "String",
+        "required": false,
+        "maxLength": 50,
+        "modernValidation": "jquery.validate with required rule"
+      },
+      "dataBinding": {
+        "legacyProperty": "_ColorPair.Name",
+        "legacyEvent": "Validated",
+        "modernBinding": "Two-way binding via JavaScript on form submit and load"
+      }
+    },
+    {
+      "legacyControl": "UltraColorPicker (clrTextColor)",
+      "legacyType": "Infragistics.Win.UltraWinEditors.UltraColorPicker",
+      "legacySource": "frmBargeTokenColors.Designer.vb:52, 78, 182-189",
+      "modernEquivalent": "HTML Color Input with Preview",
+      "modernLibrary": "HTML5 + Bootstrap 5",
+      "html": "<div class=\"mb-3\">\n  <label for=\"clrTextColor\" class=\"form-label\">Text color:</label>\n  <div class=\"input-group\">\n    <input type=\"color\" class=\"form-control form-control-color\" id=\"clrTextColor\" name=\"TextColorHex\" required />\n    <input type=\"text\" class=\"form-control\" id=\"txtTextColorName\" readonly />\n    <input type=\"hidden\" id=\"hdnTextColor\" name=\"TextColor\" />\n  </div>\n  <div class=\"invalid-feedback\">Please select a text color.</div>\n</div>",
+      "colorConversion": {
+        "legacyFormat": "System.Drawing.Color (color name string)",
+        "modernFormat": "Hex color value (#RRGGBB) for color picker, color name for database storage",
+        "conversionNeeded": true,
+        "conversionPattern": "ColorConverter.ToHex('Red') -> '#FF0000', ColorConverter.ToColorName('#FF0000') -> 'Red'",
+        "dtoFields": ["TextColor (string, color name)", "TextColorHex (string, hex value)"]
+      },
+      "javascript": {
+        "onLoad": "splitColorToHex('textColor', model.TextColor, model.TextColorHex);",
+        "onChange": "$('#clrTextColor').on('input', updateSamplePreview);",
+        "onSubmit": "combineColorFromHex('clrTextColor', 'txtTextColorName', 'hdnTextColor');"
+      },
+      "validation": {
+        "required": true,
+        "cannotBe": "Cannot be '0' or empty (special validation)",
+        "legacyValidation": "ColorPair.vb:46-49"
+      },
+      "linkedControls": {
+        "sampleLabel": "lblSample - updates ForeColor on color change",
+        "event": "ColorChanged event updates sample preview in real-time"
+      }
+    },
+    {
+      "legacyControl": "UltraColorPicker (clrBackColor)",
+      "legacyType": "Infragistics.Win.UltraWinEditors.UltraColorPicker",
+      "legacySource": "frmBargeTokenColors.Designer.vb:49, 77, 173-180",
+      "modernEquivalent": "HTML Color Input with Preview",
+      "modernLibrary": "HTML5 + Bootstrap 5",
+      "html": "<div class=\"mb-3\">\n  <label for=\"clrBackColor\" class=\"form-label\">Back color:</label>\n  <div class=\"input-group\">\n    <input type=\"color\" class=\"form-control form-control-color\" id=\"clrBackColor\" name=\"BackColorHex\" required />\n    <input type=\"text\" class=\"form-control\" id=\"txtBackColorName\" readonly />\n    <input type=\"hidden\" id=\"hdnBackColor\" name=\"BackColor\" />\n  </div>\n  <div class=\"invalid-feedback\">Please select a background color.</div>\n</div>",
+      "colorConversion": {
+        "legacyFormat": "System.Drawing.Color (color name string)",
+        "modernFormat": "Hex color value (#RRGGBB) for color picker, color name for database storage",
+        "conversionNeeded": true,
+        "conversionPattern": "ColorConverter.ToHex('Pink') -> '#FFC0CB', ColorConverter.ToColorName('#FFC0CB') -> 'Pink'",
+        "dtoFields": ["BackColor (string, color name)", "BackColorHex (string, hex value)"]
+      },
+      "javascript": {
+        "onLoad": "splitColorToHex('backColor', model.BackColor, model.BackColorHex);",
+        "onChange": "$('#clrBackColor').on('input', updateSamplePreview);",
+        "onSubmit": "combineColorFromHex('clrBackColor', 'txtBackColorName', 'hdnBackColor');"
+      },
+      "validation": {
+        "required": true,
+        "cannotBe": "Cannot be '0' or empty (special validation)",
+        "legacyValidation": "ColorPair.vb:50-53"
+      },
+      "linkedControls": {
+        "sampleLabel": "lblSample - updates BackColor on color change",
+        "event": "ColorChanged event updates sample preview in real-time"
+      }
+    },
+    {
+      "legacyControl": "UltraLabel (lblSample)",
+      "legacyType": "Infragistics.Win.Misc.UltraLabel",
+      "legacySource": "frmBargeTokenColors.Designer.vb:48, 76, 160-171",
+      "modernEquivalent": "Bootstrap Badge or Div with Live Preview",
+      "modernLibrary": "Bootstrap 5",
+      "html": "<div class=\"mb-3\">\n  <label class=\"form-label\">Sample:</label>\n  <div id=\"lblSample\" class=\"border p-2 text-center\" style=\"min-height: 40px; background-color: #FFC0CB; color: #000000;\">Sample</div>\n</div>",
+      "javascript": {
+        "updateFunction": "function updateSamplePreview() {\n  var textColor = $('#clrTextColor').val();\n  var backColor = $('#clrBackColor').val();\n  $('#lblSample').css({ 'color': textColor, 'background-color': backColor });\n}",
+        "triggers": ["clrTextColor.ColorChanged -> updateSamplePreview()", "clrBackColor.ColorChanged -> updateSamplePreview()"]
+      },
+      "appearance": {
+        "legacyAlignment": "Center (TextHAlignAsString, TextVAlignAsString)",
+        "modernClasses": "border p-2 text-center",
+        "defaultColors": {
+          "textColor": "Black (#000000)",
+          "backColor": "Pink (#FFC0CB)"
+        }
+      },
+      "notes": "Real-time preview that updates as user changes text or background colors"
+    },
+    {
+      "legacyControl": "UltraLabel (lblName, lblTextColor, lblBackColor)",
+      "legacyType": "Infragistics.Win.Misc.UltraLabel",
+      "legacySource": "frmBargeTokenColors.Designer.vb:33, 45-46, 83, 79-80",
+      "modernEquivalent": "HTML Label with Bootstrap",
+      "modernLibrary": "Bootstrap 5",
+      "html": "<label for=\"controlId\" class=\"form-label\">Label text:</label>",
+      "appearance": {
+        "legacyBold": "FontData.BoldAsString = True",
+        "modernClass": "form-label (Bootstrap provides appropriate styling)",
+        "legacyVerticalAlign": "Middle"
+      },
+      "notes": "All labels use bold font in legacy, Bootstrap form-label provides consistent styling"
+    },
+    {
+      "legacyControl": "UltraButton (btnDetailSubmit)",
+      "legacyType": "Infragistics.Win.Misc.UltraButton",
+      "legacySource": "frmBargeTokenColors.Designer.vb:51, 75, 151-158",
+      "modernEquivalent": "Bootstrap Button",
+      "modernLibrary": "Bootstrap 5",
+      "html": "<button type=\"submit\" class=\"btn btn-primary\" id=\"btnDetailSubmit\">Submit</button>",
+      "buttonType": "ButtonType.Submit",
+      "action": "Validates and saves color pair (insert or update), then refreshes grid",
+      "authorization": "Visible in edit mode, no specific permission check on detail button",
+      "anchor": "Bottom-Right",
+      "notes": "Primary action button for saving changes"
+    },
+    {
+      "legacyControl": "UltraButton (btnDetailCancel)",
+      "legacyType": "Infragistics.Win.Misc.UltraButton",
+      "legacySource": "frmBargeTokenColors.Designer.vb:44, 82, 225-233",
+      "modernEquivalent": "Bootstrap Button",
+      "modernLibrary": "Bootstrap 5",
+      "html": "<button type=\"button\" class=\"btn btn-secondary\" id=\"btnDetailCancel\">Cancel</button>",
+      "buttonType": "ButtonType.CancelEdit",
+      "action": "Discards changes and hides detail panel, calls BeginEdit.CancelEdit()",
+      "causesValidation": false,
+      "anchor": "Bottom-Right",
+      "notes": "Secondary action button for canceling edit operation"
+    },
+    {
+      "legacyControl": "UltraButton (btnClose)",
+      "legacyType": "Infragistics.Win.Misc.UltraButton",
+      "legacySource": "frmBargeTokenColors.Designer.vb:37, 85, 257-265",
+      "modernEquivalent": "Not needed in modern web UI",
+      "modernLibrary": "N/A",
+      "html": "<!-- Close button not needed in web UI - user closes browser tab/window -->",
+      "buttonType": "ButtonType.Cancel",
+      "legacyAction": "Closes the form dialog",
+      "modernPattern": "Web apps don't have explicit close buttons - user navigates away or uses browser controls",
+      "notes": "In legacy this closes the dialog form; web UI doesn't need this pattern"
+    },
+    {
+      "legacyControl": "UltraGroupBox (grpClose)",
+      "legacyType": "Infragistics.Win.Misc.UltraGroupBox",
+      "legacySource": "frmBargeTokenColors.Designer.vb:42, 84, 246-255",
+      "modernEquivalent": "Not needed in modern web UI",
+      "modernLibrary": "N/A",
+      "html": "<!-- Close panel not needed in web UI -->",
+      "notes": "Container for close button - not needed in web implementation"
+    },
+    {
+      "legacyControl": "UltraStatusBar (staStatus)",
+      "legacyType": "Infragistics.Win.UltraWinStatusBar.UltraStatusBar",
+      "legacySource": "frmBargeTokenColors.Designer.vb:31, 86, 267-272",
+      "modernEquivalent": "Bootstrap Alert or Toast for Messages",
+      "modernLibrary": "Bootstrap 5",
+      "html": "<div id=\"statusMessage\" class=\"alert alert-info alert-dismissible fade show\" role=\"alert\" style=\"display: none;\">\n  <span id=\"statusText\"></span>\n  <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>\n</div>",
+      "usage": {
+        "legacyUsage": "ValidatorExtender.DisplayControl = staStatus - shows validation messages",
+        "modernUsage": "Display validation messages and status updates as Bootstrap alerts",
+        "pattern": "Show/hide alerts for success, error, and validation messages"
+      },
+      "notes": "Replace status bar with dismissible Bootstrap alerts for messages"
+    },
+    {
+      "legacyControl": "ValidatorExtender",
+      "legacyType": "ValidatorExtender",
+      "legacySource": "frmBargeTokenColors.Designer.vb:50, 93, 363-365",
+      "modernEquivalent": "jQuery Validate with Unobtrusive Validation",
+      "modernLibrary": "jquery.validate.js + jquery.validate.unobtrusive.js",
+      "html": "<!-- Validation attributes on form elements -->\n<form id=\"colorPairForm\" data-ajax=\"false\">\n  <input ... data-val=\"true\" data-val-required=\"Color name is required\" data-val-maxlength=\"Maximum length is 50\" />\n</form>",
+      "javascript": {
+        "initialization": "$('#colorPairForm').validate({ errorClass: 'invalid-feedback', validClass: 'is-valid', errorElement: 'div' });",
+        "pattern": "Use ASP.NET Core MVC unobtrusive validation attributes on inputs"
+      },
+      "validationRules": {
+        "txtName": "String validation, max length 50",
+        "clrTextColor": "Required, cannot be '0' or empty",
+        "clrBackColor": "Required, cannot be '0' or empty"
+      },
+      "displayControl": "staStatus (legacy) -> Bootstrap alerts (modern)",
+      "notes": "Modern validation uses client-side jquery.validate and server-side DataAnnotations"
+    }
+  ],
+  "formPatterns": {
+    "masterDetail": {
+      "legacyPattern": "Master-detail on single form with grid + detail panel",
+      "modernPattern": "Same master-detail pattern: search screen with inline edit panel",
+      "layout": {
+        "toolbar": "Toolbar with Add/Modify/Remove/Export buttons at top",
+        "grid": "DataTables grid showing color pairs list",
+        "detailPanel": "Collapsible/hideable card below grid for editing (initially hidden)",
+        "statusBar": "Alert messages for validation and status (instead of status bar)"
+      },
+      "editMode": {
+        "trigger": "Add button or Modify button or double-click grid row",
+        "behavior": "Show detail panel, disable toolbar buttons, load form with data (if modify)",
+        "submit": "Validate, save via AJAX, hide detail panel, refresh grid, show success message",
+        "cancel": "Discard changes, hide detail panel, re-enable toolbar buttons"
+      }
+    },
+    "searchForm": {
+      "legacy": "No search form - form opens with FleetID parameter and loads all color pairs for that fleet",
+      "modern": "Index page with optional FleetID dropdown filter",
+      "layout": "Simple search criteria (FleetID dropdown) + search button, results in DataTables grid below",
+      "filter": "FleetID (required parameter in legacy, optional filter in modern)"
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "serverSide": true,
+      "ajax": {
+        "url": "/BargeTokenColors/ColorPairTable",
+        "type": "POST",
+        "data": "function(d) { d.fleetId = $('#FleetId').val(); }"
+      },
+      "columns": "See controlMappings[0].javascript.columns",
+      "stateSave": true,
+      "processing": true,
+      "responsive": true,
+      "referencePattern": "Follow boatLocationSearch.js exactly"
+    },
+    "colorHandling": {
+      "challenge": "Legacy stores System.Drawing.Color names, web uses hex values",
+      "solution": {
+        "storage": "Continue storing color names in database (TextColor, BackColor varchar fields)",
+        "display": "Convert to/from hex for HTML color picker",
+        "dto": "Include both color name and hex in DTO (TextColor, TextColorHex, BackColor, BackColorHex)",
+        "conversion": "Server-side ColorConverter helper class to convert between color names and hex",
+        "grid": "Display color swatch + name in grid cells using custom render function"
+      },
+      "samplePreview": {
+        "legacy": "lblSample updates in real-time via ColorChanged events",
+        "modern": "JavaScript updates sample div on color input events: $('#lblSample').css({ 'color': textHex, 'background-color': backHex });"
+      }
+    }
+  },
+  "modernArchitecture": {
+    "viewModels": {
+      "namespace": "BargeOpsAdmin.ViewModels",
+      "path": "src/BargeOps.UI/Models/",
+      "models": [
+        {
+          "name": "BargeTokenColorsSearchViewModel",
+          "properties": [
+            "int? FleetId (optional filter)",
+            "string Name (optional search)",
+            "IEnumerable<SelectListItem> FleetOptions (for dropdown)"
+          ]
+        },
+        {
+          "name": "ColorPairEditViewModel",
+          "properties": [
+            "int ColorPairID",
+            "int FleetID",
+            "string Name (max 50)",
+            "string TextColor (color name for storage)",
+            "string TextColorHex (hex for color picker)",
+            "string BackColor (color name for storage)",
+            "string BackColorHex (hex for color picker)",
+            "DateTime? ModifyDateTime (for optimistic concurrency)"
+          ],
+          "validation": "[Required] Name, TextColor, BackColor; [MaxLength(50)] Name, TextColor, BackColor; Custom validation: TextColor and BackColor cannot be '0'"
+        }
+      ]
+    },
+    "controllers": {
+      "namespace": "BargeOpsAdmin.Controllers",
+      "path": "src/BargeOps.UI/Controllers/",
+      "controller": "BargeTokenColorsController",
+      "baseClass": "AppController",
+      "actions": [
+        {
+          "action": "Index",
+          "method": "GET",
+          "authorization": "[Authorize(Policy = \"BargeTokenColorsView\")]",
+          "returns": "View with BargeTokenColorsSearchViewModel"
+        },
+        {
+          "action": "ColorPairTable",
+          "method": "POST",
+          "authorization": "[Authorize(Policy = \"BargeTokenColorsView\")]",
+          "description": "DataTables server-side processing endpoint",
+          "parameters": "DataTablesRequest + FleetId filter",
+          "returns": "JsonResult with DataTablesResponse<ColorPairDto>"
+        },
+        {
+          "action": "Create (GET)",
+          "method": "GET",
+          "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+          "returns": "PartialView with empty ColorPairEditViewModel"
+        },
+        {
+          "action": "Create (POST)",
+          "method": "POST",
+          "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+          "parameters": "[FromBody] ColorPairEditViewModel model",
+          "returns": "JsonResult with success/error"
+        },
+        {
+          "action": "Edit (GET)",
+          "method": "GET",
+          "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+          "parameters": "int id",
+          "returns": "PartialView with ColorPairEditViewModel"
+        },
+        {
+          "action": "Edit (POST)",
+          "method": "POST",
+          "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+          "parameters": "[FromBody] ColorPairEditViewModel model",
+          "returns": "JsonResult with success/error, handles ConcurrencyException"
+        },
+        {
+          "action": "Delete",
+          "method": "POST",
+          "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+          "parameters": "int id",
+          "returns": "JsonResult with success/error",
+          "notes": "Hard delete - shows confirmation dialog first"
+        },
+        {
+          "action": "Export",
+          "method": "GET",
+          "authorization": "[Authorize(Policy = \"BargeTokenColorsExport\")]",
+          "description": "Export color pairs to Excel/CSV",
+          "returns": "FileResult"
+        }
+      ]
+    },
+    "views": {
+      "path": "src/BargeOps.UI/Views/BargeTokenColors/",
+      "views": [
+        {
+          "view": "Index.cshtml",
+          "description": "Main search page with grid and inline edit panel",
+          "sections": [
+            "Page title and breadcrumbs",
+            "Alert messages (success/error)",
+            "Search criteria (FleetId dropdown)",
+            "Toolbar buttons (Add/Modify/Remove/Export) - permission-based visibility",
+            "DataTables grid (#colorPairTable)",
+            "Detail edit panel (Bootstrap card, initially hidden)",
+            "Scripts section: bargeTokenColorsSearch.js"
+          ]
+        },
+        {
+          "view": "_Search.cshtml",
+          "description": "Partial view for search criteria",
+          "model": "BargeTokenColorsSearchViewModel"
+        },
+        {
+          "view": "_SearchResults.cshtml",
+          "description": "Partial view for DataTables grid container"
+        },
+        {
+          "view": "_EditForm.cshtml",
+          "description": "Partial view for detail edit form (loaded via AJAX)",
+          "model": "ColorPairEditViewModel",
+          "notes": "Optional - could be included directly in Index.cshtml"
+        }
+      ]
+    },
+    "javascript": {
+      "path": "src/BargeOps.UI/wwwroot/js/",
+      "files": [
+        {
+          "file": "bargeTokenColorsSearch.js",
+          "description": "DataTables initialization, toolbar button handlers, inline edit panel",
+          "functions": [
+            "DataTable initialization with server-side processing",
+            "Color preview render function for grid cells",
+            "Sample preview render function (shows text/back color combination)",
+            "Action buttons render function (Edit, Delete)",
+            "Toolbar button click handlers (Add, Modify, Remove, Export)",
+            "Color picker change handlers (updates sample preview)",
+            "Form submit handler (AJAX save)",
+            "Color conversion helpers (hex <-> color name)",
+            "Grid row selection handler",
+            "Detail panel show/hide functions"
+          ],
+          "pattern": "Follow boatLocationSearch.js structure exactly"
+        },
+        {
+          "file": "colorConverter.js",
+          "description": "Helper utility for color name <-> hex conversion",
+          "functions": [
+            "colorNameToHex(colorName) - converts 'Red' to '#FF0000'",
+            "hexToColorName(hex) - converts '#FF0000' to 'Red' (best match)",
+            "Uses System.Drawing.KnownColor mapping table"
+          ]
+        }
+      ]
+    },
+    "css": {
+      "path": "src/BargeOps.UI/wwwroot/css/",
+      "files": [
+        {
+          "file": "bargeTokenColors.css",
+          "description": "Custom styles for color preview and sample label",
+          "styles": [
+            ".color-swatch { display: inline-block; width: 20px; height: 20px; border: 1px solid #ccc; margin-right: 5px; }",
+            "#lblSample { min-height: 40px; font-weight: bold; }",
+            ".color-cell { display: flex; align-items: center; }"
+          ]
+        }
+      ]
+    }
+  },
+  "dataFlow": {
+    "initialization": {
+      "legacy": "frmBargeTokenColors.Initialize(FleetID) -> loads ColorPairList for FleetID",
+      "modern": "GET /BargeTokenColors/Index?fleetId={id} -> loads page, DataTables AJAX loads grid data"
+    },
+    "addNew": {
+      "legacy": "Add button -> _ColorPair = ColorPair.NewColorPair() -> BeginEdit() -> show detail panel",
+      "modern": "Add button -> show detail card with empty form -> Submit -> POST /BargeTokenColors/Create"
+    },
+    "modify": {
+      "legacy": "Modify button or double-click -> _ColorPair = ColorPair.GetColorPair(id) -> BeginEdit() -> load controls -> show detail panel",
+      "modern": "Modify button or Edit link -> GET /BargeTokenColors/Edit/{id} -> load form in detail card -> Submit -> POST /BargeTokenColors/Edit"
+    },
+    "delete": {
+      "legacy": "Remove button -> confirmation dialog -> ColorPair.DeleteColorPair(id) -> RefreshList",
+      "modern": "Delete button -> confirmation dialog -> POST /BargeTokenColors/Delete/{id} -> refresh DataTable"
+    },
+    "submit": {
+      "legacy": "Submit button -> ValidatorExtender validates -> _ColorPair.FleetID = _FleetID (if new) -> ApplyEdit() -> Save -> RefreshList -> hide detail panel",
+      "modern": "Submit button -> jquery.validate validates -> AJAX POST with ColorPairEditViewModel -> server saves -> JSON response -> refresh DataTable -> hide detail card"
+    },
+    "cancel": {
+      "legacy": "Cancel button -> CancelEdit() -> clear controls -> hide detail panel",
+      "modern": "Cancel button -> discard form changes -> hide detail card"
+    },
+    "colorChange": {
+      "legacy": "ColorChanged event -> update lblSample.ForeColor or BackColor immediately",
+      "modern": "input event on color picker -> updateSamplePreview() -> $('#lblSample').css(...)"
+    }
+  },
+  "specialFeatures": {
+    "realTimeColorPreview": {
+      "description": "Sample label updates in real-time as user changes text or background color",
+      "legacy": "ColorChanged event handlers for clrTextColor and clrBackColor update lblSample",
+      "modern": "JavaScript input event listeners update #lblSample CSS immediately",
+      "implementation": "$('#clrTextColor, #clrBackColor').on('input', function() { $('#lblSample').css({ 'color': $('#clrTextColor').val(), 'background-color': $('#clrBackColor').val() }); });"
+    },
+    "gridColorPreview": {
+      "description": "Grid displays color swatches with color names for TextColor and BackColor columns",
+      "legacy": "Grid cells show color names as text only",
+      "modern": "Custom DataTables render function shows color swatch + name",
+      "implementation": "render: function(data, type, row) { return '<span class=\"color-swatch\" style=\"background-color: ' + row.textColorHex + ';\"></span>' + data; }"
+    },
+    "colorConversion": {
+      "challenge": "Database stores color names (e.g., 'Red', 'Blue'), web UI needs hex values",
+      "solution": "Server-side ColorConverter utility class",
+      "serverSide": "ColorConverter.ToHex('Red') -> '#FF0000', ColorConverter.ToColorName('#FF0000') -> 'Red'",
+      "dto": "ColorPairDto includes both: TextColor='Red', TextColorHex='#FF0000'",
+      "clientSide": "JavaScript colorConverter.js helper for client-side conversion if needed"
+    },
+    "inlineEditing": {
+      "description": "Edit panel appears below grid, grid stays visible during editing",
+      "legacy": "grpDetail panel docked at bottom, enabled/disabled based on edit mode",
+      "modern": "Bootstrap card with id='cardDetail', shown/hidden via $('#cardDetail').show() / .hide()",
+      "behavior": "Grid disabled during edit (overlay or pointer-events: none), toolbar buttons disabled"
+    }
+  },
+  "validationRules": {
+    "clientSide": {
+      "Name": {
+        "required": false,
+        "maxLength": 50,
+        "message": "Color name cannot exceed 50 characters"
+      },
+      "TextColor": {
+        "required": true,
+        "cannotBe": "'0' or empty",
+        "message": "Text color is required and must be a valid color"
+      },
+      "BackColor": {
+        "required": true,
+        "cannotBe": "'0' or empty",
+        "message": "Background color is required and must be a valid color"
+      }
+    },
+    "serverSide": {
+      "Name": "[Required, MaxLength(50)]",
+      "TextColor": "[Required, MaxLength(50), NotEqualTo('0')]",
+      "BackColor": "[Required, MaxLength(50), NotEqualTo('0')]",
+      "customValidation": "ColorPair.vb:46-53 - special check for '0' value"
+    }
+  },
+  "securityIntegration": {
+    "permissions": [
+      "BargeTokenColorsView - view color pairs list and details",
+      "BargeTokenColorsModify - create, edit, and delete color pairs",
+      "BargeTokenColorsExport - export color pairs to file"
+    ],
+    "viewLevelSecurity": {
+      "addButton": "@if (User.HasPermission(AuthPermissions.BargeTokenColorsModify)) { <button id=\"btnAdd\">...</button> }",
+      "modifyButton": "@if (User.HasPermission(AuthPermissions.BargeTokenColorsModify)) { ... }",
+      "removeButton": "@if (User.HasPermission(AuthPermissions.BargeTokenColorsModify)) { ... }",
+      "exportButton": "@if (User.HasPermission(AuthPermissions.BargeTokenColorsExport)) { ... }"
+    },
+    "controllerSecurity": {
+      "pattern": "[Authorize(Policy = \"PermissionName\")]",
+      "reference": "See BargeTokenColors_security.json for complete security mapping"
+    }
+  },
+  "referenceImplementations": {
+    "dataTablesPattern": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js",
+    "razorViewPattern": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\Index.cshtml",
+    "controllerPattern": "BoatLocationSearchController.cs - CRUD actions with DataTables support",
+    "validationPattern": "Standard ASP.NET Core MVC with jquery.validate.unobtrusive"
+  },
+  "migrationNotes": [
+    "Form is a fixed-size dialog (362x428) in legacy - make responsive in modern UI",
+    "Master-detail pattern on single form - keep this pattern in modern UI for consistency",
+    "Grid is read-only - editing happens in detail panel below (keep this UX pattern)",
+    "Real-time color preview is important UX feature - maintain with JavaScript events",
+    "Color storage format (names vs hex) requires careful DTO design and conversion",
+    "No search form in legacy (just FleetID parameter) - consider adding optional search in modern",
+    "Hard delete with confirmation - maintain this pattern (no soft delete for ColorPair)",
+    "Optimistic concurrency via ModifyDateTime - include in edit form as hidden field",
+    "ValidatorExtender displays in status bar - use Bootstrap alerts in modern UI",
+    "Double-click grid row opens edit mode - maintain this convenience feature",
+    "Export functionality - implement using Excel export library (EPPlus or similar)",
+    "FleetID is passed as parameter on form open - consider making it a search filter",
+    "Form title: 'Define Colors for Barge Token' - use same title in modern UI"
+  ],
+  "commonMistakes": [
+    "❌ Using single datetime-local input instead of separate date/time (not applicable to this form)",
+    "❌ Not converting between color names and hex values for web color pickers",
+    "❌ Not including both TextColorHex and BackColorHex in DTOs",
+    "❌ Missing real-time sample preview update on color changes",
+    "❌ Not showing color swatches in grid (displaying text-only color names)",
+    "❌ Using soft delete when ColorPair uses hard delete",
+    "❌ Not validating that TextColor and BackColor cannot be '0'",
+    "❌ Missing confirmation dialog on delete",
+    "❌ Not maintaining inline edit panel pattern (using separate edit page instead)",
+    "❌ Not disabling toolbar buttons during edit mode",
+    "❌ Missing optimistic concurrency check (ModifyDateTime)",
+    "❌ Not following DataTables server-side processing pattern from boatLocationSearch.js"
+  ],
+  "implementationChecklist": [
+    "✓ Create ColorPairEditViewModel with color name and hex fields",
+    "✓ Create BargeTokenColorsController with CRUD actions",
+    "✓ Create Index.cshtml with search criteria, toolbar, grid, and detail card",
+    "✓ Implement bargeTokenColorsSearch.js following boatLocationSearch.js pattern",
+    "✓ Create colorConverter.js utility for color name <-> hex conversion",
+    "✓ Create ColorPairTable action for DataTables server-side processing",
+    "✓ Implement color preview render function for grid columns",
+    "✓ Implement sample preview render function for grid 'Sample' column",
+    "✓ Add real-time color preview updates on color picker changes",
+    "✓ Add jquery.validate validation rules for all fields",
+    "✓ Add special validation for TextColor and BackColor cannot be '0'",
+    "✓ Implement hard delete with confirmation dialog",
+    "✓ Add optimistic concurrency check using ModifyDateTime",
+    "✓ Implement inline edit panel show/hide logic",
+    "✓ Add permission-based button visibility",
+    "✓ Implement Export functionality",
+    "✓ Add Bootstrap alerts for validation and status messages",
+    "✓ Test color conversion round-trip (name -> hex -> name)",
+    "✓ Test real-time preview updates",
+    "✓ Test grid refresh after save/delete",
+    "✓ Test validation error display"
+  ]
+}

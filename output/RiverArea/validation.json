@@ -1,0 +1,516 @@
+{
+  "entity": "RiverArea",
+  "formValidation": {
+    "method": "SetValidatorExtenderForRiverArea",
+    "location": "frmRiverAreaDetail.vb:678-686",
+    "rules": [
+      {
+        "field": "txtName",
+        "rule": "String",
+        "validationType": "ValidationTypeConstants.String",
+        "message": "Name is required",
+        "severity": "Error",
+        "maxLength": 50
+      }
+    ]
+  },
+  "businessValidation": {
+    "method": "CheckBusinessRules",
+    "location": "RiverArea.vb:83-107",
+    "rules": [
+      {
+        "ruleName": "NameRequired",
+        "property": "Name",
+        "condition": "String.IsNullOrEmpty(p_Name)",
+        "message": "Name is required",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "RiverAreaBase.vb:314-320"
+      },
+      {
+        "ruleName": "NameMaxLength",
+        "property": "Name",
+        "condition": "p_Name.Length > MaxLength.Name",
+        "message": "Name cannot exceed 50 characters.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "maxLength": 50,
+        "source": "RiverAreaBase.vb:314-320"
+      },
+      {
+        "ruleName": "MutualExclusiveAreaTypes",
+        "property": "IsPriceZone, IsPortalArea, IsHighWaterArea",
+        "condition": "((p_IsPriceZone AndAlso p_IsPortalArea) OrElse (p_IsPortalArea AndAlso p_IsHighWaterArea) OrElse (p_IsPriceZone AndAlso p_IsHighWaterArea))",
+        "message": "Only one of these may be checked: Pricing zone, Portal area, or High water area.",
+        "severity": "Error",
+        "alwaysApplies": false,
+        "appliesWhen": "When any two or more of these flags are set to true",
+        "source": "RiverArea.vb:92-97"
+      },
+      {
+        "ruleName": "CustomerIDRequiresHighWaterArea",
+        "property": "CustomerID",
+        "condition": "((Not p_IsHighWaterArea) AndAlso (Not String.IsNullOrEmpty(p_CustomerID)))",
+        "message": "High water customer must be blank if High water area is not checked.",
+        "severity": "Error",
+        "alwaysApplies": false,
+        "appliesWhen": "When CustomerID has a value but IsHighWaterArea is false",
+        "note": "The form clears this field automatically when the user clicks Submit if High Water Area is not checked",
+        "source": "RiverArea.vb:101-105"
+      },
+      {
+        "ruleName": "OverlappingPricingZones",
+        "property": "RiverAreaSegments",
+        "condition": "IsPriceZone = true AND river segments overlap with another pricing zone",
+        "message": "Another pricing zone has river segments that overlap this zone. The other zone(s) are {zone names}.",
+        "severity": "Error",
+        "alwaysApplies": false,
+        "appliesWhen": "When IsPriceZone is true and validation is triggered via IsValid property",
+        "validationTrigger": "IsValid property call",
+        "complexValidation": {
+          "description": "Compares Start Mile and End Mile of each river segment against any other pricing zone with matching river segments to determine if there is an overlap",
+          "method": "CheckOverlappingPricingZones",
+          "location": "RiverArea.vb:113-169",
+          "logic": [
+            "Only applies if IsPriceZone is true",
+            "Collects all rivers from non-deleted RiverAreaSegments",
+            "Searches for other pricing zones with matching rivers using RiverAreaPriceZoneSearch",
+            "For each overlapping zone, compares mile ranges using HasOverlappingMiles function",
+            "Overlap logic: NOT ((myEndMile <= otherStartMile) OR (myStartMile >= otherEndMile))",
+            "Error message includes comma-separated list of overlapping zone names"
+          ]
+        },
+        "source": "RiverArea.vb:87-89, 113-169, 182-187"
+      }
+    ]
+  },
+  "childEntityValidation": {
+    "entity": "RiverAreaSegment",
+    "formValidation": {
+      "method": "SetValidatorExtenderForRiverAreaSegment",
+      "location": "frmRiverAreaDetail.vb:792-801",
+      "rules": [
+        {
+          "field": "txtStartMile",
+          "rule": "Decimal",
+          "validationType": "ValidationTypeConstants.Decimal",
+          "message": "Start mile must be a valid decimal number",
+          "severity": "Error"
+        },
+        {
+          "field": "txtEndMile",
+          "rule": "Decimal",
+          "validationType": "ValidationTypeConstants.Decimal",
+          "message": "End mile must be a valid decimal number",
+          "severity": "Error"
+        }
+      ]
+    },
+    "businessValidation": {
+      "method": "CheckBusinessRules",
+      "location": "RiverAreaSegment.vb:63-93",
+      "rules": [
+        {
+          "ruleName": "RiverRequired",
+          "property": "River",
+          "condition": "String.IsNullOrEmpty(p_River)",
+          "message": "River is required",
+          "severity": "Error",
+          "alwaysApplies": true,
+          "source": "RiverAreaSegmentBase.vb:211-217"
+        },
+        {
+          "ruleName": "RiverMaxLength",
+          "property": "River",
+          "condition": "p_River.Length > MaxLength.River",
+          "message": "River cannot exceed 3 characters.",
+          "severity": "Error",
+          "alwaysApplies": true,
+          "maxLength": 3,
+          "source": "RiverAreaSegmentBase.vb:211-217"
+        },
+        {
+          "ruleName": "StartMileRequired",
+          "property": "StartMile",
+          "condition": "String.IsNullOrEmpty(p_StartMile)",
+          "message": "Start mile is required",
+          "severity": "Error",
+          "alwaysApplies": true,
+          "source": "RiverAreaSegmentBase.vb:219-222"
+        },
+        {
+          "ruleName": "EndMileRequired",
+          "property": "EndMile",
+          "condition": "String.IsNullOrEmpty(p_EndMile)",
+          "message": "End mile is required",
+          "severity": "Error",
+          "alwaysApplies": true,
+          "source": "RiverAreaSegmentBase.vb:224-227"
+        },
+        {
+          "ruleName": "StartMileInRiverRange",
+          "property": "StartMile",
+          "condition": "((Not String.IsNullOrEmpty(p_River)) AndAlso CheckMileInRangeForRiver(p_StartMile, minMile, maxMile))",
+          "message": "Mile {StartMile} must be within the river's mile range of {minMile} to {maxMile}.",
+          "severity": "Error",
+          "alwaysApplies": false,
+          "appliesWhen": "When River is selected",
+          "complexValidation": {
+            "description": "Validates that StartMile falls within the selected river's min/max mile range",
+            "method": "CheckMileInRangeForRiver",
+            "location": "RiverAreaSegment.vb:99-104",
+            "logic": "StartMile must be >= minMile AND <= maxMile for the selected river"
+          },
+          "source": "RiverAreaSegment.vb:76-78"
+        },
+        {
+          "ruleName": "EndMileInRiverRange",
+          "property": "EndMile",
+          "condition": "((Not String.IsNullOrEmpty(p_River)) AndAlso CheckMileInRangeForRiver(p_EndMile, minMile, maxMile))",
+          "message": "Mile {EndMile} must be within the river's mile range of {minMile} to {maxMile}.",
+          "severity": "Error",
+          "alwaysApplies": false,
+          "appliesWhen": "When River is selected",
+          "complexValidation": {
+            "description": "Validates that EndMile falls within the selected river's min/max mile range",
+            "method": "CheckMileInRangeForRiver",
+            "location": "RiverAreaSegment.vb:99-104",
+            "logic": "EndMile must be >= minMile AND <= maxMile for the selected river"
+          },
+          "source": "RiverAreaSegment.vb:81-83"
+        },
+        {
+          "ruleName": "StartMileNotGreaterEndMile",
+          "property": "StartMile, EndMile",
+          "condition": "((Not String.IsNullOrEmpty(p_River)) AndAlso (Not String.IsNullOrEmpty(p_StartMile)) AndAlso (Not String.IsNullOrEmpty(p_EndMile)) AndAlso (CType(p_StartMile, Decimal) > CType(p_EndMile, Decimal)))",
+          "message": "Start mile must not be greater than end mile.",
+          "severity": "Error",
+          "alwaysApplies": false,
+          "appliesWhen": "When River, StartMile, and EndMile all have values",
+          "source": "RiverAreaSegment.vb:86-91"
+        }
+      ]
+    }
+  },
+  "uiInteractions": {
+    "conditionalEnabling": [
+      {
+        "field": "cboCustomerID",
+        "condition": "chkIsHighWaterArea.Checked = True",
+        "enabledWhen": "IsHighWaterArea checkbox is checked",
+        "disabledWhen": "IsHighWaterArea checkbox is unchecked",
+        "location": "frmRiverAreaDetail.vb:584-607"
+      },
+      {
+        "field": "cboCustomerID",
+        "condition": "chkIsFuelTaxArea.Checked = True",
+        "enabledWhen": "IsFuelTaxArea checkbox is checked (alternate condition)",
+        "disabledWhen": "IsFuelTaxArea checkbox is unchecked",
+        "location": "frmRiverAreaDetail.vb:629-652"
+      }
+    ],
+    "visibilityRules": [
+      {
+        "field": "chkIsPortalArea",
+        "condition": "LicenseList(Licenses.LicenseComponent.Portal).Active",
+        "visibleWhen": "Portal license is active",
+        "location": "frmRiverAreaDetail.vb:367"
+      },
+      {
+        "field": "chkIsLiquidRateArea",
+        "condition": "LicenseList(Licenses.LicenseComponent.UnitTow).Active",
+        "visibleWhen": "UnitTow license is active",
+        "location": "frmRiverAreaDetail.vb:368"
+      },
+      {
+        "field": "lblCustomerID, cboCustomerID, chkIsHighWaterArea",
+        "condition": "Lists.GlobalSettingList.EnableRiverSegmentHighWaterModel",
+        "visibleWhen": "EnableRiverSegmentHighWaterModel global setting is enabled",
+        "hiddenWhen": "EnableRiverSegmentHighWaterModel global setting is disabled",
+        "location": "frmRiverAreaDetail.vb:371-380"
+      }
+    ],
+    "dataClearing": [
+      {
+        "field": "CustomerID",
+        "trigger": "Submit or Cancel button click",
+        "condition": "IsHighWaterArea = False",
+        "action": "Clear CustomerID field",
+        "location": "frmRiverAreaDetail.vb:466-475"
+      }
+    ]
+  },
+  "modernValidationMapping": {
+    "dataAnnotations": {
+      "RiverArea": [
+        "[Required(ErrorMessage = \"Name is required\")]",
+        "[StringLength(50, ErrorMessage = \"Name cannot exceed 50 characters.\")]",
+        "public string Name { get; set; }",
+        "",
+        "public bool IsActive { get; set; }",
+        "public bool IsPriceZone { get; set; }",
+        "public bool IsPortalArea { get; set; }",
+        "public bool IsHighWaterArea { get; set; }",
+        "public bool IsFuelTaxArea { get; set; }",
+        "public bool IsLiquidRateArea { get; set; }",
+        "",
+        "public string? CustomerID { get; set; }"
+      ],
+      "RiverAreaSegment": [
+        "[Required(ErrorMessage = \"River is required\")]",
+        "[StringLength(3, ErrorMessage = \"River cannot exceed 3 characters.\")]",
+        "public string River { get; set; }",
+        "",
+        "[Required(ErrorMessage = \"Start mile is required\")]",
+        "[Range(0, 9999.99, ErrorMessage = \"Start mile must be a valid decimal number\")]",
+        "public decimal StartMile { get; set; }",
+        "",
+        "[Required(ErrorMessage = \"End mile is required\")]",
+        "[Range(0, 9999.99, ErrorMessage = \"End mile must be a valid decimal number\")]",
+        "public decimal EndMile { get; set; }"
+      ]
+    },
+    "fluentValidation": {
+      "RiverArea": [
+        "RuleFor(x => x.Name)",
+        "    .NotEmpty().WithMessage(\"Name is required\")",
+        "    .MaximumLength(50).WithMessage(\"Name cannot exceed 50 characters.\");",
+        "",
+        "RuleFor(x => x)",
+        "    .Must(x => !((x.IsPriceZone && x.IsPortalArea) || (x.IsPortalArea && x.IsHighWaterArea) || (x.IsPriceZone && x.IsHighWaterArea)))",
+        "    .WithMessage(\"Only one of these may be checked: Pricing zone, Portal area, or High water area.\")",
+        "    .WithName(\"Area Type\");",
+        "",
+        "RuleFor(x => x.CustomerID)",
+        "    .Empty()",
+        "    .When(x => !x.IsHighWaterArea)",
+        "    .WithMessage(\"High water customer must be blank if High water area is not checked.\");",
+        "",
+        "RuleFor(x => x.RiverAreaSegments)",
+        "    .Must((model, segments) => !HasOverlappingPricingZones(model, segments))",
+        "    .When(x => x.IsPriceZone)",
+        "    .WithMessage(x => GetOverlappingZonesMessage(x));"
+      ],
+      "RiverAreaSegment": [
+        "RuleFor(x => x.River)",
+        "    .NotEmpty().WithMessage(\"River is required\")",
+        "    .MaximumLength(3).WithMessage(\"River cannot exceed 3 characters.\");",
+        "",
+        "RuleFor(x => x.StartMile)",
+        "    .NotEmpty().WithMessage(\"Start mile is required\")",
+        "    .Must((segment, startMile) => IsWithinRiverRange(segment.River, startMile))",
+        "    .When(x => !string.IsNullOrEmpty(x.River))",
+        "    .WithMessage((segment, startMile) => GetRiverRangeMessage(\"Start mile\", startMile, segment.River));",
+        "",
+        "RuleFor(x => x.EndMile)",
+        "    .NotEmpty().WithMessage(\"End mile is required\")",
+        "    .Must((segment, endMile) => IsWithinRiverRange(segment.River, endMile))",
+        "    .When(x => !string.IsNullOrEmpty(x.River))",
+        "    .WithMessage((segment, endMile) => GetRiverRangeMessage(\"End mile\", endMile, segment.River));",
+        "",
+        "RuleFor(x => x.StartMile)",
+        "    .LessThanOrEqualTo(x => x.EndMile)",
+        "    .When(x => !string.IsNullOrEmpty(x.River) && x.StartMile.HasValue && x.EndMile.HasValue)",
+        "    .WithMessage(\"Start mile must not be greater than end mile.\");"
+      ]
+    },
+    "clientSideValidation": {
+      "jquery": [
+        "// Name validation",
+        "rules: {",
+        "  Name: {",
+        "    required: true,",
+        "    maxlength: 50",
+        "  },",
+        "  StartMile: {",
+        "    required: true,",
+        "    number: true",
+        "  },",
+        "  EndMile: {",
+        "    required: true,",
+        "    number: true",
+        "  }",
+        "}",
+        "",
+        "// Custom validation for mutual exclusive checkboxes",
+        "$.validator.addMethod('mutualExclusive', function(value, element, params) {",
+        "  var checkedCount = $(params).filter(':checked').length;",
+        "  return checkedCount <= 1;",
+        "}, 'Only one of these may be checked: Pricing zone, Portal area, or High water area.');",
+        "",
+        "// Custom validation for mile range",
+        "$.validator.addMethod('mileRange', function(value, element, params) {",
+        "  var startMile = parseFloat($('#StartMile').val());",
+        "  var endMile = parseFloat($('#EndMile').val());",
+        "  return startMile <= endMile;",
+        "}, 'Start mile must not be greater than end mile.');"
+      ]
+    }
+  },
+  "validationPatterns": {
+    "requiredFields": [
+      {
+        "entity": "RiverArea",
+        "fields": ["Name"]
+      },
+      {
+        "entity": "RiverAreaSegment",
+        "fields": ["River", "StartMile", "EndMile"]
+      }
+    ],
+    "conditionalRequired": [
+      {
+        "field": "CustomerID",
+        "requiredWhen": "IsHighWaterArea = true",
+        "mustBeEmptyWhen": "IsHighWaterArea = false"
+      }
+    ],
+    "maxLengthValidations": [
+      {
+        "field": "Name",
+        "maxLength": 50,
+        "entity": "RiverArea"
+      },
+      {
+        "field": "River",
+        "maxLength": 3,
+        "entity": "RiverAreaSegment"
+      }
+    ],
+    "decimalValidations": [
+      {
+        "field": "StartMile",
+        "type": "Decimal",
+        "formatting": "Two decimal places",
+        "entity": "RiverAreaSegment"
+      },
+      {
+        "field": "EndMile",
+        "type": "Decimal",
+        "formatting": "Two decimal places",
+        "entity": "RiverAreaSegment"
+      }
+    ],
+    "rangeValidations": [
+      {
+        "field": "StartMile",
+        "range": "River-specific min/max mile values",
+        "dynamicValidation": true,
+        "dataSource": "Lists.RiverList.GetRiver",
+        "entity": "RiverAreaSegment"
+      },
+      {
+        "field": "EndMile",
+        "range": "River-specific min/max mile values",
+        "dynamicValidation": true,
+        "dataSource": "Lists.RiverList.GetRiver",
+        "entity": "RiverAreaSegment"
+      }
+    ],
+    "crossFieldValidations": [
+      {
+        "name": "MutualExclusiveAreaTypes",
+        "fields": ["IsPriceZone", "IsPortalArea", "IsHighWaterArea"],
+        "rule": "Only one can be true at a time",
+        "entity": "RiverArea"
+      },
+      {
+        "name": "StartEndMileOrder",
+        "fields": ["StartMile", "EndMile"],
+        "rule": "StartMile <= EndMile",
+        "entity": "RiverAreaSegment"
+      }
+    ],
+    "complexValidations": [
+      {
+        "name": "OverlappingPricingZones",
+        "description": "Validates that pricing zones don't have overlapping river segments",
+        "requiresDatabaseQuery": true,
+        "asyncValidation": true,
+        "entity": "RiverArea"
+      },
+      {
+        "name": "RiverMileRangeValidation",
+        "description": "Validates mile values against river-specific min/max ranges",
+        "requiresLookup": true,
+        "dataSource": "RiverList",
+        "entity": "RiverAreaSegment"
+      }
+    ]
+  },
+  "validationTriggers": {
+    "formLevel": [
+      {
+        "event": "txtName.Validated",
+        "triggersValidation": true,
+        "location": "frmRiverAreaDetail.vb:503-522"
+      },
+      {
+        "event": "chkIsHighWaterArea.CheckedChanged",
+        "triggersValidation": true,
+        "triggersUIChange": "Enables/disables CustomerID combo",
+        "location": "frmRiverAreaDetail.vb:584-607"
+      },
+      {
+        "event": "txtStartMile.Validated",
+        "triggersValidation": true,
+        "location": "frmRiverAreaDetail.vb:746-765"
+      },
+      {
+        "event": "txtEndMile.Validated",
+        "triggersValidation": true,
+        "location": "frmRiverAreaDetail.vb:767-786"
+      }
+    ],
+    "businessObjectLevel": [
+      {
+        "property": "Name",
+        "trigger": "Property setter",
+        "callsCheckBusinessRules": true,
+        "location": "RiverAreaBase.vb:114-127"
+      },
+      {
+        "property": "IsPriceZone",
+        "trigger": "Property setter",
+        "callsCheckBusinessRules": true,
+        "location": "RiverAreaBase.vb:144-157"
+      },
+      {
+        "property": "IsPortalArea",
+        "trigger": "Property setter",
+        "callsCheckBusinessRules": true,
+        "location": "RiverAreaBase.vb:159-172"
+      },
+      {
+        "property": "IsHighWaterArea",
+        "trigger": "Property setter",
+        "callsCheckBusinessRules": true,
+        "location": "RiverAreaBase.vb:174-187"
+      },
+      {
+        "property": "CustomerID",
+        "trigger": "Property setter",
+        "callsCheckBusinessRules": true,
+        "location": "RiverAreaBase.vb:189-202"
+      },
+      {
+        "property": "IsValid",
+        "trigger": "Property getter",
+        "triggersComplexValidation": "CheckOverlappingPricingZones",
+        "location": "RiverArea.vb:182-187"
+      }
+    ]
+  },
+  "notes": [
+    "The form automatically clears CustomerID when submitting if IsHighWaterArea is unchecked (ClearUnusedFields method)",
+    "ValidatorExtender is used for client-side validation in WinForms application",
+    "DisplayControl for validation messages is set to staStatus (status bar)",
+    "RiverAreaSegments is a child collection that must also be validated",
+    "OverlappingPricingZones validation only runs when IsValid property is accessed, not on every property change",
+    "Mile formatting uses FmtTwoDecimalPlaces constant for display",
+    "River values are looked up from Lists.RiverList for validation",
+    "The system supports license-based feature visibility (Portal, UnitTow)",
+    "Global settings control visibility of high water area features",
+    "All child RiverAreaSegments must be valid for parent RiverArea to be valid"
+  ]
+}

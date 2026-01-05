@@ -1,0 +1,515 @@
+{
+  "entity": "BargeTokenMap",
+  "formName": "frmBargeTokenMap",
+  "formType": "DetailEditList",
+  "description": "Map field values to display types (Pictures, Symbols, or Colors) for barge tokens. Manages mappings between field values and visual representations with dynamic form sections based on display type.",
+  "modernArchitecture": {
+    "pattern": "ASP.NET Core 8 MVC with Bootstrap 5",
+    "viewModel": "BargeTokenMapViewModel",
+    "controller": "BargeTokenMapController (inherits from AppController)",
+    "views": {
+      "index": "Views/BargeTokenMap/Index.cshtml",
+      "search": "Views/BargeTokenMap/_Search.cshtml",
+      "searchResults": "Views/BargeTokenMap/_SearchResults.cshtml",
+      "edit": "Views/BargeTokenMap/Edit.cshtml (or use modal)",
+      "editSections": {
+        "basicInfo": "Views/BargeTokenMap/_BasicInformation.cshtml",
+        "dynamicDisplay": "Views/BargeTokenMap/_DisplayMapping.cshtml"
+      }
+    },
+    "javascript": {
+      "search": "wwwroot/js/bargeTokenMapSearch.js",
+      "edit": "wwwroot/js/bargeTokenMapEdit.js"
+    }
+  },
+  "controlMappings": [
+    {
+      "legacyControl": "UltraTextEditor (txtFieldName)",
+      "purpose": "Display field name (read-only) when NOT a location map",
+      "modernEquivalent": "Bootstrap Text Input (read-only)",
+      "html": "<input type=\"text\" class=\"form-control\" asp-for=\"FieldName\" readonly />",
+      "bootstrap": {
+        "class": "form-control",
+        "attributes": ["readonly"]
+      },
+      "visibility": "Conditional - shown when field is NOT a location map",
+      "validation": {
+        "maxLength": 50,
+        "required": true
+      }
+    },
+    {
+      "legacyControl": "UltraCombo (cboFieldName)",
+      "purpose": "Select location type when mapping location fields",
+      "modernEquivalent": "Select2 Dropdown",
+      "html": "<select class=\"form-select\" asp-for=\"LocationType\" data-select2=\"true\">\n    <option value=\"\">-- Select Location Type --</option>\n    <option value=\"Boat\">Boat</option>\n    <option value=\"Consign Facility\">Consign Facility</option>\n    <option value=\"Facility\">Facility</option>\n    <option value=\"Ship\">Ship</option>\n</select>",
+      "bootstrap": {
+        "class": "form-select",
+        "plugin": "Select2"
+      },
+      "javascript": "$('#LocationType').select2({ placeholder: 'Select Location Type', allowClear: true });",
+      "visibility": "Conditional - shown when field IS a location map",
+      "events": ["change - triggers field value population"],
+      "options": [
+        { "value": "Boat", "text": "Boat", "condition": "fieldName = 'Location'" },
+        { "value": "Consign Facility", "text": "Consign Facility", "condition": "fieldName = 'Location'" },
+        { "value": "Facility", "text": "Facility", "condition": "always shown" },
+        { "value": "Ship", "text": "Ship", "condition": "always shown" }
+      ]
+    },
+    {
+      "legacyControl": "UltraCombo (cboFieldValue)",
+      "purpose": "Select the field value to map",
+      "modernEquivalent": "Select2 Dropdown (cascading)",
+      "html": "<select class=\"form-select\" asp-for=\"FieldValue\" data-select2=\"true\">\n    <option value=\"\">-- Select Value --</option>\n</select>",
+      "bootstrap": {
+        "class": "form-select",
+        "plugin": "Select2"
+      },
+      "javascript": "$('#FieldValue').select2({\n    placeholder: 'Select Field Value',\n    allowClear: true,\n    ajax: {\n        url: '/api/bargetokenmap/fieldvalues',\n        dataType: 'json',\n        delay: 250,\n        data: function(params) {\n            return {\n                fieldValue: $('#LocationType').val() || $('#FieldName').val(),\n                fleetId: $('#FleetId').val()\n            };\n        },\n        processResults: function(data) {\n            return { results: data.map(item => ({ id: item.fieldValue, text: item.fieldValue })) };\n        }\n    }\n});",
+      "dataSource": "GET /api/bargetokenmap/fieldvalues?fieldValue={fieldValue}&fleetId={fleetId}",
+      "validation": {
+        "required": true,
+        "maxLength": 200
+      }
+    },
+    {
+      "legacyControl": "UltraCombo (cboPictureID)",
+      "purpose": "Select picture when DisplayType is 'picture'",
+      "modernEquivalent": "Select2 Dropdown with Image Template",
+      "html": "<select class=\"form-select\" asp-for=\"PictureID\" data-select2=\"true\" data-template=\"image\">\n    <option value=\"\">-- Select Picture --</option>\n</select>",
+      "bootstrap": {
+        "class": "form-select",
+        "plugin": "Select2 with custom image template"
+      },
+      "javascript": "$('#PictureID').select2({\n    placeholder: 'Select Picture',\n    allowClear: true,\n    templateResult: formatPictureOption,\n    templateSelection: formatPictureSelection\n});\n\nfunction formatPictureOption(picture) {\n    if (!picture.id) return picture.text;\n    return $('<span><img src=\"/images/pictures/' + picture.imageUrl + '\" class=\"img-select2\" /> ' + picture.text + '</span>');\n}\n\nfunction formatPictureSelection(picture) {\n    return picture.text;\n}",
+      "dataSource": "GET /api/pictures/list",
+      "visibility": "Conditional - shown only when DisplayType = 'picture'",
+      "validation": {
+        "required": "when DisplayType = 'picture'"
+      },
+      "specialBehavior": "Displays image preview in dropdown options"
+    },
+    {
+      "legacyControl": "UltraTextEditor (txtSymbolValue)",
+      "purpose": "Enter symbol character when DisplayType is 'symbol'",
+      "modernEquivalent": "Bootstrap Text Input (single character)",
+      "html": "<input type=\"text\" class=\"form-control\" asp-for=\"SymbolValue\" maxlength=\"1\" placeholder=\"Enter single character\" />",
+      "bootstrap": {
+        "class": "form-control",
+        "attributes": ["maxlength=\"1\""]
+      },
+      "visibility": "Conditional - shown only when DisplayType = 'symbol'",
+      "validation": {
+        "required": "when DisplayType = 'symbol'",
+        "maxLength": 1
+      }
+    },
+    {
+      "legacyControl": "UltraCombo (cboColorPairID)",
+      "purpose": "Select color pair when DisplayType is 'color'",
+      "modernEquivalent": "Select2 Dropdown with Color Preview",
+      "html": "<select class=\"form-select\" asp-for=\"ColorPairID\" data-select2=\"true\" data-template=\"color\">\n    <option value=\"\">-- Select Color --</option>\n</select>",
+      "bootstrap": {
+        "class": "form-select",
+        "plugin": "Select2 with custom color template"
+      },
+      "javascript": "$('#ColorPairID').select2({\n    placeholder: 'Select Color',\n    allowClear: true,\n    templateResult: formatColorOption,\n    templateSelection: formatColorSelection\n});\n\nfunction formatColorOption(color) {\n    if (!color.id) return color.text;\n    var textColor = color.textColor || '#000';\n    var backColor = color.backColor || '#FFF';\n    return $('<span style=\"background-color: ' + backColor + '; color: ' + textColor + '; padding: 2px 8px; border-radius: 3px;\">' + color.text + '</span>');\n}\n\nfunction formatColorSelection(color) {\n    return color.text;\n}",
+      "dataSource": "GET /api/colorpairs/list?fleetId={fleetId}",
+      "visibility": "Conditional - shown only when DisplayType = 'color'",
+      "validation": {
+        "required": "when DisplayType = 'color' AND not DeferredDelete"
+      },
+      "specialBehavior": "Displays color preview with background and text color"
+    },
+    {
+      "legacyControl": "UltraGrid (grdBargeTokenMap)",
+      "purpose": "Display list of token mappings",
+      "modernEquivalent": "DataTables with Server-Side Processing",
+      "html": "<table id=\"bargeTokenMapTable\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\">\n    <thead>\n        <tr>\n            <th>Actions</th>\n            <th>Value</th>\n            <th id=\"thDynamicColumn\">Picture/Symbol/Color</th>\n        </tr>\n    </thead>\n    <tbody>\n    </tbody>\n</table>",
+      "bootstrap": {
+        "class": "table table-striped table-bordered dt-responsive nowrap",
+        "wrapper": "table-responsive"
+      },
+      "javascript": {
+        "initialization": "var dataTable = $('#bargeTokenMapTable').DataTable({\n    processing: true,\n    serverSide: true,\n    stateSave: true,\n    responsive: true,\n    ajax: {\n        url: '/BargeTokenMap/TokenMapTable',\n        type: 'POST',\n        data: function(d) {\n            d.fieldName = $('#FieldName').val();\n            d.displayType = $('#DisplayType').val();\n            d.fleetId = $('#FleetId').val();\n        }\n    },\n    columns: getColumnsForDisplayType(),\n    order: [[1, 'asc']]\n});",
+        "dynamicColumns": "function getColumnsForDisplayType() {\n    var displayType = $('#DisplayType').val();\n    var baseColumns = [\n        { data: null, name: 'actions', orderable: false, searchable: false,\n          render: function(data, type, row) {\n              return '<div class=\"btn-group btn-group-sm\">' +\n                     '<a href=\"#\" class=\"btn btn-sm btn-primary btn-edit\" data-id=\"' + row.bargeTokenMapID + '\"><i class=\"fas fa-edit\"></i></a>' +\n                     '<a href=\"#\" class=\"btn btn-sm btn-danger btn-delete\" data-id=\"' + row.bargeTokenMapID + '\"><i class=\"fas fa-trash\"></i></a>' +\n                     '</div>';\n          }\n        },\n        { data: 'fieldValue', name: 'fieldValue' }\n    ];\n    \n    if (displayType === 'picture') {\n        baseColumns.push({\n            data: 'picture',\n            name: 'picture',\n            render: function(data) {\n                return data ? '<img src=\"/images/pictures/' + data + '\" alt=\"Picture\" style=\"max-width: 40px; max-height: 40px;\" />' : '';\n            }\n        });\n        $('#thDynamicColumn').text('Picture');\n    } else if (displayType === 'symbol') {\n        baseColumns.push({ data: 'symbolValue', name: 'symbolValue' });\n        $('#thDynamicColumn').text('Symbol');\n    } else if (displayType === 'color') {\n        baseColumns.push({\n            data: null,\n            name: 'color',\n            render: function(data, type, row) {\n                var style = 'background-color: ' + (row.backColor || '#FFF') + '; color: ' + (row.textColor || '#000') + '; padding: 4px 12px; border-radius: 3px;';\n                return '<span style=\"' + style + '\">' + (row.colorName || '') + '</span>';\n            }\n        });\n        $('#thDynamicColumn').text('Color');\n    }\n    \n    return baseColumns;\n}"
+      },
+      "columnsByDisplayType": {
+        "picture": [
+          { "column": "Actions", "width": "80px" },
+          { "column": "Value", "width": "auto" },
+          { "column": "Picture", "width": "100px", "render": "image preview" }
+        ],
+        "symbol": [
+          { "column": "Actions", "width": "80px" },
+          { "column": "Value", "width": "auto" },
+          { "column": "Symbol", "width": "80px" }
+        ],
+        "color": [
+          { "column": "Actions", "width": "80px" },
+          { "column": "Value", "width": "auto" },
+          { "column": "Color Name", "width": "auto", "render": "color preview with text" }
+        ]
+      },
+      "sorting": [
+        { "column": "Value", "direction": "Ascending" }
+      ],
+      "features": [
+        "Server-side processing",
+        "Responsive design",
+        "State saving",
+        "Dynamic columns based on DisplayType",
+        "Inline action buttons (Edit/Delete)"
+      ]
+    },
+    {
+      "legacyControl": "UltraPanel (pnlMain)",
+      "purpose": "Main container panel",
+      "modernEquivalent": "Bootstrap Container Fluid",
+      "html": "<div class=\"container-fluid\">\n    <!-- Content -->\n</div>",
+      "bootstrap": {
+        "class": "container-fluid"
+      }
+    },
+    {
+      "legacyControl": "UltraGroupBox (grpDetail)",
+      "purpose": "Detail editing section",
+      "modernEquivalent": "Bootstrap Card",
+      "html": "<div class=\"card mb-3\">\n    <div class=\"card-header\">\n        <h5 class=\"card-title mb-0\">\n            <i class=\"fas fa-edit\"></i> Detail\n        </h5>\n    </div>\n    <div class=\"card-body\">\n        <!-- Detail form controls -->\n    </div>\n    <div class=\"card-footer text-end\">\n        <button type=\"button\" class=\"btn btn-secondary\" id=\"btnCancel\">\n            <i class=\"fas fa-times\"></i> Cancel\n        </button>\n        <button type=\"submit\" class=\"btn btn-primary\" id=\"btnSubmit\">\n            <i class=\"fas fa-save\"></i> Submit\n        </button>\n    </div>\n</div>",
+      "bootstrap": {
+        "class": "card mb-3",
+        "sections": {
+          "header": "card-header",
+          "body": "card-body",
+          "footer": "card-footer"
+        }
+      },
+      "state": "Disabled when not editing (apply disabled class to card-body)"
+    },
+    {
+      "legacyControl": "UltraGroupBox (grpClose)",
+      "purpose": "Close button section",
+      "modernEquivalent": "Bootstrap Card or Bottom Toolbar",
+      "html": "<div class=\"card\">\n    <div class=\"card-body text-end\">\n        <button type=\"button\" class=\"btn btn-secondary\" id=\"btnClose\">\n            <i class=\"fas fa-times\"></i> Close\n        </button>\n    </div>\n</div>",
+      "bootstrap": {
+        "class": "card",
+        "alignment": "text-end"
+      }
+    },
+    {
+      "legacyControl": "UltraCheckEditor",
+      "purpose": "Generic checkbox control",
+      "modernEquivalent": "Bootstrap Checkbox",
+      "html": "<div class=\"form-check\">\n    <input type=\"checkbox\" class=\"form-check-input\" id=\"checkboxId\" />\n    <label class=\"form-check-label\" for=\"checkboxId\">Label Text</label>\n</div>",
+      "bootstrap": {
+        "wrapper": "form-check",
+        "input": "form-check-input",
+        "label": "form-check-label"
+      }
+    },
+    {
+      "legacyControl": "Toolbar Buttons (Add/Modify/Remove/Export)",
+      "purpose": "Action buttons for grid operations",
+      "modernEquivalent": "Bootstrap Button Group",
+      "html": "<div class=\"btn-toolbar mb-3\" role=\"toolbar\">\n    <div class=\"btn-group me-2\" role=\"group\">\n        <button type=\"button\" class=\"btn btn-success\" id=\"btnAdd\">\n            <i class=\"fas fa-plus\"></i> Add\n        </button>\n        <button type=\"button\" class=\"btn btn-primary\" id=\"btnModify\" disabled>\n            <i class=\"fas fa-edit\"></i> Modify\n        </button>\n        <button type=\"button\" class=\"btn btn-danger\" id=\"btnRemove\" disabled>\n            <i class=\"fas fa-trash\"></i> Remove\n        </button>\n    </div>\n    <div class=\"btn-group\" role=\"group\">\n        <button type=\"button\" class=\"btn btn-secondary\" id=\"btnExport\">\n            <i class=\"fas fa-file-export\"></i> Export\n        </button>\n    </div>\n</div>",
+      "bootstrap": {
+        "toolbar": "btn-toolbar",
+        "group": "btn-group",
+        "buttons": {
+          "add": "btn btn-success",
+          "modify": "btn btn-primary",
+          "remove": "btn btn-danger",
+          "export": "btn btn-secondary"
+        }
+      },
+      "javascript": {
+        "enableDisable": "$('#bargeTokenMapTable').on('click', 'tbody tr', function() {\n    var hasSelection = $(this).hasClass('selected');\n    $('#btnModify, #btnRemove').prop('disabled', !hasSelection);\n});"
+      }
+    },
+    {
+      "legacyControl": "Status Bar (staStatus)",
+      "purpose": "Display validation messages",
+      "modernEquivalent": "Bootstrap Toast/Alert",
+      "html": "<div class=\"position-fixed bottom-0 end-0 p-3\" style=\"z-index: 11\">\n    <div id=\"validationToast\" class=\"toast align-items-center text-white bg-danger border-0\" role=\"alert\">\n        <div class=\"d-flex\">\n            <div class=\"toast-body\" id=\"validationMessage\">\n                <!-- Validation message here -->\n            </div>\n            <button type=\"button\" class=\"btn-close btn-close-white me-2 m-auto\" data-bs-dismiss=\"toast\"></button>\n        </div>\n    </div>\n</div>",
+      "bootstrap": {
+        "class": "toast",
+        "variants": {
+          "error": "bg-danger",
+          "success": "bg-success",
+          "warning": "bg-warning"
+        }
+      },
+      "javascript": "function showValidationMessage(message, type) {\n    var toast = new bootstrap.Toast($('#validationToast'));\n    $('#validationMessage').text(message);\n    $('#validationToast').removeClass('bg-danger bg-success bg-warning').addClass('bg-' + type);\n    toast.show();\n}"
+    }
+  ],
+  "formPatterns": {
+    "searchForm": {
+      "layout": "Bootstrap card with form inputs",
+      "submitButton": "btn btn-primary",
+      "resetButton": "btn btn-secondary",
+      "addButton": "btn btn-success float-end"
+    },
+    "detailForm": {
+      "layout": "Bootstrap card with dynamic sections",
+      "editMode": "Inline editing within detail card",
+      "validation": "jQuery Validate with unobtrusive validation",
+      "dynamicSections": "JavaScript shows/hides sections based on DisplayType and LocationType"
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "serverSide": true,
+      "responsive": true,
+      "stateSave": true,
+      "dynamicColumns": "Columns vary based on DisplayType parameter"
+    },
+    "modalPattern": {
+      "alternative": "Use Bootstrap modal for Add/Edit instead of inline detail panel",
+      "html": "<div class=\"modal fade\" id=\"tokenMapModal\" tabindex=\"-1\">\n    <div class=\"modal-dialog modal-lg\">\n        <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\">Token Map Detail</h5>\n                <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button>\n            </div>\n            <div class=\"modal-body\">\n                <!-- Form fields -->\n            </div>\n            <div class=\"modal-footer\">\n                <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Cancel</button>\n                <button type=\"button\" class=\"btn btn-primary\">Save</button>\n            </div>\n        </div>\n    </div>\n</div>"
+    }
+  },
+  "dynamicBehavior": {
+    "titleFormat": "{fieldName} - Map Field Values to {displayType}s",
+    "controlVisibility": {
+      "locationMap": {
+        "condition": "fieldName in ['location', 'consign to', 'on order to']",
+        "show": ["#LocationType"],
+        "hide": ["#FieldName"],
+        "javascript": "if (isLocationField) {\n    $('#LocationType').parent().show();\n    $('#FieldName').parent().hide();\n} else {\n    $('#LocationType').parent().hide();\n    $('#FieldName').parent().show();\n}"
+      },
+      "pictureMode": {
+        "condition": "displayType === 'picture'",
+        "show": ["#PictureID"],
+        "hide": ["#SymbolValue", "#ColorPairID"],
+        "labelText": "Picture:",
+        "javascript": "if (displayType === 'picture') {\n    $('#divPicture').show();\n    $('#divSymbol, #divColor').hide();\n    $('#lblDisplayType').text('Picture:');\n}"
+      },
+      "symbolMode": {
+        "condition": "displayType === 'symbol'",
+        "show": ["#SymbolValue"],
+        "hide": ["#PictureID", "#ColorPairID"],
+        "labelText": "Symbol:",
+        "javascript": "if (displayType === 'symbol') {\n    $('#divSymbol').show();\n    $('#divPicture, #divColor').hide();\n    $('#lblDisplayType').text('Symbol:');\n}"
+      },
+      "colorMode": {
+        "condition": "displayType === 'color'",
+        "show": ["#ColorPairID"],
+        "hide": ["#PictureID", "#SymbolValue"],
+        "labelText": "Color:",
+        "javascript": "if (displayType === 'color') {\n    $('#divColor').show();\n    $('#divPicture, #divSymbol').hide();\n    $('#lblDisplayType').text('Color:');\n}"
+      }
+    },
+    "cascadingDropdowns": {
+      "trigger": "LocationType or FieldName change",
+      "target": "FieldValue dropdown",
+      "javascript": "$('#LocationType, #FieldName').on('change', function() {\n    var fieldValue = $('#LocationType').val() || $('#FieldName').val();\n    var fleetId = $('#FleetId').val();\n    \n    $.ajax({\n        url: '/api/bargetokenmap/fieldvalues',\n        data: { fieldValue: fieldValue, fleetId: fleetId },\n        success: function(data) {\n            $('#FieldValue').empty().append('<option value=\"\">-- Select Value --</option>');\n            data.forEach(function(item) {\n                $('#FieldValue').append('<option value=\"' + item.fieldValue + '\">' + item.fieldValue + '</option>');\n            });\n        }\n    });\n});"
+    }
+  },
+  "apiEndpoints": [
+    {
+      "method": "GET",
+      "route": "/api/bargetokenmap/list",
+      "parameters": ["fieldName", "displayType", "fleetId"],
+      "returns": "List of BargeTokenMap entries",
+      "dataTablesEndpoint": false
+    },
+    {
+      "method": "POST",
+      "route": "/BargeTokenMap/TokenMapTable",
+      "parameters": ["DataTables parameters + fieldName, displayType, fleetId"],
+      "returns": "DataTables JSON response",
+      "dataTablesEndpoint": true
+    },
+    {
+      "method": "GET",
+      "route": "/api/bargetokenmap/{id}",
+      "parameters": ["id"],
+      "returns": "Single BargeTokenMap entry"
+    },
+    {
+      "method": "POST",
+      "route": "/api/bargetokenmap",
+      "parameters": ["BargeTokenMapViewModel"],
+      "returns": "Created BargeTokenMap"
+    },
+    {
+      "method": "PUT",
+      "route": "/api/bargetokenmap/{id}",
+      "parameters": ["id", "BargeTokenMapViewModel"],
+      "returns": "Updated BargeTokenMap"
+    },
+    {
+      "method": "DELETE",
+      "route": "/api/bargetokenmap/{id}",
+      "parameters": ["id"],
+      "returns": "Success status"
+    },
+    {
+      "method": "GET",
+      "route": "/api/bargetokenmap/fieldvalues",
+      "parameters": ["fieldValue", "fleetId"],
+      "returns": "List of distinct field values",
+      "description": "Populates FieldValue dropdown based on selected FieldName/LocationType"
+    },
+    {
+      "method": "GET",
+      "route": "/api/bargetokenmap/locationtypes",
+      "parameters": ["fieldName"],
+      "returns": "List of location types (Boat, Consign Facility, Facility, Ship)",
+      "description": "Returns location type options filtered by fieldName"
+    },
+    {
+      "method": "GET",
+      "route": "/api/pictures/list",
+      "parameters": [],
+      "returns": "List of available pictures with IDs and image URLs"
+    },
+    {
+      "method": "GET",
+      "route": "/api/colorpairs/list",
+      "parameters": ["fleetId"],
+      "returns": "List of color pairs with text and background colors"
+    }
+  ],
+  "validation": {
+    "clientSide": {
+      "library": "jQuery Validate with Unobtrusive Validation",
+      "rules": [
+        {
+          "field": "FieldName",
+          "rules": { "required": true, "maxlength": 50 },
+          "messages": { "required": "Field Name is required.", "maxlength": "Field Name cannot exceed 50 characters." }
+        },
+        {
+          "field": "FieldValue",
+          "rules": { "required": true, "maxlength": 200 },
+          "messages": { "required": "Field Value is required.", "maxlength": "Field Value cannot exceed 200 characters." }
+        },
+        {
+          "field": "SymbolValue",
+          "rules": { "required": "when DisplayType = 'symbol'", "maxlength": 1 },
+          "messages": { "required": "Symbol is required.", "maxlength": "Symbol must be a single character." }
+        },
+        {
+          "field": "ColorPairID",
+          "rules": { "required": "when DisplayType = 'color'" },
+          "messages": { "required": "Color is required." }
+        },
+        {
+          "field": "PictureID",
+          "rules": { "required": "when DisplayType = 'picture'" },
+          "messages": { "required": "Picture is required." }
+        }
+      ],
+      "conditionalValidation": "$.validator.addMethod('conditionalRequired', function(value, element, params) {\n    var displayType = $('#DisplayType').val();\n    return params.condition(displayType) ? value.length > 0 : true;\n});"
+    },
+    "serverSide": {
+      "library": "FluentValidation",
+      "validator": "BargeTokenMapValidator",
+      "rules": [
+        "RuleFor(x => x.FieldName).NotEmpty().MaximumLength(50)",
+        "RuleFor(x => x.FieldValue).NotEmpty().When(x => !x.DeferredDelete).MaximumLength(200)",
+        "RuleFor(x => x.SymbolValue).NotEmpty().When(x => x.DisplayType == 'symbol').MaximumLength(1)",
+        "RuleFor(x => x.ColorPairID).NotEmpty().When(x => x.DisplayType == 'color' && !x.DeferredDelete)",
+        "RuleFor(x => x.PictureID).NotEmpty().When(x => x.DisplayType == 'picture')"
+      ]
+    }
+  },
+  "javascriptPatterns": {
+    "initialization": "$(document).ready(function() {\n    initializeDataTable();\n    initializeSelect2Dropdowns();\n    setupEventHandlers();\n    setupConditionalValidation();\n});",
+    "dataTableInit": "See 'UltraGrid (grdBargeTokenMap)' mapping above",
+    "select2Init": "See individual dropdown mappings above",
+    "dynamicFormSections": "function updateFormSections() {\n    var displayType = $('#DisplayType').val();\n    var fieldName = $('#FieldName').val();\n    \n    // Show/hide display type sections\n    $('.display-section').hide();\n    $('#div' + displayType.charAt(0).toUpperCase() + displayType.slice(1)).show();\n    \n    // Show/hide field name vs location type\n    var isLocationField = ['location', 'consign to', 'on order to'].includes(fieldName.toLowerCase());\n    $('#divLocationType').toggle(isLocationField);\n    $('#divFieldName').toggle(!isLocationField);\n}",
+    "cascadingDropdown": "See 'cascadingDropdowns' in dynamicBehavior section above",
+    "editMode": "function enableEditMode(id) {\n    if (id > 0) {\n        // Load existing record\n        $.get('/api/bargetokenmap/' + id, function(data) {\n            populateForm(data);\n            $('#detailCard').removeClass('disabled');\n            $('#detailCard input, #detailCard select').prop('disabled', false);\n        });\n    } else {\n        // New record\n        clearForm();\n        $('#detailCard').removeClass('disabled');\n        $('#detailCard input, #detailCard select').prop('disabled', false);\n    }\n}",
+    "disableEditMode": "function disableEditMode() {\n    clearForm();\n    $('#detailCard').addClass('disabled');\n    $('#detailCard input, #detailCard select').prop('disabled', true);\n}",
+    "saveRecord": "function saveRecord() {\n    if (!$('#editForm').valid()) return;\n    \n    var data = $('#editForm').serialize();\n    var id = $('#BargeTokenMapID').val();\n    var method = id > 0 ? 'PUT' : 'POST';\n    var url = id > 0 ? '/api/bargetokenmap/' + id : '/api/bargetokenmap';\n    \n    $.ajax({\n        method: method,\n        url: url,\n        data: data,\n        success: function() {\n            showValidationMessage('Record saved successfully', 'success');\n            disableEditMode();\n            dataTable.ajax.reload();\n        },\n        error: function(xhr) {\n            showValidationMessage(xhr.responseJSON.message || 'Error saving record', 'danger');\n        }\n    });\n}",
+    "deleteRecord": "function deleteRecord(id) {\n    if (!confirm('Are you sure you want to delete this record?')) return;\n    \n    $.ajax({\n        method: 'DELETE',\n        url: '/api/bargetokenmap/' + id,\n        success: function() {\n            showValidationMessage('Record deleted successfully', 'success');\n            dataTable.ajax.reload();\n        },\n        error: function(xhr) {\n            showValidationMessage(xhr.responseJSON.message || 'Error deleting record', 'danger');\n        }\n    });\n}"
+  },
+  "stylingGuidelines": {
+    "colorScheme": "Bootstrap 5 default theme",
+    "responsiveBreakpoints": ["sm", "md", "lg", "xl"],
+    "cardStyling": "Use card-header, card-body, card-footer for consistent layout",
+    "formLayout": "Use row/col grid system for responsive forms",
+    "buttonStyling": {
+      "primary": "btn btn-primary (Submit, Modify)",
+      "secondary": "btn btn-secondary (Cancel, Reset, Close)",
+      "success": "btn btn-success (Add)",
+      "danger": "btn btn-danger (Remove, Delete)"
+    },
+    "iconLibrary": "Font Awesome 6",
+    "tableStyle": "table table-striped table-bordered dt-responsive nowrap"
+  },
+  "accessibilityConsiderations": {
+    "labels": "All form controls must have associated labels using asp-for tag helper",
+    "ariaAttributes": "Add aria-label to icon-only buttons, aria-required to required fields",
+    "keyboardNavigation": "Ensure all interactive elements are keyboard accessible",
+    "screenReaderSupport": "Use sr-only class for screen reader only text",
+    "focusManagement": "Set focus to first field when entering edit mode",
+    "colorContrast": "Ensure WCAG AA compliance for color combinations",
+    "formValidation": "Display validation errors in accessible manner with role=\"alert\""
+  },
+  "complexities": [
+    "Dynamic control visibility based on DisplayType (picture/symbol/color) and FieldName (location vs non-location)",
+    "Three different display modes with different required fields and UI elements",
+    "Cascading dropdown dependencies (FieldName/LocationType -> FieldValue)",
+    "Grid columns vary dynamically based on DisplayType parameter",
+    "Image display in Select2 dropdown for picture mode",
+    "Color preview rendering in Select2 and grid for color mode",
+    "Conditional validation rules based on DisplayType",
+    "DeferredDelete pattern for special deletion scenarios"
+  ],
+  "recommendedApproach": [
+    "Create main Index view with search parameters (FieldName, DisplayType, FleetId)",
+    "Use separate partial views for each display type's edit form (_PictureMapping.cshtml, _SymbolMapping.cshtml, _ColorMapping.cshtml)",
+    "Implement JavaScript show/hide logic for dynamic form sections based on DisplayType",
+    "Use Select2 with custom templates for image and color previews",
+    "Implement DataTables with dynamic column configuration function",
+    "Consider using Bootstrap modal for Add/Edit instead of inline detail panel (modern pattern)",
+    "Use AJAX for all CRUD operations to avoid page refreshes",
+    "Implement client-side validation with conditional rules",
+    "Use Bootstrap toasts for success/error feedback instead of status bar",
+    "Implement export functionality using DataTables buttons extension"
+  ],
+  "alternativePattern": {
+    "modalBasedEditing": {
+      "description": "Use Bootstrap modal for Add/Edit instead of inline detail panel",
+      "benefits": [
+        "Cleaner UI with more screen space for grid",
+        "Better focus on editing task",
+        "Easier to implement responsive design",
+        "Modern UI pattern"
+      ],
+      "implementation": "Show modal on Add/Edit button click, populate form, save via AJAX, close modal and reload grid"
+    },
+    "tabBasedLayout": {
+      "description": "Use Bootstrap tabs if managing multiple display types simultaneously",
+      "benefits": [
+        "Organize different display types in separate tabs",
+        "Allow switching between display types without reloading page"
+      ],
+      "implementation": "Create tab for each display type (Picture, Symbol, Color) with separate grids"
+    }
+  },
+  "testingConsiderations": [
+    "Test dynamic form sections visibility with all DisplayType values",
+    "Test location vs non-location field handling",
+    "Test cascading dropdown population with various FieldName/LocationType values",
+    "Test conditional validation for each DisplayType",
+    "Test image preview in Select2 for picture mode",
+    "Test color preview rendering in Select2 and grid",
+    "Test grid column configuration changes when switching DisplayType",
+    "Test CRUD operations (Create, Read, Update, Delete)",
+    "Test DeferredDelete scenarios if applicable",
+    "Test responsive behavior on mobile devices"
+  ],
+  "notes": [
+    "This form requires significant JavaScript for dynamic behavior",
+    "Consider progressive enhancement approach: basic form without JS, enhanced with JS",
+    "Image and color preview features enhance user experience significantly",
+    "Grid filtering by DisplayType requires page reload or dynamic column reconfiguration",
+    "Consider caching picture and color pair lists client-side to reduce API calls",
+    "Export functionality can use DataTables buttons extension or custom implementation",
+    "Form initialization parameters (fieldName, displayType, fleetID) should be passed via query string or view model"
+  ]
+}

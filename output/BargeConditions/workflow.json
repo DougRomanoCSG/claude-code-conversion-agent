@@ -1,0 +1,580 @@
+{
+  "formName": "frmBargeConditions",
+  "formType": "ReadOnlyListWithDetail",
+  "description": "View-only form for displaying barge condition reports with associated photos. This is a modal dialog launched from the Barge Detail form.",
+  "formStates": [
+    {
+      "state": "Initial",
+      "description": "Form loads with list of condition reports for the specific barge",
+      "gridBargeConditionsState": "Populated with condition history",
+      "gridBargeConditionPhotosState": "Empty",
+      "txtNoteState": "Empty and readonly",
+      "enabledButtons": [
+        "Remove (if row selected in conditions grid)",
+        "Export (if rows exist in conditions grid)",
+        "Close"
+      ]
+    },
+    {
+      "state": "ConditionSelected",
+      "description": "User selects a condition report row",
+      "gridBargeConditionsState": "One row selected",
+      "gridBargeConditionPhotosState": "Populated with photos for selected condition",
+      "txtNoteState": "Displays condition note text (readonly)",
+      "enabledButtons": [
+        "Remove (in conditions toolbar)",
+        "Export (in conditions toolbar)",
+        "View Photo (if photo selected in photos grid)",
+        "Remove Photo (if photo selected in photos grid)",
+        "Export Photo (if photos exist)",
+        "Close"
+      ]
+    },
+    {
+      "state": "PhotoSelected",
+      "description": "User selects a photo from the photos grid",
+      "gridBargeConditionsState": "One row selected",
+      "gridBargeConditionPhotosState": "One photo selected",
+      "txtNoteState": "Displays condition note text (readonly)",
+      "enabledButtons": [
+        "Remove (in conditions toolbar)",
+        "Export (in conditions toolbar)",
+        "View Photo",
+        "Remove Photo",
+        "Export Photo",
+        "Close"
+      ]
+    },
+    {
+      "state": "ViewingPhotoInExternalViewer",
+      "description": "Photo opened in external application via System.Diagnostics.Process.Start",
+      "formState": "Still visible/modal behind external photo viewer"
+    }
+  ],
+  "primaryWorkflows": [
+    {
+      "name": "ViewConditionReports",
+      "description": "User opens form to view all condition reports for a specific barge",
+      "steps": [
+        {
+          "step": 1,
+          "action": "LaunchFromBargeDetail",
+          "trigger": "btnViewPhotos_Click in frmBargeDetail",
+          "navigation": "Opens frmBargeConditions as ShowDialog (modal)",
+          "dataPassed": {
+            "bargeID": "Primary key for the barge",
+            "bargeNum": "Barge number for display in form title"
+          }
+        },
+        {
+          "step": 2,
+          "action": "FormLoad",
+          "details": "frmDetailEdit_Load event handler executes",
+          "operations": [
+            "FormatControls() - Sets up grid columns and unique identifiers",
+            "RefreshList(True, grdBargeConditions) - Loads condition reports via BargeConditionList.GetList(bargeID)",
+            "SetToolState(grdBargeConditions) - Enables/disables toolbar buttons",
+            "SetToolState(grdBargeConditionPhotos) - Enables/disables photo toolbar buttons",
+            "SetState(txtNote, ControlState.Readonly) - Makes note field readonly"
+          ],
+          "gridSorting": "Initial sort by CreateDateTime descending"
+        },
+        {
+          "step": 3,
+          "action": "ViewConditionList",
+          "display": "Grid shows: Received (CreateDateTime), Sent By (CreateUser), Condition (Note), Notified (EmailSentDateTime)"
+        }
+      ]
+    },
+    {
+      "name": "ViewConditionDetails",
+      "description": "User selects a condition report to view its details and photos",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectConditionRow",
+          "trigger": "grdBargeConditions_AfterSelectChange",
+          "validation": "InfragisticsHelper.HasOneRowSelected(grdBargeConditions)",
+          "operations": [
+            "Get BargeConditionID from selected row",
+            "Load _BargeCondition = BargeCondition.GetBargeCondition(bargeConditionID)",
+            "LoadControlsForBargeCondition() - Populates txtNote.Text",
+            "RefreshList(True, grdBargeConditionPhotos) - Loads associated photos"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "ViewNote",
+          "control": "txtNote",
+          "state": "Readonly with ellipsis button",
+          "behavior": "Displays condition note text inline"
+        },
+        {
+          "step": 3,
+          "action": "ViewPhotosGrid",
+          "display": "Photo grid shows: Photo Name (DocumentName), Type (DocumentExtension)"
+        }
+      ]
+    },
+    {
+      "name": "ViewNoteInTextEditor",
+      "description": "User clicks ellipsis button to view full note text in larger editor",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickEllipsisButton",
+          "trigger": "txtNote_EditorButtonClick",
+          "handler": "Opens frmTextEditor as ShowDialog (modal)"
+        },
+        {
+          "step": 2,
+          "action": "ViewInTextEditor",
+          "parameters": {
+            "text": "txtNote.Text",
+            "title": "Barge Condition Note",
+            "accessLevel": "AccessLevel.Readonly",
+            "maxLength": "txtNote.MaxLength"
+          }
+        },
+        {
+          "step": 3,
+          "action": "CloseTextEditor",
+          "result": "Returns to frmBargeConditions",
+          "behavior": "txtNote.SelectionStart set to end of text (prevents highlighting)"
+        }
+      ]
+    },
+    {
+      "name": "ViewPhoto",
+      "description": "User views a photo by double-clicking or clicking View Photo toolbar button",
+      "triggers": [
+        "grdBargeConditionPhotos.DoubleClickRow",
+        "tbmBargeConditionPhoto ViewPhoto button click"
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectPhoto",
+          "validation": "Photo must be selected in grdBargeConditionPhotos"
+        },
+        {
+          "step": 2,
+          "action": "OpenPhotoInExternalViewer",
+          "method": "ViewPhoto(bargeConditionPhoto)",
+          "implementation": [
+            "Get serverPath from Lists.GlobalSettingList.DocumentsFilePath",
+            "System.Diagnostics.Process.Start(Path.Combine(serverPath, bargeConditionPhoto.Document.Filename))",
+            "Opens photo in default application for file type"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RemoveConditionReport",
+      "description": "User removes a condition report and all its associated photos",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectCondition",
+          "validation": "InfragisticsHelper.HasListObjectSelected(grdBargeConditions)"
+        },
+        {
+          "step": 2,
+          "action": "ClickRemoveButton",
+          "trigger": "tbmBargeCondition Remove button click",
+          "security": "ControlAuthorization.ToolbarButtonCanBeEnabled checks Remove permission"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDeletion",
+          "dialog": "Main.ItemRemoveDialog(\"Barge Condition and Related Photo(s)\")",
+          "userChoice": "Yes/No dialog"
+        },
+        {
+          "step": 4,
+          "action": "DeleteConditionAndPhotos",
+          "condition": "If user clicks Yes",
+          "operations": [
+            "Get bargeConditionID from selected row",
+            "Load bc = BargeCondition.GetBargeCondition(bargeConditionID)",
+            "bc.Delete() - Marks for deletion",
+            "bc.SaveNoRefresh() - Deletes from database AND deletes photo files from server",
+            "RefreshList(True, grdBargeConditions) - Reloads conditions grid",
+            "RefreshList(True, grdBargeConditionPhotos) - Clears photos grid"
+          ],
+          "fileSystemOperation": "Photos deleted from server via Document.DeleteFileFromServer(filename)"
+        }
+      ]
+    },
+    {
+      "name": "RemovePhoto",
+      "description": "User removes a single photo from a condition report",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectPhoto",
+          "validation": "InfragisticsHelper.HasListObjectSelected(grdBargeConditionPhotos)"
+        },
+        {
+          "step": 2,
+          "action": "ClickRemovePhotoButton",
+          "trigger": "tbmBargeConditionPhoto RemovePhoto button click",
+          "security": "ControlAuthorization.ToolbarButtonCanBeEnabled checks Remove permission"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDeletion",
+          "dialog": "Main.ItemRemoveDialog(\"Photo\")",
+          "userChoice": "Yes/No dialog"
+        },
+        {
+          "step": 4,
+          "action": "DeletePhoto",
+          "condition": "If user clicks Yes",
+          "operations": [
+            "Get bargeConditionPhoto from selected row (ListObject)",
+            "BargeConditionPhoto.DeleteBargeConditionPhoto(photoID, filename)",
+            "Reload _BargeCondition = BargeCondition.GetBargeCondition(bargeConditionID)",
+            "RefreshList(True, grdBargeConditionPhotos) - Reloads photos grid"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ExportConditionsToExcel",
+      "description": "User exports the conditions grid to Excel",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickExportButton",
+          "trigger": "tbmBargeCondition Export button click",
+          "validation": "At least one row exists in grid"
+        },
+        {
+          "step": 2,
+          "action": "ExportGrid",
+          "method": "Main.ExportGrid(grdBargeConditions, staStatus, Me.Text)",
+          "exportTitle": "Form title (e.g., 'B-1234 - Barge Conditions')",
+          "result": "Excel file created with grid data"
+        }
+      ]
+    },
+    {
+      "name": "ExportPhotosToExcel",
+      "description": "User exports the photos grid to Excel",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickExportPhotoButton",
+          "trigger": "tbmBargeConditionPhoto ExportPhoto button click",
+          "validation": "At least one row exists in grid"
+        },
+        {
+          "step": 2,
+          "action": "ExportGrid",
+          "method": "Main.ExportGrid(grdBargeConditionPhotos, staStatus, title)",
+          "exportTitle": "{bargeNum} - Barge Condition Photos",
+          "result": "Excel file created with photo metadata"
+        }
+      ]
+    },
+    {
+      "name": "CloseForm",
+      "description": "User closes the form and returns to Barge Detail",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickClose",
+          "trigger": "btnClose_Click",
+          "handler": "Calls CancelClick()"
+        },
+        {
+          "step": 2,
+          "action": "FormClosing",
+          "operations": [
+            "CancelClick() -> base form handles close logic",
+            "No dirty checking needed (readonly form)"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "FormClosed",
+          "event": "frmDetailEdit_FormClosed",
+          "operations": [
+            "MyAppSettingHelper.SaveGrid(Me, grdBargeConditions, True) - Saves grid layout preferences",
+            "MyAppSettingHelper.SaveGrid(Me, grdBargeConditionPhotos, True) - Saves photo grid layout",
+            "Form disposed"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "ReturnToBargeDetail",
+          "navigation": "Control returns to frmBargeDetail (parent form)"
+        }
+      ]
+    }
+  ],
+  "navigationPatterns": [
+    {
+      "from": "frmBargeDetail",
+      "to": "frmBargeConditions",
+      "trigger": "btnViewPhotos_Click",
+      "modalType": "ShowDialog",
+      "dataPassed": {
+        "bargeID": "Integer - Primary key",
+        "bargeNum": "String - For display"
+      },
+      "initializationMethod": "Initialize(bargeID, bargeNum)",
+      "returnNavigation": "SubSystem.frmBargeSearch (used for permission context)"
+    },
+    {
+      "from": "frmBargeConditions",
+      "to": "frmTextEditor",
+      "trigger": "txtNote ellipsis button click",
+      "modalType": "ShowDialog",
+      "dataPassed": {
+        "text": "txtNote.Text",
+        "title": "Barge Condition Note",
+        "accessLevel": "AccessLevel.Readonly",
+        "maxLength": "txtNote.MaxLength"
+      }
+    },
+    {
+      "from": "frmBargeConditions",
+      "to": "ExternalPhotoViewer",
+      "trigger": "View Photo button or double-click photo row",
+      "method": "System.Diagnostics.Process.Start",
+      "filePath": "GlobalSettingList.DocumentsFilePath + Document.Filename"
+    }
+  ],
+  "stateManagement": {
+    "sessionVariables": [
+      {
+        "name": "_BargeCondition",
+        "type": "BusinessLogic.BargeCondition",
+        "scope": "Form-level private variable",
+        "purpose": "Holds currently selected condition report",
+        "lifetime": "Exists only while form is open",
+        "updateTriggers": [
+          "grdBargeConditions_AfterSelectChange when single row selected",
+          "After photo deletion to refresh object state"
+        ]
+      },
+      {
+        "name": "_BargeID",
+        "type": "Integer",
+        "scope": "Form-level private variable",
+        "purpose": "Primary key for the barge",
+        "lifetime": "Set during Initialize, persists for form lifetime"
+      },
+      {
+        "name": "_BargeNum",
+        "type": "String",
+        "scope": "Form-level private variable",
+        "purpose": "Barge number for display in form title",
+        "lifetime": "Set during Initialize, persists for form lifetime"
+      }
+    ],
+    "gridStatePersistence": [
+      {
+        "grid": "grdBargeConditions",
+        "persistedSettings": "Column widths, sort order, visibility",
+        "saveEvent": "FormClosed",
+        "loadEvent": "FormatControls during Load",
+        "mechanism": "MyAppSettingHelper.SaveGrid / User preferences",
+        "uniqueIdentifier": "BargeConditionID"
+      },
+      {
+        "grid": "grdBargeConditionPhotos",
+        "persistedSettings": "Column widths, sort order, visibility",
+        "saveEvent": "FormClosed",
+        "loadEvent": "FormatControls during Load",
+        "mechanism": "MyAppSettingHelper.SaveGrid / User preferences",
+        "uniqueIdentifier": "BargeConditionPhotoID"
+      }
+    ],
+    "selectionStatePersistence": {
+      "mechanism": "Base class SelectedRowsStringsDictionary",
+      "purpose": "Re-select rows after grid refresh",
+      "implementation": "Protected via frmBaseDetailEditList base class",
+      "events": [
+        "AfterSelectChange: Saves selected row IDs to dictionary",
+        "InitializeRow: Re-selects rows based on dictionary during grid reload"
+      ]
+    },
+    "toolbarStateManagement": {
+      "method": "SetToolState(gridControl)",
+      "triggers": [
+        "Form Load",
+        "AfterSelectChange in either grid"
+      ],
+      "logic": {
+        "Remove": "Enabled if row selected AND user has Remove permission",
+        "Export": "Enabled if at least one row exists AND user has Open permission",
+        "ViewPhoto": "Enabled if photo selected AND user has Open permission",
+        "RemovePhoto": "Enabled if photo selected AND user has Remove permission",
+        "ExportPhoto": "Enabled if at least one photo exists AND user has Open permission"
+      },
+      "securityIntegration": "ControlAuthorization.ToolbarButtonCanBeEnabled validates against _ToolbarButtonTypes hashtable"
+    }
+  },
+  "refreshTriggers": [
+    {
+      "trigger": "FormLoad",
+      "refreshes": [
+        "grdBargeConditions - Loads all conditions for barge",
+        "grdBargeConditionPhotos - Initially empty",
+        "txtNote - Empty"
+      ]
+    },
+    {
+      "trigger": "SelectConditionRow",
+      "refreshes": [
+        "grdBargeConditionPhotos - Loads photos for selected condition",
+        "txtNote - Displays condition note"
+      ]
+    },
+    {
+      "trigger": "DeleteCondition",
+      "refreshes": [
+        "grdBargeConditions - Reloads condition list",
+        "grdBargeConditionPhotos - Cleared (no selection)",
+        "txtNote - Cleared"
+      ]
+    },
+    {
+      "trigger": "DeletePhoto",
+      "refreshes": [
+        "grdBargeConditionPhotos - Reloads photos for current condition",
+        "_BargeCondition - Reloaded from database to get current photo list"
+      ]
+    }
+  ],
+  "modalDialogPatterns": [
+    {
+      "dialogType": "Confirmation",
+      "usage": "Delete confirmation for conditions and photos",
+      "method": "Main.ItemRemoveDialog(itemDescription)",
+      "returns": "DialogResult.Yes or DialogResult.No",
+      "messages": [
+        "Barge Condition and Related Photo(s)",
+        "Photo"
+      ]
+    },
+    {
+      "dialogType": "TextEditor",
+      "usage": "View full text of condition note",
+      "formName": "frmTextEditor",
+      "mode": "Readonly",
+      "purpose": "Display long text that doesn't fit in single-line textbox"
+    }
+  ],
+  "userExperience": {
+    "formModality": "Modal (ShowDialog) - blocks parent form until closed",
+    "formTitle": "{BargeNum} - Barge Conditions (e.g., 'B-1234 - Barge Conditions')",
+    "layout": "Master-detail with two grids stacked vertically",
+    "topGrid": "Condition reports (master)",
+    "bottomPanel": "Condition detail (note + photos grid)",
+    "defaultState": "Read-only throughout - no editing capabilities",
+    "gridBehavior": {
+      "conditionsGrid": {
+        "defaultSort": "CreateDateTime descending (most recent first)",
+        "selection": "Single row selection",
+        "doubleClick": "No action (read-only)",
+        "customComparers": [
+          "CreateDateTime uses DateTimeSortComparer",
+          "EmailSentDateTime uses DateTimeSortComparer"
+        ]
+      },
+      "photosGrid": {
+        "defaultSort": "None specified",
+        "selection": "Single row selection",
+        "doubleClick": "Opens photo in external viewer",
+        "autoFit": "ExtendLastColumn"
+      }
+    },
+    "cursorManagement": "WaitCursor shown during all operations",
+    "keyboardShortcuts": [
+      {
+        "key": "Alt+C",
+        "action": "Close form",
+        "button": "btnClose"
+      }
+    ],
+    "accessibilityFeatures": [
+      "Button mnemonics (Alt+C for Close)",
+      "Toolbar keyboard navigation",
+      "Grid keyboard navigation"
+    ]
+  },
+  "securityModel": {
+    "buttonTypes": {
+      "btnClose": "ButtonType.Cancel - Always accessible",
+      "Remove": "ButtonType.Remove - Requires delete permission",
+      "Export": "ButtonType.Open - Requires read/view permission",
+      "ViewPhoto": "ButtonType.Open - Requires read/view permission",
+      "RemovePhoto": "ButtonType.Remove - Requires delete permission",
+      "ExportPhoto": "ButtonType.Open - Requires read/view permission"
+    },
+    "permissionContext": "SubSystem.frmBargeSearch",
+    "implementation": "ControlAuthorization with _ToolbarButtonTypes hashtable",
+    "enforcement": "SetToolState method checks permissions via ToolbarButtonCanBeEnabled"
+  },
+  "businessLogic": {
+    "dataAccess": [
+      {
+        "method": "BargeConditionList.GetList(bargeID)",
+        "purpose": "Loads all condition reports for a barge",
+        "returns": "List of BargeCondition objects"
+      },
+      {
+        "method": "BargeCondition.GetBargeCondition(bargeConditionID)",
+        "purpose": "Loads single condition report with photos",
+        "returns": "BargeCondition object with BargeConditionPhotoes collection"
+      },
+      {
+        "method": "BargeConditionPhoto.DeleteBargeConditionPhoto(photoID, filename)",
+        "purpose": "Deletes photo record and file from server",
+        "fileSystemSideEffect": "Deletes physical file"
+      }
+    ],
+    "deleteOperations": [
+      {
+        "operation": "Delete Condition",
+        "cascade": "Deletes all associated photos and files",
+        "implementation": "BargeCondition.SaveNoRefresh() override",
+        "fileCleanup": "Document.DeleteFileFromServer(filename) for each photo",
+        "errorHandling": "Silently catches file deletion errors (files may already be missing)"
+      },
+      {
+        "operation": "Delete Photo",
+        "cascade": "None - only deletes single photo",
+        "fileCleanup": "DeleteBargeConditionPhoto handles file deletion"
+      }
+    ],
+    "noEditMode": "Form is read-only - no BeginEdit/ApplyEdit/CancelEdit pattern used",
+    "noValidation": "No validation rules enforced (read-only form)"
+  },
+  "errorHandling": {
+    "globalExceptionHandling": "All event handlers wrap operations in Try-Catch",
+    "exceptionPublishing": "ExceptionManager.Publish(ex) in all Catch blocks",
+    "formLoadErrorHandling": "If load fails, attempts to close form; if close fails, shows MessageBox",
+    "cursorRestoration": "Finally blocks ensure Cursor.Current = Cursors.Default",
+    "fileNotFoundHandling": "Silently handles missing photo files during deletion"
+  },
+  "technicalNotes": {
+    "baseFormInheritance": "frmBaseDetailEditList -> frmBaseDetailEdit -> frmBase",
+    "implementsInterface": "IBaseDetailEdit",
+    "gridLibrary": "Infragistics UltraWinGrid",
+    "toolbarLibrary": "Infragistics UltraWinToolbars (UltraToolbarsManager)",
+    "initializationPattern": "Initialize(businessObject) + Initialize(bargeID, bargeNum) overloads",
+    "businessObjectPattern": "CSLA-style business objects with BeginEdit/ApplyEdit (not used in this readonly form)",
+    "documentStorage": "Files stored on server path from GlobalSettingList.DocumentsFilePath",
+    "photoFileNaming": "Document.Filename property provides full filename",
+    "gridUniqueIdentifiers": [
+      "grdBargeConditions: BargeConditionID",
+      "grdBargeConditionPhotos: BargeConditionPhotoID"
+    ],
+    "noBackgroundOperations": "All operations are synchronous on UI thread"
+  }
+}

@@ -1,0 +1,613 @@
+{
+  "formName": "frmBoatFuelPrices",
+  "formTitle": "Boat Fuel Prices",
+  "baseClass": "frmBaseSearchEdit",
+  "implements": ["IBaseSearch"],
+  "subsystem": "frmBoatFuelPrices",
+  "description": "Search and edit form for managing boat fuel prices with vendor information",
+  "businessObject": "BoatFuelPrice",
+  "businessLogicNamespace": "BargeOps.Onshore.BusinessLogic",
+  "layout": {
+    "mainPanel": "pnlSearch",
+    "sections": [
+      {
+        "name": "lblContextTitle",
+        "type": "Header",
+        "text": "Boat Fuel Prices",
+        "dock": "Top",
+        "style": "SearchCaption"
+      },
+      {
+        "name": "pnlCriteria",
+        "type": "SearchCriteria",
+        "dock": "Top",
+        "description": "Search criteria panel - enabled when not editing"
+      },
+      {
+        "name": "grdSearch",
+        "type": "ResultsGrid",
+        "dock": "Fill",
+        "description": "Search results grid"
+      },
+      {
+        "name": "grpDetail",
+        "type": "DetailEdit",
+        "dock": "Bottom",
+        "text": "Detail",
+        "description": "Detail edit section - enabled when adding/modifying records"
+      }
+    ]
+  },
+  "controls": {
+    "searchCriteria": [
+      {
+        "name": "dtEffectiveDateSearch",
+        "type": "UltraDateTimeEditor",
+        "category": "SearchCriteria",
+        "label": "Effective date",
+        "labelControl": "lblEffectiveDate",
+        "dataBinding": null,
+        "validation": {
+          "required": false,
+          "validationType": "Date"
+        },
+        "defaultValue": "Date.Today",
+        "tabIndex": 0,
+        "location": "pnlCriteria",
+        "notes": "Primary search criterion - defaults to today's date"
+      },
+      {
+        "name": "cboFuelVendorSearch",
+        "type": "UltraCombo",
+        "category": "SearchCriteria",
+        "label": "Fuel vendor",
+        "labelControl": "lblFuelVendorSearch",
+        "dataBinding": null,
+        "dataSource": "Lists.FuelVendorList.GetList",
+        "validation": {
+          "required": false
+        },
+        "tabIndex": 1,
+        "location": "pnlCriteria",
+        "notes": "Optional fuel vendor filter"
+      }
+    ],
+    "detailEdit": [
+      {
+        "name": "dtEffectiveDate",
+        "type": "UltraDateTimeEditor",
+        "category": "DetailEdit",
+        "label": "Effective date",
+        "labelControl": "UltraLabel2",
+        "dataBinding": "_BoatFuelPrice.EffectiveDate",
+        "validation": {
+          "required": true,
+          "validationType": "Date"
+        },
+        "tabIndex": 0,
+        "location": "grpDetail",
+        "eventHandlers": ["Validated"],
+        "notes": "Required field - effective date for the fuel price",
+        "isBold": true
+      },
+      {
+        "name": "cboFuelVendorBusinessUnitID",
+        "type": "UltraCombo",
+        "category": "DetailEdit",
+        "label": "Fuel vendor",
+        "labelControl": "lblFuelVendorBusinessUnitID",
+        "dataBinding": "_BoatFuelPrice.FuelVendorBusinessUnitID",
+        "dataSource": "Lists.FuelVendorList.GetList (active only)",
+        "validation": {
+          "required": false
+        },
+        "tabIndex": 2,
+        "location": "grpDetail",
+        "eventHandlers": ["Validated"],
+        "notes": "When vendor is selected, enables Invoice Number field",
+        "conditionalLogic": "Controls txtInvoiceNumber.Enabled state"
+      },
+      {
+        "name": "txtPrice",
+        "type": "UltraTextEditor",
+        "category": "DetailEdit",
+        "label": "Fuel price",
+        "labelControl": "lblPrice",
+        "dataBinding": "_BoatFuelPrice.Price",
+        "validation": {
+          "required": true,
+          "validationType": "Currency"
+        },
+        "tabIndex": 1,
+        "location": "grpDetail",
+        "eventHandlers": ["Validated"],
+        "notes": "Required currency field",
+        "isBold": true
+      },
+      {
+        "name": "txtInvoiceNumber",
+        "type": "UltraTextEditor",
+        "category": "DetailEdit",
+        "label": "Vendor inv #",
+        "labelControl": "UltraLabel3",
+        "dataBinding": "_BoatFuelPrice.InvoiceNumber",
+        "validation": {
+          "required": false,
+          "validationType": "String"
+        },
+        "maxLength": "BoatFuelPrice.MaxLength.InvoiceNumber",
+        "tabIndex": 3,
+        "location": "grpDetail",
+        "eventHandlers": ["Validated"],
+        "defaultEnabled": false,
+        "notes": "Only enabled when FuelVendorBusinessUnitID has a value; cleared if vendor is cleared"
+      }
+    ],
+    "buttons": [
+      {
+        "name": "btnFind",
+        "type": "UltraButton",
+        "text": "F&ind",
+        "category": "Search",
+        "location": "pnlCriteria",
+        "tabIndex": 2,
+        "buttonType": "Open",
+        "eventHandler": "btnFind_Click",
+        "action": "RefreshList(True)",
+        "notes": "Executes search with current criteria"
+      },
+      {
+        "name": "btnReset",
+        "type": "UltraButton",
+        "text": "Reset",
+        "category": "Search",
+        "location": "pnlCriteria",
+        "tabIndex": 3,
+        "buttonType": "Open",
+        "causesValidation": false,
+        "eventHandler": "btnReset_Click",
+        "action": "ResetControls()",
+        "notes": "Resets search criteria to default values"
+      },
+      {
+        "name": "btnSubmit",
+        "type": "UltraButton",
+        "text": "&Submit",
+        "category": "DetailEdit",
+        "location": "grpDetail",
+        "tabIndex": 4,
+        "buttonType": "Submit",
+        "anchor": "Bottom, Right",
+        "eventHandler": "btnSubmit_Click",
+        "action": "SubmitNoRefreshClick",
+        "notes": "Saves changes to BoatFuelPrice object"
+      },
+      {
+        "name": "btnCancel",
+        "type": "UltraButton",
+        "text": "&Cancel",
+        "category": "DetailEdit",
+        "location": "grpDetail",
+        "tabIndex": 5,
+        "buttonType": "Cancel",
+        "anchor": "Bottom, Right",
+        "causesValidation": false,
+        "eventHandler": "btnCancel_Click",
+        "action": "CancelClick",
+        "notes": "Cancels edit mode and discards changes"
+      }
+    ]
+  },
+  "grids": [
+    {
+      "name": "grdSearch",
+      "type": "UltraGrid",
+      "uniqueIdentifier": "BoatFuelPriceID",
+      "dataSource": "Lists.BoatFuelPriceSearch.GetList(effectiveDate, fuelVendorBusinessUnitID).List",
+      "location": "pnlSearch",
+      "dock": "Fill",
+      "columns": [
+        {
+          "name": "EffectiveDate",
+          "header": "Effective Date",
+          "width": 100,
+          "alignment": "Left",
+          "sortOrder": "Descending (Primary)",
+          "customComparer": "DateTimeSortComparer",
+          "dataType": "Date"
+        },
+        {
+          "name": "Price",
+          "header": "Fuel Price",
+          "width": 100,
+          "alignment": "Right",
+          "customComparer": "NumericSortComparer",
+          "dataType": "Currency"
+        },
+        {
+          "name": "FuelVendor",
+          "header": "Fuel Vendor",
+          "width": 250,
+          "alignment": "Left",
+          "sortOrder": "Ascending (Secondary)",
+          "dataType": "String"
+        },
+        {
+          "name": "InvoiceNumber",
+          "header": "Invoice",
+          "width": 100,
+          "alignment": "Left",
+          "dataType": "String"
+        }
+      ],
+      "initialSortOrder": [
+        {
+          "column": "EffectiveDate",
+          "direction": "Descending",
+          "isPrimary": true
+        },
+        {
+          "column": "FuelVendor",
+          "direction": "Ascending",
+          "isPrimary": false
+        }
+      ],
+      "features": [
+        "UserAppSettings persistence",
+        "Custom column comparers for sorting",
+        "Row selection for edit/delete operations"
+      ]
+    }
+  ],
+  "dropdowns": [
+    {
+      "name": "cboFuelVendorSearch",
+      "type": "UltraCombo",
+      "purpose": "Search filter",
+      "populationMethod": "PopulateListCombo(Lists.FuelVendorList.GetList, cboFuelVendorSearch, True, False)",
+      "includeAll": true,
+      "onlyActive": false,
+      "notes": "Populated on form initialization in FormatControls"
+    },
+    {
+      "name": "cboFuelVendorBusinessUnitID",
+      "type": "UltraCombo",
+      "purpose": "Detail edit",
+      "populationMethod": "PopulateListCombo(Lists.FuelVendorList.GetList, cboFuelVendorBusinessUnitID, True, False, _BoatFuelPrice.FuelVendorBusinessUnitID)",
+      "includeAll": true,
+      "onlyActive": false,
+      "notes": "Populated when ItemAdd or ItemModify is called, preserving current selection"
+    }
+  ],
+  "eventHandlers": {
+    "formLevel": [
+      {
+        "event": "pnlSearch.HandleCreated",
+        "handler": "pnlSearch_HandleCreated",
+        "description": "Initializes controls and restores grid settings from database",
+        "actions": [
+          "FormatControls()",
+          "MyAppSettingHelper.RestoreGrid(Me, Me.UltraGridControl)"
+        ]
+      },
+      {
+        "event": "pnlSearch.HandleDestroyed",
+        "handler": "pnlSearch_HandleDestroyed",
+        "description": "Saves grid settings to database when panel is destroyed",
+        "actions": [
+          "MyAppSettingHelper.SaveGrid(Me, Me.UltraGridControl, True)"
+        ]
+      },
+      {
+        "event": "ValidatorExtender.MessageSet",
+        "handler": "ValidatorExtender_MessageSet",
+        "description": "Raises status bar text event for main form",
+        "actions": [
+          "RaiseStatusBarTextChangedEvent(text)"
+        ]
+      }
+    ],
+    "controlValidated": [
+      {
+        "control": "dtEffectiveDate",
+        "event": "Validated",
+        "handler": "dtEffectiveDate_Validated",
+        "action": "_BoatFuelPrice.EffectiveDate = .Text; .Text = _BoatFuelPrice.EffectiveDate",
+        "notes": "Bidirectional binding with business object"
+      },
+      {
+        "control": "txtPrice",
+        "event": "Validated",
+        "handler": "txtPrice_Validated",
+        "action": "_BoatFuelPrice.Price = .Text; .Text = _BoatFuelPrice.Price",
+        "notes": "Currency validation and formatting"
+      },
+      {
+        "control": "cboFuelVendorBusinessUnitID",
+        "event": "Validated",
+        "handler": "cboFuelVendorBusinessUnitID_Validated",
+        "action": "InfragisticsHelper.SetObjectProperty(_BoatFuelPrice.FuelVendorBusinessUnitID, cboFuelVendorBusinessUnitID); Toggle txtInvoiceNumber.Enabled",
+        "notes": "Enables/disables invoice number field based on vendor selection"
+      },
+      {
+        "control": "txtInvoiceNumber",
+        "event": "Validated",
+        "handler": "txtInvoiceNumber_Validated",
+        "action": "_BoatFuelPrice.InvoiceNumber = .Text; .Text = _BoatFuelPrice.InvoiceNumber",
+        "notes": "String validation"
+      }
+    ],
+    "buttonClicks": [
+      {
+        "button": "btnFind",
+        "event": "Click",
+        "handler": "btnFind_Click",
+        "action": "RefreshList(True)"
+      },
+      {
+        "button": "btnReset",
+        "event": "Click",
+        "handler": "btnReset_Click",
+        "action": "ResetControls()"
+      },
+      {
+        "button": "btnSubmit",
+        "event": "Click",
+        "handler": "btnSubmit_Click",
+        "action": "SubmitNoRefreshClick(DirectCast(_BoatFuelPrice, BusinessLogicBase), False)"
+      },
+      {
+        "button": "btnCancel",
+        "event": "Click",
+        "handler": "btnCancel_Click",
+        "action": "CancelClick(DirectCast(_BoatFuelPrice, BusinessLogicBase), False)"
+      }
+    ]
+  },
+  "validationRules": {
+    "fieldLevelValidation": [
+      {
+        "control": "txtPrice",
+        "validationType": "Currency",
+        "required": true,
+        "notes": "ValidatorExtender provides field-level validation"
+      },
+      {
+        "control": "txtInvoiceNumber",
+        "validationType": "String",
+        "required": false,
+        "maxLength": "BoatFuelPrice.MaxLength.InvoiceNumber"
+      }
+    ],
+    "businessLogicValidation": [
+      {
+        "method": "ClearUnusedFields",
+        "rule": "If FuelVendorBusinessUnitID is empty, clear InvoiceNumber",
+        "timing": "Before submit"
+      }
+    ]
+  },
+  "dataFlow": {
+    "searchFlow": [
+      "User enters search criteria (dtEffectiveDateSearch, cboFuelVendorSearch)",
+      "User clicks Find button",
+      "RefreshList(True) called",
+      "Lists.BoatFuelPriceSearch.GetList(effectiveDate, fuelVendorBusinessUnitID) executed",
+      "Grid populated with results",
+      "First row selected"
+    ],
+    "addFlow": [
+      "User clicks Add button (via IBaseSearch.ItemAdd)",
+      "_BoatFuelPrice = BoatFuelPrice.NewBoatFuelPrice",
+      "_BoatFuelPrice.BeginEdit()",
+      "PopulateListCombo for cboFuelVendorBusinessUnitID",
+      "LoadControlsForBoatFuelPrice()",
+      "EnableDisableControls(True) - enables detail section",
+      "Focus set to dtEffectiveDate"
+    ],
+    "modifyFlow": [
+      "User selects row and clicks Modify (via IBaseSearch.ItemModify)",
+      "_BoatFuelPrice = BoatFuelPrice.GetBoatFuelPrice(GridControlIndex)",
+      "_BoatFuelPrice.BeginEdit()",
+      "PopulateListCombo for cboFuelVendorBusinessUnitID",
+      "LoadControlsForBoatFuelPrice()",
+      "EnableDisableControls(True)",
+      "Focus set to dtEffectiveDate"
+    ],
+    "submitFlow": [
+      "User modifies fields (each Validated event updates business object)",
+      "User clicks Submit",
+      "ClearUnusedFields() - business rule enforcement",
+      "SubmitNoRefreshClick(businessObject, False)",
+      "Base validation and save logic",
+      "On success: ClearControls(), EnableDisableControls(False), RefreshList(False)"
+    ],
+    "cancelFlow": [
+      "User clicks Cancel",
+      "CancelClick(businessObject, False)",
+      "Business object rollback",
+      "ClearControls()",
+      "EnableDisableControls(False)"
+    ],
+    "deleteFlow": [
+      "User selects row and clicks Remove (via IBaseSearch.ItemRemove)",
+      "Confirmation dialog displayed",
+      "If confirmed: BusinessLogic.BoatFuelPrice.DeleteBoatFuelPrice(GridControlIndex)",
+      "RefreshList(False)"
+    ]
+  },
+  "initialization": {
+    "subsystem": "SubSystem.frmBoatFuelPrices",
+    "method": "InitializeBase",
+    "steps": [
+      "Call InitializeBase(SubSystem.frmBoatFuelPrices)",
+      "SetButtonTypes for security",
+      "Set permissions via ControlAuthorization"
+    ],
+    "firstFocus": "dtEffectiveDateSearch"
+  },
+  "businessRules": [
+    {
+      "rule": "Invoice number is only enabled when a fuel vendor is selected",
+      "implementation": "cboFuelVendorBusinessUnitID_Validated event handler",
+      "location": "frmBoatFuelPrices.vb:463-486"
+    },
+    {
+      "rule": "Invoice number is cleared if fuel vendor is removed",
+      "implementation": "ClearUnusedFields method",
+      "location": "frmBoatFuelPrices.vb:404-410"
+    },
+    {
+      "rule": "Effective date search defaults to today's date",
+      "implementation": "FormatControls method",
+      "location": "frmBoatFuelPrices.vb:361"
+    },
+    {
+      "rule": "Search and edit sections are mutually exclusive (enabled/disabled)",
+      "implementation": "EnableDisableControls method",
+      "location": "frmBoatFuelPrices.vb:365-384"
+    }
+  ],
+  "securityConfiguration": {
+    "buttonTypes": [
+      {
+        "button": "btnFind",
+        "type": "ButtonType.Open"
+      },
+      {
+        "button": "btnReset",
+        "type": "ButtonType.Open"
+      },
+      {
+        "button": "btnSubmit",
+        "type": "ButtonType.Submit"
+      },
+      {
+        "button": "btnCancel",
+        "type": "ButtonType.Cancel"
+      }
+    ],
+    "controlAuthorization": "Set via ControlAuthorization object from Security DLL"
+  },
+  "userPreferences": {
+    "gridSettings": {
+      "saveMethod": "MyAppSettingHelper.SaveGrid",
+      "restoreMethod": "MyAppSettingHelper.RestoreGrid",
+      "persistence": "Database (UserAppSettings)",
+      "settings": [
+        "Column widths",
+        "Column order",
+        "Sort order",
+        "Filter settings"
+      ]
+    }
+  },
+  "interfaceImplementation": {
+    "interface": "IBaseSearch",
+    "requiredMethods": [
+      {
+        "method": "FocusFirstField",
+        "implementation": "dtEffectiveDateSearch.Focus()",
+        "description": "Sets focus to first search field when panel loads"
+      },
+      {
+        "method": "GridControlIndex",
+        "implementation": "InfragisticsHelper.GetSelectedRowID(UltraGridControl, 'BoatFuelPriceID')",
+        "description": "Returns ID of selected row"
+      },
+      {
+        "method": "Initialize",
+        "implementation": "InitializeBase(SubSystem.frmBoatFuelPrices)",
+        "description": "Initializes form, security, and permissions"
+      },
+      {
+        "method": "ItemAdd",
+        "implementation": "Creates new BoatFuelPrice, populates combos, loads controls, enables edit mode",
+        "description": "Handles add new record operation"
+      },
+      {
+        "method": "ItemModify",
+        "implementation": "Loads existing BoatFuelPrice, populates combos, loads controls, enables edit mode",
+        "description": "Handles edit existing record operation"
+      },
+      {
+        "method": "ItemRemove",
+        "implementation": "Prompts user, deletes record, refreshes grid",
+        "description": "Handles delete record operation"
+      },
+      {
+        "method": "ItemRun",
+        "implementation": "Do nothing",
+        "description": "Not used in this form"
+      },
+      {
+        "method": "ItemView",
+        "implementation": "Do nothing",
+        "description": "Not used in this form"
+      },
+      {
+        "method": "LocalPanel",
+        "implementation": "Returns pnlSearch",
+        "description": "Returns the main panel for reparenting into main form"
+      },
+      {
+        "method": "OnChangeOfFleet",
+        "implementation": "Do nothing",
+        "description": "Not used in this form"
+      },
+      {
+        "method": "RefreshList",
+        "implementation": "Builds search parameters, calls Lists.BoatFuelPriceSearch.GetList, populates grid",
+        "description": "Executes search and refreshes grid"
+      },
+      {
+        "method": "SetButtonTypes",
+        "implementation": "Sets security button types for authorization",
+        "description": "Configures button types for security system"
+      },
+      {
+        "method": "UltraGridControl",
+        "implementation": "Returns grdSearch",
+        "description": "Returns the grid control"
+      }
+    ]
+  },
+  "modernizationNotes": {
+    "formType": "Search and Edit (Combined)",
+    "targetPattern": "ASP.NET Core MVC with DataTables",
+    "recommendedViewModels": [
+      "BoatFuelPriceSearchViewModel - for search criteria and results",
+      "BoatFuelPriceEditViewModel - for add/edit operations"
+    ],
+    "recommendedViews": [
+      "Index.cshtml - search screen with DataTables grid",
+      "Edit.cshtml - modal or separate page for add/edit"
+    ],
+    "dataTableConfiguration": {
+      "ajaxSource": "/BoatFuelPriceSearch/GetSearchResults",
+      "columns": 4,
+      "serverSide": false,
+      "defaultSort": "[[0, 'desc'], [2, 'asc']]",
+      "features": [
+        "Column sorting",
+        "Column filtering",
+        "State saving (localStorage)",
+        "Row selection",
+        "Custom date/currency comparers"
+      ]
+    },
+    "controlMapping": {
+      "dtEffectiveDateSearch": "Input type='date' with Bootstrap datepicker",
+      "cboFuelVendorSearch": "Select2 dropdown",
+      "grdSearch": "DataTables grid",
+      "dtEffectiveDate": "Input type='date' (required, bold label)",
+      "txtPrice": "Input type='text' with currency formatting (required, bold label)",
+      "cboFuelVendorBusinessUnitID": "Select2 dropdown",
+      "txtInvoiceNumber": "Input type='text' (conditionally enabled)"
+    },
+    "businessLogicLocation": "BargeOps.Shared/Dto/BoatFuelPriceDto.cs",
+    "validationApproach": "Client-side: jQuery Validation, Server-side: Data Annotations + FluentValidation",
+    "conditionalLogicJavaScript": "When vendor dropdown changes, enable/disable invoice field",
+    "securityApproach": "ASP.NET Core Authorization policies based on user roles/permissions"
+  }
+}

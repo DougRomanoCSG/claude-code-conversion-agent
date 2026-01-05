@@ -1,0 +1,455 @@
+{
+  "formName": "frmBargeSeriesDetail",
+  "formTitle": "Barge Series Detail",
+  "hasTraditionalTabs": false,
+  "layoutType": "panel-based",
+  "layoutDescription": "Form uses a vertical panel layout with a top detail panel and a bottom grid section, rather than traditional tabs",
+  "sections": [
+    {
+      "sectionName": "pnlDetailEdit",
+      "displayName": "Barge Series Details",
+      "order": 1,
+      "purpose": "Primary barge series information and specifications",
+      "layout": "Top-docked panel",
+      "controls": [
+        {
+          "name": "txtName",
+          "type": "UltraTextEditor",
+          "label": "Series",
+          "dataType": "String",
+          "required": false,
+          "maxLength": "BargeSeries.MaxLength.Name",
+          "validationType": "String",
+          "tabIndex": 1
+        },
+        {
+          "name": "cboHullType",
+          "type": "UltraCombo",
+          "label": "Hull type",
+          "dataType": "ValidationList",
+          "required": false,
+          "validationListType": "HullType",
+          "tabIndex": 2
+        },
+        {
+          "name": "cboCustomerID",
+          "type": "UltraCombo",
+          "label": "Owner",
+          "dataType": "CustomerList",
+          "required": false,
+          "populatedFrom": "Lists.CustomerList.GetList",
+          "tabIndex": 3
+        },
+        {
+          "name": "cboCoverType",
+          "type": "UltraCombo",
+          "label": "Cover type",
+          "dataType": "ValidationList",
+          "required": false,
+          "validationListType": "CoverType",
+          "tabIndex": 4,
+          "labelStyle": "Bold"
+        },
+        {
+          "name": "txtLength",
+          "type": "UltraTextEditor",
+          "label": "Length",
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "tabIndex": 5
+        },
+        {
+          "name": "txtWidth",
+          "type": "UltraTextEditor",
+          "label": "Width",
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "tabIndex": 6
+        },
+        {
+          "name": "txtDepth",
+          "type": "UltraTextEditor",
+          "label": "Depth",
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "tabIndex": 7
+        },
+        {
+          "name": "txtTonsPerInch",
+          "type": "UltraTextEditor",
+          "label": "Tons/inch",
+          "dataType": "Decimal",
+          "required": false,
+          "validationType": "Decimal",
+          "tabIndex": 8
+        },
+        {
+          "name": "txtDraftLightFeet",
+          "type": "UltraTextEditor",
+          "label": "Light draft (ft/in)",
+          "dataType": "Int32",
+          "required": false,
+          "validationType": "Int32",
+          "tabIndex": 9,
+          "groupedWith": "txtDraftLightInches"
+        },
+        {
+          "name": "txtDraftLightInches",
+          "type": "UltraTextEditor",
+          "label": "Light draft (ft/in)",
+          "dataType": "Int32",
+          "required": false,
+          "validationType": "Int32",
+          "tabIndex": 10,
+          "groupedWith": "txtDraftLightFeet"
+        }
+      ],
+      "fieldGroups": [
+        {
+          "name": "Basic Information",
+          "controls": ["txtName", "cboHullType", "cboCustomerID", "cboCoverType"]
+        },
+        {
+          "name": "Dimensions",
+          "controls": ["txtLength", "txtWidth", "txtDepth"]
+        },
+        {
+          "name": "Draft Information",
+          "controls": ["txtTonsPerInch", "txtDraftLightFeet", "txtDraftLightInches"]
+        }
+      ]
+    },
+    {
+      "sectionName": "grpDetailEditList",
+      "displayName": "Draft tonnage",
+      "order": 2,
+      "purpose": "Editable grid for barge series draft tonnage values across different depths and inches",
+      "layout": "Fill-docked group box with embedded panel and grid",
+      "hasGrid": true,
+      "grid": {
+        "name": "grdBargeSeriesDraft",
+        "childEntity": "BargeSeriesDraft",
+        "parentKey": "BargeSeriesID",
+        "foreignKey": "BargeSeriesID",
+        "uniqueIdentifier": "BargeSeriesDraftID",
+        "operations": ["Paste", "Export"],
+        "gridType": "Editable inline grid",
+        "updateMode": "OnCellChangeOrLostFocus",
+        "allowAddNew": false,
+        "allowUpdate": true,
+        "allowDelete": false,
+        "nullText": "xxx",
+        "invalidValueBehavior": "RetainValueAndFocus",
+        "sortable": false,
+        "sortablePrevented": "BeforeSortChange event cancels sorting",
+        "columns": [
+          {
+            "key": "BargeSeriesDraftID",
+            "header": "BargeSeriesDraftID",
+            "type": "Int32",
+            "visible": false,
+            "description": "Primary key for draft record"
+          },
+          {
+            "key": "DraftFeet",
+            "header": "Feet",
+            "type": "Int32",
+            "width": 50,
+            "alignment": "Right",
+            "editable": false,
+            "description": "Draft depth in feet (0-13)"
+          },
+          {
+            "key": "Tons00",
+            "header": "0\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 0 inches"
+          },
+          {
+            "key": "Tons01",
+            "header": "1\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 1 inch"
+          },
+          {
+            "key": "Tons02",
+            "header": "2\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 2 inches"
+          },
+          {
+            "key": "Tons03",
+            "header": "3\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 3 inches"
+          },
+          {
+            "key": "Tons04",
+            "header": "4\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 4 inches"
+          },
+          {
+            "key": "Tons05",
+            "header": "5\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 5 inches"
+          },
+          {
+            "key": "Tons06",
+            "header": "6\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 6 inches"
+          },
+          {
+            "key": "Tons07",
+            "header": "7\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 7 inches"
+          },
+          {
+            "key": "Tons08",
+            "header": "8\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 8 inches"
+          },
+          {
+            "key": "Tons09",
+            "header": "9\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 9 inches"
+          },
+          {
+            "key": "Tons10",
+            "header": "10\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 10 inches"
+          },
+          {
+            "key": "Tons11",
+            "header": "11\"",
+            "type": "String",
+            "width": 44,
+            "alignment": "Right",
+            "editable": true,
+            "description": "Tonnage at 11 inches"
+          }
+        ],
+        "defaultRows": [
+          "0 feet through 13 feet, pre-populated with 'xxx' placeholders for all tonnage values"
+        ],
+        "dataProcessing": {
+          "afterCellUpdate": "Validates and formats cell values; ensures numeric values or 'xxx' placeholder",
+          "beforeSortChange": "Prevents user from changing sort order",
+          "keyDown": "Custom keyboard navigation (Up/Down/Left/Right) with edit mode management"
+        },
+        "toolbar": {
+          "name": "ChildEditToolbar",
+          "location": "Top of grid panel",
+          "tools": [
+            {
+              "key": "Paste",
+              "caption": "&Paste from Clipboard",
+              "type": "ButtonTool",
+              "displayStyle": "ImageAndText",
+              "image": "Resources.Paste",
+              "buttonType": "Action",
+              "functionality": "Paste comma or tab-delimited data from clipboard into grid"
+            },
+            {
+              "key": "Export",
+              "caption": "Export",
+              "type": "ButtonTool",
+              "displayStyle": "ImageAndText",
+              "image": "Resources.ExportResults",
+              "buttonType": "Open",
+              "functionality": "Export grid data to external format"
+            }
+          ],
+          "toolbarSettings": {
+            "allowCustomize": false,
+            "allowDocking": false,
+            "allowFloating": false,
+            "allowHiding": false,
+            "grabHandleStyle": "None"
+          }
+        }
+      }
+    }
+  ],
+  "sharedControls": {
+    "location": "Bottom of form (grpSubmitCancel)",
+    "dockStyle": "Bottom",
+    "controls": [
+      {
+        "name": "chkIsActive",
+        "type": "UltraCheckEditor",
+        "text": "Active",
+        "defaultValue": true,
+        "tabIndex": 12,
+        "position": "Left side of button group"
+      },
+      {
+        "name": "btnSubmit",
+        "type": "UltraButton",
+        "text": "&Submit",
+        "dialogResult": "OK",
+        "tabIndex": 13,
+        "buttonType": "Submit",
+        "position": "Right side, second from right"
+      },
+      {
+        "name": "btnCancel",
+        "type": "UltraButton",
+        "text": "&Cancel",
+        "dialogResult": "Cancel",
+        "tabIndex": 14,
+        "causesValidation": false,
+        "buttonType": "Cancel",
+        "position": "Right side, rightmost"
+      }
+    ]
+  },
+  "formMetadata": {
+    "inheritsFrom": "frmBaseDetailEditList",
+    "implements": "IBaseDetailEdit",
+    "businessObject": "BargeSeries",
+    "formSize": {
+      "width": 600,
+      "height": 570
+    },
+    "formBorderStyle": "FixedSingle",
+    "maximizeBox": false,
+    "minimizeBox": false,
+    "showInTaskbar": false,
+    "startPosition": "CenterParent",
+    "statusBar": {
+      "name": "staStatus",
+      "usedForValidation": true,
+      "location": "Bottom"
+    }
+  },
+  "layoutLogic": {
+    "conditionalVisibility": [],
+    "conditionalEnabling": [
+      {
+        "control": "pnlDetailEdit",
+        "condition": "Always enabled on form load",
+        "method": "EnableDisableControls"
+      },
+      {
+        "control": "btnSubmit",
+        "condition": "Always enabled on form load",
+        "method": "EnableDisableControls"
+      },
+      {
+        "toolbar": "ToolbarsManager",
+        "condition": "State set based on grid selection",
+        "method": "SetToolState"
+      }
+    ],
+    "loadSequence": [
+      {
+        "order": 1,
+        "action": "FormatControls",
+        "description": "Format grid, populate combos, set validation, set max lengths, enable/disable controls"
+      },
+      {
+        "order": 2,
+        "action": "LoadControlsForBargeSeries",
+        "description": "Load BargeSeries data into form controls"
+      },
+      {
+        "order": 3,
+        "action": "RefreshList",
+        "description": "Build and bind draft tonnage grid with BargeSeriesDraft children"
+      }
+    ]
+  },
+  "specialBehaviors": {
+    "clipboardPaste": {
+      "enabled": true,
+      "formats": ["CommaSeparatedValue", "Text (tab-delimited)"],
+      "targetGrid": "grdBargeSeriesDraft",
+      "startColumn": "Tons00",
+      "validation": "Converts decimal values to integers, rounds values",
+      "description": "Allows pasting tonnage data from Excel or CSV into the grid"
+    },
+    "gridNavigation": {
+      "customKeyboardHandling": true,
+      "keys": ["Up", "Down", "Left", "Right"],
+      "behavior": "Exit edit mode, move cell, re-enter edit mode",
+      "tabNavigation": "NextControlOnLastCell"
+    },
+    "cellValidation": {
+      "afterCellUpdate": true,
+      "emptyBehavior": "Set to 'xxx'",
+      "numericBehavior": "Parse as decimal, convert to integer",
+      "invalidBehavior": "Set to 'xxx'"
+    },
+    "dataBinding": {
+      "childEntityHandling": "Manual processing in ProcessBargeSeriesDraft method",
+      "newRecords": "Clear and rebuild BargeSeriesDrafts collection",
+      "existingRecords": "Update existing BargeSeriesDraft items by ID"
+    }
+  },
+  "modernizationNotes": {
+    "tabStrategy": "No tabs needed - use panel-based layout with sections",
+    "detailSection": {
+      "recommendation": "Use Bootstrap form layout with labeled input groups",
+      "grouping": "Group fields into cards: Basic Information, Dimensions, Draft Information"
+    },
+    "gridSection": {
+      "recommendation": "Use modern data grid component (e.g., AG Grid, DevExtreme)",
+      "features": [
+        "Inline editing",
+        "Clipboard paste support",
+        "Export to Excel/CSV",
+        "Custom cell validation",
+        "Keyboard navigation"
+      ],
+      "complexity": "High - 13 editable columns with custom validation and clipboard paste"
+    },
+    "toolbar": {
+      "recommendation": "Convert to button group above grid",
+      "buttons": ["Paste from Clipboard", "Export"]
+    },
+    "validationStrategy": "Client-side validation on blur with server-side validation on submit"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "entity": "Vendor",
+  "overallStatus": "completed",
+  "startTime": "2025-12-18T16:03:06.586Z",
+  "totalSteps": 10,
+  "completedSteps": 1,
+  "failedSteps": 0,
+  "skippedSteps": 9,
+  "steps": [
+    {
+      "stepNumber": 1,
+      "name": "Form Structure Analyzer (Search)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract search form UI components",
+      "status": "skipped",
+      "startTime": "2025-12-18T16:03:06.587Z",
+      "endTime": "2025-12-18T16:03:06.587Z",
+      "durationMs": 0,
+      "outputFile": "form-structure-search.json"
+    },
+    {
+      "stepNumber": 2,
+      "name": "Form Structure Analyzer (Detail)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract detail form UI components",
+      "status": "skipped",
+      "startTime": "2025-12-18T16:03:06.587Z",
+      "endTime": "2025-12-18T16:03:06.587Z",
+      "durationMs": 0,
+      "outputFile": "form-structure-detail.json"
+    },
+    {
+      "stepNumber": 3,
+      "name": "Business Logic Extractor",
+      "script": "business-logic-extractor.ts",
+      "description": "Extract business rules and validation",
+      "status": "skipped",
+      "startTime": "2025-12-18T16:03:06.588Z",
+      "endTime": "2025-12-18T16:03:06.588Z",
+      "durationMs": 0,
+      "outputFile": "business-logic.json"
+    },
+    {
+      "stepNumber": 4,
+      "name": "Data Access Pattern Analyzer",
+      "script": "data-access-analyzer.ts",
+      "description": "Extract stored procedures and queries",
+      "status": "completed",
+      "startTime": "2025-12-18T16:03:06.589Z",
+      "outputFile": "data-access.json",
+      "endTime": "2025-12-18T16:10:50.224Z",
+      "durationMs": 463635,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 5,
+      "name": "Security & Authorization Extractor",
+      "script": "security-extractor.ts",
+      "description": "Extract permissions and authorization",
+      "status": "skipped",
+      "startTime": "2025-12-18T16:10:50.225Z",
+      "endTime": "2025-12-18T16:10:50.225Z",
+      "durationMs": 0,
+      "outputFile": "security.json"
+    },
+    {
+      "stepNumber": 6,
+      "name": "UI Component Mapper",
+      "script": "ui-component-mapper.ts",
+      "description": "Map legacy controls to modern equivalents",
+      "status": "skipped",
+      "startTime": "2025-12-18T16:10:50.226Z",
+      "endTime": "2025-12-18T16:10:50.226Z",
+      "durationMs": 0,
+      "outputFile": "ui-mapping.json"
+    },
+    {
+      "stepNumber": 7,
+      "name": "Form Workflow Analyzer",
+      "script": "form-workflow-analyzer.ts",
+      "description": "Extract user flows and state management",
+      "status": "skipped",
+      "startTime": "2025-12-18T16:10:50.226Z",
+      "endTime": "2025-12-18T16:10:50.226Z",
+      "durationMs": 0,
+      "outputFile": "workflow.json"
+    },
+    {
+      "stepNumber": 8,
+      "name": "Detail Form Tab Analyzer",
+      "script": "detail-tab-analyzer.ts",
+      "description": "Extract tab structure and related entities",
+      "status": "skipped",
+      "startTime": "2025-12-18T16:10:50.227Z",
+      "endTime": "2025-12-18T16:10:50.227Z",
+      "durationMs": 0,
+      "outputFile": "tabs.json"
+    },
+    {
+      "stepNumber": 9,
+      "name": "Validation Rule Extractor",
+      "script": "validation-extractor.ts",
+      "description": "Extract all validation logic",
+      "status": "skipped",
+      "startTime": "2025-12-18T16:10:50.228Z",
+      "endTime": "2025-12-18T16:10:50.228Z",
+      "durationMs": 0,
+      "outputFile": "validation.json"
+    },
+    {
+      "stepNumber": 10,
+      "name": "Related Entity Analyzer",
+      "script": "related-entity-analyzer.ts",
+      "description": "Extract entity relationships",
+      "status": "skipped",
+      "startTime": "2025-12-18T16:10:50.228Z",
+      "endTime": "2025-12-18T16:10:50.228Z",
+      "durationMs": 0,
+      "outputFile": "related-entities.json"
+    }
+  ],
+  "childForms": [],
+  "endTime": "2025-12-18T16:10:50.229Z",
+  "durationMs": 463642
+}

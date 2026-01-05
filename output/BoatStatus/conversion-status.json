@@ -1,0 +1,46 @@
+{
+  "entity": "BoatStatus",
+  "formName": "frmBoatStatus",
+  "overallStatus": "running",
+  "startTime": "2026-01-05T15:57:27.453Z",
+  "totalSteps": 9,
+  "completedSteps": 2,
+  "failedSteps": 0,
+  "skippedSteps": 0,
+  "steps": [
+    {
+      "stepNumber": 1,
+      "name": "Form Structure Analyzer (frmBoatStatus)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract frmBoatStatus UI components",
+      "status": "completed",
+      "startTime": "2026-01-05T15:57:27.457Z",
+      "outputFile": "form-structure.json",
+      "endTime": "2026-01-05T15:59:26.281Z",
+      "durationMs": 118824,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 2,
+      "name": "Business Logic Extractor",
+      "script": "business-logic-extractor.ts",
+      "description": "Extract business rules and validation",
+      "status": "completed",
+      "startTime": "2026-01-05T15:59:26.282Z",
+      "outputFile": "business-logic.json",
+      "endTime": "2026-01-05T16:02:19.806Z",
+      "durationMs": 173536,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 3,
+      "name": "Data Access Pattern Analyzer",
+      "script": "data-access-analyzer.ts",
+      "description": "Extract stored procedures and queries",
+      "status": "running",
+      "startTime": "2026-01-05T16:02:19.822Z",
+      "outputFile": "data-access.json"
+    }
+  ],
+  "childForms": []
+}

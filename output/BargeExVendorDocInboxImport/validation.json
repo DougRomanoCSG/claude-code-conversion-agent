@@ -1,0 +1,519 @@
+{
+  "entity": "BargeExVendorDocInboxImport",
+  "formValidation": {
+    "method": "FormatControls",
+    "rules": [
+      {
+        "field": "btnStart",
+        "rule": "ConditionalEnable",
+        "condition": "(_VendorDocInboxList IsNot Nothing) AndAlso (rows where IsSelected = 1).Count > 0",
+        "message": "Start button is only enabled when there are selected records to import",
+        "severity": "Info"
+      }
+    ]
+  },
+  "businessValidation": {
+    "method": "CheckBusinessRules",
+    "rules": [
+      {
+        "ruleName": "ControlNumberRequired",
+        "property": "ControlNumber",
+        "condition": "String.IsNullOrEmpty(p_ControlNumber)",
+        "message": "Control number (Instance identifier) is required",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "ControlNumberMaxLength",
+        "property": "ControlNumber",
+        "condition": "p_ControlNumber.Length > 128",
+        "message": "Control number (Instance identifier) cannot exceed 128 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "ReceivedDateTimeRequired",
+        "property": "ReceivedDateTime",
+        "condition": "p_ReceivedDateTime.IsEmpty",
+        "message": "Received date/time is required",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "SenderTradingPartnerNumberMaxLength",
+        "property": "SenderTradingPartnerNumber",
+        "condition": "p_SenderTradingPartnerNumber.Length > 8",
+        "message": "Sender trading partner number cannot exceed 8 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "BargeUscgNumMaxLength",
+        "property": "BargeUscgNum",
+        "condition": "p_BargeUscgNum.Length > 10",
+        "message": "Barge USCG Number cannot exceed 10 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "BargeNumMaxLength",
+        "property": "BargeNum",
+        "condition": "p_BargeNum.Length > 30",
+        "message": "Barge number cannot exceed 30 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "FleetBoatUscgNumMaxLength",
+        "property": "FleetBoatUscgNum",
+        "condition": "p_FleetBoatUscgNum.Length > 10",
+        "message": "Fleet-boat USCG Number cannot exceed 10 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "FleetBoatNameMaxLength",
+        "property": "FleetBoatName",
+        "condition": "p_FleetBoatName.Length > 50",
+        "message": "Fleet-boat name cannot exceed 50 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "LocationBargeExCodeMaxLength",
+        "property": "LocationBargeExCode",
+        "condition": "p_LocationBargeExCode.Length > 20",
+        "message": "Location BargeEx code cannot exceed 20 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "LocationNameMaxLength",
+        "property": "LocationName",
+        "condition": "p_LocationName.Length > 50",
+        "message": "Location name cannot exceed 50 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "EndLocationBargeExCodeMaxLength",
+        "property": "EndLocationBargeExCode",
+        "condition": "p_EndLocationBargeExCode.Length > 20",
+        "message": "End-location BargeEx code cannot exceed 20 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "EndLocationNameMaxLength",
+        "property": "EndLocationName",
+        "condition": "p_EndLocationName.Length > 50",
+        "message": "End-location name cannot exceed 50 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "AssistedBoatUscgNumMaxLength",
+        "property": "AssistedBoatUscgNum",
+        "condition": "p_AssistedBoatUscgNum.Length > 10",
+        "message": "Assisted-boat USCG Number cannot exceed 10 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "AssistedBoatNameMaxLength",
+        "property": "AssistedBoatName",
+        "condition": "p_AssistedBoatName.Length > 50",
+        "message": "Assisted-boat name cannot exceed 50 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "LoadStatusMaxLength",
+        "property": "LoadStatus",
+        "condition": "p_LoadStatus.Length > 15",
+        "message": "Load status cannot exceed 15 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "RiverMaxLength",
+        "property": "River",
+        "condition": "p_River.Length > 3",
+        "message": "River cannot exceed 3 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "CleanTypeMaxLength",
+        "property": "CleanType",
+        "condition": "p_CleanType.Length > 50",
+        "message": "Clean type cannot exceed 50 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "PumpTypeMaxLength",
+        "property": "PumpType",
+        "condition": "p_PumpType.Length > 50",
+        "message": "Pump type cannot exceed 50 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "CoverHandlingTypeMaxLength",
+        "property": "CoverHandlingType",
+        "condition": "p_CoverHandlingType.Length > 50",
+        "message": "Cover handling cannot exceed 50 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "OriginalControlNumberMaxLength",
+        "property": "OriginalControlNumber",
+        "condition": "p_OriginalControlNumber.Length > 128",
+        "message": "Original control number (Transaction identifier) cannot exceed 128 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      },
+      {
+        "ruleName": "PrimaryControlNumberMaxLength",
+        "property": "PrimaryControlNumber",
+        "condition": "p_PrimaryControlNumber.Length > 128",
+        "message": "PrimaryControlNumber cannot exceed 128 characters.",
+        "severity": "Error",
+        "alwaysApplies": true
+      }
+    ]
+  },
+  "importProcessValidation": {
+    "method": "ProcessRow",
+    "rules": [
+      {
+        "ruleName": "BargeExists",
+        "property": "BargeID",
+        "condition": "(Not Int32.TryParse(row(Columns.BargeID), brgID)) OrElse (brgID <= 0)",
+        "message": "Transaction could not be imported because barge does not exist in the database.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "VendorExists",
+        "property": "VendorID",
+        "condition": "(Not Int32.TryParse(row(Columns.VendorID), vendorID)) OrElse (vendorID <= 0)",
+        "message": "Transaction could not be imported because no vendor exists in the database associated with this Sender Trading Partner Number [{SenderTradingPartnerNumber}].",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "ValidEventType",
+        "property": "EventTypeName",
+        "condition": "evntType = Lists.EventTypeList.EventTypes.Invalid",
+        "message": "Transaction could not be imported because of invalid event type: '{EventTypeName}'.",
+        "severity": "Error",
+        "appliesWhen": "DocType is BargeStatus",
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "ValidEventStage",
+        "property": "EventStage",
+        "condition": "evntStage = Lists.EventTypeList.EventStage.None",
+        "message": "Transaction could not be imported because the stage of the event could not be determined based on the type of event.",
+        "severity": "Error",
+        "appliesWhen": "New transaction and DocType is BargeStatus",
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "OriginalTransactionExists",
+        "property": "OriginalControlNumber",
+        "condition": "isUpdate AndAlso (tcktEventID <= 0 OrElse tcktID <= 0)",
+        "message": "Update transaction could not be imported because no barge event could be found for the original control number [{OriginalControlNumber}].",
+        "severity": "Error",
+        "appliesWhen": "Update transaction",
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "AdditionalCleanOriginalExists",
+        "property": "PrimaryControlNumber",
+        "condition": "evntType = Clean AndAlso PrimaryControlNumber has value AndAlso (tcktEventID <= 0 OrElse tcktID <= 0)",
+        "message": "Update transaction could not be imported for the Additional Clean type because no original Clean event could not be found for the primary control number [{PrimaryControlNumber}].",
+        "severity": "Error",
+        "appliesWhen": "Additional Clean event type",
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "TicketNotVoided",
+        "property": "IsVoid",
+        "condition": ".BargeEventTicket.IsVoid",
+        "message": "Skipping import - cannot add barge event to Ticket that has been voided. OR Skipping import - cannot update barge event on Ticket that has been voided.",
+        "severity": "Error",
+        "appliesWhen": "Ticket is voided",
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "TicketEventNotVoided",
+        "property": "IsVoid",
+        "condition": ".BargeEventTicketEvent.IsVoid",
+        "message": "Skipping import - cannot update barge event that has been voided.",
+        "severity": "Error",
+        "appliesWhen": "Ticket event is voided",
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "NoFinalBillAdjustments",
+        "property": "VendorBillItemStatus",
+        "condition": "VendorBillItemStatus = 'F' AND (HasDivisionChangedForSameCustomerInvoicedEvent OR HasTotalAmountChangedForSameCustomerInvoicedEvent OR HasCustomerChangedForSameDivisionInvoicedEvent OR HaveDivisionAndCustomerChangedForInvoicedEvent)",
+        "message": "Skipping import - this vendor event is in Final Bill status and cannot be adjusted.",
+        "severity": "Error",
+        "appliesWhen": "Vendor bill is in Final Bill status",
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "SupportedDocumentType",
+        "property": "DocType",
+        "condition": "DocType NOT IN ('BargeStatus', 'BoatStatus')",
+        "message": "Processing '{SubDocType}' for {VendorName}: Unsupported document type - cannot process this row.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "validationTrigger": "OnImport"
+      },
+      {
+        "ruleName": "PartsServiceBillItemExists",
+        "property": "OriginalPartsServiceBillItemID",
+        "condition": "isUpdate AndAlso (psBillItemID <= 0 OrElse psBillID <= 0)",
+        "message": "Update transaction could not be imported because no Parts & Service Bill Item could be found for the original control number [{OriginalControlNumber}].",
+        "severity": "Error",
+        "appliesWhen": "Update transaction for BoatStatus",
+        "validationTrigger": "OnImport"
+      }
+    ]
+  },
+  "modernValidationMapping": {
+    "dataAnnotations": [
+      "[Required(ErrorMessage = \"Control number (Instance identifier) is required\")]",
+      "[StringLength(128, ErrorMessage = \"Control number (Instance identifier) cannot exceed 128 characters.\")]",
+      "public string ControlNumber { get; set; }",
+      "",
+      "[Required(ErrorMessage = \"Received date/time is required\")]",
+      "public DateTime ReceivedDateTime { get; set; }",
+      "",
+      "[StringLength(8, ErrorMessage = \"Sender trading partner number cannot exceed 8 characters.\")]",
+      "public string SenderTradingPartnerNumber { get; set; }",
+      "",
+      "[StringLength(30, ErrorMessage = \"Barge number cannot exceed 30 characters.\")]",
+      "public string BargeNum { get; set; }",
+      "",
+      "[StringLength(50, ErrorMessage = \"Location name cannot exceed 50 characters.\")]",
+      "public string LocationName { get; set; }",
+      "",
+      "[StringLength(3, ErrorMessage = \"River cannot exceed 3 characters.\")]",
+      "public string River { get; set; }"
+    ],
+    "fluentValidation": [
+      "RuleFor(x => x.ControlNumber)",
+      "    .NotEmpty()",
+      "    .WithMessage(\"Control number (Instance identifier) is required\")",
+      "    .MaximumLength(128)",
+      "    .WithMessage(\"Control number (Instance identifier) cannot exceed 128 characters.\");",
+      "",
+      "RuleFor(x => x.ReceivedDateTime)",
+      "    .NotEmpty()",
+      "    .WithMessage(\"Received date/time is required\");",
+      "",
+      "RuleFor(x => x.SenderTradingPartnerNumber)",
+      "    .MaximumLength(8)",
+      "    .When(x => !string.IsNullOrEmpty(x.SenderTradingPartnerNumber))",
+      "    .WithMessage(\"Sender trading partner number cannot exceed 8 characters.\");",
+      "",
+      "RuleFor(x => x.BargeNum)",
+      "    .MaximumLength(30)",
+      "    .When(x => !string.IsNullOrEmpty(x.BargeNum))",
+      "    .WithMessage(\"Barge number cannot exceed 30 characters.\");",
+      "",
+      "RuleFor(x => x.River)",
+      "    .MaximumLength(3)",
+      "    .When(x => !string.IsNullOrEmpty(x.River))",
+      "    .WithMessage(\"River cannot exceed 3 characters.\");"
+    ],
+    "complexValidationRules": [
+      "// Import-time validation: Check if barge exists",
+      "RuleFor(x => x.BargeID)",
+      "    .Must(BargeExists)",
+      "    .When(x => x.IsImporting)",
+      "    .WithMessage(\"Transaction could not be imported because barge does not exist in the database.\");",
+      "",
+      "// Import-time validation: Check if vendor exists",
+      "RuleFor(x => x.VendorID)",
+      "    .Must((model, vendorId) => VendorExistsForTradingPartner(vendorId, model.SenderTradingPartnerNumber))",
+      "    .When(x => x.IsImporting)",
+      "    .WithMessage(\"Transaction could not be imported because no vendor exists in the database associated with this Sender Trading Partner Number.\");",
+      "",
+      "// Import-time validation: Check for voided tickets",
+      "RuleFor(x => x)",
+      "    .Must(x => !x.TicketIsVoided)",
+      "    .When(x => x.IsImporting)",
+      "    .WithMessage(\"Skipping import - cannot add/update barge event to/on Ticket that has been voided.\");",
+      "",
+      "// Import-time validation: Check for final bill adjustments",
+      "RuleFor(x => x)",
+      "    .Must(x => !HasFinalBillAdjustment(x))",
+      "    .When(x => x.IsImporting && x.VendorBillItemStatus == \"F\")",
+      "    .WithMessage(\"Skipping import - this vendor event is in Final Bill status and cannot be adjusted.\");"
+    ]
+  },
+  "validationPatterns": {
+    "requiredFields": [
+      "ControlNumber",
+      "ReceivedDateTime"
+    ],
+    "maxLengthValidations": [
+      {
+        "field": "ControlNumber",
+        "maxLength": 128
+      },
+      {
+        "field": "SenderTradingPartnerNumber",
+        "maxLength": 8
+      },
+      {
+        "field": "BargeUscgNum",
+        "maxLength": 10
+      },
+      {
+        "field": "BargeNum",
+        "maxLength": 30
+      },
+      {
+        "field": "FleetBoatUscgNum",
+        "maxLength": 10
+      },
+      {
+        "field": "FleetBoatName",
+        "maxLength": 50
+      },
+      {
+        "field": "LocationBargeExCode",
+        "maxLength": 20
+      },
+      {
+        "field": "LocationName",
+        "maxLength": 50
+      },
+      {
+        "field": "EndLocationBargeExCode",
+        "maxLength": 20
+      },
+      {
+        "field": "EndLocationName",
+        "maxLength": 50
+      },
+      {
+        "field": "AssistedBoatUscgNum",
+        "maxLength": 10
+      },
+      {
+        "field": "AssistedBoatName",
+        "maxLength": 50
+      },
+      {
+        "field": "LoadStatus",
+        "maxLength": 15
+      },
+      {
+        "field": "River",
+        "maxLength": 3
+      },
+      {
+        "field": "CleanType",
+        "maxLength": 50
+      },
+      {
+        "field": "PumpType",
+        "maxLength": 50
+      },
+      {
+        "field": "CoverHandlingType",
+        "maxLength": 50
+      },
+      {
+        "field": "OriginalControlNumber",
+        "maxLength": 128
+      },
+      {
+        "field": "PrimaryControlNumber",
+        "maxLength": 128
+      }
+    ],
+    "databaseValidations": [
+      {
+        "type": "ForeignKeyCheck",
+        "field": "BargeID",
+        "table": "Barge",
+        "message": "Transaction could not be imported because barge does not exist in the database."
+      },
+      {
+        "type": "ForeignKeyCheck",
+        "field": "VendorID",
+        "table": "Vendor",
+        "condition": "Vendor.SenderTradingPartnerNumber matches row.SenderTradingPartnerNumber",
+        "message": "Transaction could not be imported because no vendor exists in the database associated with this Sender Trading Partner Number."
+      },
+      {
+        "type": "StatusCheck",
+        "field": "Ticket.IsVoid",
+        "message": "Skipping import - cannot add/update barge event to/on Ticket that has been voided."
+      },
+      {
+        "type": "StatusCheck",
+        "field": "TicketEvent.IsVoid",
+        "message": "Skipping import - cannot update barge event that has been voided."
+      },
+      {
+        "type": "StatusCheck",
+        "field": "VendorBillItemStatus",
+        "condition": "VendorBillItemStatus = 'F'",
+        "message": "Skipping import - this vendor event is in Final Bill status and cannot be adjusted."
+      }
+    ],
+    "conditionalValidations": [
+      {
+        "condition": "DocType = 'BargeStatus'",
+        "validations": [
+          "EventTypeName must be valid",
+          "EventStage must be determinable",
+          "BargeID must exist"
+        ]
+      },
+      {
+        "condition": "DocType = 'BoatStatus'",
+        "validations": [
+          "VendorID must exist",
+          "Parts & Service Bill Item must exist for updates"
+        ]
+      },
+      {
+        "condition": "IsUpdate = true",
+        "validations": [
+          "OriginalControlNumber must reference existing TicketEvent or PartsServiceBillItem"
+        ]
+      },
+      {
+        "condition": "EventType = 'Clean' AND PrimaryControlNumber has value",
+        "validations": [
+          "Primary control number must reference existing Clean event"
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "This is an import form with no traditional form-level validation (AreFieldsValid).",
+    "Validation occurs primarily during the import process via ProcessRow, ProcessBargeStatus, and ProcessBoatStatus methods.",
+    "Business object validation (CheckBusinessRules) focuses on required fields and max length constraints.",
+    "Import validation includes complex business rules for: barge/vendor existence, event type validity, voided tickets, and final bill adjustments.",
+    "The form validates selected records before enabling the Start button.",
+    "Error messages are logged to txtLog textbox during import process.",
+    "Successful imports delete records from BargeExVendorDocumentInbox table.",
+    "The form processes two document types: BargeStatus (creates BargeEvent) and BoatStatus (creates PartsServiceBillItem)."
+  ]
+}

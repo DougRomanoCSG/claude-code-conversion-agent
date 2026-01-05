@@ -1,0 +1,815 @@
+{
+  "formName": "frmVendorSearch",
+  "formTitle": "Vendors",
+  "inherits": "frmBaseSearch",
+  "implements": ["IBaseSearch"],
+  "uniqueIdentifier": "VendorID",
+  "defaultSortColumn": "Name",
+  "defaultSortDirection": "Ascending",
+
+  "searchCriteria": {
+    "controls": [
+      {
+        "name": "txtSearchName",
+        "type": "UltraTextEditor",
+        "category": "SearchCriteria",
+        "label": "Name",
+        "dataBinding": null,
+        "validation": [],
+        "events": [],
+        "modernPattern": {
+          "type": "text",
+          "htmlElement": "<input type=\"text\" class=\"form-control\" />",
+          "bindTo": "Name",
+          "maxLength": 50
+        },
+        "tabIndex": 1,
+        "location": {
+          "x": 48,
+          "y": 6
+        },
+        "size": {
+          "width": 136,
+          "height": 21
+        },
+        "notes": "Primary search field, receives initial focus"
+      },
+      {
+        "name": "txtSearchAccountingCode",
+        "type": "UltraTextEditor",
+        "category": "SearchCriteria",
+        "label": "Accounting #",
+        "dataBinding": null,
+        "validation": [],
+        "events": [],
+        "modernPattern": {
+          "type": "text",
+          "htmlElement": "<input type=\"text\" class=\"form-control\" />",
+          "bindTo": "AccountingCode",
+          "maxLength": 20
+        },
+        "tabIndex": 3,
+        "location": {
+          "x": 277,
+          "y": 6
+        },
+        "size": {
+          "width": 136,
+          "height": 21
+        }
+      },
+      {
+        "name": "chkIsActiveOnly",
+        "type": "UltraCheckEditor",
+        "category": "SearchCriteria",
+        "label": "Active only",
+        "dataBinding": null,
+        "validation": [],
+        "events": [],
+        "defaultValue": true,
+        "modernPattern": {
+          "type": "checkbox",
+          "htmlElement": "<input type=\"checkbox\" class=\"form-check-input\" />",
+          "bindTo": "ActiveOnly"
+        },
+        "tabIndex": 4,
+        "location": {
+          "x": 431,
+          "y": 6
+        },
+        "size": {
+          "width": 86,
+          "height": 21
+        },
+        "notes": "Checked by default on reset"
+      },
+      {
+        "name": "chkFuelSuppliersOnly",
+        "type": "UltraCheckEditor",
+        "category": "SearchCriteria",
+        "label": "Fuel suppliers",
+        "dataBinding": null,
+        "validation": [],
+        "events": [],
+        "defaultValue": false,
+        "modernPattern": {
+          "type": "checkbox",
+          "htmlElement": "<input type=\"checkbox\" class=\"form-check-input\" />",
+          "bindTo": "FuelSuppliersOnly"
+        },
+        "tabIndex": 5,
+        "location": {
+          "x": 6,
+          "y": 30
+        },
+        "size": {
+          "width": 102,
+          "height": 21
+        }
+      },
+      {
+        "name": "chkInternalVendorOnly",
+        "type": "UltraCheckEditor",
+        "category": "SearchCriteria",
+        "label": "Internal vendor",
+        "dataBinding": null,
+        "validation": [],
+        "events": [],
+        "defaultValue": false,
+        "modernPattern": {
+          "type": "checkbox",
+          "htmlElement": "<input type=\"checkbox\" class=\"form-check-input\" />",
+          "bindTo": "InternalVendorOnly"
+        },
+        "tabIndex": 6,
+        "location": {
+          "x": 112,
+          "y": 30
+        },
+        "size": {
+          "width": 98,
+          "height": 21
+        }
+      },
+      {
+        "name": "chkIsBargeExEnabledOnly",
+        "type": "UltraCheckEditor",
+        "category": "SearchCriteria",
+        "label": "BargeEx enabled",
+        "dataBinding": null,
+        "validation": [],
+        "events": [],
+        "defaultValue": false,
+        "modernPattern": {
+          "type": "checkbox",
+          "htmlElement": "<input type=\"checkbox\" class=\"form-check-input\" />",
+          "bindTo": "IsBargeExEnabledOnly"
+        },
+        "tabIndex": 7,
+        "location": {
+          "x": 220,
+          "y": 30
+        },
+        "size": {
+          "width": 114,
+          "height": 21
+        },
+        "visibilityCondition": "Lists.GlobalSettingList.EnableBargeExBargeLineSupport",
+        "notes": "Visibility controlled by EnableBargeExBargeLineSupport global setting"
+      },
+      {
+        "name": "chkEnablePortalOnly",
+        "type": "UltraCheckEditor",
+        "category": "SearchCriteria",
+        "label": "Portal enabled",
+        "dataBinding": null,
+        "validation": [],
+        "events": [],
+        "defaultValue": false,
+        "modernPattern": {
+          "type": "checkbox",
+          "htmlElement": "<input type=\"checkbox\" class=\"form-check-input\" />",
+          "bindTo": "EnablePortalOnly"
+        },
+        "tabIndex": 8,
+        "location": {
+          "x": 342,
+          "y": 30
+        },
+        "size": {
+          "width": 98,
+          "height": 21
+        },
+        "visibilityCondition": "LicenseList(Licenses.LicenseComponent.Portal).Active",
+        "notes": "Visibility controlled by Portal license. Position dynamically adjusted if BargeEx checkbox is hidden"
+      },
+      {
+        "name": "chkLiquidBrokerOnly",
+        "type": "UltraCheckEditor",
+        "category": "SearchCriteria",
+        "label": "Liquid broker",
+        "dataBinding": null,
+        "validation": [],
+        "events": [],
+        "defaultValue": false,
+        "modernPattern": {
+          "type": "checkbox",
+          "htmlElement": "<input type=\"checkbox\" class=\"form-check-input\" />",
+          "bindTo": "LiquidBrokerOnly"
+        },
+        "tabIndex": 9,
+        "location": {
+          "x": 450,
+          "y": 30
+        },
+        "size": {
+          "width": 98,
+          "height": 21
+        },
+        "visibilityCondition": "LicenseList(Licenses.LicenseComponent.UnitTow).Active",
+        "notes": "Visibility controlled by UnitTow license. Position dynamically adjusted if BargeEx checkbox is hidden"
+      },
+      {
+        "name": "chkTankermanOnly",
+        "type": "UltraCheckEditor",
+        "category": "SearchCriteria",
+        "label": "Tankerman",
+        "dataBinding": null,
+        "validation": [],
+        "events": [],
+        "defaultValue": false,
+        "modernPattern": {
+          "type": "checkbox",
+          "htmlElement": "<input type=\"checkbox\" class=\"form-check-input\" />",
+          "bindTo": "TankermanOnly"
+        },
+        "tabIndex": 10,
+        "location": {
+          "x": 554,
+          "y": 30
+        },
+        "size": {
+          "width": 98,
+          "height": 21
+        },
+        "visibilityCondition": "LicenseList(Licenses.LicenseComponent.UnitTow).Active",
+        "notes": "Visibility controlled by UnitTow license"
+      }
+    ]
+  },
+
+  "buttons": [
+    {
+      "name": "btnFind",
+      "text": "Find",
+      "type": "Search",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnFind_Click",
+      "purpose": "Executes search using current criteria and selects first row",
+      "tabIndex": 11,
+      "anchor": "TopRight",
+      "location": {
+        "x": 698,
+        "y": 6
+      },
+      "size": {
+        "width": 75,
+        "height": 23
+      },
+      "buttonType": "Open",
+      "modernPattern": {
+        "type": "submit",
+        "class": "btn btn-primary",
+        "icon": "fa-search"
+      },
+      "notes": "Form AcceptButton (triggered by Enter key)"
+    },
+    {
+      "name": "btnReset",
+      "text": "Reset",
+      "type": "Reset",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnReset_Click",
+      "purpose": "Resets all search fields to default state",
+      "tabIndex": 12,
+      "anchor": "TopRight",
+      "location": {
+        "x": 698,
+        "y": 30
+      },
+      "size": {
+        "width": 75,
+        "height": 23
+      },
+      "buttonType": "Open",
+      "modernPattern": {
+        "type": "button",
+        "class": "btn btn-secondary",
+        "icon": "fa-undo"
+      },
+      "causesValidation": false
+    }
+  ],
+
+  "grid": {
+    "name": "grdSearch",
+    "type": "UltraGrid",
+    "uniqueIdentifier": "VendorID",
+    "dock": "Fill",
+    "location": {
+      "x": 0,
+      "y": 82
+    },
+    "size": {
+      "width": 779,
+      "height": 500
+    },
+    "columns": [
+      {
+        "key": "Name",
+        "header": "Name",
+        "dataType": "String",
+        "width": 120,
+        "alignment": "Left",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 0,
+        "modernPattern": {
+          "data": "name",
+          "title": "Name",
+          "className": "text-start"
+        }
+      },
+      {
+        "key": "LongName",
+        "header": "Long Name",
+        "dataType": "String",
+        "width": 120,
+        "alignment": "Left",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 1,
+        "modernPattern": {
+          "data": "longName",
+          "title": "Long Name",
+          "className": "text-start"
+        }
+      },
+      {
+        "key": "AccountingCode",
+        "header": "Accounting #",
+        "dataType": "String",
+        "width": 90,
+        "alignment": "Left",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 2,
+        "modernPattern": {
+          "data": "accountingCode",
+          "title": "Accounting #",
+          "className": "text-start"
+        }
+      },
+      {
+        "key": "IsActive",
+        "header": "Active",
+        "dataType": "Boolean",
+        "width": 60,
+        "alignment": "Center",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 3,
+        "modernPattern": {
+          "data": "isActive",
+          "title": "Active",
+          "className": "text-center",
+          "render": "renderBoolean"
+        }
+      },
+      {
+        "key": "IsFuelSupplier",
+        "header": "Fuel Supplier",
+        "dataType": "Boolean",
+        "width": 80,
+        "alignment": "Center",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 4,
+        "modernPattern": {
+          "data": "isFuelSupplier",
+          "title": "Fuel Supplier",
+          "className": "text-center",
+          "render": "renderBoolean"
+        }
+      },
+      {
+        "key": "IsBoatAssistSupplier",
+        "header": "Boat Assist",
+        "dataType": "Boolean",
+        "width": 80,
+        "alignment": "Center",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 5,
+        "modernPattern": {
+          "data": "isBoatAssistSupplier",
+          "title": "Boat Assist",
+          "className": "text-center",
+          "render": "renderBoolean"
+        }
+      },
+      {
+        "key": "IsInternalVendor",
+        "header": "Internal Vendor",
+        "dataType": "Boolean",
+        "width": 90,
+        "alignment": "Center",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 6,
+        "modernPattern": {
+          "data": "isInternalVendor",
+          "title": "Internal Vendor",
+          "className": "text-center",
+          "render": "renderBoolean"
+        }
+      },
+      {
+        "key": "IsBargeExEnabled",
+        "header": "BargeEx",
+        "dataType": "Boolean",
+        "width": 60,
+        "alignment": "Center",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 7,
+        "visibilityCondition": "Lists.GlobalSettingList.EnableBargeExBargeLineSupport",
+        "modernPattern": {
+          "data": "isBargeExEnabled",
+          "title": "BargeEx",
+          "className": "text-center",
+          "render": "renderBoolean"
+        },
+        "notes": "Conditional column - only visible if EnableBargeExBargeLineSupport global setting is True"
+      },
+      {
+        "key": "EnablePortal",
+        "header": "Portal",
+        "dataType": "Boolean",
+        "width": 60,
+        "alignment": "Center",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 8,
+        "visibilityCondition": "LicenseList(Licenses.LicenseComponent.Portal).Active",
+        "modernPattern": {
+          "data": "enablePortal",
+          "title": "Portal",
+          "className": "text-center",
+          "render": "renderBoolean"
+        },
+        "notes": "Conditional column - only visible if Portal license is active"
+      },
+      {
+        "key": "IsLiquidBroker",
+        "header": "Liquid Broker",
+        "dataType": "Boolean",
+        "width": 90,
+        "alignment": "Center",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 9,
+        "visibilityCondition": "LicenseList(Licenses.LicenseComponent.UnitTow).Active",
+        "modernPattern": {
+          "data": "isLiquidBroker",
+          "title": "Liquid Broker",
+          "className": "text-center",
+          "render": "renderBoolean"
+        },
+        "notes": "Conditional column - only visible if UnitTow license is active"
+      },
+      {
+        "key": "IsTankerman",
+        "header": "Tankerman",
+        "dataType": "Boolean",
+        "width": 90,
+        "alignment": "Center",
+        "sortable": true,
+        "filterable": true,
+        "columnIndex": 10,
+        "visibilityCondition": "LicenseList(Licenses.LicenseComponent.UnitTow).Active",
+        "modernPattern": {
+          "data": "isTankerman",
+          "title": "Tankerman",
+          "className": "text-center",
+          "render": "renderBoolean"
+        },
+        "notes": "Conditional column - only visible if UnitTow license is active"
+      }
+    ],
+    "events": [
+      {
+        "event": "DoubleClick",
+        "handler": "Opens detail form for selected vendor (via IBaseSearch.ItemModify)",
+        "mapping": "frmVendorDetail.Initialize(Vendor.GetVendor(GridControlIndex))"
+      },
+      {
+        "event": "AfterSelectChange",
+        "handler": "Enables/disables toolbar buttons based on selection"
+      }
+    ],
+    "modernPattern": {
+      "type": "DataTable",
+      "serverSide": true,
+      "ajax": {
+        "url": "/VendorSearch/VendorTable",
+        "type": "POST"
+      },
+      "dom": "lrtip",
+      "processing": true,
+      "order": [[0, "asc"]],
+      "pageLength": 25,
+      "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+      "autoWidth": false,
+      "select": {
+        "style": "single"
+      },
+      "notes": "Use DataTables with server-side processing for large datasets"
+    }
+  },
+
+  "panels": [
+    {
+      "name": "pnlSearch",
+      "type": "UltraPanel",
+      "dock": "Fill",
+      "location": {
+        "x": 0,
+        "y": 0
+      },
+      "size": {
+        "width": 779,
+        "height": 582
+      },
+      "controls": ["lblContextTitle", "pnlCriteria", "grdSearch"],
+      "notes": "Main container panel for the entire search form"
+    },
+    {
+      "name": "pnlCriteria",
+      "type": "UltraPanel",
+      "dock": "Top",
+      "location": {
+        "x": 0,
+        "y": 24
+      },
+      "size": {
+        "width": 779,
+        "height": 58
+      },
+      "controls": [
+        "lblSearchName",
+        "txtSearchName",
+        "lblSearchAccountingCode",
+        "txtSearchAccountingCode",
+        "chkIsActiveOnly",
+        "chkFuelSuppliersOnly",
+        "chkInternalVendorOnly",
+        "chkIsBargeExEnabledOnly",
+        "chkEnablePortalOnly",
+        "chkLiquidBrokerOnly",
+        "chkTankermanOnly",
+        "btnFind",
+        "btnReset"
+      ],
+      "notes": "Search criteria panel - contains all filter controls and action buttons"
+    }
+  ],
+
+  "labels": [
+    {
+      "name": "lblContextTitle",
+      "text": "Vendors",
+      "dock": "Top",
+      "location": {
+        "x": 0,
+        "y": 0
+      },
+      "size": {
+        "width": 779,
+        "height": 24
+      },
+      "font": "Arial, 12pt, Bold",
+      "appearance": "SearchCaption",
+      "backgroundColor": "SystemColors.Highlight",
+      "foreColor": "SystemColors.HighlightText",
+      "modernPattern": {
+        "htmlElement": "<h2 class=\"page-header\">Vendors</h2>"
+      }
+    },
+    {
+      "name": "lblSearchName",
+      "text": "Name:",
+      "location": {
+        "x": 4,
+        "y": 6
+      },
+      "size": {
+        "width": 40,
+        "height": 21
+      },
+      "alignment": {
+        "horizontal": "Left",
+        "vertical": "Middle"
+      }
+    },
+    {
+      "name": "lblSearchAccountingCode",
+      "text": "Accounting #:",
+      "location": {
+        "x": 197,
+        "y": 6
+      },
+      "size": {
+        "width": 76,
+        "height": 21
+      },
+      "alignment": {
+        "horizontal": "Left",
+        "vertical": "Middle"
+      }
+    }
+  ],
+
+  "businessLogic": {
+    "searchMethod": "GetList",
+    "searchParameters": [
+      "txtSearchName.Text.Trim",
+      "txtSearchAccountingCode.Text.Trim",
+      "chkIsBargeExEnabledOnly.Checked",
+      "chkIsActiveOnly.Checked",
+      "chkEnablePortalOnly.Checked",
+      "chkFuelSuppliersOnly.Checked",
+      "chkLiquidBrokerOnly.Checked",
+      "chkInternalVendorOnly.Checked",
+      "chkTankermanOnly.Checked"
+    ],
+    "searchReturnType": "VendorSearchList.List",
+    "detailFormClass": "frmVendorDetail",
+    "entityClass": "Vendor",
+    "newMethod": "Vendor.NewVendor",
+    "getMethod": "Vendor.GetVendor(GridControlIndex)",
+    "deleteMethod": "Vendor.DeleteVendor(GridControlIndex)"
+  },
+
+  "eventHandlers": {
+    "pnlSearch_HandleCreated": {
+      "purpose": "Initializes form when panel is loaded into main form",
+      "operations": [
+        "FormatControls() - Sets Infragistics control formatting",
+        "RestoreGrid() - Restores user's saved grid settings from database"
+      ],
+      "notes": "Used instead of Form_Load since panel is re-parented into main form"
+    },
+    "pnlSearch_HandleDestroyed": {
+      "purpose": "Saves grid settings when panel is destroyed",
+      "operations": [
+        "SaveGrid() - Persists current grid settings to database"
+      ]
+    },
+    "btnFind_Click": {
+      "purpose": "Executes search using current criteria",
+      "operations": [
+        "RefreshList(True) - Searches and selects first row"
+      ],
+      "modernPattern": "Form submit handler that triggers DataTables ajax reload"
+    },
+    "btnReset_Click": {
+      "purpose": "Resets all search fields to default state",
+      "operations": [
+        "ResetControls() - Clears all search fields and resets checkboxes"
+      ],
+      "modernPattern": "JavaScript form reset with default values"
+    }
+  },
+
+  "validation": {
+    "method": null,
+    "rules": [],
+    "notes": "No client-side validation required - search forms allow any input"
+  },
+
+  "initialization": {
+    "defaultValues": {
+      "chkIsActiveOnly": true,
+      "chkFuelSuppliersOnly": false,
+      "chkIsBargeExEnabledOnly": false,
+      "chkEnablePortalOnly": false,
+      "chkLiquidBrokerOnly": false,
+      "chkInternalVendorOnly": false,
+      "chkTankermanOnly": false,
+      "txtSearchName": "",
+      "txtSearchAccountingCode": ""
+    },
+    "focusControl": "txtSearchName",
+    "gridSettings": {
+      "uniqueIdentifier": "VendorID",
+      "defaultSort": {
+        "column": "Name",
+        "direction": "Ascending"
+      },
+      "userSettingsPersistence": true,
+      "persistenceHelper": "MyAppSettingHelper"
+    }
+  },
+
+  "interfaceImplementation": {
+    "interface": "IBaseSearch",
+    "properties": {
+      "GridControlIndex": {
+        "purpose": "Returns selected VendorID from grid",
+        "implementation": "InfragisticsHelper.GetSelectedRowID"
+      },
+      "LocalPanel": {
+        "purpose": "Returns the main panel for re-parenting",
+        "implementation": "Returns pnlSearch"
+      },
+      "UltraGridControl": {
+        "purpose": "Returns the grid control reference",
+        "implementation": "Returns grdSearch"
+      }
+    },
+    "methods": {
+      "FocusFirstField": {
+        "purpose": "Sets focus to first search field when panel loads",
+        "implementation": "txtSearchName.Focus()"
+      },
+      "Initialize": {
+        "purpose": "Initializes form with security and subsystem settings",
+        "implementation": "InitializeBase(SubSystem.frmVendorSearch)"
+      },
+      "ItemAdd": {
+        "purpose": "Opens detail form to add new vendor",
+        "implementation": "frmVendorDetail.Initialize(Vendor.NewVendor)"
+      },
+      "ItemModify": {
+        "purpose": "Opens detail form to edit selected vendor",
+        "implementation": "frmVendorDetail.Initialize(Vendor.GetVendor(GridControlIndex))"
+      },
+      "ItemRemove": {
+        "purpose": "Deletes selected vendor after confirmation",
+        "implementation": "Vendor.DeleteVendor(GridControlIndex) + RefreshList"
+      },
+      "ItemRun": {
+        "purpose": "Not implemented for this form",
+        "implementation": "Empty"
+      },
+      "ItemView": {
+        "purpose": "Not implemented for this form",
+        "implementation": "Empty"
+      },
+      "RefreshList": {
+        "purpose": "Executes search and populates grid with results",
+        "implementation": "RefreshListBase with GetList parameters"
+      },
+      "SetButtonTypes": {
+        "purpose": "Configures security button types",
+        "implementation": "Sets btnFind and btnReset as ButtonType.Open"
+      },
+      "OnChangeOfFleet": {
+        "purpose": "Not implemented for this form",
+        "implementation": "Empty"
+      }
+    }
+  },
+
+  "modernizationNotes": {
+    "controllerPattern": "Follow BoatLocationSearchController.cs pattern",
+    "viewModelPattern": "Follow BoatLocationSearchViewModel.cs pattern",
+    "viewPattern": "Use DataTables for grid with server-side processing",
+    "searchEndpoint": "POST /VendorSearch/VendorTable",
+    "indexEndpoint": "GET /VendorSearch/Index",
+    "createEndpoint": "GET /VendorSearch/Create",
+    "editEndpoint": "GET /VendorSearch/Edit/{id}",
+    "deleteEndpoint": "POST /VendorSearch/Delete/{id}",
+    "conditionalUI": [
+      "chkIsBargeExEnabledOnly visibility based on EnableBargeExBargeLineSupport global setting",
+      "chkEnablePortalOnly visibility based on Portal license",
+      "chkLiquidBrokerOnly visibility based on UnitTow license",
+      "chkTankermanOnly visibility based on UnitTow license",
+      "Grid columns IsBargeExEnabled, EnablePortal, IsLiquidBroker, IsTankerman have same conditional visibility"
+    ],
+    "dynamicLayout": "Controls reposition when conditional controls are hidden (see FormatControls method)",
+    "securityImplementation": "Use [RequirePermission] attributes with AuthPermissions.VendorReadOnly and VendorModify",
+    "dtoReference": "Create VendorDto.cs in BargeOps.Shared.Dto.Admin namespace",
+    "serviceReference": "Create IVendorService interface for data operations"
+  },
+
+  "extractionMetadata": {
+    "sourceFiles": [
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore\\Forms\\frmVendorSearch.vb",
+      "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore\\Forms\\frmVendorSearch.Designer.vb"
+    ],
+    "extractedDate": "2025-12-11",
+    "extractedBy": "Form Structure Analyzer Agent",
+    "totalControls": 13,
+    "totalButtons": 2,
+    "totalLabels": 3,
+    "totalPanels": 2,
+    "gridColumns": 11,
+    "conditionalColumns": 4,
+    "notes": [
+      "All controls documented including conditional visibility logic",
+      "Grid column definitions complete with modern DataTables mapping",
+      "Event handlers mapped to business purposes",
+      "IBaseSearch interface implementation fully documented",
+      "Layout hierarchy preserved (panels, sections, grouping)",
+      "Modern equivalents suggested (DataTables for grid, Bootstrap for styling)",
+      "License and global setting dependencies identified",
+      "Dynamic layout behavior documented",
+      "No DateTime controls requiring split pattern conversion",
+      "Reference implementations: BoatLocationSearchController.cs, BoatLocationSearchViewModel.cs"
+    ]
+  }
+}

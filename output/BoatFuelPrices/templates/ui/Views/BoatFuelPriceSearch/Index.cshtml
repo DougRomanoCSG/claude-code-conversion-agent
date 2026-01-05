@@ -1,0 +1,95 @@
+@model BargeOpsAdmin.ViewModels.BoatFuelPriceSearchViewModel
+@{
+    ViewData["Title"] = "Boat Fuel Prices";
+}
+
+<div class="container-fluid">
+    <h2>Boat Fuel Prices</h2>
+
+    @await Html.PartialAsync("_Search", Model)
+    @await Html.PartialAsync("_SearchResults")
+</div>
+
+<!-- Edit/Create Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Boat Fuel Price</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="BoatFuelPriceID" name="BoatFuelPriceID" value="0" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="EffectiveDate" class="form-label fw-bold">Effective Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="EffectiveDate" name="EffectiveDate" required />
+                                <div class="invalid-feedback">Effective date is required.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Price" class="form-label fw-bold">Fuel Price <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="text" class="form-control currency-input" id="Price" name="Price" required />
+                                </div>
+                                <div class="invalid-feedback">Fuel price is required.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="FuelVendorBusinessUnitID" class="form-label">Fuel Vendor</label>
+                                <select class="form-select select2" id="FuelVendorBusinessUnitID" name="FuelVendorBusinessUnitID">
+                                    <option value="">-- Select Vendor --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="InvoiceNumber" class="form-label">Vendor Inv #</label>
+                                <input type="text" class="form-control" id="InvoiceNumber" name="InvoiceNumber" maxlength="50" disabled />
+                                <div class="form-text">Enabled when a vendor is selected</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audit fields (read-only, shown for existing records) -->
+                    <div id="auditFields" class="row mt-3" style="display: none;">
+                        <div class="col-md-12">
+                            <hr />
+                            <h6>Audit Information</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Created By:</strong> <span id="CreatedBy"></span></p>
+                            <p class="mb-1"><strong>Created Date:</strong> <span id="CreatedDate"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Modified By:</strong> <span id="ModifiedBy"></span></p>
+                            <p class="mb-1"><strong>Modified Date:</strong> <span id="ModifiedDate"></span></p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSave">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/boatFuelPriceSearch.js"></script>
+    <script src="~/js/boatFuelPriceEdit.js"></script>
+}

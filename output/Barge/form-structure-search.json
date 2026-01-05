@@ -1,0 +1,1232 @@
+{
+  "formName": "frmBargeSearch",
+  "formType": "Search",
+  "implements": ["IBaseSearch"],
+  "title": "Barges",
+  "focusField": "txtBargeNum",
+
+  "panels": [
+    {
+      "name": "pnlCriteriaNonExpandable",
+      "label": "Basic Search Criteria",
+      "type": "Standard",
+      "controls": [
+        "txtBargeNum",
+        "cboHullType",
+        "cboOperatorID",
+        "cboStatus",
+        "txtTicketID",
+        "cboCustomerID",
+        "cboLoadStatus",
+        "cboCoverType",
+        "chkOpenTicketsOnly",
+        "chkActiveOnly",
+        "btnFind",
+        "btnReset"
+      ]
+    },
+    {
+      "name": "grpMoreSearchOptions",
+      "label": "Advanced Search Options (Expandable)",
+      "type": "ExpandableGroupBox",
+      "expanded": false,
+      "expandedText": "Hide search options",
+      "collapsedText": "Show search options",
+      "controls": [
+        "cboBoatSearchType",
+        "cboBoatLocationID",
+        "cboFacilitySearchType",
+        "cboFacilityLocationID",
+        "cboShipSearchType",
+        "cboShipLocationID",
+        "cboEquipmentType",
+        "txtCoastGuardNum",
+        "cboSizeCategory",
+        "cboRiver",
+        "txtStartMile",
+        "txtEndMile",
+        "txtContractNumber",
+        "cboCommodityID"
+      ]
+    }
+  ],
+
+  "controls": [
+    {
+      "name": "txtBargeNum",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "Barge",
+      "dataBinding": null,
+      "validation": ["String"],
+      "events": ["ValueChanged"],
+      "tooltip": "Starts with search",
+      "modernEquivalent": {
+        "type": "text",
+        "class": "form-control",
+        "placeholder": "Enter barge number..."
+      }
+    },
+    {
+      "name": "cboHullType",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Hull type",
+      "dataBinding": null,
+      "populationMethod": "PopulateValidationListCombo",
+      "dataSource": "Lists.ValidationList.ValidationTypes.HullType",
+      "events": ["ValueChanged"],
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboOperatorID",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Operator",
+      "dataBinding": null,
+      "populationMethod": "PopulateListCombo",
+      "dataSource": "Lists.CustomerList.GetList",
+      "events": ["ValueChanged"],
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboStatus",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Status",
+      "dataBinding": null,
+      "populationMethod": "PopulateValidationListCombo",
+      "dataSource": "Lists.ValidationList.ValidationTypes.BargeStatus",
+      "events": ["ValueChanged"],
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "txtTicketID",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "Ticket",
+      "dataBinding": null,
+      "validation": ["Int32"],
+      "events": ["ValueChanged"],
+      "tooltip": "Exact match search",
+      "modernEquivalent": {
+        "type": "text",
+        "class": "form-control",
+        "inputmode": "numeric",
+        "placeholder": "Ticket ID..."
+      }
+    },
+    {
+      "name": "cboCustomerID",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Customer",
+      "dataBinding": null,
+      "populationMethod": "PopulateListCombo",
+      "dataSource": "Lists.CustomerList.GetList",
+      "events": ["ValueChanged"],
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboLoadStatus",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Load status",
+      "dataBinding": null,
+      "populationMethod": "PopulateValidationListCombo",
+      "dataSource": "Lists.ValidationList.ValidationTypes.LoadStatus",
+      "events": ["ValueChanged"],
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboCoverType",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Cover type",
+      "dataBinding": null,
+      "populationMethod": "PopulateValidationListCombo",
+      "dataSource": "Lists.ValidationList.ValidationTypes.CoverType",
+      "events": ["ValueChanged"],
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "chkOpenTicketsOnly",
+      "type": "UltraCheckEditor",
+      "category": "SearchCriteria",
+      "label": "Open tickets",
+      "dataBinding": null,
+      "defaultValue": true,
+      "events": ["CheckedChanged"],
+      "modernEquivalent": {
+        "type": "checkbox",
+        "class": "form-check-input"
+      }
+    },
+    {
+      "name": "chkActiveOnly",
+      "type": "UltraCheckEditor",
+      "category": "SearchCriteria",
+      "label": "Active only",
+      "dataBinding": null,
+      "defaultValue": true,
+      "events": ["CheckedChanged"],
+      "modernEquivalent": {
+        "type": "checkbox",
+        "class": "form-check-input"
+      }
+    },
+    {
+      "name": "cboBoatSearchType",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "Boat",
+      "dataBinding": null,
+      "populationMethod": "PopulateValidationListCombo",
+      "dataSource": "Lists.ValidationList.ValidationTypes.BoatSearchType",
+      "events": ["ValueChanged"],
+      "enablesControl": "cboBoatLocationID",
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboBoatLocationID",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "Boat Location",
+      "dataBinding": null,
+      "populationMethod": "PopulateListCombo",
+      "dataSource": "Lists.BoatLocationList.GetList()",
+      "events": ["ValueChanged"],
+      "initialState": "Disabled",
+      "enabledBy": "cboBoatSearchType",
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboFacilitySearchType",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "Facility",
+      "dataBinding": null,
+      "populationMethod": "PopulateValidationListCombo",
+      "dataSource": "Lists.ValidationList.ValidationTypes.FacilitySearchType",
+      "events": ["ValueChanged"],
+      "enablesControl": "cboFacilityLocationID",
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboFacilityLocationID",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "Facility Location",
+      "dataBinding": null,
+      "populationMethod": "PopulateExpandableFacilityCombo",
+      "dataSource": "FacilityListMode.ConsignFacilities or AllFacilities",
+      "events": ["ValueChanged", "AfterSortChange"],
+      "initialState": "Disabled",
+      "enabledBy": "cboFacilitySearchType",
+      "note": "Expandable combo with header click to toggle facility list modes",
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboShipSearchType",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "Ship",
+      "dataBinding": null,
+      "populationMethod": "PopulateValidationListCombo",
+      "dataSource": "Lists.ValidationList.ValidationTypes.ShipSearchType",
+      "events": ["ValueChanged"],
+      "enablesControl": "cboShipLocationID",
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboShipLocationID",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "Ship Location",
+      "dataBinding": null,
+      "populationMethod": "PopulateListCombo",
+      "dataSource": "Lists.ShipLocationList.GetList",
+      "events": ["ValueChanged"],
+      "initialState": "Disabled",
+      "enabledBy": "cboShipSearchType",
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboEquipmentType",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "Equipment type",
+      "dataBinding": null,
+      "populationMethod": "PopulateValidationListCombo",
+      "dataSource": "Lists.ValidationList.ValidationTypes.BargeEquipmentType",
+      "events": ["ValueChanged"],
+      "businessLogic": "When 'Fleet-owned' selected, automatically unchecks chkOpenTicketsOnly",
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "txtCoastGuardNum",
+      "type": "UltraTextEditor",
+      "category": "AdvancedSearch",
+      "label": "Barge USCG #",
+      "dataBinding": null,
+      "validation": ["String"],
+      "events": ["ValueChanged"],
+      "tooltip": "Exact match search",
+      "modernEquivalent": {
+        "type": "text",
+        "class": "form-control",
+        "placeholder": "Coast Guard number..."
+      }
+    },
+    {
+      "name": "cboSizeCategory",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "Barge size",
+      "dataBinding": null,
+      "populationMethod": "PopulateValidationListCombo",
+      "dataSource": "Lists.ValidationList.ValidationTypes.BargeSizeCategory",
+      "events": ["ValueChanged"],
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "cboRiver",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "River",
+      "dataBinding": null,
+      "populationMethod": "PopulateListCombo",
+      "dataSource": "Lists.RiverList.GetList",
+      "events": ["ValueChanged"],
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    },
+    {
+      "name": "txtStartMile",
+      "type": "UltraTextEditor",
+      "category": "AdvancedSearch",
+      "label": "Mile",
+      "dataBinding": null,
+      "validation": ["Decimal"],
+      "events": ["ValueChanged"],
+      "tooltip": "Miles greater than or equal to search",
+      "modernEquivalent": {
+        "type": "text",
+        "class": "form-control",
+        "inputmode": "decimal",
+        "placeholder": "From mile..."
+      }
+    },
+    {
+      "name": "txtEndMile",
+      "type": "UltraTextEditor",
+      "category": "AdvancedSearch",
+      "label": "to",
+      "dataBinding": null,
+      "validation": ["Decimal"],
+      "events": ["ValueChanged"],
+      "tooltip": "Miles less than or equal to search",
+      "modernEquivalent": {
+        "type": "text",
+        "class": "form-control",
+        "inputmode": "decimal",
+        "placeholder": "To mile..."
+      }
+    },
+    {
+      "name": "txtContractNumber",
+      "type": "UltraTextEditor",
+      "category": "AdvancedSearch",
+      "label": "Contract #",
+      "dataBinding": null,
+      "validation": ["String"],
+      "events": ["ValueChanged"],
+      "tooltip": "Contains search",
+      "visibilityCondition": "LicenseList(Licenses.LicenseComponent.Freight).Active",
+      "note": "Only visible with active Freight license",
+      "modernEquivalent": {
+        "type": "text",
+        "class": "form-control",
+        "placeholder": "Contract number..."
+      }
+    },
+    {
+      "name": "cboCommodityID",
+      "type": "UltraCombo",
+      "category": "AdvancedSearch",
+      "label": "Commodity",
+      "dataBinding": null,
+      "populationMethod": "PopulateListCombo",
+      "dataSource": "Lists.CommodityList.GetList",
+      "events": ["ValueChanged"],
+      "modernEquivalent": {
+        "type": "select",
+        "class": "form-select",
+        "useSelect2": true
+      }
+    }
+  ],
+
+  "buttons": [
+    {
+      "name": "btnFind",
+      "text": "Find",
+      "type": "Search",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnFind_Click",
+      "purpose": "Execute search with current criteria",
+      "accessKey": "i",
+      "isDefault": true,
+      "modernEquivalent": {
+        "type": "submit",
+        "class": "btn btn-primary"
+      }
+    },
+    {
+      "name": "btnReset",
+      "text": "Reset",
+      "type": "Reset",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnReset_Click",
+      "purpose": "Clear all search criteria to defaults",
+      "causesValidation": false,
+      "modernEquivalent": {
+        "type": "button",
+        "class": "btn btn-secondary"
+      }
+    }
+  ],
+
+  "grids": [
+    {
+      "name": "grdBargeSearch",
+      "type": "UltraGrid",
+      "uniqueIdentifier": "BargeID",
+      "dataSource": "BusinessLogic.Lists.BargeSearch.GetList",
+      "selectionMode": "Extended",
+      "allowMultiSelect": true,
+      "defaultSort": [
+        {
+          "column": "BargeNum",
+          "direction": "Ascending"
+        }
+      ],
+      "columns": [
+        {
+          "key": "BargeNum",
+          "header": "Barge",
+          "dataType": "String",
+          "width": 70,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 0
+        },
+        {
+          "key": "HullType",
+          "header": "Hull",
+          "dataType": "String",
+          "width": 43,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 1
+        },
+        {
+          "key": "Status",
+          "header": "Status",
+          "dataType": "String",
+          "width": 57,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 2
+        },
+        {
+          "key": "LocationName",
+          "header": "Location",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 3
+        },
+        {
+          "key": "LocationRiver",
+          "header": "River",
+          "dataType": "String",
+          "width": 45,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 4
+        },
+        {
+          "key": "LocationMile",
+          "header": "Mile",
+          "dataType": "Decimal",
+          "width": 47,
+          "alignment": "Right",
+          "sortable": true,
+          "filterable": true,
+          "customComparer": "NumericSortComparer",
+          "position": 5
+        },
+        {
+          "key": "TierName",
+          "header": "Tier",
+          "dataType": "String",
+          "width": 96,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 6
+        },
+        {
+          "key": "TierXY",
+          "header": "Tier Pos",
+          "dataType": "String",
+          "width": 60,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 7
+        },
+        {
+          "key": "FreightCustomer",
+          "header": "Freight Customer",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 8,
+          "visibilityCondition": "isFreightActive"
+        },
+        {
+          "key": "ContractNumber",
+          "header": "Contract #",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 9,
+          "visibilityCondition": "isFreightActive"
+        },
+        {
+          "key": "PurchaseOrderNum",
+          "header": "PO #",
+          "dataType": "String",
+          "width": 80,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 10,
+          "visibilityCondition": "isFreightActive"
+        },
+        {
+          "key": "FreightStatus",
+          "header": "Freight Status",
+          "dataType": "String",
+          "width": 84,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 11,
+          "visibilityCondition": "isFreightActive"
+        },
+        {
+          "key": "FreightOrigin",
+          "header": "Freight Origin",
+          "dataType": "String",
+          "width": 95,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 12,
+          "visibilityCondition": "isFreightActive"
+        },
+        {
+          "key": "FreightDestination",
+          "header": "Freight Destination",
+          "dataType": "String",
+          "width": 120,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 13,
+          "visibilityCondition": "isFreightActive"
+        },
+        {
+          "key": "Destination",
+          "header": "Destination",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 14
+        },
+        {
+          "key": "ConsignLocation",
+          "header": "Consigned To",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 15
+        },
+        {
+          "key": "ConsignedShip",
+          "header": "Consigned Ship",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 16
+        },
+        {
+          "key": "ShipHold",
+          "header": "Ship Hold",
+          "dataType": "String",
+          "width": 65,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 17
+        },
+        {
+          "key": "IsOnOrder",
+          "header": "On Order",
+          "dataType": "Boolean",
+          "width": 65,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 18
+        },
+        {
+          "key": "OnOrderScheduleDateTime",
+          "header": "On Order Schedule",
+          "dataType": "DateTime",
+          "width": 113,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 19,
+          "hidden": true,
+          "excludeFromColumnChooser": false
+        },
+        {
+          "key": "OnOrderTripNumber",
+          "header": "Trip #",
+          "dataType": "Integer",
+          "width": 50,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "customComparer": "NumericSortComparer",
+          "position": 20
+        },
+        {
+          "key": "IsAwaitingPickup",
+          "header": "Pickup",
+          "dataType": "Boolean",
+          "width": 52,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 21
+        },
+        {
+          "key": "AwaitingPickupReadyDateTime",
+          "header": "Pickup Schedule",
+          "dataType": "DateTime",
+          "width": 113,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 22,
+          "hidden": true,
+          "excludeFromColumnChooser": false
+        },
+        {
+          "key": "SizeCategory",
+          "header": "Size",
+          "dataType": "String",
+          "width": 60,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 23
+        },
+        {
+          "key": "BargeDimensions",
+          "header": "Dimensions",
+          "dataType": "String",
+          "width": 85,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 24
+        },
+        {
+          "key": "BargeType",
+          "header": "Barge Type",
+          "dataType": "String",
+          "width": 85,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 25
+        },
+        {
+          "key": "CoverType",
+          "header": "Cover Type",
+          "dataType": "String",
+          "width": 70,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 26
+        },
+        {
+          "key": "CoverConfig",
+          "header": "Cover",
+          "dataType": "String",
+          "width": 50,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 27
+        },
+        {
+          "key": "LoadStatus",
+          "header": "Load Status",
+          "dataType": "String",
+          "width": 77,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 28
+        },
+        {
+          "key": "IsDefaultTons",
+          "header": "DQ - Default Quantity",
+          "dataType": "Boolean",
+          "width": 25,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 29,
+          "visibilityCondition": "isFreightActive AND Lists.GlobalSettingList.EnableUseOfDefaultTonnage"
+        },
+        {
+          "key": "SurveyTons",
+          "header": "Quantity",
+          "dataType": "Decimal",
+          "width": 66,
+          "alignment": "Right",
+          "sortable": true,
+          "filterable": true,
+          "customComparer": "NumericSortComparer",
+          "position": 30,
+          "visibilityCondition": "_IsCommodityInfoCustomizationActive"
+        },
+        {
+          "key": "CargoHandlingStatus",
+          "header": "Cargo Status",
+          "dataType": "String",
+          "width": 113,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 31,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "Cargo",
+          "header": "Cargo",
+          "dataType": "String",
+          "width": 113,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 32,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "CargoCustomer",
+          "header": "Cargo Customer",
+          "dataType": "String",
+          "width": 113,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 33,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "SurveyTons",
+          "header": "Tonnage",
+          "dataType": "Decimal",
+          "width": 66,
+          "alignment": "Right",
+          "sortable": true,
+          "filterable": true,
+          "customComparer": "NumericSortComparer",
+          "position": 34,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "IsHeadBarge",
+          "header": "HB - Head Barge",
+          "dataType": "Boolean",
+          "width": 27,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 35,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "HasWaterInCargoBox",
+          "header": "WA - Water",
+          "dataType": "Boolean",
+          "width": 27,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 36,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "IsRakeDown",
+          "header": "RD - Rake Down",
+          "dataType": "Boolean",
+          "width": 27,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 37,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "IsHeavy",
+          "header": "HE - Heavy",
+          "dataType": "Boolean",
+          "width": 27,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 38,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "Commodity",
+          "header": "Commodity",
+          "dataType": "String",
+          "width": 75,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 39
+        },
+        {
+          "key": "DamageLevel",
+          "header": "Damage Level",
+          "dataType": "String",
+          "width": 90,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 40,
+          "formatting": "Cell color based on BargeTokenMapList damage level colors"
+        },
+        {
+          "key": "CleanStatus",
+          "header": "Clean Status",
+          "dataType": "String",
+          "width": 83,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 41,
+          "hidden": true,
+          "excludeFromColumnChooser": false
+        },
+        {
+          "key": "RepairStatus",
+          "header": "Repair Status",
+          "dataType": "String",
+          "width": 85,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 42,
+          "hidden": true,
+          "excludeFromColumnChooser": false
+        },
+        {
+          "key": "IsLeaker",
+          "header": "Leaker",
+          "dataType": "Boolean",
+          "width": 53,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 43,
+          "hidden": true,
+          "excludeFromColumnChooser": false
+        },
+        {
+          "key": "IsOnHold",
+          "header": "Hold",
+          "dataType": "Boolean",
+          "width": 45,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "position": 44,
+          "hidden": true,
+          "excludeFromColumnChooser": false
+        },
+        {
+          "key": "ScheduleInLoc",
+          "header": "Scheduled In",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 45
+        },
+        {
+          "key": "EstimatedArrivalDateTime",
+          "header": "Schedule In ETA",
+          "dataType": "DateTime",
+          "width": 113,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 46,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "PositionUpdatedDateTime",
+          "header": "Position Updated",
+          "dataType": "DateTime",
+          "width": 113,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 47,
+          "visibilityCondition": "isTerminalActive"
+        },
+        {
+          "key": "ScheduleOutLoc",
+          "header": "Scheduled Out",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 48
+        },
+        {
+          "key": "Customer",
+          "header": "Operator",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 49
+        },
+        {
+          "key": "TicketCustomer",
+          "header": "Ticket Customer",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 50
+        },
+        {
+          "key": "Instructions",
+          "header": "Instructions",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 51
+        },
+        {
+          "key": "CustomerComment",
+          "header": "Customer Comment",
+          "dataType": "String",
+          "width": 120,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 52
+        },
+        {
+          "key": "TicketID",
+          "header": "Ticket",
+          "dataType": "Integer",
+          "width": 60,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "customComparer": "NumericSortComparer",
+          "position": 53
+        },
+        {
+          "key": "TicketStatus",
+          "header": "Ticket Status",
+          "dataType": "String",
+          "width": 84,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 54,
+          "hidden": true,
+          "excludeFromColumnChooser": false
+        },
+        {
+          "key": "LastEventDateTime",
+          "header": "Last Event",
+          "dataType": "DateTime",
+          "width": 113,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "position": 55
+        },
+        {
+          "key": "CrossCharterCode",
+          "header": "Cross Charter Code",
+          "dataType": "String",
+          "hidden": true,
+          "note": "Used for row background color formatting"
+        },
+        {
+          "key": "NewCargoTransferPossible",
+          "header": "New Cargo Transfer Possible",
+          "dataType": "Boolean",
+          "hidden": true,
+          "note": "Used to enable/disable New Cargo Transfer button"
+        }
+      ],
+      "events": [
+        "InitializeRow",
+        "DoubleClick",
+        "AfterSelectChange"
+      ],
+      "formatting": {
+        "crossCharterCTC": {
+          "condition": "CrossCharterCode = CrossCharterBargeBackColorCTC",
+          "backColor": "From GlobalSettings.CrossCharterBargeBackColorCTC"
+        },
+        "crossCharterRTD": {
+          "condition": "CrossCharterCode = CrossCharterBargeBackColorRTD",
+          "backColor": "From GlobalSettings.CrossCharterBargeBackColorRTD"
+        },
+        "damageLevel": {
+          "condition": "DamageLevel is not empty",
+          "foreColor": "From BargeTokenMapList TextColor",
+          "backColor": "From BargeTokenMapList BackColor"
+        }
+      }
+    }
+  ],
+
+  "validation": {
+    "rules": [
+      {
+        "control": "txtTicketID",
+        "rule": "Must be valid Int32",
+        "validationType": "Int32"
+      },
+      {
+        "control": "txtStartMile",
+        "rule": "Must be valid Decimal",
+        "validationType": "Decimal"
+      },
+      {
+        "control": "txtEndMile",
+        "rule": "Must be valid Decimal",
+        "validationType": "Decimal"
+      }
+    ]
+  },
+
+  "eventHandlers": {
+    "btnFind_Click": "Executes search using RefreshList(True) to select first row",
+    "btnReset_Click": "Clears all search criteria to default values via ResetControls()",
+    "grpMoreSearchOptions_ExpandedStateChanged": "Toggles advanced search panel, adjusts grid top position",
+    "cboFacilityLocationID_AfterSortChange": "Toggles between ConsignFacilities and AllFacilities lists",
+    "cboBoatSearchType_ValueChanged": "Enables/disables cboBoatLocationID based on selection",
+    "cboFacilitySearchType_ValueChanged": "Enables/disables cboFacilityLocationID based on selection",
+    "cboShipSearchType_ValueChanged": "Enables/disables cboShipLocationID based on selection",
+    "cboEquipmentType_ValueChanged": "Auto-unchecks chkOpenTicketsOnly when 'Fleet-owned' selected",
+    "grdBargeSearch_InitializeRow": "Applies cross-charter row coloring and damage level cell coloring",
+    "ValidatorExtender_MessageSet": "Displays validation messages on main form status bar",
+    "pnlBargeSearch_HandleCreated": "Initializes form controls and restores grid settings",
+    "pnlBargeSearch_HandleDestroyed": "Saves grid settings to database"
+  },
+
+  "searchLogic": {
+    "method": "BusinessLogic.Lists.BargeSearch.GetList",
+    "parameters": [
+      "_SelectedFleetID",
+      "txtBargeNum.Text.Trim",
+      "cboHullType.Value",
+      "cboCoverType.Value",
+      "cboOperatorID.Value",
+      "cboCustomerID.Value",
+      "chkActiveOnly.Checked",
+      "txtTicketID.Text.Trim",
+      "cboLoadStatus.Value",
+      "cboStatus.Value",
+      "chkOpenTicketsOnly.Checked",
+      "cboEquipmentType.Value",
+      "isInTow",
+      "isScheduledIn",
+      "isScheduledOut",
+      "boatLocationID",
+      "isAtFacility",
+      "isConsignedToFacility",
+      "isDestinationIn",
+      "isDestinationOut",
+      "isOnOrderToFacility",
+      "facilityLocationID",
+      "isConsignedToShip",
+      "isOnOrderToShip",
+      "shipLocationID",
+      "txtCoastGuardNum.Text.Trim",
+      "cboSizeCategory.Value",
+      "cboRiver.Value",
+      "txtStartMile.Text.Trim",
+      "txtEndMile.Text.Trim",
+      "txtContractNumber.Text.Trim",
+      "cboCommodityID.Value"
+    ]
+  },
+
+  "publicMethods": [
+    {
+      "name": "SelectedBargeHasTicket",
+      "returnType": "Boolean",
+      "purpose": "Returns true if selected barge has a valid ticket ID"
+    },
+    {
+      "name": "CloseTickets",
+      "returnType": "void",
+      "purpose": "Closes selected barge tickets with confirmation dialog"
+    }
+  ],
+
+  "publicProperties": [
+    {
+      "name": "NewCargoTransferPossible",
+      "type": "Boolean",
+      "readonly": true,
+      "purpose": "Indicates if New Cargo Transfer button can be enabled for selected row"
+    },
+    {
+      "name": "CargoTransferList",
+      "type": "DataTable",
+      "readonly": true,
+      "purpose": "Returns cargo transfer list for selected barge ticket"
+    }
+  ],
+
+  "fleetBehavior": {
+    "onChangeOfFleet": "Reloads cboFacilityLocationID combo, clears grid, updates damage level colors"
+  },
+
+  "notes": [
+    "Form implements IBaseSearch interface for integration with main MDI container",
+    "Grid supports extended multi-row selection",
+    "Row background colors indicate cross-charter status (CTC/RTD)",
+    "Damage level cell colors are dynamically applied from BargeTokenMapList",
+    "Advanced search fields are in collapsible expandable group box",
+    "Some columns are conditionally visible based on license flags (Terminal, Freight)",
+    "Facility location combo supports toggle between ConsignFacilities and AllFacilities via header click",
+    "Search type combos (Boat/Facility/Ship) enable/disable their associated location combos",
+    "txtBargeNum uses 'starts with' search, txtTicketID and txtCoastGuardNum use 'exact match'",
+    "txtContractNumber uses 'contains' search",
+    "Mile range search uses txtStartMile (>=) and txtEndMile (<=)",
+    "Grid settings are saved/restored per user via MyAppSettingHelper",
+    "ValidatorExtender handles field validation for numeric fields"
+  ]
+}

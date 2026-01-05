@@ -1,0 +1,222 @@
+{
+  "entity": "BargeCondition",
+  "extractionDate": "2025-12-19",
+  "extractionSource": "VB.NET Legacy Application",
+  "formValidation": {
+    "method": "AreFieldsValid",
+    "rules": [],
+    "notes": "No form-level validation (AreFieldsValid) method found in UI layer for BargeConditions. This entity appears to be primarily managed through business object validation."
+  },
+  "businessValidation": {
+    "method": "CheckBusinessRules",
+    "location": "BargeConditionBase.vb:215-229",
+    "rules": [
+      {
+        "ruleName": "NoteRequired",
+        "property": "Note",
+        "field": "p_Note",
+        "condition": "String.IsNullOrEmpty(p_Note)",
+        "message": "Note is required",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "sourceCode": "BrokenRules.Assert(p_dispNote & cIsRequiredName, p_dispNote & cIsRequiredDesc, String.IsNullOrEmpty(p_Note))",
+        "location": "BargeConditionBase.vb:221-222"
+      },
+      {
+        "ruleName": "NoteMaxLength",
+        "property": "Note",
+        "field": "p_Note",
+        "condition": "(p_Note.Length > MaxLength.Note)",
+        "message": "Note exceeds maximum length of 500.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "maxLength": 500,
+        "sourceCode": "BrokenRules.Assert(p_dispNote & cMaxLengthName, p_dispNote & cMaxLengthDesc & MaxLength.Note & \".\", (p_Note.Length > MaxLength.Note))",
+        "location": "BargeConditionBase.vb:223-225"
+      }
+    ]
+  },
+  "fieldConstraints": {
+    "BargeConditionID": {
+      "type": "Int32",
+      "isPrimaryKey": true,
+      "isRequired": true,
+      "isIdentity": true,
+      "validation": []
+    },
+    "BargeID": {
+      "type": "Int32",
+      "isForeignKey": true,
+      "isRequired": true,
+      "validation": [],
+      "notes": "Foreign key to Barge table. No explicit validation rules in CheckBusinessRules, but property triggers validation on change."
+    },
+    "Note": {
+      "type": "String",
+      "isRequired": true,
+      "maxLength": 500,
+      "databaseType": "VarChar(500)",
+      "validation": [
+        {
+          "type": "Required",
+          "message": "Note is required"
+        },
+        {
+          "type": "MaxLength",
+          "maxLength": 500,
+          "message": "Note exceeds maximum length of 500."
+        }
+      ]
+    },
+    "EmailSentDateTime": {
+      "type": "SmartDate",
+      "databaseType": "DateTime",
+      "isRequired": false,
+      "allowNull": true,
+      "validation": [],
+      "notes": "Tracks when email notification was sent for this condition report"
+    }
+  },
+  "childCollectionValidation": {
+    "BargeConditionPhotoes": {
+      "collectionType": "BargeConditionPhotoes",
+      "itemType": "BargeConditionPhoto",
+      "relationship": "One-to-Many",
+      "validationMethod": "Validated through IsValid property which checks collection's IsValid",
+      "rules": [],
+      "notes": "Child collection of photos attached to this condition report. No specific business rules in BargeConditionPhoto.CheckBusinessRules."
+    }
+  },
+  "modernValidationMapping": {
+    "dataAnnotations": {
+      "description": "Basic validation can be implemented with Data Annotations",
+      "examples": [
+        {
+          "property": "Note",
+          "annotations": [
+            "[Required(ErrorMessage = \"Note is required\")]",
+            "[StringLength(500, ErrorMessage = \"Note exceeds maximum length of 500.\")]"
+          ]
+        },
+        {
+          "property": "BargeID",
+          "annotations": [
+            "[Required]"
+          ]
+        }
+      ]
+    },
+    "fluentValidation": {
+      "description": "Recommended approach for cleaner, more maintainable validation rules",
+      "className": "BargeConditionValidator",
+      "examples": [
+        {
+          "rule": "Note validation",
+          "code": "RuleFor(x => x.Note)\n    .NotEmpty()\n    .WithMessage(\"Note is required\")\n    .MaximumLength(500)\n    .WithMessage(\"Note exceeds maximum length of 500.\");"
+        },
+        {
+          "rule": "BargeID validation",
+          "code": "RuleFor(x => x.BargeID)\n    .GreaterThan(0)\n    .WithMessage(\"BargeID is required\");"
+        }
+      ]
+    },
+    "clientSideValidation": {
+      "framework": "jquery.validate",
+      "description": "Client-side validation using jQuery Validation and unobtrusive validation",
+      "examples": [
+        {
+          "field": "Note",
+          "rules": {
+            "required": true,
+            "maxlength": 500
+          },
+          "messages": {
+            "required": "Note is required",
+            "maxlength": "Note exceeds maximum length of 500."
+          }
+        }
+      ]
+    }
+  },
+  "validationPatterns": {
+    "requiredFields": [
+      {
+        "field": "Note",
+        "pattern": "String.IsNullOrEmpty check",
+        "modernEquivalent": "[Required] or .NotEmpty()"
+      }
+    ],
+    "stringLengthValidations": [
+      {
+        "field": "Note",
+        "maxLength": 500,
+        "pattern": "p_Note.Length > MaxLength.Note",
+        "modernEquivalent": "[StringLength(500)] or .MaximumLength(500)"
+      }
+    ],
+    "conditionalValidations": [],
+    "crossFieldValidations": [],
+    "databaseValidations": []
+  },
+  "validationTriggers": {
+    "propertySetters": {
+      "description": "Validation is triggered when property setters are called",
+      "properties": [
+        {
+          "property": "BargeID",
+          "trigger": "CheckBusinessRules(p_dispBargeID)",
+          "location": "BargeConditionBase.vb:107"
+        },
+        {
+          "property": "Note",
+          "trigger": "CheckBusinessRules(p_dispNote)",
+          "location": "BargeConditionBase.vb:122"
+        },
+        {
+          "property": "EmailSentDateTime",
+          "trigger": "CheckBusinessRules(p_dispEmailSentDateTime)",
+          "location": "BargeConditionBase.vb:137"
+        }
+      ]
+    },
+    "initialization": {
+      "description": "All business rules checked during object initialization",
+      "trigger": "CheckBusinessRules(String.Empty)",
+      "location": "BargeConditionBase.vb:204"
+    }
+  },
+  "errorMessages": {
+    "verbatim": [
+      {
+        "field": "Note",
+        "message": "Note is required",
+        "type": "Required"
+      },
+      {
+        "field": "Note",
+        "message": "Note exceeds maximum length of 500.",
+        "type": "MaxLength"
+      }
+    ]
+  },
+  "validationNotes": [
+    "BargeCondition has minimal validation rules - primarily focused on the Note field",
+    "No form-level validation found in UI layer; validation handled entirely in business object",
+    "The entity does not override CheckBusinessRules in the custom class (BargeCondition.vb), only uses base class validation",
+    "Child collection BargeConditionPhotoes has no custom validation rules in CheckBusinessRules",
+    "EmailSentDateTime is nullable and has no validation constraints",
+    "BargeID has no explicit business rules but is required at the database level",
+    "The validation framework uses BrokenRules.Assert pattern which inverts the condition (true = broken)",
+    "All validation is server-side; no client-side validation code found in legacy system"
+  ],
+  "recommendations": [
+    "Implement FluentValidation for server-side validation in the modern application",
+    "Add client-side validation using jquery.validate with unobtrusive validation attributes",
+    "Consider adding validation for BargeID to ensure valid foreign key references",
+    "Add validation to prevent duplicate condition reports for the same barge on the same date (if business rules require)",
+    "Consider adding conditional validation for EmailSentDateTime (e.g., must be in the past if set)",
+    "Validate that at least one photo is attached to the condition report (if required by business rules)",
+    "Implement validation to ensure Note contains meaningful content (not just whitespace)",
+    "Add maximum length validation to client-side to prevent unnecessary server roundtrips"
+  ]
+}

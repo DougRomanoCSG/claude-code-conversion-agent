@@ -1,0 +1,52 @@
+@model VendorEditViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Portal Settings</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="form-check">
+                    <input asp-for="Vendor.EnablePortal" class="form-check-input" type="checkbox" id="chkEnablePortal" />
+                    <label asp-for="Vendor.EnablePortal" class="form-check-label"></label>
+                </div>
+                <small class="text-muted">Enable portal access for this vendor's contacts</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3" id="portalGroupsSection">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Portal User Groups</h5>
+        <div>
+            <button type="button" class="btn btn-sm btn-primary" id="btnAddPortalGroup">
+                <i class="fas fa-plus"></i> Add Group
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <table id="portalGroupsTable" class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th style="width: 100px;">Actions</th>
+                    <th>Name</th>
+                    <th class="text-center">Event History Days</th>
+                    <th class="text-center">Limit Events</th>
+                    <th class="text-center">Limit Destinations</th>
+                    <th class="text-center">Limit Customers</th>
+                    <th class="text-center">Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="7" class="text-center text-muted">Portal groups will be loaded dynamically</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="alert alert-info mt-3" role="alert">
+            <i class="fas fa-info-circle"></i> Portal groups must be managed separately. Save the vendor first before adding portal groups.
+        </div>
+    </div>
+</div>

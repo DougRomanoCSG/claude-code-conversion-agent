@@ -1,0 +1,283 @@
+{
+  "entity": "BoatStatus",
+  "legacy": {
+    "formName": "frmBoatStatus",
+    "subsystem": "frmBoatSearch",
+    "description": "Boat status maintenance log form for tracking boat status changes, division/facility changes, and boat role changes",
+    "securityButtons": [
+      {
+        "button": "btnClose",
+        "type": "Cancel",
+        "legacyPermission": "None",
+        "description": "Close the form"
+      },
+      {
+        "button": "btnSetEdit",
+        "type": "Submit",
+        "legacyPermission": "CanModify",
+        "description": "Submit/save boat status changes"
+      },
+      {
+        "button": "btnCancelEdit",
+        "type": "CancelEdit",
+        "legacyPermission": "None",
+        "description": "Cancel editing current record"
+      },
+      {
+        "button": "btnAdd",
+        "type": "Add",
+        "legacyPermission": "CanCreate",
+        "description": "Add new boat status/maintenance log entry",
+        "toolbarKey": "Add"
+      },
+      {
+        "button": "btnModify",
+        "type": "Open",
+        "legacyPermission": "CanView",
+        "description": "Modify existing boat status/maintenance log entry",
+        "toolbarKey": "Modify"
+      },
+      {
+        "button": "btnRemove",
+        "type": "Remove",
+        "legacyPermission": "CanDelete",
+        "description": "Remove boat status/maintenance log entry",
+        "toolbarKey": "Remove"
+      },
+      {
+        "button": "btnExport",
+        "type": "Open",
+        "legacyPermission": "CanView",
+        "description": "Export boat status/maintenance log list to file",
+        "toolbarKey": "Export"
+      }
+    ],
+    "authorizationPattern": {
+      "method": "ControlAuthorization.ToolbarButtonCanBeEnabled",
+      "location": "SetToolState method (lines 418-429)",
+      "description": "Uses CSG Windows Forms Security framework with ButtonType enumeration"
+    }
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "description": "API endpoints require API Key authentication configured in appsettings.json",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/boat/{boatId}/maintenance-logs",
+          "action": "GetBoatMaintenanceLogs",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BoatStatusView",
+          "description": "Retrieve boat maintenance log history"
+        },
+        {
+          "method": "GET",
+          "route": "api/boat-maintenance-log/{id}",
+          "action": "GetBoatMaintenanceLog",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BoatStatusView",
+          "description": "Retrieve specific maintenance log entry"
+        },
+        {
+          "method": "POST",
+          "route": "api/boat-maintenance-log",
+          "action": "CreateBoatMaintenanceLog",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BoatStatusModify",
+          "description": "Create new boat maintenance log entry"
+        },
+        {
+          "method": "PUT",
+          "route": "api/boat-maintenance-log/{id}",
+          "action": "UpdateBoatMaintenanceLog",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BoatStatusModify",
+          "description": "Update existing boat maintenance log entry"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/boat-maintenance-log/{id}",
+          "action": "DeleteBoatMaintenanceLog",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BoatStatusModify",
+          "description": "Delete boat maintenance log entry (soft delete)"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "description": "UI uses OIDC (Azure AD) in production, DevelopmentAutoSignInMiddleware in development",
+      "permissions": [
+        {
+          "name": "BoatStatusView",
+          "enumValue": "AuthPermissions.BoatStatusView",
+          "description": "View boat status and maintenance log entries",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "List",
+            "Details",
+            "Export"
+          ],
+          "uiElements": [
+            "View maintenance log grid",
+            "View maintenance log details",
+            "Export button (read-only access)"
+          ]
+        },
+        {
+          "name": "BoatStatusModify",
+          "enumValue": "AuthPermissions.BoatStatusModify",
+          "description": "Create, update, and delete boat status and maintenance log entries",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Create",
+            "Edit",
+            "Delete"
+          ],
+          "uiElements": [
+            "Add button",
+            "Modify button",
+            "Remove button",
+            "Set/Submit button",
+            "All edit form fields"
+          ]
+        }
+      ],
+      "buttonSecurity": [
+        {
+          "button": "Add",
+          "requiredPermission": "BoatStatusModify",
+          "visibilityCondition": "User has BoatStatusModify permission",
+          "enabledCondition": "Not currently editing a child record"
+        },
+        {
+          "button": "Modify",
+          "requiredPermission": "BoatStatusModify",
+          "visibilityCondition": "User has BoatStatusModify permission",
+          "enabledCondition": "Row selected AND not currently editing"
+        },
+        {
+          "button": "Remove",
+          "requiredPermission": "BoatStatusModify",
+          "visibilityCondition": "User has BoatStatusModify permission",
+          "enabledCondition": "Row selected AND not currently editing"
+        },
+        {
+          "button": "Export",
+          "requiredPermission": "BoatStatusView",
+          "visibilityCondition": "Always visible",
+          "enabledCondition": "At least one row in grid AND not currently editing"
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BoatStatusView",
+          "description": "View boat status and maintenance logs"
+        },
+        {
+          "name": "BoatStatusModify",
+          "description": "Create, update, and delete boat status and maintenance logs"
+        }
+      ]
+    },
+    "implementation": {
+      "apiController": {
+        "name": "BoatMaintenanceLogController",
+        "baseClass": "ApiControllerBase",
+        "attributes": [
+          "[ApiController]",
+          "[ApiKey]"
+        ],
+        "route": "api/boat-maintenance-log"
+      },
+      "uiController": {
+        "name": "BoatStatusController",
+        "baseClass": "AppController",
+        "attributes": [
+          "[Authorize]"
+        ],
+        "actions": [
+          {
+            "name": "Index",
+            "attributes": [
+              "[Authorize(Policy = \"BoatStatusView\")]"
+            ]
+          },
+          {
+            "name": "Create",
+            "attributes": [
+              "[Authorize(Policy = \"BoatStatusModify\")]"
+            ]
+          },
+          {
+            "name": "Edit",
+            "attributes": [
+              "[Authorize(Policy = \"BoatStatusModify\")]"
+            ]
+          },
+          {
+            "name": "Delete",
+            "attributes": [
+              "[Authorize(Policy = \"BoatStatusModify\")]"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "businessRules": {
+    "maintenanceTypes": [
+      {
+        "type": "Boat Status",
+        "fields": [
+          "StartDateTime",
+          "Status",
+          "Note"
+        ],
+        "description": "Records boat status changes"
+      },
+      {
+        "type": "Change Division/Facility",
+        "fields": [
+          "StartDateTime",
+          "Division",
+          "PortFacilityID",
+          "Note"
+        ],
+        "description": "Records division and facility changes"
+      },
+      {
+        "type": "Change Boat Role",
+        "fields": [
+          "StartDateTime",
+          "BoatRoleID",
+          "Note"
+        ],
+        "description": "Records boat role changes"
+      }
+    ],
+    "validationRules": [
+      "Maintenance type cannot be changed after record creation",
+      "Only fields relevant to selected maintenance type are enabled and saved",
+      "StartDateTime is required for all maintenance types",
+      "Unused fields are cleared before saving based on maintenance type"
+    ]
+  },
+  "notes": [
+    "BoatStatus is a child detail form accessed from BoatSearch/BoatLocation",
+    "Uses SubSystem.frmBoatSearch for security context (parent form)",
+    "Form manages BoatMaintenanceLog child collection of BoatLocation",
+    "Remove operation is soft delete (maintains audit trail)",
+    "Export requires read-only View permission (ButtonType.Open)",
+    "Maintenance type selection controls which fields are enabled/required",
+    "Form implements IBaseDetailEdit interface from CSG framework"
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "entity": "BargeDraft",
+  "formName": "frmBargeDraft",
+  "overallStatus": "completed",
+  "startTime": "2025-12-18T19:59:11.306Z",
+  "totalSteps": 9,
+  "completedSteps": 9,
+  "failedSteps": 0,
+  "skippedSteps": 0,
+  "steps": [
+    {
+      "stepNumber": 1,
+      "name": "Form Structure Analyzer (frmBargeDraft)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract frmBargeDraft UI components",
+      "status": "completed",
+      "startTime": "2025-12-18T19:59:11.307Z",
+      "outputFile": "form-structure.json",
+      "endTime": "2025-12-18T20:02:02.945Z",
+      "durationMs": 171638,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 2,
+      "name": "Business Logic Extractor",
+      "script": "business-logic-extractor.ts",
+      "description": "Extract business rules and validation",
+      "status": "completed",
+      "startTime": "2025-12-18T20:02:02.947Z",
+      "outputFile": "business-logic.json",
+      "endTime": "2025-12-18T20:06:02.482Z",
+      "durationMs": 239554,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 3,
+      "name": "Data Access Pattern Analyzer",
+      "script": "data-access-analyzer.ts",
+      "description": "Extract stored procedures and queries",
+      "status": "completed",
+      "startTime": "2025-12-18T20:06:02.503Z",
+      "outputFile": "data-access.json",
+      "endTime": "2025-12-18T20:09:18.408Z",
+      "durationMs": 195917,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 4,
+      "name": "Security & Authorization Extractor",
+      "script": "security-extractor.ts",
+      "description": "Extract permissions and authorization",
+      "status": "completed",
+      "startTime": "2025-12-18T20:09:18.420Z",
+      "outputFile": "security.json",
+      "endTime": "2025-12-18T20:13:41.259Z",
+      "durationMs": 262854,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 5,
+      "name": "UI Component Mapper",
+      "script": "ui-component-mapper.ts",
+      "description": "Map legacy controls to modern equivalents",
+      "status": "completed",
+      "startTime": "2025-12-18T20:13:41.275Z",
+      "outputFile": "ui-mapping.json",
+      "endTime": "2025-12-18T20:17:10.281Z",
+      "durationMs": 209006,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 6,
+      "name": "Form Workflow Analyzer",
+      "script": "form-workflow-analyzer.ts",
+      "description": "Extract user flows and state management",
+      "status": "completed",
+      "startTime": "2025-12-18T20:17:10.282Z",
+      "outputFile": "workflow.json",
+      "endTime": "2025-12-18T20:21:37.231Z",
+      "durationMs": 266961,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 7,
+      "name": "Detail Form Tab Analyzer",
+      "script": "detail-tab-analyzer.ts",
+      "description": "Extract tab structure and related entities",
+      "status": "completed",
+      "startTime": "2025-12-18T20:21:37.244Z",
+      "outputFile": "tabs.json",
+      "endTime": "2025-12-18T20:24:17.664Z",
+      "durationMs": 160432,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 8,
+      "name": "Validation Rule Extractor",
+      "script": "validation-extractor.ts",
+      "description": "Extract all validation logic",
+      "status": "completed",
+      "startTime": "2025-12-18T20:24:17.679Z",
+      "outputFile": "validation.json",
+      "endTime": "2025-12-18T20:28:03.702Z",
+      "durationMs": 226036,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 9,
+      "name": "Related Entity Analyzer",
+      "script": "related-entity-analyzer.ts",
+      "description": "Extract entity relationships",
+      "status": "completed",
+      "startTime": "2025-12-18T20:28:03.718Z",
+      "outputFile": "related-entities.json",
+      "endTime": "2025-12-18T20:30:59.927Z",
+      "durationMs": 176209,
+      "exitCode": 0
+    }
+  ],
+  "childForms": [
+    "frmBrokenRules"
+  ],
+  "endTime": "2025-12-18T20:30:59.928Z",
+  "durationMs": 1908622
+}

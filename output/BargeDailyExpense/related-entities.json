@@ -1,0 +1,134 @@
+{
+  "parentEntity": "BargeDailyExpenseDate",
+  "relationships": [
+    {
+      "relatedEntity": "BargeDailyExpense",
+      "relationshipType": "OneToMany",
+      "parentProperty": "BargeDailyExpenses",
+      "childProperty": "BargeDailyExpenseDate",
+      "foreignKey": "BargeDailyExpenseDateID",
+      "cascadeDelete": true,
+      "gridName": "grdBargeDailyExpenses",
+      "gridColumns": [
+        {
+          "key": "SizeCategoryUnbound",
+          "header": "Size Category",
+          "type": "String",
+          "boundProperty": "SizeCategory",
+          "width": 100,
+          "alignment": "Left",
+          "editorType": "UltraCombo",
+          "validationList": "BargeSizeCategory",
+          "nullable": true
+        },
+        {
+          "key": "CoverTypeUnbound",
+          "header": "Cover Type",
+          "type": "String",
+          "boundProperty": "CoverType",
+          "width": 100,
+          "alignment": "Left",
+          "editorType": "UltraCombo",
+          "validationList": "CoverType",
+          "nullable": true
+        },
+        {
+          "key": "CoverSubTypeIDUnbound",
+          "header": "Sub Type",
+          "type": "String",
+          "boundProperty": "CoverSubTypeID",
+          "width": 100,
+          "alignment": "Left",
+          "editorType": "UltraCombo",
+          "validationList": "CoverSubType",
+          "nullable": true,
+          "dependsOn": "CoverType"
+        },
+        {
+          "key": "IsCharteredInUnbound",
+          "header": "Chartered-In",
+          "type": "Boolean",
+          "boundProperty": "IsCharteredIn",
+          "width": 100,
+          "alignment": "Center",
+          "editorType": "Checkbox",
+          "nullable": false
+        },
+        {
+          "key": "DailyExpenseUnbound",
+          "header": "Daily Expense",
+          "type": "Decimal",
+          "boundProperty": "DailyExpense",
+          "width": 100,
+          "alignment": "Right",
+          "editorType": "TextBox",
+          "format": "Currency",
+          "nullable": false
+        }
+      ],
+      "operations": {
+        "add": "ItemAdd",
+        "remove": "ItemRemove",
+        "modify": "InlineEdit"
+      },
+      "gridBehavior": {
+        "editMode": "InCell",
+        "updateMode": "OnCellChangeOrLostFocus",
+        "selectTypeRow": "Single",
+        "selectTypeCell": "Single",
+        "allowUpdate": true,
+        "unboundColumns": true,
+        "unboundColumnPattern": "BoundPropertyUnbound"
+      }
+    }
+  ],
+  "lookupRelationships": [
+    {
+      "property": "SizeCategory",
+      "lookupEntity": "ValidationList",
+      "lookupType": "BargeSizeCategory",
+      "displayProperty": "SizeCategory",
+      "required": false,
+      "maxLength": 15
+    },
+    {
+      "property": "CoverType",
+      "lookupEntity": "ValidationList",
+      "lookupType": "CoverType",
+      "displayProperty": "CoverType",
+      "required": false,
+      "maxLength": 3
+    },
+    {
+      "property": "CoverSubTypeID",
+      "lookupEntity": "CoverSubType",
+      "displayProperty": "CoverSubTypeName",
+      "required": false,
+      "dependsOn": "CoverType",
+      "notes": "CoverSubType combo is dynamically populated based on CoverType selection"
+    }
+  ],
+  "notes": [
+    "BargeDailyExpense is a child entity of BargeDailyExpenseDate",
+    "The form uses in-grid editing with unbound columns for editable fields",
+    "Unbound columns follow the pattern: {PropertyName}Unbound for display/editing",
+    "Bound columns (hidden) store the actual business object properties",
+    "Data transfer occurs in InitializeRow (bound to unbound) and AfterExitEditMode (unbound to bound)",
+    "CoverSubTypeID dropdown is dynamically filtered based on CoverType selection",
+    "When CoverType changes, CoverSubTypeID is automatically cleared",
+    "No separate Modify button - all editing is done directly in the grid cells",
+    "Grid supports Add and Remove operations via toolbar buttons"
+  ],
+  "modernDapperPattern": {
+    "entityClass": "BargeDailyExpense does NOT include child collections as properties",
+    "repositoryMethods": [
+      "Task<BargeDailyExpenseDate> GetByIdAsync(int id)",
+      "Task<IEnumerable<BargeDailyExpense>> GetExpensesAsync(int bargeDailyExpenseDateId)",
+      "Task<BargeDailyExpense> GetExpenseByIdAsync(int id)",
+      "Task<int> InsertExpenseAsync(BargeDailyExpense expense)",
+      "Task UpdateExpenseAsync(BargeDailyExpense expense)",
+      "Task DeleteExpenseAsync(int id)"
+    ],
+    "serviceLayerComposition": "Service layer loads parent and children separately, then composes into DTO"
+  }
+}

@@ -1,0 +1,566 @@
+{
+  "businessObject": "BargeTokenMap",
+  "baseClass": "BargeTokenMapBase",
+  "namespace": "BargeOps.Onshore.BusinessLogic",
+  "description": "Maps field names and field values to display types (Symbol/Color/Picture) for barge tracking and visualization. Used for visual representation of barge states and properties.",
+  "properties": [
+    {
+      "name": "BargeTokenMapID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "defaultValue": "0",
+      "description": "Primary key identifier for the barge token map entry",
+      "sourceFile": "BargeTokenMapBase.vb:94-98"
+    },
+    {
+      "name": "FleetID",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": false,
+      "defaultValue": "0",
+      "description": "Foreign key to Fleet - identifies which fleet this token map applies to",
+      "sourceFile": "BargeTokenMapBase.vb:111-123"
+    },
+    {
+      "name": "FieldName",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": "String.Empty",
+      "description": "Name of the field being mapped (e.g., 'Consign to')",
+      "sourceFile": "BargeTokenMapBase.vb:125-138"
+    },
+    {
+      "name": "FieldValue",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 200,
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": "String.Empty",
+      "description": "Value of the field being mapped - conditionally required (not required if marked for deletion)",
+      "sourceFile": "BargeTokenMapBase.vb:140-153"
+    },
+    {
+      "name": "DisplayType",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": "String.Empty",
+      "validValues": ["Color", "Picture", "Symbol"],
+      "description": "Type of display for this token map entry - determines which field (Symbol/Color/Picture) is required",
+      "sourceFile": "BargeTokenMapBase.vb:155-168"
+    },
+    {
+      "name": "SymbolValue",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 1,
+      "isNullable": true,
+      "defaultValue": "String.Empty",
+      "description": "Single character symbol to display - required when DisplayType is 'Symbol'",
+      "sourceFile": "BargeTokenMapBase.vb:170-183"
+    },
+    {
+      "name": "ColorPairID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "defaultValue": "String.Empty",
+      "description": "Foreign key to ColorPair - required when DisplayType is 'Color' (unless marked for deferred deletion)",
+      "sqlDbType": "Int",
+      "sourceFile": "BargeTokenMapBase.vb:185-198"
+    },
+    {
+      "name": "PictureID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "defaultValue": "String.Empty",
+      "description": "Foreign key to Picture - required when DisplayType is 'Picture'",
+      "sqlDbType": "Int",
+      "sourceFile": "BargeTokenMapBase.vb:200-213"
+    },
+    {
+      "name": "IsGenerated",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isNullable": false,
+      "defaultValue": "False",
+      "description": "Indicates if this token map entry was auto-generated",
+      "sourceFile": "BargeTokenMapBase.vb:215-228"
+    },
+    {
+      "name": "LocationType",
+      "type": "String",
+      "access": "ReadOnly",
+      "isNullable": true,
+      "description": "Additional field loaded from database for frmBargeTokenMap form - not persisted",
+      "sourceFile": "BargeTokenMap.vb:43-47,166-172"
+    },
+    {
+      "name": "DeferredDelete",
+      "type": "Boolean",
+      "access": "Friend",
+      "defaultValue": "False",
+      "description": "Friend property to control deferred deletion - allows marking/unmarking for deletion. Used by validation to control delete state without using base MarkDeleted method",
+      "sourceFile": "BargeTokenMap.vb:64-72"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "FieldNameRequired",
+      "property": "FieldName",
+      "condition": "String.IsNullOrEmpty(p_FieldName)",
+      "message": "FieldName is required.",
+      "severity": "Error",
+      "context": "Always",
+      "sourceFile": "BargeTokenMapBase.vb:287-293"
+    },
+    {
+      "ruleName": "FieldNameMaxLength",
+      "property": "FieldName",
+      "condition": "p_FieldName.Length > MaxLength.FieldName (50)",
+      "message": "FieldName exceeds maximum length of 50.",
+      "severity": "Error",
+      "context": "Always",
+      "sourceFile": "BargeTokenMapBase.vb:287-293"
+    },
+    {
+      "ruleName": "FieldValueRequired",
+      "property": "FieldValue",
+      "condition": "String.IsNullOrEmpty(p_FieldValue)",
+      "message": "FieldValue is required.",
+      "severity": "Error",
+      "context": "Always (base rule)",
+      "sourceFile": "BargeTokenMapBase.vb:295-301",
+      "notes": "Base class rule - overridden in derived class"
+    },
+    {
+      "ruleName": "FieldValueRequiredConditional",
+      "property": "FieldValue",
+      "condition": "String.IsNullOrEmpty(p_FieldValue) AndAlso (Not Me.DeferredDelete)",
+      "message": "FieldValue is required.",
+      "severity": "Error",
+      "context": "Only required when not marked for deferred deletion",
+      "sourceFile": "BargeTokenMap.vb:134-141",
+      "notes": "Overrides base class rule to allow empty FieldValue when object is marked for deletion"
+    },
+    {
+      "ruleName": "FieldValueMaxLength",
+      "property": "FieldValue",
+      "condition": "p_FieldValue.Length > MaxLength.FieldValue (200)",
+      "message": "FieldValue exceeds maximum length of 200.",
+      "severity": "Error",
+      "context": "Always",
+      "sourceFile": "BargeTokenMapBase.vb:295-301"
+    },
+    {
+      "ruleName": "DisplayTypeRequired",
+      "property": "DisplayType",
+      "condition": "String.IsNullOrEmpty(p_DisplayType)",
+      "message": "DisplayType is required.",
+      "severity": "Error",
+      "context": "Always",
+      "sourceFile": "BargeTokenMapBase.vb:303-309"
+    },
+    {
+      "ruleName": "DisplayTypeMaxLength",
+      "property": "DisplayType",
+      "condition": "p_DisplayType.Length > MaxLength.DisplayType (20)",
+      "message": "DisplayType exceeds maximum length of 20.",
+      "severity": "Error",
+      "context": "Always",
+      "sourceFile": "BargeTokenMapBase.vb:303-309"
+    },
+    {
+      "ruleName": "SymbolValueMaxLength",
+      "property": "SymbolValue",
+      "condition": "p_SymbolValue.Length > MaxLength.SymbolValue (1)",
+      "message": "SymbolValue exceeds maximum length of 1.",
+      "severity": "Error",
+      "context": "Always",
+      "sourceFile": "BargeTokenMapBase.vb:311-315"
+    },
+    {
+      "ruleName": "SymbolRequired",
+      "property": "SymbolValue",
+      "condition": "(p_DisplayType.ToLower() = 'symbol') AndAlso (p_SymbolValue = String.Empty)",
+      "message": "Symbol is required.",
+      "severity": "Error",
+      "context": "When DisplayType is 'Symbol'",
+      "sourceFile": "BargeTokenMap.vb:115-118"
+    },
+    {
+      "ruleName": "ColorRequired",
+      "property": "ColorPairID",
+      "condition": "((Not _DeferredDelete) AndAlso (p_DisplayType.ToLower() = 'color') AndAlso (p_ColorPairID = String.Empty))",
+      "message": "Color is required.",
+      "severity": "Error",
+      "context": "When DisplayType is 'Color' AND not marked for deferred deletion",
+      "sourceFile": "BargeTokenMap.vb:120-127",
+      "notes": "Special handling for ShipBerth/Arrive Ship form - ColorPairID not required when DeferredDelete is true, allowing object to be saved before deletion"
+    },
+    {
+      "ruleName": "PictureRequired",
+      "property": "PictureID",
+      "condition": "(p_DisplayType.ToLower() = 'picture') AndAlso (p_PictureID = String.Empty)",
+      "message": "Picture is required.",
+      "severity": "Error",
+      "context": "When DisplayType is 'Picture'",
+      "sourceFile": "BargeTokenMap.vb:129-132"
+    }
+  ],
+  "methods": {
+    "factory": [
+      {
+        "name": "NewBargeTokenMap",
+        "visibility": "Public Shared",
+        "returnType": "BargeTokenMap",
+        "parameters": [],
+        "description": "Creates a new parent BargeTokenMap instance with default values",
+        "sourceFile": "BargeTokenMapBase.vb:417-419"
+      },
+      {
+        "name": "NewBargeTokenMapAsChild",
+        "visibility": "Friend Shared",
+        "returnType": "BargeTokenMap",
+        "parameters": [],
+        "description": "Creates a new child BargeTokenMap instance",
+        "sourceFile": "BargeTokenMapBase.vb:422-424"
+      },
+      {
+        "name": "GetBargeTokenMap",
+        "visibility": "Public Shared",
+        "returnType": "BargeTokenMap",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Loads an existing parent BargeTokenMap by ID",
+        "sourceFile": "BargeTokenMapBase.vb:427-429"
+      },
+      {
+        "name": "GetBargeTokenMapChild",
+        "visibility": "Friend Shared",
+        "returnType": "BargeTokenMap",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Loads an existing child BargeTokenMap by ID",
+        "sourceFile": "BargeTokenMapBase.vb:432-434"
+      },
+      {
+        "name": "GetBargeTokenMapChild",
+        "visibility": "Friend Shared",
+        "returnType": "BargeTokenMap",
+        "parameters": [
+          {
+            "name": "dr",
+            "type": "SafeDataReader"
+          }
+        ],
+        "description": "Loads an existing child BargeTokenMap from a DataReader",
+        "sourceFile": "BargeTokenMapBase.vb:437-443"
+      },
+      {
+        "name": "DeleteBargeTokenMap",
+        "visibility": "Public Shared",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Deletes a parent BargeTokenMap by ID",
+        "sourceFile": "BargeTokenMapBase.vb:446-448"
+      }
+    ],
+    "initialization": [
+      {
+        "name": "Initialize",
+        "visibility": "Public Overrides",
+        "description": "Initializes object with default values and sets stored procedure names. Also overrides display property names for user-friendly error messages",
+        "sourceFile": "BargeTokenMap.vb:82-106",
+        "defaults": [
+          {
+            "property": "p_dispSymbolValue",
+            "value": "\"Symbol\""
+          },
+          {
+            "property": "p_dispColorPairID",
+            "value": "\"Color\""
+          },
+          {
+            "property": "p_dispPictureID",
+            "value": "\"Picture\""
+          }
+        ]
+      }
+    ],
+    "validation": [
+      {
+        "name": "CheckBusinessRules",
+        "visibility": "Public Overrides",
+        "parameters": [
+          {
+            "name": "PropertyName",
+            "type": "String"
+          }
+        ],
+        "description": "Validates business rules for conditional requirements based on DisplayType and DeferredDelete state",
+        "sourceFile": "BargeTokenMap.vb:108-143"
+      }
+    ],
+    "dataAccess": [
+      {
+        "name": "LoadProperties",
+        "visibility": "Protected Overrides",
+        "parameters": [
+          {
+            "name": "dr",
+            "type": "SafeDataReader"
+          }
+        ],
+        "description": "Loads properties from database DataReader, including additional LocationType field for UI",
+        "sourceFile": "BargeTokenMap.vb:166-173"
+      },
+      {
+        "name": "Update",
+        "visibility": "Protected Friend Overrides",
+        "parameters": [
+          {
+            "name": "tr",
+            "type": "SqlTransaction"
+          },
+          {
+            "name": "parent",
+            "type": "BusinessLogicBase"
+          }
+        ],
+        "description": "Handles insert/update/delete to database. Sets MarkDeleted state based on DeferredDelete property before calling base Update",
+        "sourceFile": "BargeTokenMap.vb:184-192",
+        "notes": "Custom logic: If DeferredDelete is true, calls MarkDeleted() before base.Update"
+      }
+    ],
+    "businessLogic": [
+      {
+        "name": "MarkDeleted",
+        "visibility": "Private Shadows",
+        "description": "Shadows base class MarkDeleted method to prevent direct usage - enforces use of DeferredDelete property instead",
+        "sourceFile": "BargeTokenMap.vb:205-207",
+        "notes": "Private shadowing prevents external callers from bypassing DeferredDelete validation logic"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "property": "FleetID",
+      "relatedEntity": "Fleet",
+      "type": "ManyToOne",
+      "description": "Many token maps belong to one fleet"
+    },
+    {
+      "property": "ColorPairID",
+      "relatedEntity": "ColorPair",
+      "type": "ManyToOne",
+      "isOptional": true,
+      "description": "Reference to color pair when DisplayType is 'Color'"
+    },
+    {
+      "property": "PictureID",
+      "relatedEntity": "Picture",
+      "type": "ManyToOne",
+      "isOptional": true,
+      "description": "Reference to picture when DisplayType is 'Picture'"
+    }
+  ],
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "BargeTokenMapID",
+        "value": "0",
+        "sourceFile": "BargeTokenMapBase.vb:258"
+      },
+      {
+        "property": "FleetID",
+        "value": "0",
+        "sourceFile": "BargeTokenMapBase.vb:260"
+      },
+      {
+        "property": "FieldName",
+        "value": "String.Empty",
+        "sourceFile": "BargeTokenMapBase.vb:261"
+      },
+      {
+        "property": "FieldValue",
+        "value": "String.Empty",
+        "sourceFile": "BargeTokenMapBase.vb:262"
+      },
+      {
+        "property": "DisplayType",
+        "value": "String.Empty",
+        "sourceFile": "BargeTokenMapBase.vb:263"
+      },
+      {
+        "property": "SymbolValue",
+        "value": "String.Empty",
+        "sourceFile": "BargeTokenMapBase.vb:264"
+      },
+      {
+        "property": "ColorPairID",
+        "value": "String.Empty",
+        "sourceFile": "BargeTokenMapBase.vb:265"
+      },
+      {
+        "property": "PictureID",
+        "value": "String.Empty",
+        "sourceFile": "BargeTokenMapBase.vb:266"
+      },
+      {
+        "property": "IsGenerated",
+        "value": "False",
+        "sourceFile": "BargeTokenMapBase.vb:267"
+      },
+      {
+        "property": "DeferredDelete",
+        "value": "False",
+        "sourceFile": "BargeTokenMap.vb:12"
+      }
+    ],
+    "storedProcedures": {
+      "select": "BargeTokenMapSelect",
+      "selectAll": "BargeTokenMapsSelect",
+      "insert": "BargeTokenMapInsert",
+      "update": "BargeTokenMapUpdate",
+      "delete": "BargeTokenMapDelete",
+      "search": "BargeTokenMapSearch"
+    }
+  },
+  "constants": [
+    {
+      "name": "c_FieldNameConsignTo",
+      "value": "\"Consign to\"",
+      "visibility": "Friend",
+      "description": "Constant used by ShipBerth object for field name",
+      "sourceFile": "BargeTokenMap.vb:16"
+    },
+    {
+      "name": "c_DisplayTypeColor",
+      "value": "\"Color\"",
+      "visibility": "Friend",
+      "description": "Display type constant for color display",
+      "sourceFile": "BargeTokenMap.vb:19"
+    },
+    {
+      "name": "c_DisplayTypePicture",
+      "value": "\"Picture\"",
+      "visibility": "Friend",
+      "description": "Display type constant for picture display",
+      "sourceFile": "BargeTokenMap.vb:20"
+    },
+    {
+      "name": "c_DisplayTypeSymbol",
+      "value": "\"Symbol\"",
+      "visibility": "Friend",
+      "description": "Display type constant for symbol display",
+      "sourceFile": "BargeTokenMap.vb:21"
+    }
+  ],
+  "modernEquivalents": {
+    "dataAnnotations": [
+      "[Key]",
+      "[Required]",
+      "[MaxLength(50)]",
+      "[MaxLength(200)]",
+      "[MaxLength(20)]",
+      "[MaxLength(1)]"
+    ],
+    "fluentValidation": [
+      "RuleFor(x => x.FieldName).NotEmpty().WithMessage(\"FieldName is required.\").MaximumLength(50)",
+      "RuleFor(x => x.FieldValue).NotEmpty().When(x => !x.DeferredDelete).WithMessage(\"FieldValue is required.\").MaximumLength(200)",
+      "RuleFor(x => x.DisplayType).NotEmpty().WithMessage(\"DisplayType is required.\").MaximumLength(20)",
+      "RuleFor(x => x.SymbolValue).NotEmpty().When(x => x.DisplayType?.ToLower() == \"symbol\").WithMessage(\"Symbol is required.\").MaximumLength(1)",
+      "RuleFor(x => x.ColorPairID).NotEmpty().When(x => !x.DeferredDelete && x.DisplayType?.ToLower() == \"color\").WithMessage(\"Color is required.\")",
+      "RuleFor(x => x.PictureID).NotEmpty().When(x => x.DisplayType?.ToLower() == \"picture\").WithMessage(\"Picture is required.\")"
+    ]
+  },
+  "specialBehaviors": [
+    {
+      "behavior": "Deferred Deletion Pattern",
+      "description": "Uses DeferredDelete property to control when objects are marked for deletion. This allows validation logic to mark objects for deletion without immediately calling MarkDeleted, enabling the object to save with relaxed validation rules (e.g., ColorPairID not required when deleting).",
+      "usedBy": ["ShipBerth object", "Arrive Ship form"],
+      "sourceFile": "BargeTokenMap.vb:53-72,184-192"
+    },
+    {
+      "behavior": "Conditional Validation Based on DisplayType",
+      "description": "Validation requirements change based on DisplayType value: Symbol requires SymbolValue, Color requires ColorPairID, Picture requires PictureID. Only the field matching the DisplayType is required.",
+      "sourceFile": "BargeTokenMap.vb:115-132"
+    },
+    {
+      "behavior": "User-Friendly Property Display Names",
+      "description": "Overrides auto-generated property names in Initialize method to provide more user-friendly names in validation messages (e.g., 'Symbol' instead of 'SymbolValue')",
+      "sourceFile": "BargeTokenMap.vb:94-96"
+    },
+    {
+      "behavior": "Additional UI Fields",
+      "description": "Loads LocationType field from database for UI display purposes only - this field is not persisted when saving",
+      "sourceFile": "BargeTokenMap.vb:166-172"
+    }
+  ],
+  "auditFields": [
+    "BargeTokenMapID",
+    "FleetID",
+    "FieldName",
+    "FieldValue",
+    "DisplayType",
+    "SymbolValue",
+    "ColorPairID",
+    "PictureID",
+    "IsGenerated"
+  ],
+  "lists": [
+    {
+      "name": "BargeTokenMapList",
+      "description": "Search list for token maps filtered by FieldName, DisplayType, and FleetID",
+      "displayMember": "FieldValue",
+      "valueMember": "BargeTokenMapID",
+      "storedProcedure": "BargeTokenMapSearch",
+      "parameters": ["FieldName", "DisplayType", "FleetID"],
+      "columns": ["BargeTokenMapID", "FieldValue", "SymbolValue", "ColorPairID", "ColorName", "TextColor", "BackColor", "PictureID", "Picture"],
+      "sourceFile": "BargeTokenMapList.vb"
+    },
+    {
+      "name": "BargeTokenMapFieldValueList",
+      "description": "List of distinct field values filtered by FieldName and FleetID",
+      "displayMember": "FieldValue",
+      "valueMember": "FieldNameID",
+      "storedProcedure": "BargeTokenMapFieldValueSelect",
+      "parameters": ["FieldName", "FleetID"],
+      "columns": ["FieldValue"],
+      "sourceFile": "BargeTokenMapFieldValueList.vb"
+    }
+  ],
+  "notes": [
+    "This object is used for visual representation of barge states and properties across the application",
+    "ShipBerth object depends on this for 'Consign to' field mapping",
+    "The DeferredDelete pattern is critical for integration with ShipBerth/Arrive Ship forms",
+    "DisplayType acts as a discriminator field determining which display field (Symbol/Color/Picture) is required",
+    "FieldName and FieldValue together create the mapping key-value pair",
+    "IsGenerated flag indicates auto-generated entries vs manually created ones",
+    "Supports binary image data (Picture) stored as BLOB in database"
+  ]
+}

@@ -1,0 +1,676 @@
+{
+  "entity": "BargeDraft",
+  "description": "Draft measurements for barges including four corner drafts, overall draft, and draft survey calculations with tonnage",
+  "formValidation": {
+    "method": "SetValidatorExtenderForDraft",
+    "location": "frmBargeDraft.vb:727-750",
+    "rules": [
+      {
+        "field": "txtDraftFeet",
+        "property": "DraftFeet",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Feet must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftInches",
+        "property": "DraftInches",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Inches must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftPortBowFeet",
+        "property": "DraftPortBowFeet",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Port Bow Feet must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftPortBowInches",
+        "property": "DraftPortBowInches",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Port Bow Inches must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftStarboardBowFeet",
+        "property": "DraftStarboardBowFeet",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Starboard Bow Feet must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftStarboardBowInches",
+        "property": "DraftStarboardBowInches",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Starboard Bow Inches must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftPortSternFeet",
+        "property": "DraftPortSternFeet",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Port Stern Feet must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftPortSternInches",
+        "property": "DraftPortSternInches",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Port Stern Inches must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftStarboardSternFeet",
+        "property": "DraftStarboardSternFeet",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Starboard Stern Feet must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftStarboardSternInches",
+        "property": "DraftStarboardSternInches",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Draft Starboard Stern Inches must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftAverageFeet",
+        "property": "DraftAverageFeet",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Average Draft Feet must be a valid integer",
+        "severity": "Error",
+        "clientSide": true,
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "field": "txtDraftAverageInches",
+        "property": "DraftAverageInches",
+        "rule": "Int32",
+        "validationType": "ValidationTypeConstants.Int32",
+        "message": "Average Draft Inches must be a valid integer",
+        "severity": "Error",
+        "clientSide": true,
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "field": "txtEstimatedCargoDeadweight",
+        "property": "EstimatedCargoDeadweight",
+        "rule": "Decimal",
+        "validationType": "ValidationTypeConstants.Decimal",
+        "message": "Est.cargo deadweight must be a valid decimal",
+        "severity": "Error",
+        "clientSide": true,
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "field": "txtLightshipCorrection",
+        "property": "LightshipCorrection",
+        "rule": "Decimal",
+        "validationType": "ValidationTypeConstants.Decimal",
+        "message": "Lightship correction must be a valid decimal",
+        "severity": "Error",
+        "clientSide": true,
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "field": "txtAdjustmentTons",
+        "property": "AdjustmentTons",
+        "rule": "Decimal",
+        "validationType": "ValidationTypeConstants.Decimal",
+        "message": "Adjustment must be a valid decimal",
+        "severity": "Error",
+        "clientSide": true,
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "field": "txtLoadUnloadTons",
+        "property": "LoadUnloadTons",
+        "rule": "Decimal",
+        "validationType": "ValidationTypeConstants.Decimal",
+        "message": "Calculated tonnage must be a valid decimal",
+        "severity": "Error",
+        "clientSide": true,
+        "appliesWhen": "EventType is DraftSurvey"
+      }
+    ]
+  },
+  "businessValidation": {
+    "method": "CheckBusinessRules",
+    "location": "Draft.vb:1007-1114",
+    "rules": [
+      {
+        "ruleName": "DraftMaxRule",
+        "property": "Draft",
+        "condition": "(p_Draft <> String.Empty) AndAlso ((p_DraftPortBow <> String.Empty AndAlso CDec(p_DraftPortBow) > CDec(p_Draft)) OrElse (p_DraftPortStern <> String.Empty AndAlso CDec(p_DraftPortStern) > CDec(p_Draft)) OrElse (p_DraftStarboardBow <> String.Empty AndAlso CDec(p_DraftStarboardBow) > CDec(p_Draft)) OrElse (p_DraftStarboardStern <> String.Empty AndAlso CDec(p_DraftStarboardStern) > CDec(p_Draft)))",
+        "message": "Overall draft must be >= the highest corner draft.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "crossFieldValidation": true,
+        "affectedProperties": ["Draft", "DraftPortBow", "DraftStarboardBow", "DraftPortStern", "DraftStarboardStern"]
+      },
+      {
+        "ruleName": "DraftRangeRule",
+        "property": "Draft",
+        "condition": "(p_Draft <> String.Empty AndAlso (CType(p_Draft, Decimal) > 99.999 OrElse CType(p_Draft, Decimal) < 0.0))",
+        "message": "Draft must be between 0 and 99 ft 11 in",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0.0,
+          "max": 99.999
+        }
+      },
+      {
+        "ruleName": "DraftInchesRangeRule",
+        "property": "DraftInches",
+        "condition": "(DraftInches <> String.Empty AndAlso (CInt(DraftInches) < 0 OrElse CInt(DraftInches) > 11))",
+        "message": "Draft Inches must be between 0 and 11.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0,
+          "max": 11
+        }
+      },
+      {
+        "ruleName": "DraftAverageRangeRule",
+        "property": "DraftAverage",
+        "condition": "(_IsFreightActive OrElse _IsTowingActive) AndAlso (Not String.IsNullOrEmpty(p_DraftAverage) AndAlso ((CType(p_DraftAverage, Decimal) > 99.999) OrElse (CType(p_DraftAverage, Decimal) < 0.0)))",
+        "message": "Average Draft must be between 0 and 99 ft 11 in",
+        "severity": "Error",
+        "appliesWhen": "Freight or Towing license is active",
+        "range": {
+          "min": 0.0,
+          "max": 99.999
+        }
+      },
+      {
+        "ruleName": "DraftAverageInchesRangeRule",
+        "property": "DraftAverageInches",
+        "condition": "(_IsFreightActive OrElse _IsTowingActive) AndAlso (DraftAverageInches <> String.Empty AndAlso (CInt(DraftAverageInches) < 0 OrElse CInt(DraftAverageInches) > 11))",
+        "message": "Average Draft Inches must be between 0 and 11.",
+        "severity": "Error",
+        "appliesWhen": "Freight or Towing license is active",
+        "range": {
+          "min": 0,
+          "max": 11
+        }
+      },
+      {
+        "ruleName": "DraftPortBowRangeRule",
+        "property": "DraftPortBow",
+        "condition": "(p_DraftPortBow <> String.Empty AndAlso (CType(p_DraftPortBow, Decimal) > 99.999 OrElse CType(p_DraftPortBow, Decimal) < 0.0))",
+        "message": "Draft Port Bow must be between 0 and 99 ft 11 in",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0.0,
+          "max": 99.999
+        }
+      },
+      {
+        "ruleName": "DraftPortBowInchesRangeRule",
+        "property": "DraftPortBowInches",
+        "condition": "(DraftPortBowInches <> String.Empty AndAlso (CInt(DraftPortBowInches) < 0 OrElse CInt(DraftPortBowInches) > 11))",
+        "message": "Draft Port Bow Inches must be between 0 and 11.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0,
+          "max": 11
+        }
+      },
+      {
+        "ruleName": "DraftStarboardBowRangeRule",
+        "property": "DraftStarboardBow",
+        "condition": "(p_DraftStarboardBow <> String.Empty AndAlso (CType(p_DraftStarboardBow, Decimal) > 99.999 OrElse CType(p_DraftStarboardBow, Decimal) < 0.0))",
+        "message": "Draft Starboard Bow must be between 0 and 99 ft 11 in",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0.0,
+          "max": 99.999
+        }
+      },
+      {
+        "ruleName": "DraftStarboardBowInchesRangeRule",
+        "property": "DraftStarboardBowInches",
+        "condition": "(DraftStarboardBowInches <> String.Empty AndAlso (CInt(DraftStarboardBowInches) < 0 OrElse CInt(DraftStarboardBowInches) > 11))",
+        "message": "Draft Starboard Bow Inches must be between 0 and 11.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0,
+          "max": 11
+        }
+      },
+      {
+        "ruleName": "DraftPortSternRangeRule",
+        "property": "DraftPortStern",
+        "condition": "(p_DraftPortStern <> String.Empty AndAlso (CType(p_DraftPortStern, Decimal) > 99.999 OrElse CType(p_DraftPortStern, Decimal) < 0.0))",
+        "message": "Draft Port Stern must be between 0 and 99 ft 11 in",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0.0,
+          "max": 99.999
+        }
+      },
+      {
+        "ruleName": "DraftPortSternInchesRangeRule",
+        "property": "DraftPortSternInches",
+        "condition": "(DraftPortSternInches <> String.Empty AndAlso (CInt(DraftPortSternInches) < 0 OrElse CInt(DraftPortSternInches) > 11))",
+        "message": "Draft Port Stern Inches must be between 0 and 11.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0,
+          "max": 11
+        }
+      },
+      {
+        "ruleName": "DraftStarboardSternRangeRule",
+        "property": "DraftStarboardStern",
+        "condition": "(p_DraftStarboardStern <> String.Empty AndAlso (CType(p_DraftStarboardStern, Decimal) > 99.999 OrElse CType(p_DraftStarboardStern, Decimal) < 0.0))",
+        "message": "Draft Starboard Stern must be between 0 and 99 ft 11 in",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0.0,
+          "max": 99.999
+        }
+      },
+      {
+        "ruleName": "DraftStarboardSternInchesRangeRule",
+        "property": "DraftStarboardSternInches",
+        "condition": "(DraftStarboardSternInches <> String.Empty AndAlso (CInt(DraftStarboardSternInches) < 0 OrElse CInt(DraftStarboardSternInches) > 11))",
+        "message": "Draft Starboard Stern Inches must be between 0 and 11.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "range": {
+          "min": 0,
+          "max": 11
+        }
+      }
+    ]
+  },
+  "propertyValidation": {
+    "description": "Property setters with inline validation and side effects",
+    "rules": [
+      {
+        "property": "Draft",
+        "location": "Draft.vb:44-61",
+        "validation": "SetDecimalProp with rounding to nearest 0.001",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts to DraftFeet and DraftInches"
+        ],
+        "precision": 0.001,
+        "roundingMethod": "Math.RoundingMethods.Nearest"
+      },
+      {
+        "property": "DraftInches",
+        "location": "Draft.vb:78-95",
+        "validation": "Must be between 0 and 11 before converting to Draft",
+        "condition": "(String.IsNullOrEmpty(DraftInches)) OrElse ((CInt(DraftInches) >= 0) AndAlso (CInt(DraftInches) < 12))",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts from DraftFeet and DraftInches to Draft decimal"
+        ]
+      },
+      {
+        "property": "DraftPortBow",
+        "location": "Draft.vb:97-118",
+        "validation": "SetDecimalProp with rounding to nearest 0.001",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts to DraftPortBowFeet and DraftPortBowInches",
+          "Sets Draft to MaxDraft()",
+          "Calculates DraftAverage"
+        ],
+        "precision": 0.001,
+        "roundingMethod": "Math.RoundingMethods.Nearest"
+      },
+      {
+        "property": "DraftPortBowInches",
+        "location": "Draft.vb:139-160",
+        "validation": "Must be between 0 and 11 before converting",
+        "condition": "(String.IsNullOrEmpty(DraftPortBowInches)) OrElse ((CInt(DraftPortBowInches) >= 0) AndAlso (CInt(DraftPortBowInches) < 12))",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts from feet/inches to DraftPortBow decimal",
+          "Sets Draft to MaxDraft()",
+          "Calculates DraftAverage"
+        ]
+      },
+      {
+        "property": "DraftStarboardBow",
+        "location": "Draft.vb:162-183",
+        "validation": "SetDecimalProp with rounding to nearest 0.001",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts to DraftStarboardBowFeet and DraftStarboardBowInches",
+          "Sets Draft to MaxDraft()",
+          "Calculates DraftAverage"
+        ],
+        "precision": 0.001,
+        "roundingMethod": "Math.RoundingMethods.Nearest"
+      },
+      {
+        "property": "DraftStarboardBowInches",
+        "location": "Draft.vb:204-226",
+        "validation": "Must be between 0 and 11 before converting",
+        "condition": "(String.IsNullOrEmpty(DraftStarboardBowInches)) OrElse ((CInt(DraftStarboardBowInches) >= 0) AndAlso (CInt(DraftStarboardBowInches) < 12))",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts from feet/inches to DraftStarboardBow decimal",
+          "Sets Draft to MaxDraft()",
+          "Calculates DraftAverage"
+        ]
+      },
+      {
+        "property": "DraftPortStern",
+        "location": "Draft.vb:228-249",
+        "validation": "SetDecimalProp with rounding to nearest 0.001",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts to DraftPortSternFeet and DraftPortSternInches",
+          "Sets Draft to MaxDraft()",
+          "Calculates DraftAverage"
+        ],
+        "precision": 0.001,
+        "roundingMethod": "Math.RoundingMethods.Nearest"
+      },
+      {
+        "property": "DraftPortSternInches",
+        "location": "Draft.vb:270-291",
+        "validation": "Must be between 0 and 11 before converting",
+        "condition": "(String.IsNullOrEmpty(DraftPortSternInches)) OrElse ((CInt(DraftPortSternInches) >= 0) AndAlso (CInt(DraftPortSternInches) < 12))",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts from feet/inches to DraftPortStern decimal",
+          "Sets Draft to MaxDraft()",
+          "Calculates DraftAverage"
+        ]
+      },
+      {
+        "property": "DraftStarboardStern",
+        "location": "Draft.vb:293-314",
+        "validation": "SetDecimalProp with rounding to nearest 0.001",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts to DraftStarboardSternFeet and DraftStarboardSternInches",
+          "Sets Draft to MaxDraft()",
+          "Calculates DraftAverage"
+        ],
+        "precision": 0.001,
+        "roundingMethod": "Math.RoundingMethods.Nearest"
+      },
+      {
+        "property": "DraftStarboardSternInches",
+        "location": "Draft.vb:335-356",
+        "validation": "Must be between 0 and 11 before converting",
+        "condition": "(String.IsNullOrEmpty(DraftStarboardSternInches)) OrElse ((CInt(DraftStarboardSternInches) >= 0) AndAlso (CInt(DraftStarboardSternInches) < 12))",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts from feet/inches to DraftStarboardStern decimal",
+          "Sets Draft to MaxDraft()",
+          "Calculates DraftAverage"
+        ]
+      },
+      {
+        "property": "DraftAverage",
+        "location": "Draft.vb:358-377",
+        "validation": "SetDecimalProp with rounding to nearest 0.001",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts to DraftAverageFeet and DraftAverageInches",
+          "Recalculates EstimatedCargoDeadweight and LightshipCorrection"
+        ],
+        "precision": 0.001,
+        "roundingMethod": "Math.RoundingMethods.Nearest",
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "property": "DraftAverageInches",
+        "location": "Draft.vb:396-415",
+        "validation": "Must be between 0 and 11 before converting",
+        "condition": "(String.IsNullOrEmpty(DraftAverageInches)) OrElse ((CInt(DraftAverageInches) >= 0) AndAlso (CInt(DraftAverageInches) < 12))",
+        "sideEffects": [
+          "Triggers CheckBusinessRules",
+          "Converts from feet/inches to DraftAverage decimal",
+          "Recalculates EstimatedCargoDeadweight and LightshipCorrection"
+        ],
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "property": "EstimatedCargoDeadweight",
+        "location": "Draft.vb:417-428",
+        "validation": "Decimal with two decimal places",
+        "sideEffects": [
+          "Recalculates LoadUnloadTons"
+        ],
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "property": "LightshipCorrection",
+        "location": "Draft.vb:430-441",
+        "validation": "Decimal with two decimal places",
+        "sideEffects": [
+          "Recalculates LoadUnloadTons"
+        ],
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "property": "AdjustmentTons",
+        "location": "Draft.vb:443-454",
+        "validation": "Decimal with two decimal places",
+        "sideEffects": [
+          "Recalculates LoadUnloadTons"
+        ],
+        "appliesWhen": "EventType is DraftSurvey"
+      },
+      {
+        "property": "LoadUnloadTons",
+        "location": "Draft.vb:456-463",
+        "validation": "Decimal with two decimal places",
+        "calculated": true,
+        "formula": "EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+        "appliesWhen": "EventType is DraftSurvey"
+      }
+    ]
+  },
+  "calculatedFields": {
+    "description": "Fields that are automatically calculated based on other field values",
+    "fields": [
+      {
+        "field": "Draft",
+        "calculation": "MaxDraft()",
+        "description": "Automatically set to the highest of the four corner drafts",
+        "dependencies": ["DraftPortBow", "DraftStarboardBow", "DraftPortStern", "DraftStarboardStern"],
+        "location": "Draft.vb:1120-1152"
+      },
+      {
+        "field": "DraftAverage",
+        "calculation": "CalculateAverageDraft()",
+        "description": "Average of the four corner drafts, rounded to nearest inch (rounding up at 0.5)",
+        "dependencies": ["DraftPortBow", "DraftStarboardBow", "DraftPortStern", "DraftStarboardStern"],
+        "location": "Draft.vb:1198-1237",
+        "appliesWhen": "EventType is DraftSurvey",
+        "notes": "Converts to inches for precision, then averages and rounds"
+      },
+      {
+        "field": "EstimatedCargoDeadweight",
+        "calculation": "CalculateTonnageFromAvgDraft() or prior Draft Survey LoadUnloadTons",
+        "description": "For Load/PartLoad: tonnage from average draft. For Empty: tonnage from most recent Load/PartLoad draft survey",
+        "dependencies": ["DraftAverage", "LoadStatus", "BargeSeriesID", "CoverType", "CoverSubTypeID", "CoverConfig"],
+        "location": "Draft.vb:1350-1411",
+        "appliesWhen": "EventType is DraftSurvey",
+        "conditionalLogic": {
+          "Empty": "Uses LoadUnloadTons from prior Load/PartLoad draft survey",
+          "Load_PartLoad": "Calculated from average draft using barge series draft tables"
+        }
+      },
+      {
+        "field": "LightshipCorrection",
+        "calculation": "CalculateTonnageFromAvgDraft() or prior Draft Survey DraftAverage",
+        "description": "For Load/PartLoad: tonnage from most recent Empty draft survey. For Empty: tonnage from average draft",
+        "dependencies": ["DraftAverage", "LoadStatus", "BargeSeriesID", "CoverType", "CoverSubTypeID", "CoverConfig"],
+        "location": "Draft.vb:1350-1411",
+        "appliesWhen": "EventType is DraftSurvey",
+        "conditionalLogic": {
+          "Empty": "Calculated from average draft using barge series draft tables",
+          "Load_PartLoad": "Uses tonnage from most recent Empty draft survey"
+        }
+      },
+      {
+        "field": "LoadUnloadTons",
+        "calculation": "CalculateLoadUnloadTons()",
+        "description": "EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+        "dependencies": ["EstimatedCargoDeadweight", "LightshipCorrection", "AdjustmentTons"],
+        "location": "Draft.vb:1326-1348",
+        "formula": "estCargoDeadweight - ltshipCorrection + adjstmntTons",
+        "appliesWhen": "EventType is DraftSurvey"
+      }
+    ]
+  },
+  "validationTriggers": {
+    "description": "Events that trigger validation",
+    "triggers": [
+      {
+        "event": "Property Changed",
+        "validation": "CheckBusinessRules(propertyName)",
+        "scope": "Individual property"
+      },
+      {
+        "event": "Form Submit (btnSet_Click)",
+        "validation": "_Draft.IsValid check",
+        "location": "frmBargeDraft.vb:111",
+        "action": "Shows BrokenRules dialog if invalid"
+      },
+      {
+        "event": "Control Validated",
+        "validation": "Property assignment in Validated event handlers",
+        "location": "frmBargeDraft.vb:318-721",
+        "scope": "Client-side field validation before business rule check"
+      }
+    ]
+  },
+  "conditionalValidation": {
+    "description": "Validation rules that apply conditionally based on context",
+    "conditions": [
+      {
+        "condition": "EventType = DraftSurvey",
+        "affectedFields": [
+          "DraftAverage",
+          "DraftAverageFeet",
+          "DraftAverageInches",
+          "EstimatedCargoDeadweight",
+          "LightshipCorrection",
+          "AdjustmentTons",
+          "LoadUnloadTons"
+        ],
+        "description": "Tonnage fields and average draft only visible and validated for Draft Survey events",
+        "location": "frmBargeDraft.vb:264-269"
+      },
+      {
+        "condition": "IsVoidOnLoad = True",
+        "affectedFields": "All fields",
+        "description": "All fields set to readonly and Set button disabled for voided tickets",
+        "location": "frmBargeDraft.vb:226-249"
+      },
+      {
+        "condition": "License: Freight or Towing Active",
+        "affectedFields": ["DraftAverage", "DraftAverageInches"],
+        "description": "Average draft validation only applies if Freight or Towing license is active",
+        "location": "Draft.vb:1042-1053"
+      },
+      {
+        "condition": "LoadStatus = Empty",
+        "calculation": "EstimatedCargoDeadweight from prior Load/PartLoad, LightshipCorrection from average draft",
+        "location": "Draft.vb:1368-1386"
+      },
+      {
+        "condition": "LoadStatus = Load or PartLoad",
+        "calculation": "EstimatedCargoDeadweight from average draft, LightshipCorrection from prior Empty",
+        "location": "Draft.vb:1387-1404"
+      }
+    ]
+  },
+  "modernValidationMapping": {
+    "dataAnnotations": {
+      "example": "// Range validations\n[Range(0, 99.999, ErrorMessage = \"Draft must be between 0 and 99 ft 11 in\")]\npublic decimal? Draft { get; set; }\n\n[Range(0, 11, ErrorMessage = \"Draft Inches must be between 0 and 11.\")]\npublic int? DraftInches { get; set; }\n\n// Similar for all corner drafts and their inch components",
+      "notes": "Data Annotations appropriate for simple range validations"
+    },
+    "fluentValidation": {
+      "example": "// Cross-field validation\nRuleFor(x => x.Draft)\n    .Must((model, draft) => BeGreaterThanOrEqualToMaxCornerDraft(model))\n    .WithMessage(\"Overall draft must be >= the highest corner draft.\")\n    .When(x => !string.IsNullOrEmpty(x.Draft));\n\n// Conditional validation based on event type\nRuleFor(x => x.DraftAverage)\n    .InclusiveBetween(0m, 99.999m)\n    .WithMessage(\"Average Draft must be between 0 and 99 ft 11 in\")\n    .When(x => x.EventTypeEnumVal == EventTypes.DraftSurvey && (IsFreightActive || IsTowingActive));\n\n// Range validation with precision\nRuleFor(x => x.DraftPortBow)\n    .InclusiveBetween(0m, 99.999m)\n    .WithMessage(\"Draft Port Bow must be between 0 and 99 ft 11 in\")\n    .PrecisionScale(5, 3, true)\n    .When(x => !string.IsNullOrEmpty(x.DraftPortBow));",
+      "notes": "FluentValidation required for complex cross-field validation and conditional rules"
+    },
+    "jqueryValidate": {
+      "example": "// Client-side validation rules\n$('#txtDraftInches').rules('add', {\n    number: true,\n    min: 0,\n    max: 11,\n    messages: {\n        number: 'Draft Inches must be a valid integer',\n        min: 'Draft Inches must be between 0 and 11.',\n        max: 'Draft Inches must be between 0 and 11.'\n    }\n});\n\n// Conditional required based on event type\n$('#txtDraftAverageFeet').rules('add', {\n    required: function() { return $('#EventType').val() === 'DraftSurvey'; },\n    number: true,\n    messages: {\n        required: 'Average Draft Feet is required for Draft Survey events'\n    }\n});",
+      "notes": "Client-side validation for immediate feedback, mirrors server-side rules"
+    }
+  },
+  "commonPatterns": {
+    "feetInchesValidation": {
+      "description": "Validation pattern for feet and inches fields",
+      "rules": [
+        "Feet: Integer, range 0-99",
+        "Inches: Integer, range 0-11",
+        "Inches validated inline before converting to decimal",
+        "Decimal value rounded to nearest 0.001"
+      ]
+    },
+    "crossFieldValidation": {
+      "description": "Overall draft must be >= highest corner draft",
+      "pattern": "Compare Draft against max(DraftPortBow, DraftStarboardBow, DraftPortStern, DraftStarboardStern)"
+    },
+    "calculationChain": {
+      "description": "Corner drafts trigger cascading calculations",
+      "chain": [
+        "Corner draft changed",
+        "MaxDraft() recalculated → sets Draft",
+        "CalculateAverageDraft() → sets DraftAverage",
+        "CalculateEstimatedCargoDeadweightAndLightshipCorrection()",
+        "CalculateLoadUnloadTons()"
+      ]
+    }
+  },
+  "extractionMetadata": {
+    "sourceFiles": [
+      "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore.BusinessLogic/Business Objects/Draft.vb",
+      "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore.BusinessLogic/Business Objects/Base Classes/DraftBase.vb",
+      "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore/Forms/frmBargeDraft.vb"
+    ],
+    "extractionDate": "2025-12-18",
+    "notes": [
+      "No AreFieldsValid method found - validation handled through ValidatorExtender and property setters",
+      "Complex calculation dependencies for Draft Survey events",
+      "Tonnage calculations depend on prior draft survey events on same barge ticket",
+      "Cover weight adjustments affect tonnage calculations for Load and Draft Survey events"
+    ]
+  }
+}

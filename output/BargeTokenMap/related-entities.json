@@ -1,0 +1,180 @@
+{
+  "parentEntity": "BargeTokenMap",
+  "relationships": [],
+  "lookupRelationships": [
+    {
+      "property": "FleetID",
+      "lookupEntity": "Fleet",
+      "displayProperty": "FleetName",
+      "required": true,
+      "notes": "Fleet context for the token map. Determines which fleet's color pairs and locations are available."
+    },
+    {
+      "property": "ColorPairID",
+      "lookupEntity": "ColorPair",
+      "displayProperty": "ColorPairName",
+      "required": false,
+      "notes": "Required only when DisplayType is 'Color'. Filtered by FleetID. Maps field values to visual colors."
+    },
+    {
+      "property": "PictureID",
+      "lookupEntity": "Picture",
+      "displayProperty": "PictureName",
+      "required": false,
+      "notes": "Required only when DisplayType is 'Picture'. Maps field values to visual pictures/icons."
+    },
+    {
+      "property": "FieldValue",
+      "lookupEntity": "DynamicFieldValue",
+      "displayProperty": "FieldValue",
+      "required": true,
+      "notes": "Dynamic lookup based on FieldName. For location types (Location, Consign to, On order to), filtered by LocationType. For damage levels, uses BargeDamageLevel validation list."
+    },
+    {
+      "property": "FieldName",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "FieldName",
+      "required": true,
+      "validationType": "BargeTokenMapFieldName",
+      "notes": "Determines what is being mapped. Common values: 'Location', 'Consign to', 'On order to', 'Damage level'. Location-based fields have additional LocationType dimension."
+    },
+    {
+      "property": "DisplayType",
+      "lookupEntity": "ValidationList",
+      "displayProperty": "DisplayType",
+      "required": true,
+      "validationType": "BargeTokenMapDisplayType",
+      "notes": "How the field value is visually represented. Valid values: 'Color', 'Picture', 'Symbol'. Determines which property (ColorPairID, PictureID, SymbolValue) is required."
+    }
+  ],
+  "computedFields": [
+    {
+      "property": "LocationType",
+      "computedFrom": ["FieldName", "FieldValue"],
+      "notes": "Computed in stored procedure. For FieldName='Location', determines if FieldValue represents a Boat, Consign Facility, Facility, or Ship."
+    }
+  ],
+  "specialBehaviors": [
+    {
+      "behaviorName": "ConditionalRequiredFields",
+      "description": "Required field depends on DisplayType",
+      "rules": [
+        {
+          "condition": "DisplayType = 'Color'",
+          "requiredFields": ["ColorPairID"],
+          "notes": "ColorPairID must be selected when mapping to colors"
+        },
+        {
+          "condition": "DisplayType = 'Picture'",
+          "requiredFields": ["PictureID"],
+          "notes": "PictureID must be selected when mapping to pictures"
+        },
+        {
+          "condition": "DisplayType = 'Symbol'",
+          "requiredFields": ["SymbolValue"],
+          "notes": "SymbolValue (single character) must be entered when mapping to symbols"
+        }
+      ]
+    },
+    {
+      "behaviorName": "LocationTypeMapping",
+      "description": "Special handling for location-based fields",
+      "notes": "When FieldName is 'Location', 'Consign to', or 'On order to', user must first select LocationType (Boat, Consign Facility, Facility, Ship) before selecting FieldValue. FieldValue list is filtered by LocationType."
+    },
+    {
+      "behaviorName": "DeferredDeletion",
+      "description": "Custom deletion pattern for ShipBerth integration",
+      "notes": "Uses DeferredDelete property to mark objects for deletion without immediately calling MarkDeleted(). Allows validation to control deletion state. Used by ShipBerth object when clearing consign-to mappings."
+    }
+  ],
+  "gridConfiguration": {
+    "gridName": "grdBargeTokenMap",
+    "parentForm": "frmBargeTokenMap",
+    "gridColumns": [
+      {
+        "key": "Picture",
+        "header": "Picture",
+        "type": "Image",
+        "width": 46,
+        "visible": "DisplayType = 'Picture'"
+      },
+      {
+        "key": "FieldValue",
+        "header": "Value",
+        "type": "String",
+        "width": 100,
+        "visible": "Always"
+      },
+      {
+        "key": "SymbolValue",
+        "header": "Symbol",
+        "type": "String",
+        "width": 46,
+        "visible": "DisplayType = 'Symbol'"
+      },
+      {
+        "key": "ColorName",
+        "header": "Color Name",
+        "type": "String",
+        "width": 86,
+        "visible": "DisplayType = 'Color'"
+      },
+      {
+        "key": "TextColor",
+        "header": "Text Color",
+        "type": "Color",
+        "width": 80,
+        "visible": "DisplayType = 'Color'"
+      },
+      {
+        "key": "BackColor",
+        "header": "Back Color",
+        "type": "Color",
+        "width": 80,
+        "visible": "DisplayType = 'Color'"
+      }
+    ],
+    "operations": {
+      "add": "ItemAdd",
+      "edit": "ItemModify",
+      "delete": "ItemRemove",
+      "export": "ExportGrid"
+    },
+    "notes": "Grid columns are dynamically visible based on DisplayType parameter. Form is initialized with FieldName, DisplayType, and FleetID parameters."
+  },
+  "usageContext": {
+    "primaryUseCase": "Maps field values to visual representations (colors, pictures, symbols) for barge tracking boards and displays",
+    "callingForms": [
+      {
+        "formName": "frmBargeDetail",
+        "button": "btnMapColors",
+        "purpose": "Map damage levels to colors for visual barge token display",
+        "parameters": {
+          "fieldName": "Damage level",
+          "displayType": "Color",
+          "fleetID": "Current fleet"
+        }
+      }
+    ],
+    "commonFieldNames": [
+      "Location",
+      "Consign to",
+      "On order to",
+      "Damage level"
+    ],
+    "businessPurpose": "Provides visual configuration for barge tracking board displays, allowing operators to customize how different barge states and locations appear on visual boards."
+  },
+  "implementationNotes": {
+    "serviceLayerPattern": "Repository should NOT include child collections. BargeTokenMap is a standalone configuration entity with no child collections.",
+    "dapperPattern": "Simple CRUD operations. List queries filtered by FieldName, DisplayType, and FleetID.",
+    "complexValidation": "Conditional required fields based on DisplayType. Use FluentValidation rules to enforce ColorPairID, PictureID, or SymbolValue requirements.",
+    "specialConstants": {
+      "c_FieldNameConsignTo": "Consign to",
+      "c_DisplayTypeColor": "Color",
+      "c_DisplayTypePicture": "Picture",
+      "c_DisplayTypeSymbol": "Symbol"
+    },
+    "uiPattern": "Single form manages all CRUD operations inline. No separate detail form. Grid and edit controls on same form.",
+    "modernizationStrategy": "Convert to configuration management screen with dynamic form fields based on DisplayType selection. Consider using a wizard or stepped form for better UX."
+  }
+}

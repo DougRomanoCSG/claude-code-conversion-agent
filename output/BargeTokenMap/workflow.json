@@ -1,0 +1,935 @@
+{
+  "formName": "frmBargeTokenMap",
+  "formType": "DetailEditList",
+  "baseClass": "frmBaseDetailEditList",
+  "purpose": "Maps field values to display types (Pictures, Symbols, or Colors) for barge tokens",
+  "initializationPattern": {
+    "signature": "Initialize(fieldName As String, displayType As String, fleetID As Integer)",
+    "parameters": [
+      {
+        "name": "fieldName",
+        "type": "String",
+        "description": "The field being mapped (e.g., 'Location', 'Consign to', 'On Order to', or custom field)",
+        "examples": ["Location", "Consign to", "On Order to", "Status"]
+      },
+      {
+        "name": "displayType",
+        "type": "String",
+        "description": "Type of visual representation",
+        "validValues": ["picture", "symbol", "color"],
+        "constants": {
+          "cPicture": "picture",
+          "cSymbol": "symbol",
+          "cColor": "color"
+        }
+      },
+      {
+        "name": "fleetID",
+        "type": "Integer",
+        "description": "Fleet context for the mapping"
+      }
+    ],
+    "stateSetup": {
+      "formCaption": "_FieldName + ' - Map Field Values to ' + _DisplayType + 's'",
+      "dynamicControls": "Controls visibility determined by displayType and whether field is location-based"
+    }
+  },
+  "formLifecycle": {
+    "load": {
+      "method": "frmBargeTokenMap_Load",
+      "sequence": [
+        {
+          "step": 1,
+          "action": "FormatControls",
+          "description": "Sets up grid, validators, max lengths, and control visibility"
+        },
+        {
+          "step": 2,
+          "action": "RefreshList",
+          "parameters": "selectFirstRow = True",
+          "description": "Loads initial data into grid"
+        }
+      ]
+    },
+    "formatControls": {
+      "method": "FormatControls",
+      "responsibilities": [
+        "Disable column chooser for grid (state not saved)",
+        "Set unique identifier column to 'BargeTokenMapID'",
+        "Set initial sort order (ID ascending)",
+        "Clear all detail controls",
+        "Set validator extender",
+        "Set max lengths",
+        "Configure control visibility based on displayType and fieldName",
+        "Populate field types for location maps",
+        "Populate display-type specific combos",
+        "Populate field values",
+        "Set label text",
+        "Initial state: all detail controls disabled"
+      ],
+      "controlStateLogic": {
+        "description": "Form has two-factor control visibility",
+        "factor1": "displayType (Picture, Symbol, Color)",
+        "factor2": "isLocationMap (Location, Consign to, On Order to)",
+        "defaultState": "All detail controls hidden except cboFieldValue (readonly)",
+        "locationMapTrue": {
+          "visible": ["cboFieldName"],
+          "state": "Readonly",
+          "populated": "Location types (Boat, Consign Facility, Facility, Ship)",
+          "note": "Boat and Consign Facility only for 'Location' field"
+        },
+        "locationMapFalse": {
+          "visible": ["txtFieldName"],
+          "state": "Readonly",
+          "value": "_FieldName"
+        },
+        "displayTypePicture": {
+          "visible": ["cboPictureID"],
+          "state": "Readonly when not editing",
+          "populated": "PictureList.GetList()"
+        },
+        "displayTypeSymbol": {
+          "visible": ["txtSymbolValue"],
+          "state": "Readonly when not editing"
+        },
+        "displayTypeColor": {
+          "visible": ["cboColorPairID"],
+          "state": "Readonly when not editing",
+          "populated": "ColorPairList.GetList(fleetID)"
+        }
+      }
+    },
+    "dispose": {
+      "method": "Dispose",
+      "behavior": "Standard cleanup via base class"
+    }
+  },
+  "stateManagement": {
+    "memberVariables": [
+      {
+        "name": "_ToolbarButtonTypes",
+        "type": "Hashtable",
+        "purpose": "Maps toolbar button keys to ButtonType for security authorization"
+      },
+      {
+        "name": "_BargeTokenMap",
+        "type": "BusinessLogic.BargeTokenMap",
+        "purpose": "Current business object being edited"
+      },
+      {
+        "name": "_FleetID",
+        "type": "Int32",
+        "purpose": "Fleet context passed during initialization"
+      },
+      {
+        "name": "_DisplayType",
+        "type": "String",
+        "purpose": "Display type (picture/symbol/color) passed during initialization"
+      },
+      {
+        "name": "_FieldName",
+        "type": "String",
+        "purpose": "Field name being mapped, passed during initialization"
+      }
+    ],
+    "formStates": [
+      {
+        "state": "Initial",
+        "description": "Form loaded, no editing in progress",
+        "gridState": "Populated with existing mappings",
+        "detailGroupState": "Disabled",
+        "toolbarState": {
+          "Add": "Enabled (if authorized)",
+          "Modify": "Disabled (nothing selected)",
+          "Remove": "Disabled (nothing selected)",
+          "Export": "Enabled if grid has rows"
+        },
+        "buttonState": {
+          "btnSubmit": "Not visible/relevant",
+          "btnCancel": "Not visible/relevant",
+          "btnClose": "Enabled"
+        }
+      },
+      {
+        "state": "ItemSelected",
+        "description": "User selected a row in grid",
+        "gridState": "One row selected",
+        "detailGroupState": "Disabled",
+        "toolbarState": {
+          "Add": "Enabled",
+          "Modify": "Enabled",
+          "Remove": "Enabled",
+          "Export": "Enabled"
+        },
+        "trigger": "Grid row selection changed"
+      },
+      {
+        "state": "AddingNew",
+        "description": "User clicked Add button",
+        "gridState": "Unchanged (can't interact)",
+        "detailGroupState": "Enabled",
+        "businessObject": "New BargeTokenMap created via NewBargeTokenMap(), BeginEdit() called",
+        "toolbarState": {
+          "allButtons": "Disabled"
+        },
+        "buttonState": {
+          "btnSubmit": "Enabled",
+          "btnCancel": "Enabled",
+          "btnClose": "Enabled (will prompt if changes)"
+        },
+        "controlState": {
+          "cboFieldName_or_txtFieldName": "Appropriate one enabled based on IsLocationMap",
+          "cboFieldValue": "Disabled initially if location map and no location type selected, else enabled",
+          "displayControl": "Disabled initially if location map and no location type selected, else enabled"
+        },
+        "focusTarget": "cboFieldName",
+        "trigger": "Toolbar Add button clicked"
+      },
+      {
+        "state": "AddingNew_LocationTypeSelected",
+        "description": "User selected a location type (for location-based fields)",
+        "condition": "Only applicable when IsLocationMap(_FieldName) = True",
+        "detailGroupState": "Enabled",
+        "controlState": {
+          "cboFieldName": "Enabled with value",
+          "cboFieldValue": "Enabled (populated with values for selected location type)",
+          "displayControl": "Enabled"
+        },
+        "trigger": "cboFieldName.ValueChanged event"
+      },
+      {
+        "state": "Editing",
+        "description": "User clicked Modify or double-clicked a grid row",
+        "gridState": "Row selected, can't interact",
+        "detailGroupState": "Enabled",
+        "businessObject": "Existing BargeTokenMap loaded via GetBargeTokenMap(ID), BeginEdit() called",
+        "toolbarState": {
+          "allButtons": "Disabled"
+        },
+        "buttonState": {
+          "btnSubmit": "Enabled",
+          "btnCancel": "Enabled",
+          "btnClose": "Enabled (will prompt if changes)"
+        },
+        "controlState": {
+          "cboFieldName_or_txtFieldName": "Appropriate one enabled/readonly based on IsLocationMap",
+          "cboFieldValue": "Enabled",
+          "displayControl": "Enabled"
+        },
+        "focusTarget": "cboFieldName",
+        "trigger": "Toolbar Modify button clicked OR grid double-click"
+      },
+      {
+        "state": "Saved",
+        "description": "User clicked Submit and validation passed",
+        "gridState": "Refreshed with updated data",
+        "detailGroupState": "Disabled",
+        "businessObject": "ApplyEdit() called, saved to database",
+        "toolbarState": "Reset to Initial or ItemSelected state",
+        "transition": "Returns to Initial state (no selection) or ItemSelected if row auto-selected",
+        "trigger": "btnSubmit.Click → SubmitNoRefreshClick success"
+      },
+      {
+        "state": "Cancelled",
+        "description": "User clicked Cancel button",
+        "gridState": "Unchanged",
+        "detailGroupState": "Disabled",
+        "businessObject": "CancelEdit() called, changes discarded",
+        "controlsClear": "All detail controls cleared",
+        "toolbarState": "Reset to Initial or ItemSelected state",
+        "transition": "Returns to previous list state",
+        "trigger": "btnCancel.Click → CancelClick"
+      },
+      {
+        "state": "ValidationError",
+        "description": "User tried to submit but validation failed",
+        "detailGroupState": "Remains enabled",
+        "staStatus": "Displays validation error message",
+        "businessObject": "Remains in edit mode",
+        "userAction": "Must fix errors or cancel",
+        "trigger": "Submit clicked but IsValid() returns false"
+      }
+    ],
+    "editModeProperty": {
+      "property": "IsEditingChild",
+      "purpose": "Inherited property that tracks whether form is in edit mode",
+      "setVia": "SetIsEditingChild property setter",
+      "affects": [
+        "Toolbar button enabling/disabling",
+        "Grid interaction availability"
+      ]
+    }
+  },
+  "eventHandlerChains": {
+    "toolbarClick": {
+      "event": "toolbarBargeTokenMap.ToolClick",
+      "handler": "toolbarBargeTokenMap_ToolClick",
+      "routing": [
+        {
+          "toolKey": "Add",
+          "method": "ItemAdd",
+          "chain": [
+            "Check if already editing (exit if IsEditingChild = true)",
+            "Create new BargeTokenMap via NewBargeTokenMap()",
+            "Call BeginEdit() on business object",
+            "Set FieldName, DisplayType, FleetID from form-level variables",
+            "Call LoadControlsForBargeTokenMap()",
+            "Call EnableDisableControls(True)",
+            "Set focus to cboFieldName"
+          ]
+        },
+        {
+          "toolKey": "Modify",
+          "method": "ItemModify",
+          "chain": [
+            "Check if already editing (exit if IsEditingChild = true)",
+            "Check if row selected (via HasListObjectSelected)",
+            "Get BargeTokenMap via GetBargeTokenMap(GridControlIndex)",
+            "Call BeginEdit() on business object",
+            "Call LoadControlsForBargeTokenMap()",
+            "Call EnableDisableControls(True)",
+            "Set focus to cboFieldName"
+          ]
+        },
+        {
+          "toolKey": "Remove",
+          "method": "ItemRemove",
+          "chain": [
+            "Show confirmation dialog via Main.ItemRemoveDialog('Barge Token Map')",
+            "If Yes, call BargeTokenMap.DeleteBargeTokenMap(GridControlIndex)",
+            "Call RefreshList(False)"
+          ]
+        },
+        {
+          "toolKey": "Export",
+          "method": "Main.ExportGrid",
+          "chain": [
+            "Call Main.ExportGrid(grdBargeTokenMap, staStatus, Me.Text)"
+          ]
+        }
+      ]
+    },
+    "gridDoubleClick": {
+      "event": "grdBargeTokenMap.DoubleClick",
+      "handler": "Inherited from base class, calls ItemModify",
+      "behavior": "Same as clicking Modify toolbar button"
+    },
+    "gridAfterSelectChange": {
+      "event": "grdBargeTokenMap.AfterSelectChange",
+      "handler": "Inherited from base class, calls SetToolState",
+      "behavior": "Updates toolbar button enabled states based on selection"
+    },
+    "submitButton": {
+      "event": "btnSubmit.Click",
+      "handler": "btnSubmit_Click",
+      "chain": [
+        "Call SubmitNoRefreshClick(_BargeTokenMap, False)",
+        "If FleetID not set (IsNew), set _BargeTokenMap.FleetID = _FleetID",
+        "Call base SubmitNoRefreshClick",
+        "Base class calls IsValid() on business object",
+        "If valid, base class calls ApplyEdit() which saves to database",
+        "On success, call ClearControls()",
+        "Call EnableDisableControls(False)",
+        "Call RefreshList(False)"
+      ],
+      "validation": {
+        "validatorExtender": "Displays errors in staStatus",
+        "businessRules": [
+          "FieldValue required (unless DeferredDelete = true)",
+          "If DisplayType = 'symbol', SymbolValue required",
+          "If DisplayType = 'color', ColorPairID required",
+          "If DisplayType = 'picture', PictureID required"
+        ]
+      }
+    },
+    "cancelButton": {
+      "event": "btnCancel.Click",
+      "handler": "btnCancel_Click",
+      "chain": [
+        "Call CancelClick(_BargeTokenMap, False)",
+        "Base class calls CancelEdit() on business object",
+        "Call ClearControls()",
+        "Call EnableDisableControls(False)"
+      ]
+    },
+    "closeButton": {
+      "event": "btnClose.Click",
+      "handler": "btnClose_Click",
+      "chain": [
+        "Call CancelClick() (no parameters)",
+        "Overridden to call CancelClick(_BargeTokenMap, True)",
+        "If changes exist, prompts user (via base class)",
+        "Closes form if user confirms or no changes"
+      ]
+    },
+    "fieldValidated": {
+      "cboFieldName": {
+        "event": "cboFieldName.Validated",
+        "handler": "cboFieldName_Validated",
+        "chain": [
+          "Call PopulateFieldValues()",
+          "Repopulates cboFieldValue based on selected location type"
+        ]
+      },
+      "cboFieldNameValueChanged": {
+        "event": "cboFieldName.ValueChanged",
+        "handler": "cboFieldName_ValueChanged",
+        "chain": [
+          "Call EnableDisableControls(True)",
+          "Re-evaluates which controls should be enabled based on location type selection"
+        ]
+      },
+      "txtFieldName": {
+        "event": "txtFieldName.Validated",
+        "handler": "txtFieldName_Validated",
+        "chain": [
+          "If enabled and not readonly, set _BargeTokenMap.FieldName = txtFieldName.Text",
+          "Set txtFieldName.Text = _BargeTokenMap.FieldName (round-trip)"
+        ]
+      },
+      "cboFieldValue": {
+        "event": "cboFieldValue.Validated",
+        "handler": "cboFieldValue_Validated",
+        "chain": [
+          "If enabled and not readonly, call InfragisticsHelper.SetObjectProperty(_BargeTokenMap.FieldValue, cboFieldValue)"
+        ]
+      },
+      "txtSymbolValue": {
+        "event": "txtSymbolValue.Validated",
+        "handler": "txtSymbolValue_Validated",
+        "chain": [
+          "If enabled and not readonly, set _BargeTokenMap.SymbolValue = txtSymbolValue.Text",
+          "Set txtSymbolValue.Text = _BargeTokenMap.SymbolValue (round-trip)"
+        ]
+      },
+      "cboColorPairID": {
+        "event": "cboColorPairID.Validated",
+        "handler": "cboColorPairID_Validated",
+        "chain": [
+          "If enabled and not readonly, call InfragisticsHelper.SetObjectProperty(_BargeTokenMap.ColorPairID, cboColorPairID)"
+        ]
+      },
+      "cboPictureID": {
+        "event": "cboPictureID.Validated",
+        "handler": "cboPictureID_Validated",
+        "chain": [
+          "If enabled and not readonly, call InfragisticsHelper.SetObjectProperty(_BargeTokenMap.PictureID, cboPictureID)"
+        ]
+      }
+    },
+    "pictureSelection": {
+      "event": "cboPictureID.RowSelected",
+      "handler": "cboPicture_RowSelected",
+      "chain": [
+        "If selected row is not nothing",
+        "Set cboPictureID.Appearance.Image = selected row's image (Cells(1).Value)",
+        "Provides visual preview of selected picture"
+      ]
+    }
+  },
+  "refreshTriggers": {
+    "onLoad": {
+      "method": "RefreshList(True)",
+      "selectFirstRow": true,
+      "description": "Initial load of mappings"
+    },
+    "afterSave": {
+      "method": "RefreshList(False)",
+      "selectFirstRow": false,
+      "description": "Refresh after successful submit to show new/updated mapping"
+    },
+    "afterDelete": {
+      "method": "RefreshList(False)",
+      "selectFirstRow": false,
+      "description": "Refresh after successful deletion"
+    },
+    "refreshImplementation": {
+      "method": "RefreshList",
+      "chain": [
+        "Call RefreshListBase(grdBargeTokenMap, selectFirstRow, BargeTokenMapList.GetList(_FieldName, _DisplayType, _FleetID).List, False)",
+        "Call SetToolState(grdBargeTokenMap)"
+      ],
+      "dataSource": "BusinessLogic.Lists.BargeTokenMapList.GetList(fieldName, displayType, fleetID)",
+      "gridFormatting": "Dynamic columns based on _DisplayType",
+      "reselection": "Uses 'BargeTokenMapID' unique identifier to reselect rows"
+    }
+  },
+  "primaryWorkflows": [
+    {
+      "name": "CreateNewMapping",
+      "description": "User creates a new field value to display type mapping",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickAdd",
+          "trigger": "Toolbar Add button",
+          "result": "Detail section enabled, new BargeTokenMap created"
+        },
+        {
+          "step": 2,
+          "action": "SelectFieldTypeOrValue",
+          "condition": "If IsLocationMap = true, select location type from cboFieldName; else field shown readonly",
+          "controls": ["cboFieldName", "txtFieldName"],
+          "validation": "Location type required for location-based fields before proceeding"
+        },
+        {
+          "step": 3,
+          "action": "SelectFieldValue",
+          "control": "cboFieldValue",
+          "dataSource": "Populated based on field type or location type",
+          "validation": "Required field"
+        },
+        {
+          "step": 4,
+          "action": "SelectDisplayValue",
+          "condition": "Based on _DisplayType",
+          "options": [
+            {
+              "displayType": "picture",
+              "control": "cboPictureID",
+              "action": "Select picture from combo",
+              "visual": "Picture preview shown in combo"
+            },
+            {
+              "displayType": "symbol",
+              "control": "txtSymbolValue",
+              "action": "Enter single character symbol"
+            },
+            {
+              "displayType": "color",
+              "control": "cboColorPairID",
+              "action": "Select color pair from combo"
+            }
+          ],
+          "validation": "Display value required based on type"
+        },
+        {
+          "step": 5,
+          "action": "ClickSubmit",
+          "button": "btnSubmit",
+          "validation": [
+            "FieldValue must have value",
+            "Display-specific field must have value",
+            "FleetID automatically set on new records"
+          ],
+          "onSuccess": "Mapping saved, grid refreshed, detail section cleared and disabled",
+          "onFailure": "Error shown in status bar, form remains in edit mode"
+        }
+      ],
+      "alternateEndings": [
+        {
+          "action": "ClickCancel",
+          "result": "Changes discarded, detail section cleared and disabled"
+        },
+        {
+          "action": "ClickClose",
+          "result": "Prompted if changes exist, form closes if confirmed or no changes"
+        }
+      ]
+    },
+    {
+      "name": "EditExistingMapping",
+      "description": "User modifies an existing field value mapping",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRow",
+          "trigger": "Click row in grid",
+          "result": "Modify and Remove buttons enabled"
+        },
+        {
+          "step": 2,
+          "action": "OpenForEdit",
+          "trigger": "Double-click row OR click Modify button",
+          "result": "Detail section enabled, controls loaded with existing values"
+        },
+        {
+          "step": 3,
+          "action": "ModifyValues",
+          "controls": ["cboFieldValue", "cboPictureID/txtSymbolValue/cboColorPairID"],
+          "note": "Field name/type not typically changed"
+        },
+        {
+          "step": 4,
+          "action": "ClickSubmit",
+          "button": "btnSubmit",
+          "validation": "Same as create workflow",
+          "onSuccess": "Mapping updated, grid refreshed"
+        }
+      ],
+      "alternateEndings": [
+        {
+          "action": "ClickCancel",
+          "result": "Changes discarded, detail section cleared"
+        }
+      ]
+    },
+    {
+      "name": "DeleteMapping",
+      "description": "User removes a field value mapping",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRow",
+          "trigger": "Click row in grid",
+          "result": "Remove button enabled"
+        },
+        {
+          "step": 2,
+          "action": "ClickRemove",
+          "trigger": "Toolbar Remove button",
+          "result": "Confirmation dialog shown"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDeletion",
+          "dialog": "Main.ItemRemoveDialog('Barge Token Map')",
+          "options": ["Yes", "No"]
+        },
+        {
+          "step": 4,
+          "action": "DeleteExecuted",
+          "condition": "User clicked Yes",
+          "method": "BargeTokenMap.DeleteBargeTokenMap(ID)",
+          "result": "Mapping deleted from database, grid refreshed"
+        }
+      ],
+      "alternateEndings": [
+        {
+          "action": "ClickNo",
+          "result": "Dialog closed, no changes made"
+        }
+      ]
+    },
+    {
+      "name": "ExportMappings",
+      "description": "User exports current mappings to Excel",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickExport",
+          "trigger": "Toolbar Export button",
+          "condition": "Grid has at least one row"
+        },
+        {
+          "step": 2,
+          "action": "ExportToExcel",
+          "method": "Main.ExportGrid(grdBargeTokenMap, staStatus, Me.Text)",
+          "result": "Grid data exported via common export functionality"
+        }
+      ]
+    },
+    {
+      "name": "LocationBasedMapping",
+      "description": "Special workflow for location-based fields with two-step selection",
+      "condition": "FieldName = 'Location', 'Consign to', or 'On Order to'",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenAddOrEdit",
+          "result": "Detail section enabled"
+        },
+        {
+          "step": 2,
+          "action": "SelectLocationType",
+          "control": "cboFieldName",
+          "options": {
+            "Location": ["Boat", "Consign Facility", "Facility", "Ship"],
+            "ConsignTo_or_OnOrderTo": ["Facility", "Ship"]
+          },
+          "result": "Field value combo repopulated based on location type"
+        },
+        {
+          "step": 3,
+          "action": "SelectSpecificLocation",
+          "control": "cboFieldValue",
+          "dataSource": "BargeTokenMapFieldValueList.GetList(selectedLocationType, fleetID)",
+          "description": "Shows actual boats, facilities, or ships based on type"
+        },
+        {
+          "step": 4,
+          "action": "SelectDisplayValue",
+          "description": "Same as normal workflow"
+        },
+        {
+          "step": 5,
+          "action": "Submit",
+          "note": "LocationType stored in business object for filtering"
+        }
+      ]
+    }
+  ],
+  "modalDialogPatterns": {
+    "confirmationDialogs": [
+      {
+        "dialog": "ItemRemoveDialog",
+        "trigger": "Remove button clicked",
+        "message": "Confirm deletion of 'Barge Token Map'",
+        "buttons": ["Yes", "No"],
+        "yesAction": "Delete record and refresh list",
+        "noAction": "Close dialog, no changes"
+      }
+    ],
+    "changeDetection": {
+      "mechanism": "Base class WndProc monitors form close",
+      "check": "If IsEditingChild or business object IsDirty",
+      "prompt": "Standard unsaved changes dialog",
+      "options": ["Save", "Discard", "Cancel"]
+    },
+    "formMode": {
+      "modal": "Likely (not explicitly shown, but typical for this pattern)",
+      "parent": "Called from other forms passing FieldName, DisplayType, FleetID",
+      "returnValue": "None (form doesn't return data, caller would refresh their own lists)"
+    }
+  },
+  "navigationPatterns": {
+    "calledFrom": [
+      {
+        "formContext": "Configuration or Setup screens",
+        "launchPattern": "Form instantiated and Initialize() called with parameters",
+        "typicalCallers": "Admin screens that manage barge token display settings"
+      }
+    ],
+    "navigatesTo": [
+      {
+        "destination": "None",
+        "note": "Leaf form - does not navigate to other forms"
+      }
+    ],
+    "closeBehavior": {
+      "closeButton": "Prompts if changes exist, then closes",
+      "formX": "Same as close button via WndProc override",
+      "afterSave": "Form remains open, returns to list view state",
+      "afterCancel": "Form remains open, returns to list view state"
+    }
+  },
+  "dataFlow": {
+    "input": {
+      "initialization": {
+        "fieldName": "Determines which field is being mapped",
+        "displayType": "Determines visual representation type",
+        "fleetID": "Scopes data to specific fleet"
+      }
+    },
+    "dataLoading": {
+      "listData": {
+        "source": "BargeTokenMapList.GetList(fieldName, displayType, fleetID)",
+        "returns": "List of existing mappings for this field/display combination"
+      },
+      "lookupData": {
+        "pictures": "PictureList.GetList().List",
+        "colors": "ColorPairList.GetList(fleetID).List",
+        "fieldValues": "BargeTokenMapFieldValueList.GetList(fieldValue, fleetID).List",
+        "locationTypes": "Built dynamically in PopulateFieldTypes()"
+      }
+    },
+    "dataSaving": {
+      "create": {
+        "method": "BargeTokenMap.NewBargeTokenMap()",
+        "fields": "FieldName, DisplayType, FleetID set immediately; others set via UI",
+        "save": "ApplyEdit() → Insert stored proc"
+      },
+      "update": {
+        "method": "BargeTokenMap.GetBargeTokenMap(ID)",
+        "fields": "Modified via Validated event handlers",
+        "save": "ApplyEdit() → Update stored proc"
+      },
+      "delete": {
+        "method": "BargeTokenMap.DeleteBargeTokenMap(ID)",
+        "direct": "Immediate database delete, no business object"
+      }
+    },
+    "output": {
+      "none": "Form operates independently; no data returned to caller",
+      "sideEffects": "Database changes affect barge token display in other parts of application"
+    }
+  },
+  "securityAuthorization": {
+    "interface": "IBaseDetailEdit",
+    "buttonTypes": {
+      "btnSubmit": "ButtonType.Submit",
+      "btnCancel": "ButtonType.CancelEdit",
+      "btnClose": "ButtonType.Cancel",
+      "toolbarAdd": "ButtonType.Add",
+      "toolbarModify": "ButtonType.Open",
+      "toolbarRemove": "ButtonType.Remove",
+      "toolbarExport": "ButtonType.Open"
+    },
+    "authorization": {
+      "mechanism": "ControlAuthorization.ToolbarButtonCanBeEnabled()",
+      "check": "Each toolbar button checked against user permissions and button type",
+      "hashtable": "_ToolbarButtonTypes stores toolbar button-to-type mappings"
+    }
+  },
+  "businessObjectIntegration": {
+    "businessObject": "BusinessLogic.BargeTokenMap",
+    "baseClass": "BargeTokenMapBase",
+    "editPattern": "BeginEdit/CancelEdit/ApplyEdit pattern",
+    "validation": {
+      "validatorExtender": "Used for UI-level validation (string types, max lengths)",
+      "businessRules": "CheckBusinessRules() in business object",
+      "displayControl": "staStatus (status bar)"
+    },
+    "specialBehavior": {
+      "fleetIDInjection": "FleetID set on new objects during submit (not during creation) to avoid dirty state",
+      "locationTypeStorage": "LocationType read-only property derived from database query",
+      "deferredDelete": "Business object supports DeferredDelete pattern for use by other forms (e.g., ShipBerth)"
+    }
+  },
+  "gridConfiguration": {
+    "gridControl": "grdBargeTokenMap (UltraGrid)",
+    "uniqueIdentifier": "BargeTokenMapID",
+    "sortOrder": {
+      "default": "ID ascending",
+      "userCustomizable": false
+    },
+    "columnChooser": "Disabled",
+    "columns": {
+      "picture": [
+        {
+          "field": "Picture",
+          "header": "Picture",
+          "width": 46,
+          "alignment": "Left",
+          "type": "Image"
+        },
+        {
+          "field": "FieldValue",
+          "header": "Value",
+          "width": 100,
+          "alignment": "Left"
+        }
+      ],
+      "symbol": [
+        {
+          "field": "FieldValue",
+          "header": "Value",
+          "width": 300,
+          "alignment": "Left"
+        },
+        {
+          "field": "SymbolValue",
+          "header": "Symbol",
+          "width": 46,
+          "alignment": "Left"
+        }
+      ],
+      "color": [
+        {
+          "field": "FieldValue",
+          "header": "Value",
+          "width": 100,
+          "alignment": "Left"
+        },
+        {
+          "field": "ColorName",
+          "header": "Color Name",
+          "width": 86,
+          "alignment": "Left"
+        },
+        {
+          "field": "TextColor",
+          "header": "Text Color",
+          "width": 80,
+          "alignment": "Left"
+        },
+        {
+          "field": "BackColor",
+          "header": "Back Color",
+          "width": 80,
+          "alignment": "Left"
+        }
+      ]
+    },
+    "interactions": {
+      "doubleClick": "Opens selected mapping for edit (same as Modify button)",
+      "selectionChange": "Updates toolbar button states",
+      "disabledWhen": "IsEditingChild = true (during add/edit operations)"
+    }
+  },
+  "userExperience": {
+    "defaultFocus": {
+      "onLoad": "Grid (default)",
+      "onAdd": "cboFieldName",
+      "onEdit": "cboFieldName"
+    },
+    "visualFeedback": {
+      "picturePreview": "cboPictureID shows selected picture image",
+      "statusBar": "staStatus displays validation errors",
+      "waitCursor": "Displayed during all major operations"
+    },
+    "cascadingBehavior": {
+      "locationTypeSelection": {
+        "trigger": "cboFieldName.ValueChanged",
+        "effect": "Repopulates cboFieldValue with location-specific values, enables dependent controls"
+      }
+    },
+    "dataEntry": {
+      "tabOrder": "cboFieldName/txtFieldName → cboFieldValue → cboPictureID/txtSymbolValue/cboColorPairID → btnSubmit → btnCancel",
+      "enterKeyBehavior": "Default (moves to next control)",
+      "escapeKeyBehavior": "Likely triggers cancel (standard Windows Forms behavior)"
+    }
+  },
+  "specialConsiderations": {
+    "dynamicUI": {
+      "description": "Form UI significantly changes based on initialization parameters",
+      "factors": [
+        "DisplayType determines which display control is visible (picture/symbol/color)",
+        "IsLocationMap() determines if field type selector or readonly field shown",
+        "Location type affects which location options shown (Boat/Consign Facility only for 'Location')"
+      ]
+    },
+    "multiContext": {
+      "description": "Single form serves multiple field mapping scenarios",
+      "contexts": [
+        "Location to Picture mapping",
+        "Location to Symbol mapping",
+        "Location to Color mapping",
+        "Status to Picture mapping",
+        "Status to Symbol mapping",
+        "Status to Color mapping",
+        "Consign to Picture/Symbol/Color",
+        "On Order to Picture/Symbol/Color",
+        "Custom fields to any display type"
+      ]
+    },
+    "locationFieldComplexity": {
+      "description": "Location-based fields have two-tier selection",
+      "tier1": "Location type (Boat, Facility, Ship, Consign Facility)",
+      "tier2": "Specific location instance",
+      "storagePattern": "LocationType stored separately from FieldValue for query optimization"
+    },
+    "reusabilityPattern": {
+      "description": "Form designed for reuse across different field types",
+      "flexibility": "New field types can be added without code changes",
+      "configuration": "Driven by database content and initialization parameters"
+    }
+  },
+  "conversionConsiderations": {
+    "blazorMapping": {
+      "formType": "Modal component with embedded grid and detail section",
+      "stateManagement": "Component-level state for edit mode, selected item, form parameters",
+      "validation": "Blazor validation attributes + business rule validation",
+      "grid": "Telerik/Syncfusion grid or custom table with selection",
+      "combos": "Dropdown components with cascading behavior for location types"
+    },
+    "challenges": [
+      "Dynamic column configuration based on display type",
+      "Cascading dropdown behavior (location type → field values)",
+      "Image preview in picture combo",
+      "Two-way binding between controls and business object",
+      "Modal dialog management for confirmations",
+      "Status bar equivalent for validation messages"
+    ],
+    "dataAccess": {
+      "pattern": "Repository pattern with async methods",
+      "lists": "Convert to async API calls returning DTOs",
+      "save": "Async save with proper error handling",
+      "delete": "Async delete with confirmation"
+    },
+    "securityPattern": {
+      "authorization": "ASP.NET Core authorization policies for button visibility/enablement",
+      "implementation": "Component parameters or cascading values for user permissions"
+    }
+  }
+}

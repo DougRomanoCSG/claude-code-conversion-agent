@@ -1,0 +1,503 @@
+{
+  "formName": "frmBargeExVendorDocInboxSearch",
+  "formType": "SearchForm",
+  "hasTabControl": false,
+  "layout": "single-screen",
+  "tabs": [],
+  "note": "This is a search form without tabs. The form uses a vertical panel-based layout with search criteria at the top, a results grid in the middle, and action buttons at the bottom.",
+  "formStructure": {
+    "panels": [
+      {
+        "name": "pnlContextTitle",
+        "purpose": "Form title banner",
+        "dockStyle": "Top",
+        "height": 24,
+        "controls": [
+          {
+            "name": "lblContextTitle",
+            "type": "UltraLabel",
+            "text": "BargeEx Vendor Document Inbox",
+            "style": "SearchCaption",
+            "appearance": "Highlighted banner with bold font"
+          }
+        ]
+      },
+      {
+        "name": "pnlCriteria",
+        "purpose": "Search criteria panel",
+        "dockStyle": "Top",
+        "height": 58,
+        "controls": [
+          {
+            "name": "cboVendorIDSearch",
+            "type": "UltraCombo",
+            "label": "Vendor",
+            "tabIndex": 1,
+            "width": 166,
+            "dataSource": "VendorSearch.GetList"
+          },
+          {
+            "name": "cboDocumentSubTypeIDSearch",
+            "type": "UltraCombo",
+            "label": "Document type",
+            "tabIndex": 3,
+            "width": 112,
+            "dataSource": "BargeExDocumentSubTypeList.GetList",
+            "note": "Multi-column display showing SubType and Type columns"
+          },
+          {
+            "name": "txtControlNumberSearch",
+            "type": "UltraTextEditor",
+            "label": "Control number",
+            "tabIndex": 5,
+            "width": 175
+          },
+          {
+            "name": "btnFind",
+            "type": "UltraButton",
+            "text": "F&ind",
+            "tabIndex": 6,
+            "anchor": "TopRight",
+            "action": "RefreshList(True)"
+          },
+          {
+            "name": "btnReset",
+            "type": "UltraButton",
+            "text": "Reset",
+            "tabIndex": 7,
+            "anchor": "TopRight",
+            "action": "ResetControls()",
+            "causesValidation": false
+          }
+        ]
+      },
+      {
+        "name": "grdSearch",
+        "purpose": "Search results grid",
+        "dockStyle": "Fill",
+        "type": "UltraGrid",
+        "uniqueIdentifier": "BargeExVendorDocumentInboxID",
+        "multiSelect": false,
+        "cellClickAction": "RowSelect",
+        "autoFitStyle": "ExtendLastColumn",
+        "dataSource": "BargeExVendorDocumentInboxSearch.GetList",
+        "visibleColumns": [
+          {
+            "key": "IsSelected",
+            "header": "Select",
+            "width": 50,
+            "align": "Center",
+            "editable": true,
+            "note": "Checkbox column toggled by clicking"
+          },
+          {
+            "key": "VendorName",
+            "header": "Vendor",
+            "width": 100,
+            "align": "Left"
+          },
+          {
+            "key": "BargeNum",
+            "header": "Barge",
+            "width": 100,
+            "align": "Left"
+          },
+          {
+            "key": "TicketID",
+            "header": "Ticket",
+            "width": 70,
+            "align": "Left"
+          },
+          {
+            "key": "SubDocType",
+            "header": "Type",
+            "width": 100,
+            "align": "Left"
+          },
+          {
+            "key": "StartDateTime",
+            "header": "Start Time",
+            "width": 100,
+            "align": "Left",
+            "comparer": "DateTimeSortComparer"
+          },
+          {
+            "key": "EndDateTime",
+            "header": "End Time",
+            "width": 100,
+            "align": "Left",
+            "comparer": "DateTimeSortComparer"
+          },
+          {
+            "key": "AssistedBoat",
+            "header": "Assisted Boat",
+            "width": 100,
+            "align": "Left"
+          },
+          {
+            "key": "Location",
+            "header": "Location",
+            "width": 100,
+            "align": "Left"
+          },
+          {
+            "key": "EndLocation",
+            "header": "End Location",
+            "width": 100,
+            "align": "Left"
+          },
+          {
+            "key": "ServicingBoat",
+            "header": "Servicing Boat",
+            "width": 100,
+            "align": "Left"
+          },
+          {
+            "key": "LoadStatus",
+            "header": "Load Status",
+            "width": 100,
+            "align": "Left"
+          },
+          {
+            "key": "CleanPumpCoverHandlingType",
+            "header": "Clean/Cover/Pump",
+            "width": 115,
+            "align": "Left"
+          },
+          {
+            "key": "River",
+            "header": "River",
+            "width": 46,
+            "align": "Left"
+          },
+          {
+            "key": "Mile",
+            "header": "Mile",
+            "width": 60,
+            "align": "Right",
+            "comparer": "NumericSortComparer"
+          },
+          {
+            "key": "EstimatedCost",
+            "header": "Est. Cost",
+            "width": 100,
+            "align": "Right",
+            "comparer": "NumericSortComparer"
+          },
+          {
+            "key": "ControlNumber",
+            "header": "Control Number",
+            "width": 100,
+            "align": "Left"
+          },
+          {
+            "key": "OriginalControlNumber",
+            "header": "Original Control Number",
+            "width": 145,
+            "align": "Left"
+          },
+          {
+            "key": "RevisionNumber",
+            "header": "Revision",
+            "width": 65,
+            "align": "Right",
+            "comparer": "NumericSortComparer"
+          }
+        ],
+        "hiddenColumns": [
+          "HasPriorImport",
+          "PrimaryControlNumber",
+          "SenderTradingPartnerNumber",
+          "ReceivedDateTime",
+          "DocType",
+          "BargeExBargeNum",
+          "BargeExBargeUscg",
+          "BargeExLocation",
+          "BargeExLocationCode",
+          "BargeExEndLocation",
+          "BargeExEndLocationCode",
+          "BargeExServicingBoat",
+          "BargeExServicingBoatUscg",
+          "BargeExAssistedBoat",
+          "BargeExAssistedBoatUscg"
+        ],
+        "initialSort": [
+          {
+            "column": "VendorName",
+            "direction": "Ascending",
+            "primary": true
+          },
+          {
+            "column": "BargeNum",
+            "direction": "Ascending"
+          },
+          {
+            "column": "StartDateTime",
+            "direction": "Ascending"
+          },
+          {
+            "column": "EndDateTime",
+            "direction": "Ascending"
+          },
+          {
+            "column": "OriginalControlNumber",
+            "direction": "Ascending"
+          },
+          {
+            "column": "RevisionNumber",
+            "direction": "Ascending"
+          }
+        ]
+      },
+      {
+        "name": "grpDetail",
+        "purpose": "Action buttons group",
+        "dockStyle": "Bottom",
+        "height": 36,
+        "borderStyle": "Header3D",
+        "controls": [
+          {
+            "name": "btnImport",
+            "type": "UltraButton",
+            "text": "I&mport",
+            "tabIndex": 0,
+            "anchor": "BottomRight",
+            "buttonType": "Action",
+            "action": "Opens frmBargeExVendorDocInboxImport",
+            "enabledWhen": "Grid has rows",
+            "validation": [
+              "Warns if selected barges have no open tickets",
+              "Warns if revisions have no prior import"
+            ]
+          },
+          {
+            "name": "btnDiscard",
+            "type": "UltraButton",
+            "text": "&Discard",
+            "tabIndex": 1,
+            "anchor": "BottomRight",
+            "buttonType": "Action",
+            "action": "Deletes selected BargeExVendorDocumentInbox records",
+            "enabledWhen": "Grid has rows",
+            "causesValidation": false,
+            "confirmation": "MessageBox confirmation before delete"
+          }
+        ]
+      }
+    ]
+  },
+  "sharedControls": {
+    "location": "Bottom panel (grpDetail)",
+    "controls": [
+      {
+        "name": "btnImport",
+        "type": "Button",
+        "text": "Import",
+        "action": "Import selected documents"
+      },
+      {
+        "name": "btnDiscard",
+        "type": "Button",
+        "text": "Discard",
+        "action": "Delete selected documents"
+      }
+    ]
+  },
+  "toolbarButtons": {
+    "note": "These buttons are called from the main form's toolbar",
+    "buttons": [
+      {
+        "name": "CheckAll",
+        "action": "Check all IsSelected checkboxes in grid"
+      },
+      {
+        "name": "UnCheckAll",
+        "action": "Uncheck all IsSelected checkboxes in grid"
+      },
+      {
+        "name": "ItemAddBarge",
+        "action": "Open frmBargeDetail to add barge from BargeEx data"
+      },
+      {
+        "name": "ItemAddServicingBoat",
+        "action": "Open frmBoatDetail to add servicing boat from BargeEx data"
+      },
+      {
+        "name": "ItemAddAssistedBoat",
+        "action": "Open frmBoatDetail to add assisted boat from BargeEx data"
+      },
+      {
+        "name": "ItemAddStartLocation",
+        "action": "Open frmFacilityDetail to add start location from BargeEx data"
+      },
+      {
+        "name": "ItemAddEndLocation",
+        "action": "Open frmFacilityDetail to add end location from BargeEx data"
+      },
+      {
+        "name": "SelectedRowHasTicket",
+        "action": "Check if selected row has associated ticket"
+      }
+    ]
+  },
+  "gridInteractions": {
+    "checkboxToggle": {
+      "column": "IsSelected",
+      "method": "InvertIsSelected",
+      "trigger": "Click on checkbox cell",
+      "behavior": "Toggle boolean value in dataset"
+    }
+  },
+  "workflows": [
+    {
+      "name": "SearchAndImport",
+      "steps": [
+        {
+          "step": 1,
+          "action": "EnterSearchCriteria",
+          "controls": [
+            "cboVendorIDSearch",
+            "cboDocumentSubTypeIDSearch",
+            "txtControlNumberSearch"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "ClickFind",
+          "result": "RefreshList populates grid"
+        },
+        {
+          "step": 3,
+          "action": "SelectRows",
+          "method": "Click IsSelected checkboxes or use CheckAll toolbar button"
+        },
+        {
+          "step": 4,
+          "action": "ClickImport",
+          "navigation": "Opens frmBargeExVendorDocInboxImport",
+          "postAction": "RefreshList if import succeeded"
+        }
+      ]
+    },
+    {
+      "name": "SearchAndDiscard",
+      "steps": [
+        {
+          "step": 1,
+          "action": "EnterSearchCriteria"
+        },
+        {
+          "step": 2,
+          "action": "ClickFind"
+        },
+        {
+          "step": 3,
+          "action": "SelectRows"
+        },
+        {
+          "step": 4,
+          "action": "ClickDiscard",
+          "confirmation": "MessageBox confirmation",
+          "result": "MultiDelete on selected records",
+          "postAction": "RefreshList if any deleted"
+        }
+      ]
+    },
+    {
+      "name": "AddMissingEntities",
+      "description": "Add barges, boats, or locations that are in BargeEx but not in BargeOps",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRow with missing entity"
+        },
+        {
+          "step": 2,
+          "action": "ClickToolbarButton",
+          "options": [
+            "ItemAddBarge",
+            "ItemAddServicingBoat",
+            "ItemAddAssistedBoat",
+            "ItemAddStartLocation",
+            "ItemAddEndLocation"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "FormOpens",
+          "note": "Detail form pre-populated with BargeEx data"
+        },
+        {
+          "step": 4,
+          "action": "SaveEntity",
+          "postAction": "RefreshList"
+        }
+      ]
+    }
+  ],
+  "businessLogic": {
+    "documentTypeFiltering": {
+      "bargeStatusTypes": [
+        "BreakTow",
+        "Clean",
+        "CoverHandling",
+        "Fleeting",
+        "MakeTow",
+        "MidstreamIn",
+        "MidstreamOut",
+        "Pump",
+        "Shift"
+      ],
+      "boatStatusTypes": [
+        "Assist"
+      ]
+    },
+    "importValidation": [
+      {
+        "check": "NoBargeTicketBargeNums",
+        "condition": "Selected BargeStatus records without open tickets",
+        "warning": "One or more selected barges do not have open Tickets. Are you sure you want to open new tickets for these barges?"
+      },
+      {
+        "check": "HasRevisionWithNoPriorImport",
+        "condition": "Selected revision records without prior imported transaction",
+        "warning": "One or more selected barges have not had an original transaction imported. Are you sure you want to import revisions for these barges?"
+      }
+    ],
+    "dataSourceQueries": {
+      "searchList": "BargeExVendorDocumentInboxSearch.GetList(FleetID, VendorID, DocumentSubTypeID, ControlNumber)",
+      "vendors": "VendorSearch.GetList",
+      "documentTypes": "BargeExDocumentSubTypeList.GetList (filtered)"
+    }
+  },
+  "security": {
+    "subSystem": "frmBargeExVendorDocInboxSearch",
+    "buttonTypes": {
+      "btnFind": "Open",
+      "btnReset": "Open",
+      "btnImport": "Action",
+      "btnDiscard": "Action"
+    }
+  },
+  "gridPersistence": {
+    "method": "MyAppSettingHelper",
+    "saveEvent": "pnlSearch.HandleDestroyed",
+    "restoreEvent": "pnlSearch.HandleCreated",
+    "persisted": [
+      "Column widths",
+      "Column order",
+      "Column visibility",
+      "Sort order"
+    ]
+  },
+  "modernImplementationNotes": {
+    "layout": "Use vertical flex/grid layout instead of docked panels",
+    "searchCriteria": "Implement as form with labeled inputs",
+    "grid": "Use modern data table component with checkbox selection",
+    "buttons": "Material buttons in footer",
+    "toolbar": "Main form toolbar buttons become action menu or bulk operation buttons",
+    "persistence": "Store grid settings in local storage or user preferences API",
+    "validation": "Client-side validation with confirmation dialogs",
+    "noTabs": "Single-screen layout with search → results → actions flow"
+  }
+}

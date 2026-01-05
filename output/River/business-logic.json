@@ -1,0 +1,750 @@
+{
+  "businessObject": "River",
+  "baseClass": "RiverBase",
+  "namespace": "BargeOps.BusinessObjects",
+  "extractedFrom": {
+    "mainClass": "River.vb",
+    "baseClass": "RiverBase.vb",
+    "relatedClasses": ["Location.vb"]
+  },
+  "properties": [
+    {
+      "name": "RiverID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "description": "Primary key identifier for the river"
+    },
+    {
+      "name": "Name",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 40,
+      "isRequired": true,
+      "isNullable": false,
+      "description": "Waterway name",
+      "displayName": "Waterway name"
+    },
+    {
+      "name": "Code",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 3,
+      "minLength": 3,
+      "isRequired": true,
+      "isNullable": false,
+      "description": "Three-character river code",
+      "displayName": "Code",
+      "customSetter": true,
+      "setterDetails": "Uses SetStringProp instead of SetCharProp (overridden from base)"
+    },
+    {
+      "name": "BargeExCode",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 10,
+      "isRequired": false,
+      "isNullable": true,
+      "description": "BargeEx system integration code"
+    },
+    {
+      "name": "StartMile",
+      "type": "Decimal",
+      "storedAs": "String",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": true,
+      "precision": 2,
+      "roundingMethod": "Nearest",
+      "roundingIncrement": 0.01,
+      "description": "Starting mile marker for river (formatted with 2 decimal places)",
+      "displayName": "Start mile",
+      "customFormatter": true,
+      "formatterDetails": "FmtTwoDecimalPlaces - Mile position formatted with 2 decimal places"
+    },
+    {
+      "name": "EndMile",
+      "type": "Decimal",
+      "storedAs": "String",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": true,
+      "precision": 2,
+      "roundingMethod": "Nearest",
+      "roundingIncrement": 0.01,
+      "description": "Ending mile marker for river (formatted with 2 decimal places)",
+      "displayName": "End mile",
+      "customFormatter": true,
+      "formatterDetails": "FmtTwoDecimalPlaces - Mile position formatted with 2 decimal places"
+    },
+    {
+      "name": "IsLowToHighDirection",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": true,
+      "description": "Indicates if river direction is from low to high mile markers",
+      "displayName": "Direction"
+    },
+    {
+      "name": "IsActive",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": true,
+      "description": "Indicates if river is active in the system",
+      "displayName": "Active"
+    },
+    {
+      "name": "ConvFmsRiverID",
+      "type": "Int32",
+      "storedAs": "String",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": true,
+      "description": "Legacy FMS river identifier for data conversion"
+    },
+    {
+      "name": "UpLabel",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isRequired": true,
+      "isNullable": false,
+      "description": "Label for upstream direction",
+      "displayName": "Upstream"
+    },
+    {
+      "name": "DownLabel",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isRequired": true,
+      "isNullable": false,
+      "description": "Label for downstream direction",
+      "displayName": "Downstream"
+    }
+  ],
+  "childObjects": [
+    {
+      "property": "Alert",
+      "type": "Alert",
+      "relationship": "OneToOne",
+      "loadingStrategy": "Deferred",
+      "description": "Alert configuration for the river"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "NameRequired",
+      "property": "Name",
+      "condition": "String.IsNullOrEmpty(p_Name)",
+      "message": "Waterway name is required",
+      "severity": "Error",
+      "context": "Always",
+      "category": "Required",
+      "modernEquivalent": {
+        "dataAnnotation": "[Required(ErrorMessage = \"Waterway name is required\")]",
+        "fluentValidation": "RuleFor(x => x.Name).NotEmpty().WithMessage(\"Waterway name is required\")"
+      }
+    },
+    {
+      "ruleName": "NameMaxLength",
+      "property": "Name",
+      "condition": "(p_Name.Length > MaxLength.Name)",
+      "message": "Waterway name cannot exceed 40 characters.",
+      "severity": "Error",
+      "context": "Always",
+      "category": "Length",
+      "maxLength": 40,
+      "modernEquivalent": {
+        "dataAnnotation": "[MaxLength(40, ErrorMessage = \"Waterway name cannot exceed 40 characters.\")]",
+        "fluentValidation": "RuleFor(x => x.Name).MaximumLength(40).WithMessage(\"Waterway name cannot exceed 40 characters.\")"
+      }
+    },
+    {
+      "ruleName": "CodeRequired",
+      "property": "Code",
+      "condition": "String.IsNullOrEmpty(p_Code)",
+      "message": "Code is required",
+      "severity": "Error",
+      "context": "Always",
+      "category": "Required",
+      "modernEquivalent": {
+        "dataAnnotation": "[Required(ErrorMessage = \"Code is required\")]",
+        "fluentValidation": "RuleFor(x => x.Code).NotEmpty().WithMessage(\"Code is required\")"
+      }
+    },
+    {
+      "ruleName": "CodeMaxLength",
+      "property": "Code",
+      "condition": "(p_Code.Length > MaxLength.Code)",
+      "message": "Code cannot exceed 3 characters.",
+      "severity": "Error",
+      "context": "Always",
+      "category": "Length",
+      "maxLength": 3,
+      "modernEquivalent": {
+        "dataAnnotation": "[MaxLength(3, ErrorMessage = \"Code cannot exceed 3 characters.\")]",
+        "fluentValidation": "RuleFor(x => x.Code).MaximumLength(3).WithMessage(\"Code cannot exceed 3 characters.\")"
+      }
+    },
+    {
+      "ruleName": "CodeMinLength",
+      "property": "Code",
+      "condition": "(p_Code.Length <> 3)",
+      "message": "Code must be exactly 3 characters.",
+      "severity": "Error",
+      "context": "Always",
+      "category": "ExactLength",
+      "exactLength": 3,
+      "modernEquivalent": {
+        "dataAnnotation": "[StringLength(3, MinimumLength = 3, ErrorMessage = \"Code must be exactly 3 characters.\")]",
+        "fluentValidation": "RuleFor(x => x.Code).Length(3).WithMessage(\"Code must be exactly 3 characters.\")"
+      }
+    },
+    {
+      "ruleName": "BargeExCodeMaxLength",
+      "property": "BargeExCode",
+      "condition": "(p_BargeExCode.Length > MaxLength.BargeExCode)",
+      "message": "BargeExCode cannot exceed 10 characters.",
+      "severity": "Error",
+      "context": "Always",
+      "category": "Length",
+      "maxLength": 10,
+      "modernEquivalent": {
+        "dataAnnotation": "[MaxLength(10, ErrorMessage = \"BargeExCode cannot exceed 10 characters.\")]",
+        "fluentValidation": "RuleFor(x => x.BargeExCode).MaximumLength(10).WithMessage(\"BargeExCode cannot exceed 10 characters.\")"
+      }
+    },
+    {
+      "ruleName": "StartMileEndMileComparison",
+      "property": "IsLowToHighDirection",
+      "relatedProperties": ["StartMile", "EndMile"],
+      "condition": "((p_StartMile <> String.Empty) AndAlso (p_EndMile <> String.Empty) AndAlso (CType(p_StartMile, Decimal) > CType(p_EndMile, Decimal)))",
+      "message": "Start mile must be less than or equal to End mile",
+      "severity": "Error",
+      "context": "When both StartMile and EndMile have values",
+      "category": "Comparison",
+      "modernEquivalent": {
+        "fluentValidation": "RuleFor(x => x.StartMile)\n    .LessThanOrEqualTo(x => x.EndMile)\n    .When(x => x.StartMile.HasValue && x.EndMile.HasValue)\n    .WithMessage(\"Start mile must be less than or equal to End mile\")"
+      }
+    },
+    {
+      "ruleName": "StartMileNonnegative",
+      "property": "StartMile",
+      "condition": "(Not String.IsNullOrEmpty(p_StartMile) AndAlso CInt(p_StartMile) < 0)",
+      "message": "Start mile must be greater than or equal to 0.",
+      "severity": "Error",
+      "context": "When StartMile has a value",
+      "category": "Range",
+      "minValue": 0,
+      "modernEquivalent": {
+        "dataAnnotation": "[Range(0, double.MaxValue, ErrorMessage = \"Start mile must be greater than or equal to 0.\")]",
+        "fluentValidation": "RuleFor(x => x.StartMile)\n    .GreaterThanOrEqualTo(0)\n    .When(x => x.StartMile.HasValue)\n    .WithMessage(\"Start mile must be greater than or equal to 0.\")"
+      }
+    },
+    {
+      "ruleName": "StartMileReasonableNumber",
+      "property": "StartMile",
+      "condition": "(p_StartMile <> String.Empty) AndAlso (CType(p_StartMile, Decimal) > 5000.0)",
+      "message": "{Value} is not a reasonable value for Start mile",
+      "severity": "Error",
+      "context": "When StartMile has a value",
+      "category": "Range",
+      "maxValue": 5000.0,
+      "modernEquivalent": {
+        "dataAnnotation": "[Range(0, 5000, ErrorMessage = \"Start mile must be between 0 and 5000.\")]",
+        "fluentValidation": "RuleFor(x => x.StartMile)\n    .LessThanOrEqualTo(5000)\n    .When(x => x.StartMile.HasValue)\n    .WithMessage(\"{0} is not a reasonable value for Start mile\", x => x.StartMile)"
+      }
+    },
+    {
+      "ruleName": "EndMileReasonableNumber",
+      "property": "EndMile",
+      "condition": "(p_EndMile <> String.Empty) AndAlso (CType(p_EndMile, Decimal) > 5000.0)",
+      "message": "{Value} is not a reasonable value for End mile",
+      "severity": "Error",
+      "context": "When EndMile has a value",
+      "category": "Range",
+      "maxValue": 5000.0,
+      "modernEquivalent": {
+        "dataAnnotation": "[Range(0, 5000, ErrorMessage = \"End mile must be between 0 and 5000.\")]",
+        "fluentValidation": "RuleFor(x => x.EndMile)\n    .LessThanOrEqualTo(5000)\n    .When(x => x.EndMile.HasValue)\n    .WithMessage(\"{0} is not a reasonable value for End mile\", x => x.EndMile)"
+      }
+    },
+    {
+      "ruleName": "UpLabelRequired",
+      "property": "UpLabel",
+      "condition": "String.IsNullOrEmpty(p_UpLabel)",
+      "message": "Upstream is required",
+      "severity": "Error",
+      "context": "Always",
+      "category": "Required",
+      "modernEquivalent": {
+        "dataAnnotation": "[Required(ErrorMessage = \"Upstream is required\")]",
+        "fluentValidation": "RuleFor(x => x.UpLabel).NotEmpty().WithMessage(\"Upstream is required\")"
+      }
+    },
+    {
+      "ruleName": "UpLabelMaxLength",
+      "property": "UpLabel",
+      "condition": "(p_UpLabel.Length > MaxLength.UpLabel)",
+      "message": "Upstream cannot exceed 20 characters.",
+      "severity": "Error",
+      "context": "Always",
+      "category": "Length",
+      "maxLength": 20,
+      "modernEquivalent": {
+        "dataAnnotation": "[MaxLength(20, ErrorMessage = \"Upstream cannot exceed 20 characters.\")]",
+        "fluentValidation": "RuleFor(x => x.UpLabel).MaximumLength(20).WithMessage(\"Upstream cannot exceed 20 characters.\")"
+      }
+    },
+    {
+      "ruleName": "DownLabelRequired",
+      "property": "DownLabel",
+      "condition": "String.IsNullOrEmpty(p_DownLabel)",
+      "message": "Downstream is required",
+      "severity": "Error",
+      "context": "Always",
+      "category": "Required",
+      "modernEquivalent": {
+        "dataAnnotation": "[Required(ErrorMessage = \"Downstream is required\")]",
+        "fluentValidation": "RuleFor(x => x.DownLabel).NotEmpty().WithMessage(\"Downstream is required\")"
+      }
+    },
+    {
+      "ruleName": "DownLabelMaxLength",
+      "property": "DownLabel",
+      "condition": "(p_DownLabel.Length > MaxLength.DownLabel)",
+      "message": "Downstream cannot exceed 20 characters.",
+      "severity": "Error",
+      "context": "Always",
+      "category": "Length",
+      "maxLength": 20,
+      "modernEquivalent": {
+        "dataAnnotation": "[MaxLength(20, ErrorMessage = \"Downstream cannot exceed 20 characters.\")]",
+        "fluentValidation": "RuleFor(x => x.DownLabel).MaximumLength(20).WithMessage(\"Downstream cannot exceed 20 characters.\")"
+      }
+    }
+  ],
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "RiverID",
+        "value": "0",
+        "type": "Int32"
+      },
+      {
+        "property": "Name",
+        "value": "String.Empty",
+        "type": "String"
+      },
+      {
+        "property": "Code",
+        "value": "String.Empty",
+        "type": "String"
+      },
+      {
+        "property": "BargeExCode",
+        "value": "String.Empty",
+        "type": "String"
+      },
+      {
+        "property": "StartMile",
+        "value": "String.Empty",
+        "type": "String"
+      },
+      {
+        "property": "EndMile",
+        "value": "String.Empty",
+        "type": "String"
+      },
+      {
+        "property": "IsLowToHighDirection",
+        "value": "true",
+        "type": "Boolean",
+        "note": "Default is checked - Direction is low to high"
+      },
+      {
+        "property": "IsActive",
+        "value": "true",
+        "type": "Boolean",
+        "note": "Default is checked - Active"
+      },
+      {
+        "property": "ConvFmsRiverID",
+        "value": "String.Empty",
+        "type": "String"
+      },
+      {
+        "property": "UpLabel",
+        "value": "String.Empty",
+        "type": "String"
+      },
+      {
+        "property": "DownLabel",
+        "value": "String.Empty",
+        "type": "String"
+      },
+      {
+        "property": "Alert",
+        "value": "Nothing",
+        "type": "Alert",
+        "loadingStrategy": "Deferred"
+      }
+    ],
+    "displayNameOverrides": [
+      {
+        "property": "Name",
+        "displayName": "Waterway name"
+      },
+      {
+        "property": "Code",
+        "displayName": "Code"
+      },
+      {
+        "property": "StartMile",
+        "displayName": "Start mile"
+      },
+      {
+        "property": "EndMile",
+        "displayName": "End mile"
+      },
+      {
+        "property": "IsLowToHighDirection",
+        "displayName": "Direction"
+      },
+      {
+        "property": "IsActive",
+        "displayName": "Active"
+      },
+      {
+        "property": "UpLabel",
+        "displayName": "Upstream"
+      },
+      {
+        "property": "DownLabel",
+        "displayName": "Downstream"
+      }
+    ],
+    "storedProcedures": {
+      "fetch": "RiverSelect",
+      "fetchAll": "RiversSelect",
+      "insert": "RiverInsert",
+      "update": "RiverUpdate",
+      "delete": "RiverDelete"
+    }
+  },
+  "methods": {
+    "factory": [
+      {
+        "name": "NewRiver",
+        "scope": "Public Shared",
+        "returnType": "River",
+        "parameters": [],
+        "description": "Creates a new parent River instance"
+      },
+      {
+        "name": "NewRiverAsChild",
+        "scope": "Friend Shared",
+        "returnType": "River",
+        "parameters": [],
+        "description": "Creates a new child River instance"
+      },
+      {
+        "name": "GetRiver",
+        "scope": "Public Shared",
+        "returnType": "River",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Loads an existing parent River by ID"
+      },
+      {
+        "name": "GetRiverChild",
+        "scope": "Friend Shared",
+        "returnType": "River",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Loads an existing child River by ID"
+      },
+      {
+        "name": "GetRiverChild",
+        "scope": "Friend Shared",
+        "returnType": "River",
+        "parameters": [
+          {
+            "name": "dr",
+            "type": "SafeDataReader"
+          }
+        ],
+        "description": "Loads an existing child River from a DataReader"
+      }
+    ],
+    "crud": [
+      {
+        "name": "Save",
+        "scope": "Public Overrides",
+        "returnType": "BusinessBase",
+        "description": "Persists River to database and marks RiverList cache as dirty",
+        "cacheInvalidation": [
+          "Lists.RiverList.GetList.MarkCacheDirty()"
+        ]
+      },
+      {
+        "name": "SaveNoRefresh",
+        "scope": "Public Overrides",
+        "returnType": "void",
+        "description": "Persists River to database without refreshing and marks RiverList cache as dirty",
+        "cacheInvalidation": [
+          "Lists.RiverList.GetList.MarkCacheDirty()"
+        ]
+      },
+      {
+        "name": "DeleteRiver",
+        "scope": "Public Shared Shadows",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Deletes a River by ID and marks RiverList cache as dirty",
+        "cacheInvalidation": [
+          "Lists.RiverList.GetList.MarkCacheDirty()"
+        ]
+      }
+    ],
+    "businessLogic": [
+      {
+        "name": "CheckBusinessRules",
+        "scope": "Public Overrides",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "PropertyName",
+            "type": "String"
+          }
+        ],
+        "description": "Validates business rules for specified property or all properties if empty"
+      },
+      {
+        "name": "Initialize",
+        "scope": "Public Overrides",
+        "returnType": "void",
+        "description": "Initializes River instance with default values and display names"
+      }
+    ]
+  },
+  "dataAccess": {
+    "storedProcedures": {
+      "select": "RiverSelect",
+      "selectAll": "RiversSelect",
+      "insert": "RiverInsert",
+      "update": "RiverUpdate",
+      "delete": "RiverDelete"
+    },
+    "parameters": [
+      {
+        "name": "@RiverID",
+        "type": "SqlDbType.Int",
+        "direction": "InputOutput (Insert) | Input (Update/Delete/Fetch)",
+        "property": "RiverID"
+      },
+      {
+        "name": "@Name",
+        "type": "SqlDbType.VarChar",
+        "direction": "Input",
+        "property": "Name"
+      },
+      {
+        "name": "@Code",
+        "type": "SqlDbType.Char",
+        "direction": "Input",
+        "property": "Code"
+      },
+      {
+        "name": "@BargeExCode",
+        "type": "SqlDbType.VarChar",
+        "direction": "Input",
+        "property": "BargeExCode"
+      },
+      {
+        "name": "@StartMile",
+        "type": "SqlDbType.Decimal",
+        "direction": "Input",
+        "property": "StartMile"
+      },
+      {
+        "name": "@EndMile",
+        "type": "SqlDbType.Decimal",
+        "direction": "Input",
+        "property": "EndMile"
+      },
+      {
+        "name": "@IsLowToHighDirection",
+        "type": "SqlDbType.Bit",
+        "direction": "Input",
+        "property": "IsLowToHighDirection"
+      },
+      {
+        "name": "@IsActive",
+        "type": "SqlDbType.Bit",
+        "direction": "Input",
+        "property": "IsActive"
+      },
+      {
+        "name": "@UpLabel",
+        "type": "SqlDbType.VarChar",
+        "direction": "Input",
+        "property": "UpLabel"
+      },
+      {
+        "name": "@DownLabel",
+        "type": "SqlDbType.VarChar",
+        "direction": "Input",
+        "property": "DownLabel"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "property": "Alert",
+      "relatedEntity": "Alert",
+      "type": "OneToOne",
+      "cascadeDelete": false,
+      "loadingStrategy": "Deferred",
+      "description": "Alert configuration associated with the river"
+    }
+  ],
+  "cacheManagement": {
+    "listCache": "Lists.RiverList",
+    "invalidationTriggers": [
+      "Save",
+      "SaveNoRefresh",
+      "DeleteRiver"
+    ]
+  },
+  "auditFields": {
+    "enabled": true,
+    "trackedFields": [
+      "RiverID",
+      "Name",
+      "Code",
+      "BargeExCode",
+      "StartMile",
+      "EndMile",
+      "IsLowToHighDirection",
+      "IsActive",
+      "UpLabel",
+      "DownLabel"
+    ],
+    "methods": {
+      "saveOriginal": "SaveOriginalAuditValues",
+      "fieldAudit": "FieldAudit"
+    }
+  },
+  "securityContext": {
+    "functionalArea": "General",
+    "note": "Base class initializes to General functional area; override in constructor if needed"
+  },
+  "modernArchitectureMapping": {
+    "domainModel": {
+      "namespace": "BargeOps.Admin.Domain.Models",
+      "className": "River",
+      "referenceFile": "BoatLocation.cs (canonical pattern)",
+      "properties": [
+        "Id (int) - maps to RiverID",
+        "Name (string) - maps to Name",
+        "Code (string) - maps to Code",
+        "BargeExCode (string?) - maps to BargeExCode",
+        "StartMile (decimal?) - maps to StartMile",
+        "EndMile (decimal?) - maps to EndMile",
+        "IsLowToHighDirection (bool) - maps to IsLowToHighDirection",
+        "IsActive (bool) - maps to IsActive",
+        "UpLabel (string) - maps to UpLabel",
+        "DownLabel (string) - maps to DownLabel"
+      ]
+    },
+    "serviceLayer": {
+      "namespace": "BargeOps.Admin.Infrastructure.Services",
+      "interfaceName": "IRiverService",
+      "implementationName": "RiverService",
+      "referenceFiles": [
+        "IBoatLocationService.cs",
+        "BoatLocationService.cs"
+      ]
+    },
+    "validation": {
+      "approach": "FluentValidation",
+      "validatorClass": "RiverValidator",
+      "namespace": "BargeOps.Admin.Domain.Validators"
+    }
+  },
+  "specialBehaviors": [
+    {
+      "behavior": "DecimalFormatting",
+      "description": "StartMile and EndMile are formatted with 2 decimal places and rounded to nearest 0.01",
+      "properties": ["StartMile", "EndMile"],
+      "implementation": "Custom property overrides using GetDecimalProp/SetDecimalProp with FmtTwoDecimalPlaces"
+    },
+    {
+      "behavior": "CodePropertyOverride",
+      "description": "Code property overrides base to use SetStringProp instead of SetCharProp",
+      "properties": ["Code"],
+      "implementation": "Property override in River.vb"
+    },
+    {
+      "behavior": "CacheInvalidation",
+      "description": "All Save and Delete operations invalidate the RiverList cache",
+      "triggers": ["Save", "SaveNoRefresh", "DeleteRiver"]
+    },
+    {
+      "behavior": "ChildObjectManagement",
+      "description": "Alert child object loaded on demand (deferred loading)",
+      "childObjects": ["Alert"]
+    }
+  ],
+  "validationGroups": [
+    {
+      "name": "Required Fields",
+      "rules": ["NameRequired", "CodeRequired", "UpLabelRequired", "DownLabelRequired"]
+    },
+    {
+      "name": "Length Constraints",
+      "rules": ["NameMaxLength", "CodeMaxLength", "CodeMinLength", "BargeExCodeMaxLength", "UpLabelMaxLength", "DownLabelMaxLength"]
+    },
+    {
+      "name": "Range Constraints",
+      "rules": ["StartMileNonnegative", "StartMileReasonableNumber", "EndMileReasonableNumber"]
+    },
+    {
+      "name": "Cross-Property Validation",
+      "rules": ["StartMileEndMileComparison"]
+    }
+  ],
+  "notes": [
+    "Mile values are stored as strings but treated as decimals with 2 decimal places precision",
+    "Code must be exactly 3 characters - this is enforced via custom business rule",
+    "StartMile must be less than or equal to EndMile when both have values",
+    "Mile values are considered reasonable if under 5000",
+    "StartMile must be non-negative (>= 0)",
+    "IsLowToHighDirection and IsActive default to true",
+    "Alert child object uses deferred loading pattern",
+    "All CRUD operations invalidate the RiverList cache",
+    "Field auditing is enabled for all properties",
+    "ConvFmsRiverID is a legacy field for FMS data conversion"
+  ]
+}

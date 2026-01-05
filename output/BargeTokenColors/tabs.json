@@ -1,0 +1,307 @@
+{
+  "formName": "frmBargeTokenColors",
+  "formTitle": "Define Colors for Barge Token",
+  "baseForm": "frmBaseDetailEditList",
+  "formType": "ListWithDetailEdit",
+  "hasTabs": false,
+  "layout": "list-detail",
+  "tabs": [],
+  "sections": [
+    {
+      "name": "List Section",
+      "location": "Top",
+      "purpose": "Display all color pairs in a grid",
+      "dockStyle": "Fill",
+      "controls": [
+        {
+          "name": "grdColorPair",
+          "type": "UltraGrid",
+          "purpose": "Display list of color pairs",
+          "columns": [
+            {
+              "key": "ColorPairID",
+              "header": "ColorPairID",
+              "type": "Integer",
+              "hidden": true,
+              "uniqueIdentifier": true
+            },
+            {
+              "key": "Name",
+              "header": "Color Name",
+              "type": "String",
+              "width": 142,
+              "alignment": "Left"
+            },
+            {
+              "key": "TextColor",
+              "header": "Text Color",
+              "type": "String",
+              "width": 100,
+              "alignment": "Left"
+            },
+            {
+              "key": "BackColor",
+              "header": "Back Color",
+              "type": "String",
+              "width": 100,
+              "alignment": "Left"
+            }
+          ],
+          "operations": ["Add", "Modify", "Remove", "Export"],
+          "defaultSort": {
+            "column": "Name",
+            "direction": "Ascending"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Detail Edit Section",
+      "location": "Bottom",
+      "purpose": "Edit individual color pair properties",
+      "dockStyle": "Bottom",
+      "groupBox": "grpDetail",
+      "groupTitle": "Detail",
+      "controls": [
+        {
+          "name": "txtName",
+          "type": "UltraTextEditor",
+          "label": "Color name:",
+          "required": false,
+          "maxLength": "ColorPair.MaxLength.Name",
+          "validationType": "String",
+          "position": {
+            "left": 78,
+            "top": 16
+          }
+        },
+        {
+          "name": "clrTextColor",
+          "type": "UltraColorPicker",
+          "label": "Text color:",
+          "required": false,
+          "defaultValue": "Black",
+          "position": {
+            "left": 78,
+            "top": 40
+          },
+          "events": ["ColorChanged"]
+        },
+        {
+          "name": "clrBackColor",
+          "type": "UltraColorPicker",
+          "label": "Back color:",
+          "required": false,
+          "defaultValue": "Pink",
+          "position": {
+            "left": 78,
+            "top": 64
+          },
+          "events": ["ColorChanged"]
+        },
+        {
+          "name": "lblSample",
+          "type": "UltraLabel",
+          "label": null,
+          "text": "Sample",
+          "purpose": "Live preview of selected color combination",
+          "position": {
+            "left": 260,
+            "top": 16
+          },
+          "styling": {
+            "textAlign": "Center",
+            "verticalAlign": "Middle",
+            "dynamicColors": true
+          }
+        },
+        {
+          "name": "btnDetailSubmit",
+          "type": "Button",
+          "text": "&Submit",
+          "action": "Save color pair",
+          "anchor": "Bottom, Right",
+          "position": {
+            "left": 200,
+            "top": 90
+          }
+        },
+        {
+          "name": "btnDetailCancel",
+          "type": "Button",
+          "text": "Ca&ncel",
+          "action": "Cancel editing",
+          "causesValidation": false,
+          "anchor": "Bottom, Right",
+          "position": {
+            "left": 282,
+            "top": 90
+          }
+        }
+      ]
+    },
+    {
+      "name": "Close Section",
+      "location": "Bottom",
+      "purpose": "Close the entire form",
+      "dockStyle": "Bottom",
+      "groupBox": "grpClose",
+      "controls": [
+        {
+          "name": "btnClose",
+          "type": "Button",
+          "text": "&Close",
+          "action": "Close form",
+          "causesValidation": false,
+          "anchor": "Bottom, Right"
+        }
+      ]
+    }
+  ],
+  "toolbar": {
+    "name": "ToolbarColorPair",
+    "type": "UltraToolbarsManager",
+    "location": "Top",
+    "style": "Office2003",
+    "buttons": [
+      {
+        "key": "Add",
+        "caption": "&Add",
+        "type": "ButtonType.Add",
+        "icon": "Resources.Add",
+        "displayStyle": "ImageAndText",
+        "enabledWhen": "Not editing detail",
+        "action": "Create new color pair"
+      },
+      {
+        "key": "Modify",
+        "caption": "&Modify",
+        "type": "ButtonType.Open",
+        "icon": "Resources.Modify",
+        "displayStyle": "ImageAndText",
+        "enabledWhen": "Row selected and not editing detail",
+        "action": "Edit selected color pair"
+      },
+      {
+        "key": "Remove",
+        "caption": "&Remove",
+        "type": "ButtonType.Remove",
+        "icon": "Resources.Remove",
+        "displayStyle": "ImageAndText",
+        "enabledWhen": "Row selected and not editing detail",
+        "action": "Delete selected color pair"
+      },
+      {
+        "key": "Export",
+        "caption": "Export",
+        "type": "ButtonType.Open",
+        "icon": "Resources.ExportResults",
+        "displayStyle": "ImageAndText",
+        "isFirstInGroup": true,
+        "enabledWhen": "At least one row exists and not editing detail",
+        "action": "Export grid to file"
+      }
+    ]
+  },
+  "sharedControls": {
+    "location": "Throughout form",
+    "controls": [
+      {
+        "name": "staStatus",
+        "type": "UltraStatusBar",
+        "location": "Bottom of main panel",
+        "purpose": "Display validation messages and status"
+      },
+      {
+        "name": "ValidatorExtender",
+        "type": "ValidatorExtender",
+        "purpose": "Validate form inputs",
+        "displayControl": "staStatus"
+      }
+    ]
+  },
+  "businessLogic": {
+    "businessObject": "ColorPair",
+    "listObject": "Lists.ColorPairList",
+    "parentKey": "FleetID",
+    "uniqueIdentifier": "ColorPairID",
+    "subsystem": "None"
+  },
+  "formBehavior": {
+    "editMode": "detail-edit",
+    "modalDialog": true,
+    "fixedSize": true,
+    "maximizeBox": false,
+    "minimizeBox": false,
+    "startPosition": "CenterParent",
+    "formSize": {
+      "width": 362,
+      "height": 428
+    }
+  },
+  "interactionLogic": {
+    "detailEditFlow": [
+      {
+        "step": 1,
+        "action": "User clicks Add or Modify from toolbar",
+        "result": "Detail section enabled, grid and toolbar disabled"
+      },
+      {
+        "step": 2,
+        "action": "User edits color pair properties",
+        "result": "Live preview updates in lblSample as colors change"
+      },
+      {
+        "step": 3,
+        "action": "User clicks Submit",
+        "result": "Validation runs, data saved, detail section cleared and disabled, grid refreshed"
+      },
+      {
+        "step": 4,
+        "action": "User clicks Cancel (detail)",
+        "result": "Changes discarded, detail section cleared and disabled"
+      }
+    ],
+    "colorPreview": [
+      {
+        "event": "clrTextColor.ColorChanged",
+        "action": "Update lblSample.ForeColor to match selected text color"
+      },
+      {
+        "event": "clrBackColor.ColorChanged",
+        "action": "Update lblSample.BackColor to match selected background color"
+      }
+    ],
+    "stateManagement": [
+      {
+        "state": "Browsing",
+        "detailSection": "Disabled",
+        "toolbar": "Enabled (context-sensitive buttons)",
+        "grid": "Enabled"
+      },
+      {
+        "state": "Editing Detail",
+        "detailSection": "Enabled",
+        "toolbar": "Disabled",
+        "grid": "Enabled but read-only"
+      }
+    ]
+  },
+  "validationRules": {
+    "txtName": {
+      "type": "String",
+      "required": false,
+      "maxLength": "Defined in ColorPair.MaxLength.Name"
+    }
+  },
+  "modernImplementationNotes": {
+    "layout": "This is a list-detail form without tabs. Modern implementation should use a Bootstrap layout with grid on top and collapsible detail panel below.",
+    "gridComponent": "Use modern data grid component (ag-Grid, DevExtreme) for the color pairs list",
+    "colorPickers": "Replace UltraColorPicker with HTML5 color input or modern color picker component",
+    "livePreview": "Maintain the live color preview feature - very useful UX element",
+    "toolbar": "Convert toolbar buttons to standard button group or action bar at top of grid",
+    "validation": "Use client-side validation with appropriate feedback messages",
+    "stateManagement": "Implement view state (browsing vs editing) to enable/disable sections appropriately",
+    "responsiveness": "Make the layout responsive - grid should expand, detail section should be collapsible"
+  }
+}

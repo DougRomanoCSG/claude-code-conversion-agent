@@ -1,0 +1,130 @@
+{
+  "entity": "Barge",
+  "overallStatus": "completed",
+  "startTime": "2025-12-17T23:43:39.013Z",
+  "totalSteps": 10,
+  "completedSteps": 6,
+  "failedSteps": 0,
+  "skippedSteps": 4,
+  "steps": [
+    {
+      "stepNumber": 1,
+      "name": "Form Structure Analyzer (Search)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract search form UI components",
+      "status": "completed",
+      "startTime": "2025-12-17T23:43:39.014Z",
+      "outputFile": "form-structure-search.json",
+      "endTime": "2025-12-17T23:46:16.812Z",
+      "durationMs": 157798,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 2,
+      "name": "Form Structure Analyzer (Detail)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract detail form UI components",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:46:16.814Z",
+      "endTime": "2025-12-17T23:46:16.814Z",
+      "durationMs": 0,
+      "outputFile": "form-structure-detail.json"
+    },
+    {
+      "stepNumber": 3,
+      "name": "Business Logic Extractor",
+      "script": "business-logic-extractor.ts",
+      "description": "Extract business rules and validation",
+      "status": "completed",
+      "startTime": "2025-12-17T23:46:16.814Z",
+      "outputFile": "business-logic.json",
+      "endTime": "2025-12-17T23:52:16.244Z",
+      "durationMs": 359443,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 4,
+      "name": "Data Access Pattern Analyzer",
+      "script": "data-access-analyzer.ts",
+      "description": "Extract stored procedures and queries",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:52:16.258Z",
+      "endTime": "2025-12-17T23:52:16.258Z",
+      "durationMs": 0,
+      "outputFile": "data-access.json"
+    },
+    {
+      "stepNumber": 5,
+      "name": "Security & Authorization Extractor",
+      "script": "security-extractor.ts",
+      "description": "Extract permissions and authorization",
+      "status": "completed",
+      "startTime": "2025-12-17T23:52:16.259Z",
+      "outputFile": "security.json",
+      "endTime": "2025-12-17T23:53:47.233Z",
+      "durationMs": 90985,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 6,
+      "name": "UI Component Mapper",
+      "script": "ui-component-mapper.ts",
+      "description": "Map legacy controls to modern equivalents",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:53:47.245Z",
+      "endTime": "2025-12-17T23:53:47.245Z",
+      "durationMs": 0,
+      "outputFile": "ui-mapping.json"
+    },
+    {
+      "stepNumber": 7,
+      "name": "Form Workflow Analyzer",
+      "script": "form-workflow-analyzer.ts",
+      "description": "Extract user flows and state management",
+      "status": "completed",
+      "startTime": "2025-12-17T23:53:47.246Z",
+      "outputFile": "workflow.json",
+      "endTime": "2025-12-17T23:58:47.327Z",
+      "durationMs": 300091,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 8,
+      "name": "Detail Form Tab Analyzer",
+      "script": "detail-tab-analyzer.ts",
+      "description": "Extract tab structure and related entities",
+      "status": "completed",
+      "startTime": "2025-12-17T23:58:47.338Z",
+      "outputFile": "tabs.json",
+      "endTime": "2025-12-18T00:03:32.503Z",
+      "durationMs": 285175,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 9,
+      "name": "Validation Rule Extractor",
+      "script": "validation-extractor.ts",
+      "description": "Extract all validation logic",
+      "status": "skipped",
+      "startTime": "2025-12-18T00:03:32.516Z",
+      "endTime": "2025-12-18T00:03:32.516Z",
+      "durationMs": 0,
+      "outputFile": "validation.json"
+    },
+    {
+      "stepNumber": 10,
+      "name": "Related Entity Analyzer",
+      "script": "related-entity-analyzer.ts",
+      "description": "Extract entity relationships",
+      "status": "completed",
+      "startTime": "2025-12-18T00:03:32.517Z",
+      "outputFile": "related-entities.json",
+      "endTime": "2025-12-18T00:05:05.966Z",
+      "durationMs": 93462,
+      "exitCode": 0
+    }
+  ],
+  "childForms": [],
+  "endTime": "2025-12-18T00:05:05.981Z",
+  "durationMs": 1286967
+}

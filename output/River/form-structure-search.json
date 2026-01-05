@@ -1,0 +1,527 @@
+{
+  "formName": "frmRiverSearch",
+  "formTitle": "Rivers/Waterways",
+  "formType": "Search",
+  "inherits": "frmBaseSearch",
+  "implements": ["IBaseSearch"],
+  "subSystem": "frmRiverSearch",
+  "businessEntity": "River",
+  "uniqueIdentifier": "RiverID",
+
+  "layout": {
+    "mainPanel": "pnlRiverSearch",
+    "dock": "Fill",
+    "size": {
+      "width": 779,
+      "height": 460
+    },
+    "structure": [
+      {
+        "name": "pnlContextTitle",
+        "type": "Header",
+        "dock": "Top",
+        "height": 24
+      },
+      {
+        "name": "pnlCriteria",
+        "type": "SearchCriteria",
+        "dock": "Top",
+        "height": 34
+      },
+      {
+        "name": "grdRiverSearch",
+        "type": "ResultsGrid",
+        "dock": "Fill"
+      }
+    ]
+  },
+
+  "controls": [
+    {
+      "name": "txtCode",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "Code",
+      "labelControl": "lblCode",
+      "location": {
+        "x": 48,
+        "y": 6
+      },
+      "size": {
+        "width": 48,
+        "height": 21
+      },
+      "tabIndex": 1,
+      "dataBinding": null,
+      "validation": [],
+      "tooltip": "Starts with search",
+      "events": [],
+      "notes": "First field to receive focus (FocusFirstField)",
+      "modernEquivalent": {
+        "htmlType": "text",
+        "cssClass": "form-control",
+        "placeholder": "Code...",
+        "maxLength": null
+      }
+    },
+    {
+      "name": "txtName",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "River/Waterway name",
+      "labelControl": "lblName",
+      "location": {
+        "x": 246,
+        "y": 6
+      },
+      "size": {
+        "width": 216,
+        "height": 21
+      },
+      "tabIndex": 2,
+      "dataBinding": null,
+      "validation": [],
+      "tooltip": "Starts with search",
+      "events": [],
+      "notes": "Starts-with search on river/waterway name",
+      "modernEquivalent": {
+        "htmlType": "text",
+        "cssClass": "form-control",
+        "placeholder": "River/Waterway name...",
+        "maxLength": null
+      }
+    },
+    {
+      "name": "chkIsActive",
+      "type": "UltraCheckEditor",
+      "category": "SearchCriteria",
+      "label": "Active only",
+      "labelControl": null,
+      "location": {
+        "x": 482,
+        "y": 6
+      },
+      "size": {
+        "width": 80,
+        "height": 20
+      },
+      "tabIndex": 3,
+      "dataBinding": null,
+      "defaultValue": true,
+      "checked": true,
+      "validation": [],
+      "events": [],
+      "notes": "Filter for active rivers only, checked by default",
+      "modernEquivalent": {
+        "htmlType": "checkbox",
+        "cssClass": "form-check-input",
+        "defaultChecked": true
+      }
+    }
+  ],
+
+  "labels": [
+    {
+      "name": "lblContextTitle",
+      "text": "Rivers/Waterways",
+      "type": "Header",
+      "font": "Arial, 12pt, Bold",
+      "appearance": "SearchCaption",
+      "dock": "Fill",
+      "backgroundColor": "SystemColors.Highlight",
+      "foreColor": "SystemColors.HighlightText"
+    },
+    {
+      "name": "lblCode",
+      "text": "Code:",
+      "location": {
+        "x": 4,
+        "y": 6
+      },
+      "size": {
+        "width": 44,
+        "height": 20
+      },
+      "alignment": "Left, Middle"
+    },
+    {
+      "name": "lblName",
+      "text": "River/Waterway name:",
+      "location": {
+        "x": 115,
+        "y": 6
+      },
+      "size": {
+        "width": 125,
+        "height": 20
+      },
+      "alignment": "Left, Middle"
+    }
+  ],
+
+  "buttons": [
+    {
+      "name": "btnFind",
+      "text": "F&ind",
+      "type": "Search",
+      "buttonType": "Open",
+      "location": {
+        "x": 699,
+        "y": 6
+      },
+      "size": {
+        "width": 75,
+        "height": 23
+      },
+      "tabIndex": 4,
+      "anchor": "Top, Right",
+      "enabled": true,
+      "visible": true,
+      "isAcceptButton": true,
+      "handler": "btnFind_Click",
+      "purpose": "Execute search using current criteria and populate results grid",
+      "modernEquivalent": {
+        "htmlType": "submit",
+        "cssClass": "btn btn-primary",
+        "icon": "search"
+      }
+    }
+  ],
+
+  "grids": [
+    {
+      "name": "grdRiverSearch",
+      "type": "UltraGrid",
+      "dock": "Fill",
+      "location": {
+        "x": 0,
+        "y": 58
+      },
+      "size": {
+        "width": 779,
+        "height": 402
+      },
+      "tabIndex": 12,
+      "uniqueIdentifier": "RiverID",
+      "dataSource": "BusinessLogic.Lists.RiverSearch.GetList",
+      "defaultSortColumn": "Code",
+      "defaultSortDirection": "Ascending",
+      "columns": [
+        {
+          "key": "Code",
+          "header": "Code",
+          "dataType": "String",
+          "width": 56,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "hidden": false,
+          "columnIndex": 0
+        },
+        {
+          "key": "Name",
+          "header": "River/Waterway",
+          "dataType": "String",
+          "width": 234,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "hidden": false,
+          "columnIndex": 1
+        },
+        {
+          "key": "StartMile",
+          "header": "Start Mile",
+          "dataType": "Decimal",
+          "width": 72,
+          "alignment": "Right",
+          "sortable": true,
+          "filterable": true,
+          "hidden": false,
+          "columnIndex": 2,
+          "customComparer": "NumericSortComparer",
+          "notes": "Uses custom numeric sort comparer"
+        },
+        {
+          "key": "EndMile",
+          "header": "End Mile",
+          "dataType": "Decimal",
+          "width": 72,
+          "alignment": "Right",
+          "sortable": true,
+          "filterable": true,
+          "hidden": false,
+          "columnIndex": 3,
+          "customComparer": "NumericSortComparer",
+          "notes": "Uses custom numeric sort comparer"
+        },
+        {
+          "key": "IsLowToHighDirection",
+          "header": "Low to High",
+          "dataType": "Boolean",
+          "width": 100,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "hidden": false,
+          "columnIndex": 4
+        },
+        {
+          "key": "IsActive",
+          "header": "Active",
+          "dataType": "Boolean",
+          "width": 72,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "hidden": false,
+          "columnIndex": 5
+        },
+        {
+          "key": "UpLabel",
+          "header": "Upstream",
+          "dataType": "String",
+          "width": 120,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "hidden": false,
+          "columnIndex": 6
+        },
+        {
+          "key": "DownLabel",
+          "header": "Downstream",
+          "dataType": "String",
+          "width": 120,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true,
+          "hidden": false,
+          "columnIndex": 7
+        }
+      ],
+      "events": [
+        {
+          "name": "DoubleClick",
+          "handler": "Inherited from base - Opens detail form",
+          "purpose": "Open frmRiverDetail for selected river"
+        },
+        {
+          "name": "AfterSelectChange",
+          "handler": "Inherited from base",
+          "purpose": "Updates button states based on selection"
+        }
+      ],
+      "features": [
+        "User grid settings persistence (MyAppSettingHelper)",
+        "Custom column sorting with NumericSortComparer",
+        "Row selection tracking",
+        "Grid state save/restore on panel destroy/create"
+      ],
+      "modernEquivalent": {
+        "component": "DataTables",
+        "serverSide": true,
+        "ajax": {
+          "url": "/River/Search",
+          "type": "POST"
+        },
+        "columns": "See columns array above",
+        "features": [
+          "Pagination",
+          "Sorting",
+          "Filtering",
+          "Column visibility",
+          "State saving"
+        ]
+      }
+    }
+  ],
+
+  "panels": [
+    {
+      "name": "pnlRiverSearch",
+      "type": "UltraPanel",
+      "purpose": "Main container panel",
+      "dock": "Fill",
+      "controls": ["pnlContextTitle", "pnlCriteria", "grdRiverSearch"]
+    },
+    {
+      "name": "pnlContextTitle",
+      "type": "UltraPanel",
+      "purpose": "Header panel with form title",
+      "dock": "Top",
+      "height": 24,
+      "controls": ["lblContextTitle"],
+      "appearance": {
+        "backgroundColor": "SystemColors.Highlight",
+        "foreColor": "SystemColors.HighlightText"
+      }
+    },
+    {
+      "name": "pnlCriteria",
+      "type": "UltraPanel",
+      "purpose": "Search criteria container",
+      "dock": "Top",
+      "height": 34,
+      "controls": ["lblCode", "txtCode", "lblName", "txtName", "chkIsActive", "btnFind"]
+    }
+  ],
+
+  "validation": {
+    "method": null,
+    "rules": [],
+    "notes": "No explicit validation - search criteria are all optional"
+  },
+
+  "eventHandlers": {
+    "pnlRiverSearch_HandleCreated": {
+      "purpose": "Initialize form when panel is created/loaded",
+      "actions": [
+        "Call FormatControls() to setup grid and controls",
+        "Restore user's grid settings from database (MyAppSettingHelper.RestoreGrid)"
+      ],
+      "notes": "Equivalent to Form_Load for panel-based form"
+    },
+    "pnlRiverSearch_HandleDestroyed": {
+      "purpose": "Cleanup when panel is destroyed/unloaded",
+      "actions": [
+        "Save current grid settings to database (MyAppSettingHelper.SaveGrid)"
+      ]
+    },
+    "btnFind_Click": {
+      "purpose": "Execute search and populate results grid",
+      "actions": [
+        "Call RefreshList(True) to search and select first row"
+      ]
+    }
+  },
+
+  "businessLogicIntegration": {
+    "entityClass": "BusinessLogic.River",
+    "searchMethod": "BusinessLogic.Lists.RiverSearch.GetList(txtName.Text.Trim, txtCode.Text.Trim, chkIsActive.Checked).List",
+    "searchParameters": [
+      {
+        "name": "name",
+        "source": "txtName.Text.Trim",
+        "type": "String",
+        "searchType": "StartsWith"
+      },
+      {
+        "name": "code",
+        "source": "txtCode.Text.Trim",
+        "type": "String",
+        "searchType": "StartsWith"
+      },
+      {
+        "name": "isActive",
+        "source": "chkIsActive.Checked",
+        "type": "Boolean"
+      }
+    ],
+    "newItemMethod": "BusinessLogic.River.NewRiver",
+    "getItemMethod": "BusinessLogic.River.GetRiver(RiverID)",
+    "deleteItemMethod": "BusinessLogic.River.DeleteRiver(RiverID)"
+  },
+
+  "interfaceImplementations": {
+    "IBaseSearch": {
+      "FocusFirstField": "Sets focus to txtCode",
+      "GridControlIndex": "Returns selected RiverID from grid",
+      "Initialize": "Calls InitializeBase(SubSystem.frmRiverSearch)",
+      "ItemAdd": "Opens frmRiverDetail with NewRiver",
+      "ItemModify": "Opens frmRiverDetail with selected River",
+      "ItemRemove": "Deletes selected River after confirmation",
+      "ItemRun": "Not implemented",
+      "ItemView": "Not implemented",
+      "LocalPanel": "Returns pnlRiverSearch",
+      "OnChangeOfFleet": "Not implemented",
+      "RefreshList": "Executes search and populates grid",
+      "SetButtonTypes": "Sets btnFind as ButtonType.Open for security",
+      "UltraGridControl": "Returns grdRiverSearch"
+    }
+  },
+
+  "securityIntegration": {
+    "controlAuthorization": true,
+    "buttonTypes": {
+      "btnFind": "ButtonType.Open"
+    },
+    "notes": "Uses ControlAuthorization from Security DLL to set permissions"
+  },
+
+  "relatedForms": {
+    "detailForm": "frmRiverDetail",
+    "baseForm": "frmBaseSearch"
+  },
+
+  "modernizationNotes": {
+    "searchPattern": "Implement as ASP.NET Core MVC with DataTables",
+    "controllerPattern": "RiverController with Search action",
+    "viewModelPattern": "RiverSearchViewModel with search criteria properties",
+    "viewPattern": "River/Index.cshtml with search form and DataTables grid",
+    "ajaxPattern": "Server-side DataTables processing",
+    "securityPattern": "ASP.NET Core Authorization with policy-based permissions",
+    "validationPattern": "No validation needed - all criteria optional",
+    "gridFeatures": [
+      "DataTables with server-side processing",
+      "Custom numeric sorting for StartMile/EndMile columns",
+      "State persistence using localStorage or server-side",
+      "Row selection for edit/delete operations",
+      "Double-click to open detail form"
+    ],
+    "uiComponents": {
+      "txtCode": "Bootstrap form-control text input",
+      "txtName": "Bootstrap form-control text input",
+      "chkIsActive": "Bootstrap form-check-input checkbox",
+      "btnFind": "Bootstrap btn btn-primary submit button",
+      "grdRiverSearch": "DataTables with Bootstrap styling"
+    }
+  },
+
+  "searchBehavior": {
+    "searchType": "StartsWith",
+    "criteriaLogic": "All criteria are optional and combined with AND logic",
+    "defaultFilters": {
+      "isActive": true
+    },
+    "resultsDisplay": "Grid with 8 columns, sorted by Code ascending by default",
+    "rowSelection": "Single row selection, enables Edit/Delete buttons",
+    "doubleClickAction": "Opens detail form for selected river"
+  },
+
+  "dataFlowDiagram": {
+    "userAction": "Click Find button",
+    "flow": [
+      "1. btnFind_Click handler triggered",
+      "2. RefreshList(True) called with selectFirstRow=True",
+      "3. MyBase.RefreshListBase called with:",
+      "   - Grid control: grdRiverSearch",
+      "   - Data source: BusinessLogic.Lists.RiverSearch.GetList(name, code, isActive).List",
+      "   - Select first row: True",
+      "4. Grid populated with results",
+      "5. First row selected if results exist",
+      "6. Button states updated based on selection"
+    ]
+  },
+
+  "tooltip": {
+    "manager": "UltraToolTipManager",
+    "tooltips": [
+      {
+        "control": "txtCode",
+        "text": "Starts with search"
+      },
+      {
+        "control": "txtName",
+        "text": "Starts with search"
+      }
+    ]
+  },
+
+  "formSettings": {
+    "acceptButton": "btnFind",
+    "showInTaskbar": false,
+    "text": "BargeOps Onshore - Rivers/Waterways",
+    "autoScaleDimensions": "6.0, 13.0"
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "entity": "BargePositions",
+  "formName": "frmBargePositions",
+  "overallStatus": "completed",
+  "startTime": "2025-12-19T18:22:57.747Z",
+  "totalSteps": 9,
+  "completedSteps": 9,
+  "failedSteps": 0,
+  "skippedSteps": 0,
+  "steps": [
+    {
+      "stepNumber": 1,
+      "name": "Form Structure Analyzer (frmBargePositions)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract frmBargePositions UI components",
+      "status": "completed",
+      "startTime": "2025-12-19T18:22:57.748Z",
+      "outputFile": "form-structure.json",
+      "endTime": "2025-12-19T18:26:20.825Z",
+      "durationMs": 203077,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 2,
+      "name": "Business Logic Extractor",
+      "script": "business-logic-extractor.ts",
+      "description": "Extract business rules and validation",
+      "status": "completed",
+      "startTime": "2025-12-19T18:26:20.830Z",
+      "outputFile": "business-logic.json",
+      "endTime": "2025-12-19T18:29:59.988Z",
+      "durationMs": 219171,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 3,
+      "name": "Data Access Pattern Analyzer",
+      "script": "data-access-analyzer.ts",
+      "description": "Extract stored procedures and queries",
+      "status": "completed",
+      "startTime": "2025-12-19T18:30:00.002Z",
+      "outputFile": "data-access.json",
+      "endTime": "2025-12-19T18:33:51.176Z",
+      "durationMs": 231186,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 4,
+      "name": "Security & Authorization Extractor",
+      "script": "security-extractor.ts",
+      "description": "Extract permissions and authorization",
+      "status": "completed",
+      "startTime": "2025-12-19T18:33:51.189Z",
+      "outputFile": "security.json",
+      "endTime": "2025-12-19T18:37:32.030Z",
+      "durationMs": 220841,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 5,
+      "name": "UI Component Mapper",
+      "script": "ui-component-mapper.ts",
+      "description": "Map legacy controls to modern equivalents",
+      "status": "completed",
+      "startTime": "2025-12-19T18:37:32.031Z",
+      "outputFile": "ui-mapping.json",
+      "endTime": "2025-12-19T18:42:26.750Z",
+      "durationMs": 294731,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 6,
+      "name": "Form Workflow Analyzer",
+      "script": "form-workflow-analyzer.ts",
+      "description": "Extract user flows and state management",
+      "status": "completed",
+      "startTime": "2025-12-19T18:42:26.764Z",
+      "outputFile": "workflow.json",
+      "endTime": "2025-12-19T18:47:58.448Z",
+      "durationMs": 331696,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 7,
+      "name": "Detail Form Tab Analyzer",
+      "script": "detail-tab-analyzer.ts",
+      "description": "Extract tab structure and related entities",
+      "status": "completed",
+      "startTime": "2025-12-19T18:47:58.461Z",
+      "outputFile": "tabs.json",
+      "endTime": "2025-12-19T18:50:48.828Z",
+      "durationMs": 170382,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 8,
+      "name": "Validation Rule Extractor",
+      "script": "validation-extractor.ts",
+      "description": "Extract all validation logic",
+      "status": "completed",
+      "startTime": "2025-12-19T18:50:48.844Z",
+      "outputFile": "validation.json",
+      "endTime": "2025-12-19T18:55:19.600Z",
+      "durationMs": 270768,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 9,
+      "name": "Related Entity Analyzer",
+      "script": "related-entity-analyzer.ts",
+      "description": "Extract entity relationships",
+      "status": "completed",
+      "startTime": "2025-12-19T18:55:19.615Z",
+      "outputFile": "related-entities.json",
+      "endTime": "2025-12-19T18:59:42.369Z",
+      "durationMs": 262770,
+      "exitCode": 0
+    }
+  ],
+  "childForms": [
+    "frmBargePositionHistory",
+    "frmSendTowDiagram",
+    "frmBargeViewConflicts"
+  ],
+  "endTime": "2025-12-19T18:59:42.387Z",
+  "durationMs": 2204640
+}

@@ -1,0 +1,263 @@
+{
+  "entityName": "Draft",
+  "description": "Draft is a value object/detail entity representing barge draft measurements at four corners (port/starboard, bow/stern) and calculated tonnage values. It is used by Barge and BargeEvent entities but is NOT a parent entity with children.",
+  "entityType": "DetailValueObject",
+  "parentRelationships": [
+    {
+      "parentEntity": "Barge",
+      "relationshipType": "ManyToOne",
+      "description": "Draft can be associated with a Barge for current draft measurements",
+      "foreignKey": null,
+      "parentProperty": null,
+      "childProperty": "_Barge",
+      "usage": "Draft values are copied to/from Barge properties in frmBargeDraft (lines 115-120)",
+      "cascadeDelete": false
+    },
+    {
+      "parentEntity": "BargeEvent",
+      "relationshipType": "ManyToOne",
+      "description": "Draft can be associated with a BargeEvent (via TicketEvent) for event-specific draft measurements",
+      "foreignKey": null,
+      "parentProperty": null,
+      "childProperty": "_BargeEvent",
+      "usage": "Draft is used in BargeEvent context through frmBargeDraft",
+      "cascadeDelete": false
+    },
+    {
+      "parentEntity": "TicketEvent",
+      "relationshipType": "ManyToOne",
+      "description": "Draft references TicketEvent for draft survey calculations",
+      "foreignKey": "_TicketEventID",
+      "parentProperty": null,
+      "childProperty": null,
+      "usage": "Used to retrieve event details and load status for tonnage calculations",
+      "cascadeDelete": false
+    },
+    {
+      "parentEntity": "BargeSeries",
+      "relationshipType": "ManyToOne",
+      "description": "Draft uses BargeSeries to look up draft/tonnage conversion tables",
+      "foreignKey": "_BargeSeriesID",
+      "parentProperty": "BargeSeriesDrafts",
+      "childProperty": null,
+      "usage": "Referenced in CalculateDraftFromTonnage and CalculateTonnageFromAvgDraft methods",
+      "cascadeDelete": false
+    }
+  ],
+  "collectionProperties": [
+    {
+      "propertyName": "TicketEvents",
+      "collectionType": "TicketEvents",
+      "itemType": "TicketEvent",
+      "description": "Collection of all ticket events used for finding prior draft survey events",
+      "usage": "Used in BuildDraftSurveyTicketEventsDictionary to find related draft surveys (line 1166)",
+      "isChildCollection": false,
+      "purpose": "Reference data for calculations, not child entities"
+    },
+    {
+      "propertyName": "DraftSurveyEvents",
+      "collectionType": "List<TicketEvent>",
+      "itemType": "TicketEvent",
+      "description": "Filtered list of draft survey ticket events (excludes current event and voided events)",
+      "usage": "Used to find prior opposing draft survey events for tonnage calculations (line 1439)",
+      "isChildCollection": false,
+      "purpose": "Cached reference data for opposing load/empty draft surveys"
+    }
+  ],
+  "childEntities": [],
+  "lookupRelationships": [
+    {
+      "property": "LoadStatus",
+      "lookupEntity": "ValidationList.LoadStatusType",
+      "displayProperty": "LoadStatus",
+      "required": false,
+      "description": "Load status (Empty, Load, PartLoad) determines tonnage calculation logic"
+    },
+    {
+      "property": "EventTypeEnumVal",
+      "lookupEntity": "EventTypeList.EventTypes",
+      "displayProperty": "EventType",
+      "required": false,
+      "description": "Event type (DraftSurvey, Load, etc.) determines if/how draft calculations are performed"
+    },
+    {
+      "property": "CoverType",
+      "lookupEntity": "ValidationList.CoverTypeList",
+      "displayProperty": "CoverType",
+      "required": false,
+      "description": "Cover type affects tonnage calculations for cover weight adjustment"
+    },
+    {
+      "property": "_CoverSubTypeID",
+      "lookupEntity": "CoverSubTypeList",
+      "displayProperty": "CoverSubType",
+      "required": false,
+      "description": "Cover sub type used for precise cover weight calculations"
+    },
+    {
+      "property": "CoverConfig",
+      "lookupEntity": "ValidationList.CoverConfigurationList",
+      "displayProperty": "CoverConfiguration",
+      "required": false,
+      "description": "Cover configuration (Open, Stacked, Spread) affects tonnage calculations"
+    }
+  ],
+  "businessMethods": [
+    {
+      "methodName": "NewDraft",
+      "methodType": "Factory",
+      "parameters": [
+        "brgDraftPortBow", "brgDraftPortStern", "brgDraftStarboardBow", "brgDraftStarboardStern",
+        "isVoidedOnLoad", "brgDraftFeet", "brgDraftInches", "evntTypeEnumVal", "adjstmntTons",
+        "brgSeriesID", "tcktEventID", "loadStatusDraftSurvey", "tcktEvents"
+      ],
+      "description": "Creates new Draft instance with corner draft values and calculates max draft and average draft"
+    },
+    {
+      "methodName": "NewDraftAsChild",
+      "methodType": "Factory",
+      "parameters": [
+        "brgDraftPortBow", "brgDraftPortStern", "brgDraftStarboardBow", "brgDraftStarboardStern",
+        "brgDraftFeet", "brgDraftInches", "isVoidedOnLoad", "evntTypeEnumVal", "adjstmntTons",
+        "brgSeriesID", "tcktEventID", "loadStatusDraftSurvey", "tcktEvents"
+      ],
+      "description": "Creates new Draft as child object with all draft values pre-set"
+    },
+    {
+      "methodName": "CalculateDraftFromTonnage",
+      "methodType": "Calculation",
+      "description": "Converts tonnage to draft using BargeSeries draft tables, accounting for cover weight"
+    },
+    {
+      "methodName": "CalculateAverageDraft",
+      "methodType": "Calculation",
+      "description": "Calculates average draft from four corner drafts (only for DraftSurvey events)"
+    },
+    {
+      "methodName": "CalculateTonnageFromAvgDraft",
+      "methodType": "Calculation",
+      "description": "Converts average draft to tonnage using BargeSeries tables, accounting for cover weight"
+    },
+    {
+      "methodName": "CalculateEstimatedCargoDeadweightAndLightshipCorrection",
+      "methodType": "Calculation",
+      "description": "Calculates cargo deadweight and lightship correction based on load status and prior draft surveys"
+    },
+    {
+      "methodName": "CalculateLoadUnloadTons",
+      "methodType": "Calculation",
+      "description": "Calculates final load/unload tons from estimated cargo deadweight minus lightship correction plus adjustment"
+    },
+    {
+      "methodName": "PriorOpposingDraftSurveyEvent",
+      "methodType": "Query",
+      "description": "Finds the most recent opposing draft survey event (empty if current is load, or load if current is empty)"
+    }
+  ],
+  "calculatedFields": [
+    {
+      "fieldName": "Draft",
+      "calculationLogic": "Maximum of the four corner draft values (DraftPortBow, DraftPortStern, DraftStarboardBow, DraftStarboardStern)",
+      "dependencies": ["DraftPortBow", "DraftPortStern", "DraftStarboardBow", "DraftStarboardStern"]
+    },
+    {
+      "fieldName": "DraftAverage",
+      "calculationLogic": "Average of four corner drafts, rounded to nearest inch (only for DraftSurvey events)",
+      "dependencies": ["DraftPortBow", "DraftPortStern", "DraftStarboardBow", "DraftStarboardStern", "EventTypeEnumVal"]
+    },
+    {
+      "fieldName": "EstimatedCargoDeadweight",
+      "calculationLogic": "For Load/PartLoad: tonnage from average draft. For Empty: tonnage from prior load draft survey",
+      "dependencies": ["DraftAverage", "LoadStatus", "BargeSeriesID", "DraftSurveyEvents"]
+    },
+    {
+      "fieldName": "LightshipCorrection",
+      "calculationLogic": "For Load/PartLoad: tonnage from prior empty draft survey. For Empty: tonnage from average draft",
+      "dependencies": ["DraftAverage", "LoadStatus", "BargeSeriesID", "DraftSurveyEvents"]
+    },
+    {
+      "fieldName": "LoadUnloadTons",
+      "calculationLogic": "EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+      "dependencies": ["EstimatedCargoDeadweight", "LightshipCorrection", "AdjustmentTons"]
+    },
+    {
+      "fieldName": "CoverWeightAdjustment",
+      "calculationLogic": "Weight adjustment based on cover type, sub type, and configuration (subtracted for DraftSurvey, added for Load)",
+      "dependencies": ["EventTypeEnumVal", "CoverType", "CoverSubTypeID", "CoverConfig"]
+    }
+  ],
+  "gridStructures": [],
+  "formDetails": {
+    "formName": "frmBargeDraft",
+    "formType": "DetailEdit",
+    "description": "Detail form for editing barge draft measurements - NOT a master-detail form with child grids",
+    "hasChildGrids": false,
+    "formGroups": [
+      {
+        "groupName": "grpBow",
+        "fields": ["DraftPortBowFeet", "DraftPortBowInches", "DraftStarboardBowFeet", "DraftStarboardBowInches"]
+      },
+      {
+        "groupName": "grpStern",
+        "fields": ["DraftPortSternFeet", "DraftPortSternInches", "DraftStarboardSternFeet", "DraftStarboardSternInches"]
+      },
+      {
+        "groupName": "grpOverall",
+        "fields": ["DraftFeet", "DraftInches", "DraftAverageFeet", "DraftAverageInches"]
+      },
+      {
+        "groupName": "grpTonnage",
+        "fields": ["EstimatedCargoDeadweight", "LightshipCorrection", "AdjustmentTons", "LoadUnloadTons"],
+        "visibility": "Visible only for DraftSurvey events"
+      }
+    ],
+    "operations": {
+      "set": "Applies draft changes to parent Barge or BargeEvent",
+      "clearAll": "Clears all draft input fields",
+      "cancel": "Cancels edit and closes form"
+    }
+  },
+  "repositoryPattern": {
+    "note": "Draft is a value object that is not independently persisted",
+    "modernApproach": {
+      "draftStorage": "Draft values are stored as properties on Barge or within TicketEvent/BargeEvent",
+      "calculationService": "DraftCalculationService should handle all draft/tonnage conversions",
+      "bargeSeriesRepository": "BargeSeries repository provides draft/tonnage lookup tables",
+      "ticketEventRepository": "TicketEvent repository provides event data for draft survey calculations"
+    },
+    "recommendedServices": [
+      {
+        "serviceName": "DraftCalculationService",
+        "responsibility": "Draft/tonnage conversions, average calculations, tonnage estimations"
+      },
+      {
+        "serviceName": "BargeSeriesService",
+        "responsibility": "Retrieve draft/tonnage tables for barge series"
+      },
+      {
+        "serviceName": "DraftSurveyService",
+        "responsibility": "Find prior draft surveys, calculate cargo deadweight and lightship correction"
+      }
+    ]
+  },
+  "conversionNotes": [
+    "Draft is a VALUE OBJECT, not an entity with child collections",
+    "No separate Draft table or repository needed - values stored on parent entities",
+    "Complex calculations should be moved to dedicated calculation services",
+    "Modern pattern: Draft measurements as value objects on Barge/TicketEvent entities",
+    "BargeSeriesDraft lookup tables should be cached for performance",
+    "Consider creating DTOs: DraftMeasurementDto, DraftSurveyCalculationDto",
+    "Draft survey logic is complex - consider separating into DraftSurveyCalculationService",
+    "Cover weight calculations should be in separate CoverWeightService",
+    "No grids or child entity management needed for this entity"
+  ],
+  "analysisMetadata": {
+    "sourceFiles": [
+      "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore.BusinessLogic/Business Objects/Draft.vb",
+      "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore/Forms/frmBargeDraft.vb",
+      "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore/Forms/frmBargeDraft.Designer.vb"
+    ],
+    "analysisDate": "2025-12-22",
+    "entityComplexity": "High - complex calculations but no child entity relationships"
+  }
+}

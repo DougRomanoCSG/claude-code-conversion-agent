@@ -1,0 +1,631 @@
+{
+  "entity": "BargeSeries",
+  "formValidation": {
+    "method": "ValidatorExtender",
+    "location": "frmBargeSeriesDetail.vb:730-744",
+    "rules": [
+      {
+        "field": "txtName",
+        "property": "Name",
+        "validationType": "String",
+        "rule": "Type validation",
+        "message": "Must be a valid string",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtLength",
+        "property": "Length",
+        "validationType": "Decimal",
+        "rule": "Type validation",
+        "message": "Must be a valid decimal number",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtWidth",
+        "property": "Width",
+        "validationType": "Decimal",
+        "rule": "Type validation",
+        "message": "Must be a valid decimal number",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDepth",
+        "property": "Depth",
+        "validationType": "Decimal",
+        "rule": "Type validation",
+        "message": "Must be a valid decimal number",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtTonsPerInch",
+        "property": "TonsPerInch",
+        "validationType": "Decimal",
+        "rule": "Type validation",
+        "message": "Must be a valid decimal number",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftLightFeet",
+        "property": "DraftLightFeet",
+        "validationType": "Int32",
+        "rule": "Type validation",
+        "message": "Must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      },
+      {
+        "field": "txtDraftLightInches",
+        "property": "DraftLightInches",
+        "validationType": "Int32",
+        "rule": "Type validation",
+        "message": "Must be a valid integer",
+        "severity": "Error",
+        "clientSide": true
+      }
+    ],
+    "maxLengths": [
+      {
+        "field": "txtName",
+        "property": "Name",
+        "maxLength": 50,
+        "source": "BargeSeries.MaxLength.Name"
+      }
+    ]
+  },
+  "businessValidation": {
+    "method": "CheckBusinessRules",
+    "baseLocation": "BargeSeriesBase.vb:346-401",
+    "customLocation": "BargeSeries.vb:116-220",
+    "rules": [
+      {
+        "ruleName": "CustomerIDRequired",
+        "property": "CustomerID",
+        "displayName": "Customer",
+        "condition": "p_CustomerID <= 0",
+        "message": "Customer is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeries.vb:123-126"
+      },
+      {
+        "ruleName": "NameRequired",
+        "property": "Name",
+        "displayName": "Series",
+        "condition": "String.IsNullOrEmpty(p_Name)",
+        "message": "Series is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeriesBase.vb:351-353"
+      },
+      {
+        "ruleName": "NameMaxLength",
+        "property": "Name",
+        "displayName": "Series",
+        "condition": "p_Name.Length > MaxLength.Name",
+        "message": "Series cannot be longer than 50.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "maxLength": 50,
+        "source": "BargeSeriesBase.vb:354-356"
+      },
+      {
+        "ruleName": "HullTypeRequired",
+        "property": "HullType",
+        "displayName": "Hull type",
+        "condition": "String.IsNullOrEmpty(p_HullType)",
+        "message": "Hull type is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeriesBase.vb:359-361"
+      },
+      {
+        "ruleName": "HullTypeMaxLength",
+        "property": "HullType",
+        "displayName": "Hull type",
+        "condition": "p_HullType.Length > MaxLength.HullType",
+        "message": "Hull type cannot be longer than 1.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "maxLength": 1,
+        "source": "BargeSeriesBase.vb:362-364"
+      },
+      {
+        "ruleName": "CoverTypeRequired",
+        "property": "CoverType",
+        "displayName": "Cover type",
+        "condition": "String.IsNullOrEmpty(p_CoverType)",
+        "message": "Cover type is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeriesBase.vb:367-369"
+      },
+      {
+        "ruleName": "CoverTypeMaxLength",
+        "property": "CoverType",
+        "displayName": "Cover type",
+        "condition": "p_CoverType.Length > MaxLength.CoverType",
+        "message": "Cover type cannot be longer than 3.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "maxLength": 3,
+        "source": "BargeSeriesBase.vb:370-372"
+      },
+      {
+        "ruleName": "LengthRequired",
+        "property": "Length",
+        "displayName": "Length",
+        "condition": "String.IsNullOrEmpty(p_Length)",
+        "message": "Length is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeriesBase.vb:375-377"
+      },
+      {
+        "ruleName": "LengthNonNegative",
+        "property": "Length",
+        "displayName": "Length",
+        "condition": "((Not String.IsNullOrEmpty(p_Length)) AndAlso (CDec(Me.Length) < 0))",
+        "message": "Length must be non-negative.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeries.vb:136-140"
+      },
+      {
+        "ruleName": "WidthRequired",
+        "property": "Width",
+        "displayName": "Width",
+        "condition": "String.IsNullOrEmpty(p_Width)",
+        "message": "Width is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeriesBase.vb:380-382"
+      },
+      {
+        "ruleName": "WidthNonNegative",
+        "property": "Width",
+        "displayName": "Width",
+        "condition": "((Not String.IsNullOrEmpty(p_Width)) AndAlso (CDec(Me.Width) < 0))",
+        "message": "Width must be non-negative.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeries.vb:143-147"
+      },
+      {
+        "ruleName": "DepthRequired",
+        "property": "Depth",
+        "displayName": "Depth",
+        "condition": "String.IsNullOrEmpty(p_Depth)",
+        "message": "Depth is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeriesBase.vb:385-387"
+      },
+      {
+        "ruleName": "DepthNonNegative",
+        "property": "Depth",
+        "displayName": "Depth",
+        "condition": "((Not String.IsNullOrEmpty(p_Depth)) AndAlso (CDec(Me.Depth) < 0))",
+        "message": "Depth must be non-negative.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeries.vb:150-154"
+      },
+      {
+        "ruleName": "TonsPerInchRequired",
+        "property": "TonsPerInch",
+        "displayName": "Tons/inch",
+        "condition": "String.IsNullOrEmpty(p_TonsPerInch)",
+        "message": "Tons/inch is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeriesBase.vb:390-392"
+      },
+      {
+        "ruleName": "TonsPerInchNonNegative",
+        "property": "TonsPerInch",
+        "displayName": "Tons/inch",
+        "condition": "((Not String.IsNullOrEmpty(p_TonsPerInch)) AndAlso (CDec(Me.TonsPerInch) < 0))",
+        "message": "Tons/inch must be non-negative.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeries.vb:157-161"
+      },
+      {
+        "ruleName": "DraftLightRequired",
+        "property": "DraftLight",
+        "displayName": "Light draft (ft/in)",
+        "condition": "String.IsNullOrEmpty(p_DraftLight)",
+        "message": "Light draft (ft/in) is required.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeriesBase.vb:395-397"
+      },
+      {
+        "ruleName": "DraftLightRange",
+        "property": "DraftLight",
+        "displayName": "Light draft (ft/in)",
+        "condition": "((Not String.IsNullOrEmpty(p_DraftLight)) AndAlso ((CType(p_DraftLight, Decimal) < 0) OrElse (CType(p_DraftLight, Decimal) > 99.999)))",
+        "message": "Light draft (ft/in) must be between 0 and 99.999.",
+        "severity": "Error",
+        "alwaysApplies": true,
+        "source": "BargeSeries.vb:128-133"
+      },
+      {
+        "ruleName": "TonsNonNegative",
+        "property": "BargeSeriesDrafts",
+        "displayName": "Draft tonnage values",
+        "condition": "Any BargeSeriesDraft child has negative tonnage (Tons00-Tons11)",
+        "message": "All draft tonnage values must be non-negative.",
+        "severity": "Error",
+        "alwaysApplies": false,
+        "appliesWhen": "Checked when IsValid is called",
+        "validationTrigger": "IsValid property",
+        "source": "BargeSeries.vb:163-218"
+      }
+    ],
+    "childValidation": [
+      {
+        "entity": "BargeSeriesDraft",
+        "rules": [
+          {
+            "ruleName": "DraftFeetRequired",
+            "property": "DraftFeet",
+            "displayName": "DraftFeet",
+            "condition": "String.IsNullOrEmpty(p_DraftFeet)",
+            "message": "DraftFeet is required.",
+            "severity": "Error",
+            "alwaysApplies": true,
+            "source": "BargeSeriesDraftBase.vb:401-403"
+          },
+          {
+            "ruleName": "DraftFeetNonNegative",
+            "property": "DraftFeet",
+            "displayName": "DraftFeet",
+            "condition": "((Not String.IsNullOrEmpty(p_DraftFeet)) AndAlso (CInt(Me.DraftFeet) < 0))",
+            "message": "DraftFeet must be non-negative.",
+            "severity": "Error",
+            "alwaysApplies": true,
+            "source": "BargeSeriesDraft.vb:58-62"
+          }
+        ]
+      }
+    ]
+  },
+  "gridValidation": {
+    "grid": "grdBargeSeriesDraft",
+    "location": "frmBargeSeriesDetail.vb:188-216, 319-337",
+    "rules": [
+      {
+        "field": "Tons00-Tons11",
+        "rule": "Decimal conversion with fallback",
+        "condition": "On AfterCellUpdate",
+        "message": "Converts to integer or defaults to 'xxx'",
+        "validation": "Decimal.TryParse",
+        "defaultValue": "xxx",
+        "source": "frmBargeSeriesDetail.vb:195-207"
+      },
+      {
+        "field": "Tons00-Tons11",
+        "rule": "Invalid value behavior",
+        "setting": "RetainValueAndFocus",
+        "message": "Retains invalid value and keeps focus",
+        "source": "frmBargeSeriesDetail.vb:322"
+      },
+      {
+        "field": "Tons00-Tons11",
+        "rule": "Null text display",
+        "defaultDisplay": "xxx",
+        "source": "frmBargeSeriesDetail.vb:323"
+      }
+    ]
+  },
+  "validationLists": {
+    "location": "frmBargeSeriesDetail.vb:342-344",
+    "lists": [
+      {
+        "field": "cboHullType",
+        "property": "HullType",
+        "validationType": "HullType",
+        "required": true,
+        "allowEmpty": true
+      },
+      {
+        "field": "cboCoverType",
+        "property": "CoverType",
+        "validationType": "CoverType",
+        "required": true,
+        "allowEmpty": true
+      },
+      {
+        "field": "cboCustomerID",
+        "property": "CustomerID",
+        "listSource": "CustomerList.GetList",
+        "required": true,
+        "allowEmpty": true
+      }
+    ]
+  },
+  "modernEquivalents": {
+    "dataAnnotations": {
+      "example": "C#",
+      "code": [
+        "public class BargeSeriesViewModel",
+        "{",
+        "    [Required(ErrorMessage = \"Customer is required.\")]",
+        "    [Display(Name = \"Customer\")]",
+        "    public int CustomerID { get; set; }",
+        "",
+        "    [Required(ErrorMessage = \"Series is required.\")]",
+        "    [StringLength(50, ErrorMessage = \"Series cannot be longer than 50.\")]",
+        "    [Display(Name = \"Series\")]",
+        "    public string Name { get; set; }",
+        "",
+        "    [Required(ErrorMessage = \"Hull type is required.\")]",
+        "    [StringLength(1, ErrorMessage = \"Hull type cannot be longer than 1.\")]",
+        "    [Display(Name = \"Hull type\")]",
+        "    public string HullType { get; set; }",
+        "",
+        "    [Required(ErrorMessage = \"Cover type is required.\")]",
+        "    [StringLength(3, ErrorMessage = \"Cover type cannot be longer than 3.\")]",
+        "    [Display(Name = \"Cover type\")]",
+        "    public string CoverType { get; set; }",
+        "",
+        "    [Required(ErrorMessage = \"Length is required.\")]",
+        "    [Range(0, double.MaxValue, ErrorMessage = \"Length must be non-negative.\")]",
+        "    [Display(Name = \"Length\")]",
+        "    public decimal? Length { get; set; }",
+        "",
+        "    [Required(ErrorMessage = \"Width is required.\")]",
+        "    [Range(0, double.MaxValue, ErrorMessage = \"Width must be non-negative.\")]",
+        "    [Display(Name = \"Width\")]",
+        "    public decimal? Width { get; set; }",
+        "",
+        "    [Required(ErrorMessage = \"Depth is required.\")]",
+        "    [Range(0, double.MaxValue, ErrorMessage = \"Depth must be non-negative.\")]",
+        "    [Display(Name = \"Depth\")]",
+        "    public decimal? Depth { get; set; }",
+        "",
+        "    [Required(ErrorMessage = \"Tons/inch is required.\")]",
+        "    [Range(0, double.MaxValue, ErrorMessage = \"Tons/inch must be non-negative.\")]",
+        "    [Display(Name = \"Tons/inch\")]",
+        "    public decimal? TonsPerInch { get; set; }",
+        "",
+        "    [Required(ErrorMessage = \"Light draft (ft/in) is required.\")]",
+        "    [Range(0, 99.999, ErrorMessage = \"Light draft (ft/in) must be between 0 and 99.999.\")]",
+        "    [Display(Name = \"Light draft (ft/in)\")]",
+        "    public decimal? DraftLight { get; set; }",
+        "",
+        "    public bool IsActive { get; set; }",
+        "}"
+      ]
+    },
+    "fluentValidation": {
+      "example": "C#",
+      "code": [
+        "public class BargeSeriesValidator : AbstractValidator<BargeSeriesViewModel>",
+        "{",
+        "    public BargeSeriesValidator()",
+        "    {",
+        "        RuleFor(x => x.CustomerID)",
+        "            .GreaterThan(0)",
+        "            .WithMessage(\"Customer is required.\");",
+        "",
+        "        RuleFor(x => x.Name)",
+        "            .NotEmpty()",
+        "            .WithMessage(\"Series is required.\")",
+        "            .MaximumLength(50)",
+        "            .WithMessage(\"Series cannot be longer than 50.\");",
+        "",
+        "        RuleFor(x => x.HullType)",
+        "            .NotEmpty()",
+        "            .WithMessage(\"Hull type is required.\")",
+        "            .MaximumLength(1)",
+        "            .WithMessage(\"Hull type cannot be longer than 1.\");",
+        "",
+        "        RuleFor(x => x.CoverType)",
+        "            .NotEmpty()",
+        "            .WithMessage(\"Cover type is required.\")",
+        "            .MaximumLength(3)",
+        "            .WithMessage(\"Cover type cannot be longer than 3.\");",
+        "",
+        "        RuleFor(x => x.Length)",
+        "            .NotNull()",
+        "            .WithMessage(\"Length is required.\")",
+        "            .GreaterThanOrEqualTo(0)",
+        "            .WithMessage(\"Length must be non-negative.\");",
+        "",
+        "        RuleFor(x => x.Width)",
+        "            .NotNull()",
+        "            .WithMessage(\"Width is required.\")",
+        "            .GreaterThanOrEqualTo(0)",
+        "            .WithMessage(\"Width must be non-negative.\");",
+        "",
+        "        RuleFor(x => x.Depth)",
+        "            .NotNull()",
+        "            .WithMessage(\"Depth is required.\")",
+        "            .GreaterThanOrEqualTo(0)",
+        "            .WithMessage(\"Depth must be non-negative.\");",
+        "",
+        "        RuleFor(x => x.TonsPerInch)",
+        "            .NotNull()",
+        "            .WithMessage(\"Tons/inch is required.\")",
+        "            .GreaterThanOrEqualTo(0)",
+        "            .WithMessage(\"Tons/inch must be non-negative.\");",
+        "",
+        "        RuleFor(x => x.DraftLight)",
+        "            .NotNull()",
+        "            .WithMessage(\"Light draft (ft/in) is required.\")",
+        "            .InclusiveBetween(0m, 99.999m)",
+        "            .WithMessage(\"Light draft (ft/in) must be between 0 and 99.999.\");",
+        "    }",
+        "}",
+        "",
+        "public class BargeSeriesDraftValidator : AbstractValidator<BargeSeriesDraftViewModel>",
+        "{",
+        "    public BargeSeriesDraftValidator()",
+        "    {",
+        "        RuleFor(x => x.DraftFeet)",
+        "            .NotNull()",
+        "            .WithMessage(\"DraftFeet is required.\")",
+        "            .GreaterThanOrEqualTo(0)",
+        "            .WithMessage(\"DraftFeet must be non-negative.\");",
+        "",
+        "        RuleFor(x => x.Tons00)",
+        "            .GreaterThanOrEqualTo(0)",
+        "            .When(x => x.Tons00.HasValue)",
+        "            .WithMessage(\"Tons00 must be non-negative.\");",
+        "",
+        "        // Repeat for Tons01-Tons11...",
+        "    }",
+        "}"
+      ]
+    },
+    "jqueryValidate": {
+      "example": "JavaScript",
+      "code": [
+        "$(document).ready(function() {",
+        "    $('#bargeSeriesForm').validate({",
+        "        rules: {",
+        "            CustomerID: {",
+        "                required: true,",
+        "                min: 1",
+        "            },",
+        "            Name: {",
+        "                required: true,",
+        "                maxlength: 50",
+        "            },",
+        "            HullType: {",
+        "                required: true,",
+        "                maxlength: 1",
+        "            },",
+        "            CoverType: {",
+        "                required: true,",
+        "                maxlength: 3",
+        "            },",
+        "            Length: {",
+        "                required: true,",
+        "                number: true,",
+        "                min: 0",
+        "            },",
+        "            Width: {",
+        "                required: true,",
+        "                number: true,",
+        "                min: 0",
+        "            },",
+        "            Depth: {",
+        "                required: true,",
+        "                number: true,",
+        "                min: 0",
+        "            },",
+        "            TonsPerInch: {",
+        "                required: true,",
+        "                number: true,",
+        "                min: 0",
+        "            },",
+        "            DraftLight: {",
+        "                required: true,",
+        "                number: true,",
+        "                range: [0, 99.999]",
+        "            }",
+        "        },",
+        "        messages: {",
+        "            CustomerID: {",
+        "                required: 'Customer is required.',",
+        "                min: 'Customer is required.'",
+        "            },",
+        "            Name: {",
+        "                required: 'Series is required.',",
+        "                maxlength: 'Series cannot be longer than 50.'",
+        "            },",
+        "            HullType: {",
+        "                required: 'Hull type is required.',",
+        "                maxlength: 'Hull type cannot be longer than 1.'",
+        "            },",
+        "            CoverType: {",
+        "                required: 'Cover type is required.',",
+        "                maxlength: 'Cover type cannot be longer than 3.'",
+        "            },",
+        "            Length: {",
+        "                required: 'Length is required.',",
+        "                min: 'Length must be non-negative.'",
+        "            },",
+        "            Width: {",
+        "                required: 'Width is required.',",
+        "                min: 'Width must be non-negative.'",
+        "            },",
+        "            Depth: {",
+        "                required: 'Depth is required.',",
+        "                min: 'Depth must be non-negative.'",
+        "            },",
+        "            TonsPerInch: {",
+        "                required: 'Tons/inch is required.',",
+        "                min: 'Tons/inch must be non-negative.'",
+        "            },",
+        "            DraftLight: {",
+        "                required: 'Light draft (ft/in) is required.',",
+        "                range: 'Light draft (ft/in) must be between 0 and 99.999.'",
+        "            }",
+        "        }",
+        "    });",
+        "});"
+      ]
+    }
+  },
+  "validationTriggers": {
+    "clientSide": [
+      {
+        "trigger": "AfterCellUpdate",
+        "location": "frmBargeSeriesDetail.vb:188-216",
+        "description": "Grid cell update converts decimal to integer or defaults to 'xxx'"
+      },
+      {
+        "trigger": "Validated event",
+        "controls": [
+          "cboCustomerID",
+          "txtName",
+          "cboHullType",
+          "cboCoverType",
+          "txtLength",
+          "txtWidth",
+          "txtDepth",
+          "txtTonsPerInch",
+          "txtDraftLightFeet",
+          "txtDraftLightInches",
+          "chkIsActive"
+        ],
+        "description": "Field updates business object properties when control loses focus"
+      }
+    ],
+    "serverSide": [
+      {
+        "trigger": "Property setter",
+        "description": "CheckBusinessRules called automatically when property changes"
+      },
+      {
+        "trigger": "IsValid property",
+        "location": "BargeSeries.vb:222-227",
+        "description": "Explicitly checks BargeSeriesDrafts validation before returning IsValid"
+      },
+      {
+        "trigger": "Submit button",
+        "location": "frmBargeSeriesDetail.vb:132-147",
+        "description": "ProcessBargeSeriesDraft then SubmitNoRefreshClick validates before save"
+      }
+    ]
+  },
+  "notes": [
+    "BargeSeries uses a custom property split for DraftLight: DraftLightFeet and DraftLightInches are UI properties that convert to/from the underlying DraftLight decimal property",
+    "Grid validation uses 'xxx' as a special sentinel value to represent empty/null tonnage values",
+    "Child BargeSeriesDraft collection validation is deferred until IsValid is called on the parent",
+    "All tonnage fields (Tons00-Tons11) in BargeSeriesDraft children are validated collectively with a single error message",
+    "The form uses ValidatorExtender for client-side type validation, not traditional AreFieldsValid method",
+    "IsActive defaults to True on new records (Initialize method)",
+    "All decimal properties (Length, Width, Depth, TonsPerInch, DraftLight) are stored as strings but validated as decimals",
+    "HullType and CoverType are populated from ValidationLists, ensuring referential integrity"
+  ]
+}

@@ -1,0 +1,564 @@
+{
+  "businessObject": "BoatFuelPrice",
+  "baseClass": "BoatFuelPriceBase",
+  "namespace": "BargeOps.Onshore.BusinessLogic",
+  "database": {
+    "tableName": "BoatFuelPrice",
+    "primaryKey": "BoatFuelPriceID",
+    "uniqueIndex": {
+      "name": "IX_BoatFuelPrice_Unique",
+      "columns": ["EffectiveDate", "FuelVendor"]
+    }
+  },
+  "properties": [
+    {
+      "name": "BoatFuelPriceID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isRequired": true,
+      "description": "Primary key, auto-generated identity field",
+      "friendSetter": true,
+      "sqlType": "int",
+      "sqlDirection": "InputOutput"
+    },
+    {
+      "name": "EffectiveDate",
+      "type": "SmartDate",
+      "displayType": "String",
+      "access": "ReadWrite",
+      "isPrimaryKey": false,
+      "isRequired": true,
+      "displayName": "Effective date",
+      "description": "Date when the fuel price becomes effective",
+      "sqlType": "DateTime",
+      "formatString": "SmartDateFormat",
+      "isAudited": true,
+      "businessRules": [
+        "IsRequired"
+      ]
+    },
+    {
+      "name": "Price",
+      "type": "String",
+      "displayType": "Currency",
+      "access": "ReadWrite",
+      "isPrimaryKey": false,
+      "isRequired": true,
+      "displayName": "Fuel price",
+      "description": "Fuel price in currency format with 4 decimal places",
+      "sqlType": "Money",
+      "formatString": "FmtCurrencyFourDecimalExact",
+      "customLogic": "Overridden to format as currency with 4 decimals using CDec(value).ToString(\"N4\")",
+      "isAudited": true,
+      "businessRules": [
+        "IsRequired"
+      ]
+    },
+    {
+      "name": "FuelVendorBusinessUnitID",
+      "type": "String",
+      "displayType": "Int32",
+      "access": "ReadWrite",
+      "isPrimaryKey": false,
+      "isRequired": false,
+      "displayName": "Fuel vendor",
+      "description": "Foreign key to VendorBusinessUnit table, identifies the fuel vendor",
+      "sqlType": "Int",
+      "isNullable": true,
+      "isAudited": true,
+      "businessRules": [
+        "ConditionalRequired"
+      ]
+    },
+    {
+      "name": "InvoiceNumber",
+      "type": "String",
+      "access": "ReadWrite",
+      "isPrimaryKey": false,
+      "isRequired": false,
+      "displayName": "Vendor inv#",
+      "description": "Invoice number from the fuel vendor",
+      "sqlType": "VarChar",
+      "maxLength": 50,
+      "isNullable": true,
+      "isAudited": true,
+      "businessRules": [
+        "MaxLength",
+        "MustBeBlankWhenFuelVendorBlank"
+      ]
+    },
+    {
+      "name": "CreateDateTime",
+      "type": "DateTime",
+      "access": "ReadOnly",
+      "isPrimaryKey": false,
+      "isRequired": true,
+      "description": "Auto-populated with tenant date on creation",
+      "sqlType": "DateTime",
+      "defaultValue": "GetTenantDate()"
+    },
+    {
+      "name": "CreateUser",
+      "type": "String",
+      "access": "ReadOnly",
+      "isPrimaryKey": false,
+      "isRequired": true,
+      "description": "Auto-populated with current user on creation",
+      "sqlType": "VarChar(50)",
+      "defaultValue": "suser_sname()"
+    },
+    {
+      "name": "ModifyDateTime",
+      "type": "DateTime",
+      "access": "ReadOnly",
+      "isPrimaryKey": false,
+      "isRequired": true,
+      "description": "Auto-populated with tenant date on modification",
+      "sqlType": "DateTime",
+      "defaultValue": "GetTenantDate()"
+    },
+    {
+      "name": "ModifyUser",
+      "type": "String",
+      "access": "ReadOnly",
+      "isPrimaryKey": false,
+      "isRequired": true,
+      "description": "Auto-populated with current user on modification",
+      "sqlType": "VarChar(50)",
+      "defaultValue": "suser_sname()"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "IsRequired",
+      "property": "EffectiveDate",
+      "condition": "EffectiveDate.IsEmpty",
+      "message": "Effective date is required.",
+      "assertKey": "EffectiveDateIsRequiredName",
+      "severity": "Error",
+      "location": "BoatFuelPriceBase.vb:214-217"
+    },
+    {
+      "ruleName": "IsRequired",
+      "property": "Price",
+      "condition": "String.IsNullOrEmpty(p_Price)",
+      "message": "Fuel price is required.",
+      "assertKey": "PriceIsRequiredName",
+      "severity": "Error",
+      "location": "BoatFuelPriceBase.vb:219-222"
+    },
+    {
+      "ruleName": "MaxLength",
+      "property": "InvoiceNumber",
+      "condition": "p_InvoiceNumber.Length > MaxLength.InvoiceNumber",
+      "message": "Vendor inv# must be less than or equal to 50.",
+      "assertKey": "InvoiceNumberMaxLengthName",
+      "severity": "Error",
+      "maxLength": 50,
+      "location": "BoatFuelPriceBase.vb:224-228"
+    },
+    {
+      "ruleName": "MustBeBlankWhenFuelVendorBlank",
+      "property": "InvoiceNumber",
+      "relatedProperty": "FuelVendorBusinessUnitID",
+      "condition": "String.IsNullOrEmpty(p_FuelVendorBusinessUnitID) AndAlso (Not String.IsNullOrEmpty(p_InvoiceNumber))",
+      "message": "Vendor inv# must be blank when Fuel vendor is blank.",
+      "assertKey": "InvoiceNumberFuelVendorBusinessUnitIDMustBeBlankDesc",
+      "severity": "Error",
+      "description": "Invoice number can only be entered when a fuel vendor is selected",
+      "location": "BoatFuelPrice.vb:65-68",
+      "uiLogic": "InvoiceNumber field is disabled when FuelVendorBusinessUnitID is empty"
+    }
+  ],
+  "methods": [
+    {
+      "name": "NewBoatFuelPrice",
+      "visibility": "Public",
+      "isStatic": true,
+      "returnType": "BoatFuelPrice",
+      "parameters": [],
+      "description": "Factory method to create a new parent BoatFuelPrice object",
+      "implementation": "DataPortal.Create(New Criteria(False))",
+      "location": "BoatFuelPriceBase.vb:327-329"
+    },
+    {
+      "name": "NewBoatFuelPriceAsChild",
+      "visibility": "Friend",
+      "isStatic": true,
+      "returnType": "BoatFuelPrice",
+      "parameters": [],
+      "description": "Factory method to create a new child BoatFuelPrice object",
+      "implementation": "DataPortal.Create(New Criteria(True))",
+      "location": "BoatFuelPriceBase.vb:332-334"
+    },
+    {
+      "name": "GetBoatFuelPrice",
+      "visibility": "Public",
+      "isStatic": true,
+      "returnType": "BoatFuelPrice",
+      "parameters": [
+        {
+          "name": "ID",
+          "type": "Int32",
+          "description": "BoatFuelPriceID to fetch"
+        }
+      ],
+      "description": "Factory method to load an existing parent object by ID",
+      "implementation": "DataPortal.Fetch(New Criteria(ID, False))",
+      "location": "BoatFuelPriceBase.vb:337-339"
+    },
+    {
+      "name": "GetBoatFuelPriceChild",
+      "visibility": "Friend",
+      "isStatic": true,
+      "returnType": "BoatFuelPrice",
+      "parameters": [
+        {
+          "name": "ID",
+          "type": "Int32",
+          "description": "BoatFuelPriceID to fetch"
+        }
+      ],
+      "description": "Factory method to load an existing child object by ID",
+      "implementation": "DataPortal.Fetch(New Criteria(ID, True))",
+      "location": "BoatFuelPriceBase.vb:342-344"
+    },
+    {
+      "name": "GetBoatFuelPriceChild",
+      "visibility": "Friend",
+      "isStatic": true,
+      "returnType": "BoatFuelPrice",
+      "parameters": [
+        {
+          "name": "dr",
+          "type": "SafeDataReader",
+          "description": "Data reader containing row data"
+        }
+      ],
+      "description": "Factory method to load a child object from a DataReader",
+      "implementation": "Creates instance via Activator.CreateInstance, calls LoadProperties and LoadChildObjects, marks as child",
+      "location": "BoatFuelPriceBase.vb:347-353"
+    },
+    {
+      "name": "DeleteBoatFuelPrice",
+      "visibility": "Public",
+      "isStatic": true,
+      "returnType": "void",
+      "parameters": [
+        {
+          "name": "ID",
+          "type": "Int32",
+          "description": "BoatFuelPriceID to delete"
+        }
+      ],
+      "description": "Delete a parent object by ID",
+      "implementation": "BusinessLogicBase.ImmediateDelete(New Criteria(ID, False))",
+      "location": "BoatFuelPriceBase.vb:356-358"
+    },
+    {
+      "name": "GenerateBoatFuelPrices",
+      "visibility": "Public",
+      "isStatic": false,
+      "returnType": "Int32",
+      "parameters": [
+        {
+          "name": "priceDate",
+          "type": "String",
+          "description": "Date of boat fuel prices to generate"
+        }
+      ],
+      "description": "Public method to generate daily boat fuel prices by calling GenerateBoatFuelPrices stored procedure. Used by both Generate Vendor Fuel Prices form and OpisFuelPriceImport SSIS package",
+      "implementation": "Uses DirectAccess class to call stored procedure with @PriceDate parameter",
+      "storedProcedure": "GenerateBoatFuelPrices",
+      "location": "BoatFuelPrice.vb:84-104"
+    },
+    {
+      "name": "Initialize",
+      "visibility": "Public",
+      "isStatic": false,
+      "returnType": "void",
+      "parameters": [],
+      "description": "Initialize all properties to default values, set stored procedure names, and check business rules",
+      "implementation": "Calls MyBase.Initialize, sets default values for all properties, sets format strings, sets stored procedure names, calls CheckBusinessRules",
+      "location": "BoatFuelPriceBase.vb:183-207",
+      "override": "BoatFuelPrice.vb:35-56"
+    },
+    {
+      "name": "CheckBusinessRules",
+      "visibility": "Public",
+      "isStatic": false,
+      "returnType": "void",
+      "parameters": [
+        {
+          "name": "PropertyName",
+          "type": "String",
+          "description": "Name of property to validate, or empty string to validate all"
+        }
+      ],
+      "description": "Validate business rules for specified property or all properties",
+      "implementation": "Calls MyBase.CheckBusinessRules, then validates custom business rules",
+      "location": "BoatFuelPriceBase.vb:209-231",
+      "override": "BoatFuelPrice.vb:58-70"
+    }
+  ],
+  "initialization": {
+    "defaultValues": {
+      "BoatFuelPriceID": 0,
+      "EffectiveDate": "New SmartDate()",
+      "Price": "String.Empty",
+      "FuelVendorBusinessUnitID": "String.Empty",
+      "InvoiceNumber": "String.Empty"
+    },
+    "formatStrings": {
+      "EffectiveDate": "SmartDateFormat"
+    },
+    "storedProcedures": {
+      "Fetch": "BoatFuelPriceSelect",
+      "FetchAll": "BoatFuelPricesSelect",
+      "Insert": "BoatFuelPriceInsert",
+      "Update": "BoatFuelPriceUpdate",
+      "Delete": "BoatFuelPriceDelete"
+    }
+  },
+  "dataAccess": {
+    "fetchParameters": [
+      {
+        "name": "@BoatFuelPriceID",
+        "type": "Int",
+        "direction": "Input",
+        "source": "p_BoatFuelPriceID"
+      }
+    ],
+    "insertParameters": [
+      {
+        "name": "@BoatFuelPriceID",
+        "type": "Int",
+        "direction": "InputOutput",
+        "source": "p_BoatFuelPriceID"
+      },
+      {
+        "name": "@EffectiveDate",
+        "type": "DateTime",
+        "direction": "Input",
+        "source": "p_EffectiveDate"
+      },
+      {
+        "name": "@Price",
+        "type": "Money",
+        "direction": "Input",
+        "source": "p_Price"
+      },
+      {
+        "name": "@FuelVendorBusinessUnitID",
+        "type": "Int",
+        "direction": "Input",
+        "source": "p_FuelVendorBusinessUnitID"
+      },
+      {
+        "name": "@InvoiceNumber",
+        "type": "VarChar",
+        "direction": "Input",
+        "source": "p_InvoiceNumber"
+      }
+    ],
+    "updateParameters": [
+      {
+        "name": "@BoatFuelPriceID",
+        "type": "Int",
+        "direction": "Input",
+        "source": "p_BoatFuelPriceID"
+      },
+      {
+        "name": "@EffectiveDate",
+        "type": "DateTime",
+        "direction": "Input",
+        "source": "p_EffectiveDate"
+      },
+      {
+        "name": "@Price",
+        "type": "Money",
+        "direction": "Input",
+        "source": "p_Price"
+      },
+      {
+        "name": "@FuelVendorBusinessUnitID",
+        "type": "Int",
+        "direction": "Input",
+        "source": "p_FuelVendorBusinessUnitID"
+      },
+      {
+        "name": "@InvoiceNumber",
+        "type": "VarChar",
+        "direction": "Input",
+        "source": "p_InvoiceNumber"
+      }
+    ],
+    "deleteParameters": [
+      {
+        "name": "@BoatFuelPriceID",
+        "type": "Int",
+        "direction": "Input",
+        "source": "p_BoatFuelPriceID"
+      }
+    ]
+  },
+  "relatedObjects": {
+    "listObjects": [
+      {
+        "name": "BoatFuelPriceSearch",
+        "type": "Search",
+        "storedProcedure": "BoatFuelPriceSearch",
+        "searchParameters": [
+          {
+            "name": "effectiveDate",
+            "type": "String",
+            "sqlType": "DateTime",
+            "isOptional": true
+          },
+          {
+            "name": "fuelVendorBusinessUnitID",
+            "type": "String",
+            "sqlType": "VarChar",
+            "isOptional": true
+          }
+        ],
+        "columns": [
+          "BoatFuelPriceID",
+          "EffectiveDate",
+          "Price",
+          "FuelVendor",
+          "InvoiceNumber"
+        ]
+      }
+    ],
+    "foreignKeys": [
+      {
+        "propertyName": "FuelVendorBusinessUnitID",
+        "referencedTable": "VendorBusinessUnit",
+        "referencedColumn": "VendorBusinessUnitID",
+        "isNullable": true,
+        "description": "References the business unit of the fuel vendor"
+      }
+    ]
+  },
+  "uiPatterns": {
+    "formType": "SearchAndDetail",
+    "formName": "frmBoatFuelPrices",
+    "searchCriteria": [
+      {
+        "control": "dtEffectiveDateSearch",
+        "property": "EffectiveDate",
+        "defaultValue": "Date.Today.Date"
+      },
+      {
+        "control": "cboFuelVendorSearch",
+        "property": "FuelVendorBusinessUnitID",
+        "dataSource": "FuelVendorList"
+      }
+    ],
+    "detailControls": [
+      {
+        "control": "dtEffectiveDate",
+        "property": "EffectiveDate",
+        "validationType": "Date"
+      },
+      {
+        "control": "txtPrice",
+        "property": "Price",
+        "validationType": "Currency",
+        "maxLength": null
+      },
+      {
+        "control": "cboFuelVendorBusinessUnitID",
+        "property": "FuelVendorBusinessUnitID",
+        "dataSource": "FuelVendorList",
+        "includeBlankRow": true,
+        "onlyActiveRecords": false
+      },
+      {
+        "control": "txtInvoiceNumber",
+        "property": "InvoiceNumber",
+        "validationType": "String",
+        "maxLength": 50,
+        "conditionalEnabled": "Enabled only when FuelVendorBusinessUnitID is not empty"
+      }
+    ],
+    "gridColumns": [
+      {
+        "field": "EffectiveDate",
+        "header": "Effective Date",
+        "width": 100,
+        "alignment": "Left"
+      },
+      {
+        "field": "Price",
+        "header": "Fuel Price",
+        "width": 100,
+        "alignment": "Right"
+      },
+      {
+        "field": "FuelVendor",
+        "header": "Fuel Vendor",
+        "width": 250,
+        "alignment": "Left"
+      },
+      {
+        "field": "InvoiceNumber",
+        "header": "Invoice",
+        "width": 100,
+        "alignment": "Left"
+      }
+    ],
+    "gridSorting": [
+      {
+        "column": "EffectiveDate",
+        "direction": "Descending",
+        "priority": 1
+      },
+      {
+        "column": "FuelVendor",
+        "direction": "Ascending",
+        "priority": 2
+      }
+    ],
+    "conditionalLogic": [
+      {
+        "trigger": "cboFuelVendorBusinessUnitID.Validated",
+        "action": "Enable/Disable txtInvoiceNumber based on whether FuelVendorBusinessUnitID is empty",
+        "code": "If String.IsNullOrEmpty(_BoatFuelPrice.FuelVendorBusinessUnitID) Then txtInvoiceNumber.Enabled = False Else txtInvoiceNumber.Enabled = True"
+      },
+      {
+        "trigger": "SubmitNoRefreshClick",
+        "action": "Clear InvoiceNumber if FuelVendorBusinessUnitID is empty before save",
+        "code": "If String.IsNullOrEmpty(_BoatFuelPrice.FuelVendorBusinessUnitID) Then _BoatFuelPrice.InvoiceNumber = String.Empty"
+      }
+    ]
+  },
+  "auditing": {
+    "isEnabled": true,
+    "auditedFields": [
+      "BoatFuelPriceID",
+      "EffectiveDate",
+      "Price",
+      "FuelVendorBusinessUnitID",
+      "InvoiceNumber"
+    ],
+    "auditImplementation": "Uses AuditFieldEvent collection and ColumnsToAudit property"
+  },
+  "additionalNotes": [
+    "Object uses CSLA-style DataPortal pattern for all CRUD operations",
+    "Inherits from BusinessLogicBase which provides common functionality",
+    "Uses SmartDate type for date handling with configurable format strings",
+    "Price is stored as string but validated and formatted as currency with 4 decimal places",
+    "FuelVendorBusinessUnitID is stored as string but represents an Int32 foreign key",
+    "Unique constraint on EffectiveDate + FuelVendor ensures no duplicate prices for same vendor on same date",
+    "GenerateBoatFuelPrices stored procedure calculates prices from OpisFuelPrice + FuelVendorPricing.PriceSpread",
+    "Generated prices can be overridden manually through the UI",
+    "Uses BeginEdit/EndEdit pattern for transaction support",
+    "Implements IsDirty and IsValid properties for change tracking and validation",
+    "All string property setters call MarkDirty(), CheckBusinessRules(), and FieldAudit() when values change",
+    "Security is inherited from BusinessLogicBase and uses ControlAuthorization",
+    "Form uses BaseSearch interface pattern with standard CRUD operations"
+  ]
+}

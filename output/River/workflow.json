@@ -1,0 +1,722 @@
+{
+  "entityName": "River",
+  "formPair": {
+    "searchForm": "frmRiverSearch",
+    "detailForm": "frmRiverDetail"
+  },
+  "primaryWorkflows": [
+    {
+      "name": "SearchForRivers",
+      "description": "User searches for rivers/waterways using criteria",
+      "steps": [
+        {
+          "step": 1,
+          "action": "EnterSearchCriteria",
+          "controls": [
+            "txtCode",
+            "txtName",
+            "chkIsActive"
+          ],
+          "details": "User can search by Code (starts with), River/Waterway name (starts with), and Active status filter"
+        },
+        {
+          "step": 2,
+          "action": "ClickFind",
+          "button": "btnFind",
+          "trigger": "Click or Enter key (AcceptButton)",
+          "result": "Grid populated with matching results"
+        },
+        {
+          "step": 3,
+          "action": "ViewResults",
+          "control": "grdRiverSearch",
+          "gridColumns": [
+            "Code",
+            "Name (River/Waterway)",
+            "StartMile",
+            "EndMile",
+            "IsLowToHighDirection",
+            "IsActive",
+            "UpLabel",
+            "DownLabel"
+          ]
+        }
+      ],
+      "defaultSort": "Code ascending"
+    },
+    {
+      "name": "CreateNewRiver",
+      "description": "User creates a new river/waterway record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickNew",
+          "trigger": "Main form's New/Add button",
+          "method": "ItemAdd()"
+        },
+        {
+          "step": 2,
+          "action": "OpenDetailForm",
+          "form": "frmRiverDetail",
+          "mode": "New",
+          "modalDialog": true,
+          "businessObject": "River.NewRiver",
+          "title": "New - River/Waterway Detail"
+        },
+        {
+          "step": 3,
+          "action": "EnterRiverData",
+          "requiredFields": [
+            "txtName",
+            "txtCode"
+          ],
+          "optionalFields": [
+            "txtStartMile",
+            "txtEndMile",
+            "txtBargeExCode",
+            "txtUpLabel",
+            "txtDownLabel",
+            "chkIsLowToHighDirection",
+            "chkIsActive"
+          ],
+          "defaultValues": {
+            "chkIsActive": true,
+            "chkIsLowToHighDirection": true
+          }
+        },
+        {
+          "step": 4,
+          "action": "Submit",
+          "button": "btnSubmit",
+          "validation": true,
+          "onSuccess": [
+            "ApplyEdit() called on business object",
+            "Main.Notifier.Updated event raised",
+            "Search form RefreshList() triggered",
+            "Dialog closed"
+          ],
+          "onFailure": "Validation errors shown in status bar"
+        }
+      ],
+      "stateManagement": {
+        "beginEdit": "Called in Initialize() method",
+        "applyEdit": "Called on successful submit",
+        "cancelEdit": "Called when user cancels"
+      }
+    },
+    {
+      "name": "EditExistingRiver",
+      "description": "User edits an existing river/waterway record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRiverFromGrid",
+          "control": "grdRiverSearch",
+          "methods": [
+            "Single-click to select row",
+            "Double-click on row",
+            "Click Edit button"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "OpenDetailForm",
+          "form": "frmRiverDetail",
+          "mode": "Edit",
+          "modalDialog": true,
+          "businessObject": "River.GetRiver(GridControlIndex)",
+          "title": "{RiverName} - River/Waterway Detail"
+        },
+        {
+          "step": 3,
+          "action": "ModifyRiverData",
+          "fields": [
+            "txtName",
+            "txtCode",
+            "txtStartMile",
+            "txtEndMile",
+            "txtBargeExCode",
+            "txtUpLabel",
+            "txtDownLabel",
+            "chkIsLowToHighDirection",
+            "chkIsActive"
+          ],
+          "validationTrigger": "Validated event on each control"
+        },
+        {
+          "step": 4,
+          "action": "Submit",
+          "button": "btnSubmit",
+          "validation": true,
+          "onSuccess": [
+            "ApplyEdit() called on business object",
+            "Main.Notifier.Updated event raised",
+            "Search form RefreshList() triggered",
+            "Dialog closed"
+          ],
+          "onFailure": "Validation errors shown in status bar"
+        }
+      ],
+      "stateManagement": {
+        "beginEdit": "Called in Initialize() method",
+        "applyEdit": "Called on successful submit",
+        "cancelEdit": "Called when user cancels"
+      }
+    },
+    {
+      "name": "DeleteRiver",
+      "description": "User deletes a river/waterway record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectRiverFromGrid",
+          "control": "grdRiverSearch"
+        },
+        {
+          "step": 2,
+          "action": "ClickDelete",
+          "trigger": "Main form's Delete/Remove button",
+          "method": "ItemRemove()"
+        },
+        {
+          "step": 3,
+          "action": "ConfirmDeletion",
+          "dialog": "Main.ItemRemoveDialog('River')",
+          "message": "Confirmation dialog asking user to confirm deletion"
+        },
+        {
+          "step": 4,
+          "action": "DeleteRecord",
+          "onConfirm": [
+            "River.DeleteRiver(GridControlIndex) called",
+            "RefreshList(False) called to update grid"
+          ],
+          "onCancel": "No action taken"
+        }
+      ]
+    },
+    {
+      "name": "CancelEditing",
+      "description": "User cancels changes to a river/waterway",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickCancel",
+          "button": "btnCancel",
+          "trigger": "Click or ESC key (DialogResult.Cancel)"
+        },
+        {
+          "step": 2,
+          "action": "CheckForChanges",
+          "method": "FormIsClosable()",
+          "behavior": "Prompts user if unsaved changes exist"
+        },
+        {
+          "step": 3,
+          "action": "DiscardChanges",
+          "onConfirm": [
+            "CancelEdit() called on business object",
+            "Dialog closed",
+            "No refresh triggered"
+          ],
+          "onCancel": "Return to form"
+        }
+      ]
+    }
+  ],
+  "formStates": {
+    "searchForm": [
+      {
+        "state": "Initial",
+        "description": "Form first loaded/panel created",
+        "gridState": "Empty",
+        "enabledControls": [
+          "txtCode",
+          "txtName",
+          "chkIsActive",
+          "btnFind"
+        ],
+        "defaultFocus": "txtCode",
+        "lifecycle": "pnlRiverSearch.HandleCreated event"
+      },
+      {
+        "state": "SearchResults",
+        "description": "Search results displayed in grid",
+        "gridState": "Populated",
+        "enabledControls": [
+          "txtCode",
+          "txtName",
+          "chkIsActive",
+          "btnFind",
+          "grdRiverSearch (with selection)"
+        ],
+        "mainFormButtons": [
+          "New/Add",
+          "Edit/Modify",
+          "Delete/Remove"
+        ],
+        "notes": "Main form controls button state based on grid selection"
+      },
+      {
+        "state": "Destroyed",
+        "description": "Panel being destroyed",
+        "lifecycle": "pnlRiverSearch.HandleDestroyed event",
+        "actions": [
+          "Save grid settings to database (MyAppSettingHelper.SaveGrid)"
+        ]
+      }
+    ],
+    "detailForm": [
+      {
+        "state": "New",
+        "description": "Creating new river record",
+        "formTitle": "New - River/Waterway Detail",
+        "businessObject": "River.NewRiver",
+        "enabledControls": "All input controls",
+        "requiredValidation": [
+          "txtName",
+          "txtCode (must be exactly 3 characters)"
+        ]
+      },
+      {
+        "state": "Edit",
+        "description": "Editing existing river record",
+        "formTitle": "{RiverName} - River/Waterway Detail",
+        "businessObject": "River.GetRiver(id)",
+        "enabledControls": "All input controls",
+        "requiredValidation": [
+          "txtName",
+          "txtCode (must be exactly 3 characters)"
+        ]
+      },
+      {
+        "state": "Validating",
+        "description": "User tabbing through/changing fields",
+        "trigger": "Validated event on each control",
+        "behavior": "Updates business object properties, formats values (e.g., Code to uppercase)"
+      },
+      {
+        "state": "Submitting",
+        "description": "User clicked Submit button",
+        "validationSteps": [
+          "ValidatorExtender checks all fields",
+          "Business object IsValid() called",
+          "If valid: ApplyEdit() saves to database"
+        ],
+        "onSuccess": "Form closes, search refreshes",
+        "onFailure": "Errors displayed in status bar"
+      }
+    ]
+  },
+  "navigationPatterns": [
+    {
+      "from": "frmRiverSearch",
+      "to": "frmRiverDetail",
+      "trigger": "ItemAdd() - Main form New button",
+      "modalDialog": true,
+      "dataPassed": "River.NewRiver (new instance)",
+      "returnBehavior": "Search form refreshes on successful save"
+    },
+    {
+      "from": "frmRiverSearch",
+      "to": "frmRiverDetail",
+      "trigger": "ItemModify() - Main form Edit button or grid double-click",
+      "modalDialog": true,
+      "dataPassed": "River.GetRiver(GridControlIndex)",
+      "returnBehavior": "Search form refreshes on successful save"
+    }
+  ],
+  "eventHandlerChains": {
+    "searchForm": {
+      "initialization": [
+        {
+          "event": "pnlRiverSearch.HandleCreated",
+          "handler": "pnlRiverSearch_HandleCreated",
+          "actions": [
+            "FormatControls()",
+            "MyAppSettingHelper.RestoreGrid() - restore user's grid settings from database"
+          ]
+        },
+        {
+          "method": "Initialize()",
+          "trigger": "Called by main form",
+          "actions": [
+            "InitializeBase(SubSystem.frmRiverSearch)",
+            "Sets ControlAuthorization",
+            "Calls SetButtonTypes()",
+            "Sets permissions for controls"
+          ]
+        },
+        {
+          "method": "FormatControls()",
+          "actions": [
+            "InfragisticsHelper.FormatInfragisticsControls()",
+            "Set GridControlUniqueIdentifierCol = 'RiverID'",
+            "AddToInitialColumnSortOrder('Code', Ascending)"
+          ]
+        }
+      ],
+      "search": [
+        {
+          "event": "btnFind.Click",
+          "handler": "btnFind_Click",
+          "actions": [
+            "RefreshList(True) - selects first row"
+          ]
+        },
+        {
+          "method": "RefreshList(selectFirstRow)",
+          "trigger": "Called by main form or Find button",
+          "actions": [
+            "Calls BusinessLogic.Lists.RiverSearch.GetList(txtName.Text, txtCode.Text, chkIsActive.Checked)",
+            "RefreshListBase() populates grid with results",
+            "Optionally selects first row"
+          ]
+        }
+      ],
+      "crud": [
+        {
+          "method": "ItemAdd()",
+          "trigger": "Main form New button",
+          "actions": [
+            "Create new frmRiverDetail using 'Using' statement",
+            "Initialize with River.NewRiver",
+            "ShowDialog() - modal",
+            "Dispose automatically on close"
+          ]
+        },
+        {
+          "method": "ItemModify()",
+          "trigger": "Main form Edit button or grid double-click",
+          "actions": [
+            "Create new frmRiverDetail using 'Using' statement",
+            "Initialize with River.GetRiver(GridControlIndex)",
+            "ShowDialog() - modal",
+            "Dispose automatically on close"
+          ]
+        },
+        {
+          "method": "ItemRemove()",
+          "trigger": "Main form Delete button",
+          "actions": [
+            "Main.ItemRemoveDialog('River') shows confirmation",
+            "If Yes: River.DeleteRiver(GridControlIndex)",
+            "RefreshList(False) to update grid without selecting row"
+          ]
+        }
+      ],
+      "cleanup": [
+        {
+          "event": "pnlRiverSearch.HandleDestroyed",
+          "handler": "pnlRiverSearch_HandleDestroyed",
+          "actions": [
+            "MyAppSettingHelper.SaveGrid() - persist user's grid settings to database"
+          ]
+        }
+      ]
+    },
+    "detailForm": {
+      "initialization": [
+        {
+          "method": "Initialize(businessObject)",
+          "trigger": "Called from search form before ShowDialog()",
+          "actions": [
+            "_River = CType(businessObject, River)",
+            "_River.BeginEdit() - enables change tracking",
+            "InitializeBase(businessObject, SubSystem.frmRiverSearch)"
+          ]
+        },
+        {
+          "event": "frmRiverDetail.Load",
+          "handler": "frmRiverDetail_Load",
+          "actions": [
+            "FormatControls()",
+            "LoadControlsForRiver() - populate fields from business object"
+          ]
+        },
+        {
+          "method": "FormatControls()",
+          "actions": [
+            "Set form title based on new vs edit mode",
+            "SetValidatorExtenderForRiver() - configure validation rules",
+            "SetMaxLengthsForRiver() - set max lengths from business object"
+          ]
+        },
+        {
+          "method": "LoadControlsForRiver()",
+          "actions": [
+            "txtName.Text = _River.Name",
+            "txtCode.Text = _River.Code",
+            "txtBargeExCode.Text = _River.BargeExCode",
+            "txtStartMile.Text = _River.StartMile",
+            "txtEndMile.Text = _River.EndMile",
+            "chkIsLowToHighDirection.Checked = _River.IsLowToHighDirection",
+            "chkIsActive.Checked = _River.IsActive",
+            "txtUpLabel.Text = _River.UpLabel",
+            "txtDownLabel.Text = _River.DownLabel"
+          ]
+        }
+      ],
+      "fieldValidation": [
+        {
+          "event": "txtName.Validated",
+          "handler": "txtName_Validated",
+          "actions": [
+            "If enabled and not readonly: _River.Name = txtName.Text",
+            "Update display: txtName.Text = _River.Name"
+          ]
+        },
+        {
+          "event": "txtCode.Validated",
+          "handler": "txtCode_Validated",
+          "actions": [
+            "If enabled and not readonly: _River.Code = txtCode.Text.ToUpper",
+            "Update display: txtCode.Text = _River.Code (uppercase)"
+          ],
+          "validation": "Must be exactly 3 characters (custom regex)"
+        },
+        {
+          "event": "txtBargeExCode.Validated",
+          "handler": "txtBargeExCode_Validated",
+          "actions": [
+            "If enabled and not readonly: _River.BargeExCode = txtBargeExCode.Text",
+            "Update display"
+          ]
+        },
+        {
+          "event": "txtStartMile.Validated",
+          "handler": "txtStartMile_Validated",
+          "actions": [
+            "If enabled and not readonly: _River.StartMile = txtStartMile.Text",
+            "Update display"
+          ],
+          "validation": "Decimal type"
+        },
+        {
+          "event": "txtEndMile.Validated",
+          "handler": "txtEndMile_Validated",
+          "actions": [
+            "If enabled and not readonly: _River.EndMile = txtEndMile.Text",
+            "Update display"
+          ],
+          "validation": "Decimal type"
+        },
+        {
+          "event": "chkIsLowToHighDirection.Validated",
+          "handler": "chkIsLowToHighDirection_Validated",
+          "actions": [
+            "If enabled: _River.IsLowToHighDirection = chkIsLowToHighDirection.Checked"
+          ]
+        },
+        {
+          "event": "chkIsActive.Validated",
+          "handler": "chkIsActive_Validated",
+          "actions": [
+            "If enabled: _River.IsActive = chkIsActive.Checked"
+          ]
+        },
+        {
+          "event": "txtUpLabel.Validated",
+          "handler": "txtUpLabel_Validated",
+          "actions": [
+            "If enabled and not readonly: _River.UpLabel = txtUpLabel.Text",
+            "Update display"
+          ]
+        },
+        {
+          "event": "txtDownLabel.Validated",
+          "handler": "txtDownLabel_Validated",
+          "actions": [
+            "If enabled and not readonly: _River.DownLabel = txtDownLabel.Text",
+            "Update display"
+          ]
+        }
+      ],
+      "submit": [
+        {
+          "event": "btnSubmit.Click",
+          "handler": "btnSubmit_Click",
+          "actions": [
+            "SubmitNoRefreshClick() from base class"
+          ]
+        },
+        {
+          "method": "SubmitNoRefreshClick() [inherited]",
+          "actions": [
+            "Validate all fields using ValidatorExtender",
+            "Call _River.IsValid()",
+            "If valid: _River.ApplyEdit() saves to database",
+            "If successful: Main.Notifier.Updated(SubSystem.frmRiverSearch) raised",
+            "If successful: DialogResult = OK, form closes",
+            "If failed: Display error in status bar, form stays open"
+          ]
+        }
+      ],
+      "cancel": [
+        {
+          "event": "btnCancel.Click",
+          "handler": "btnCancel_Click",
+          "actions": [
+            "CancelClick() from base class"
+          ]
+        },
+        {
+          "method": "CancelClick() [inherited]",
+          "actions": [
+            "Check FormIsClosable() - prompts if changes exist",
+            "If user confirms: _River.CancelEdit() discards changes",
+            "DialogResult = Cancel, form closes",
+            "If user cancels: form stays open"
+          ]
+        },
+        {
+          "event": "Form X button clicked",
+          "handler": "WndProc override in base class",
+          "actions": [
+            "Intercept SC_CLOSE message",
+            "Call CancelClick() to check for changes",
+            "Process close if user confirms"
+          ]
+        }
+      ]
+    }
+  },
+  "statePersistence": {
+    "gridSettings": {
+      "scope": "Per user",
+      "stored": "Database (UserAppSettings)",
+      "includes": [
+        "Column widths",
+        "Column order",
+        "Sort order"
+      ],
+      "saveEvent": "pnlRiverSearch.HandleDestroyed",
+      "restoreEvent": "pnlRiverSearch.HandleCreated"
+    },
+    "businessObject": {
+      "pattern": "BeginEdit/CancelEdit/ApplyEdit",
+      "beginEdit": "Called in Initialize() when form opens",
+      "cancelEdit": "Called on Cancel button or form close without save",
+      "applyEdit": "Called on Submit button after validation"
+    }
+  },
+  "refreshTriggers": [
+    {
+      "trigger": "btnFind.Click",
+      "scope": "Search form grid",
+      "method": "RefreshList(True)",
+      "selectFirstRow": true
+    },
+    {
+      "trigger": "Main.Notifier.Updated event",
+      "scope": "Search form grid",
+      "method": "RefreshList() called by main form",
+      "when": "After successful save from detail form",
+      "selectFirstRow": false
+    },
+    {
+      "trigger": "After delete (ItemRemove)",
+      "scope": "Search form grid",
+      "method": "RefreshList(False)",
+      "selectFirstRow": false
+    },
+    {
+      "trigger": "Main form calls RefreshList",
+      "scope": "Search form grid",
+      "method": "RefreshList(selectFirstRow)",
+      "notes": "Main form decides whether to select first row"
+    }
+  ],
+  "userExperience": {
+    "searchForm": {
+      "defaultFocus": "txtCode",
+      "enterKeyBehavior": "Triggers search (btnFind is AcceptButton)",
+      "tooltips": [
+        "txtCode: 'Starts with search'",
+        "txtName: 'Starts with search'"
+      ],
+      "gridBehavior": {
+        "doubleClick": "Opens edit form (ItemModify)",
+        "singleClick": "Selects row, enables main form buttons",
+        "sorting": "Custom comparers for StartMile and EndMile (numeric sort)",
+        "defaultSort": "Code ascending"
+      }
+    },
+    "detailForm": {
+      "modalDialog": true,
+      "centerParent": true,
+      "formBorderStyle": "Fixed3D",
+      "maximizeBox": false,
+      "minimimizeBox": false,
+      "showInTaskbar": false,
+      "defaultButton": "btnSubmit",
+      "cancelButton": "btnCancel",
+      "escKeyBehavior": "Cancels form (btnCancel)",
+      "validation": {
+        "displayControl": "staStatus (status bar)",
+        "validateOnTab": true,
+        "requiredFields": [
+          "txtName",
+          "txtCode"
+        ],
+        "customValidation": [
+          "txtCode must be exactly 3 characters (regex: \\w{3})"
+        ],
+        "dataTypeValidation": [
+          "txtStartMile: Decimal",
+          "txtEndMile: Decimal"
+        ],
+        "fieldFormatting": [
+          "txtCode: Converts to uppercase on validated"
+        ]
+      }
+    }
+  },
+  "securityIntegration": {
+    "authorizationPattern": "ControlAuthorization from Security DLL",
+    "initialization": "InitializeBase() sets up authorization",
+    "buttonTypes": {
+      "searchForm": {
+        "btnFind": "ButtonType.Open"
+      },
+      "detailForm": {
+        "btnSubmit": "ButtonType.Submit",
+        "btnCancel": "ButtonType.Cancel"
+      }
+    },
+    "subSystem": "SubSystem.frmRiverSearch"
+  },
+  "errorHandling": {
+    "pattern": "Try-Catch with ExceptionManager.Publish()",
+    "cursorManagement": "WaitCursor during operations, restore in Finally",
+    "validationErrors": "Displayed in status bar (staStatus)",
+    "exceptionLogging": "ExceptionManager.Publish() for all caught exceptions"
+  },
+  "keyboardShortcuts": {
+    "searchForm": {
+      "Enter": "Triggers search (AcceptButton = btnFind)",
+      "Alt+I": "Triggers Find button (F&ind)"
+    },
+    "detailForm": {
+      "Enter": "Submits form (default button = btnSubmit)",
+      "Esc": "Cancels form (DialogResult.Cancel = btnCancel)",
+      "Alt+S": "Submit button (&Submit)",
+      "Alt+C": "Cancel button (&Cancel)"
+    }
+  },
+  "notes": [
+    "Search form is a panel (pnlRiverSearch) re-parented into main form's explorer panel",
+    "Detail form is a modal dialog shown with ShowDialog()",
+    "Business object follows BeginEdit/CancelEdit/ApplyEdit pattern for change tracking",
+    "Grid settings are persisted per user in database (MyAppSettingHelper)",
+    "Main form listens for Main.Notifier.Updated event to refresh search grid after saves",
+    "All forms use Infragistics controls (UltraGrid, UltraTextEditor, etc.)",
+    "Search uses 'starts with' matching on Code and Name fields",
+    "Code field must be exactly 3 characters",
+    "Code field is automatically converted to uppercase",
+    "Grid has custom numeric sorting for mile columns",
+    "Using statements ensure proper disposal of detail forms",
+    "Security is enforced through ControlAuthorization object",
+    "All database operations go through business logic layer"
+  ]
+}

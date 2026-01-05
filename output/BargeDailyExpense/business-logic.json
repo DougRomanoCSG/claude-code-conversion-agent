@@ -1,0 +1,591 @@
+{
+  "businessObject": "BargeDailyExpense",
+  "baseClass": "BargeDailyExpenseBase",
+  "namespace": "BargeOps.BusinessObjects",
+  "parentObject": "BargeDailyExpenseDate",
+  "collectionObject": "BargeDailyExpenses",
+  "description": "Represents daily expense entries for barges, including size categories, cover types, and chartered-in status. Child object of BargeDailyExpenseDate.",
+  "properties": [
+    {
+      "name": "BargeDailyExpenseID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "description": "Unique identifier for the barge daily expense record",
+      "sqlType": "Int",
+      "isIdentity": true
+    },
+    {
+      "name": "BargeDailyExpenseDateID",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isPrimaryKey": false,
+      "isForeignKey": true,
+      "isNullable": false,
+      "description": "Foreign key reference to BargeDailyExpenseDate parent record",
+      "sqlType": "Int",
+      "relatedEntity": "BargeDailyExpenseDate"
+    },
+    {
+      "name": "DailyExpense",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": true,
+      "isNullable": false,
+      "description": "Daily expense amount (currency value)",
+      "sqlType": "Money",
+      "displayName": "Daily Expense",
+      "propertyType": "Currency",
+      "getter": "GetCurrencyProp",
+      "setter": "SetCurrencyProp"
+    },
+    {
+      "name": "SizeCategory",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 15,
+      "isNullable": true,
+      "description": "Size category classification for the barge",
+      "sqlType": "VarChar",
+      "displayName": "Size Category"
+    },
+    {
+      "name": "CoverType",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 3,
+      "isNullable": true,
+      "description": "Cover type code for the barge",
+      "sqlType": "VarChar",
+      "displayName": "Cover Type"
+    },
+    {
+      "name": "CoverSubTypeID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Cover sub-type identifier (stored as string, backed by Int32)",
+      "sqlType": "Int",
+      "displayName": "Sub Type",
+      "propertyType": "Int32",
+      "getter": "p_CoverSubTypeID.ToString()",
+      "setter": "SetInt32Prop"
+    },
+    {
+      "name": "IsCharteredIn",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isNullable": false,
+      "description": "Indicates whether the barge is chartered-in",
+      "sqlType": "Bit",
+      "displayName": "Chartered-In",
+      "defaultValue": "False"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "DailyExpenseRequired",
+      "property": "DailyExpense",
+      "condition": "String.IsNullOrEmpty(p_DailyExpense)",
+      "message": "Daily Expense is required",
+      "severity": "Error",
+      "context": "Always",
+      "ruleType": "Required",
+      "modernEquivalent": {
+        "dataAnnotation": "[Required(ErrorMessage = \"Daily Expense is required\")]",
+        "fluentValidation": "RuleFor(x => x.DailyExpense).NotEmpty().WithMessage(\"Daily Expense is required\");"
+      }
+    },
+    {
+      "ruleName": "SizeCategoryMaxLength",
+      "property": "SizeCategory",
+      "condition": "p_SizeCategory.Length > MaxLength.SizeCategory",
+      "message": "Size Category cannot exceed 15 characters.",
+      "severity": "Error",
+      "context": "Always",
+      "ruleType": "MaxLength",
+      "maxLength": 15,
+      "modernEquivalent": {
+        "dataAnnotation": "[MaxLength(15, ErrorMessage = \"Size Category cannot exceed 15 characters.\")]",
+        "fluentValidation": "RuleFor(x => x.SizeCategory).MaximumLength(15).WithMessage(\"Size Category cannot exceed 15 characters.\");"
+      }
+    },
+    {
+      "ruleName": "CoverTypeMaxLength",
+      "property": "CoverType",
+      "condition": "p_CoverType.Length > MaxLength.CoverType",
+      "message": "Cover Type cannot exceed 3 characters.",
+      "severity": "Error",
+      "context": "Always",
+      "ruleType": "MaxLength",
+      "maxLength": 3,
+      "modernEquivalent": {
+        "dataAnnotation": "[MaxLength(3, ErrorMessage = \"Cover Type cannot exceed 3 characters.\")]",
+        "fluentValidation": "RuleFor(x => x.CoverType).MaximumLength(3).WithMessage(\"Cover Type cannot exceed 3 characters.\");"
+      }
+    }
+  ],
+  "methods": {
+    "factory": [
+      {
+        "name": "NewBargeDailyExpense",
+        "returnType": "BargeDailyExpense",
+        "parameters": [],
+        "scope": "Public Shared",
+        "description": "Creates new parent BargeDailyExpense instance with defaults",
+        "implementation": "DataPortal.Create(New Criteria(False))"
+      },
+      {
+        "name": "NewBargeDailyExpenseAsChild",
+        "returnType": "BargeDailyExpense",
+        "parameters": [],
+        "scope": "Friend Shared",
+        "description": "Creates new child BargeDailyExpense instance",
+        "implementation": "DataPortal.Create(New Criteria(True))"
+      },
+      {
+        "name": "GetBargeDailyExpense",
+        "returnType": "BargeDailyExpense",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "scope": "Public Shared",
+        "description": "Load an existing parent object by ID",
+        "implementation": "DataPortal.Fetch(New Criteria(ID, False))"
+      },
+      {
+        "name": "GetBargeDailyExpenseChild",
+        "returnType": "BargeDailyExpense",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "scope": "Friend Shared",
+        "description": "Load an existing child object by ID",
+        "implementation": "DataPortal.Fetch(New Criteria(ID, True))"
+      },
+      {
+        "name": "GetBargeDailyExpenseChild",
+        "returnType": "BargeDailyExpense",
+        "parameters": [
+          {
+            "name": "dr",
+            "type": "SafeDataReader"
+          }
+        ],
+        "scope": "Friend Shared",
+        "description": "Load an existing child object from a Data Reader",
+        "implementation": "LoadProperties(dr) then MarkAsChild()"
+      }
+    ],
+    "crud": [
+      {
+        "name": "Save",
+        "returnType": "BargeDailyExpense",
+        "description": "Persists entity to database (inherited from base)",
+        "scope": "Public"
+      },
+      {
+        "name": "DeleteBargeDailyExpense",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "scope": "Public Shared",
+        "description": "Delete a parent object",
+        "implementation": "BusinessLogicBase.ImmediateDelete(New Criteria(ID, False))"
+      }
+    ],
+    "custom": [
+      {
+        "name": "MarkAsNew",
+        "returnType": "void",
+        "parameters": [],
+        "scope": "Friend",
+        "description": "Marks the object as new. Scoped as Friend to expose MarkNew to the BargeDailyExpenseDate.CopyBargeDailyExpenseDate method for when a BargeDailyExpenseDate is cloned and we need to mark all the children as New.",
+        "implementation": "Me.MarkNew()"
+      }
+    ],
+    "dataAccess": [
+      {
+        "name": "UpdateParentKeys",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "parent",
+            "type": "BusinessLogicBase"
+          }
+        ],
+        "scope": "Protected Overrides",
+        "description": "Updates foreign key when parent changes",
+        "implementation": "p_BargeDailyExpenseDateID = CType(parent, BargeDailyExpenseDate).BargeDailyExpenseDateID"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "property": "BargeDailyExpenseDateID",
+      "relatedEntity": "BargeDailyExpenseDate",
+      "type": "ManyToOne",
+      "description": "Each BargeDailyExpense belongs to one BargeDailyExpenseDate",
+      "foreignKey": "BargeDailyExpenseDateID",
+      "cascadeDelete": true,
+      "inverseProperty": "BargeDailyExpenses"
+    }
+  ],
+  "parentEntity": {
+    "name": "BargeDailyExpenseDate",
+    "baseClass": "BargeDailyExpenseDateBase",
+    "primaryKey": "BargeDailyExpenseDateID",
+    "properties": [
+      {
+        "name": "BargeDailyExpenseDateID",
+        "type": "Int32",
+        "access": "ReadOnly",
+        "isPrimaryKey": true,
+        "description": "Unique identifier for the barge daily expense date record"
+      },
+      {
+        "name": "EffectiveDate",
+        "type": "SmartDate",
+        "access": "ReadWrite",
+        "isRequired": true,
+        "description": "Effective date for the daily expense rates",
+        "displayName": "Effective date",
+        "propertyType": "SmartDate"
+      },
+      {
+        "name": "BargeDailyExpenses",
+        "type": "BargeDailyExpenses",
+        "access": "ReadOnly",
+        "description": "Collection of daily expense entries",
+        "isCollection": true
+      }
+    ],
+    "businessRules": [
+      {
+        "ruleName": "EffectiveDateRequired",
+        "property": "EffectiveDate",
+        "condition": "p_EffectiveDate.IsEmpty",
+        "message": "Effective date is required",
+        "severity": "Error",
+        "context": "Always",
+        "ruleType": "Required"
+      }
+    ],
+    "methods": {
+      "factory": [
+        {
+          "name": "NewBargeDailyExpenseDate",
+          "returnType": "BargeDailyExpenseDate",
+          "scope": "Public Shared",
+          "description": "Creates new parent instance"
+        },
+        {
+          "name": "GetBargeDailyExpenseDate",
+          "returnType": "BargeDailyExpenseDate",
+          "parameters": [
+            {
+              "name": "ID",
+              "type": "Int32"
+            }
+          ],
+          "scope": "Public Shared",
+          "description": "Load an existing object by ID"
+        }
+      ],
+      "custom": [
+        {
+          "name": "CopyBargeDailyExpenseDate",
+          "returnType": "BargeDailyExpenseDate",
+          "parameters": [
+            {
+              "name": "bargeDailyExpenseDateID",
+              "type": "Integer"
+            }
+          ],
+          "scope": "Public Shared",
+          "description": "Makes a copy of the BargeDailyExpenseDate for the BargeDailyExpenseDateID passed in and returns the new object. Clones the parent and all child expenses, marking them as new with reset IDs."
+        }
+      ]
+    },
+    "relationships": [
+      {
+        "property": "BargeDailyExpenses",
+        "relatedEntity": "BargeDailyExpenses",
+        "type": "OneToMany",
+        "description": "Collection of daily expense entries",
+        "cascadeDelete": true
+      }
+    ]
+  },
+  "collectionEntity": {
+    "name": "BargeDailyExpenses",
+    "baseClass": "BargeDailyExpensesBase",
+    "itemType": "BargeDailyExpense",
+    "description": "Collection of BargeDailyExpense objects",
+    "methods": {
+      "factory": [
+        {
+          "name": "NewBargeDailyExpense",
+          "returnType": "BargeDailyExpense",
+          "scope": "Public Shared",
+          "description": "Factory method for creating new child expense"
+        },
+        {
+          "name": "NewBargeDailyExpenses",
+          "returnType": "BargeDailyExpenses",
+          "scope": "Public Shared",
+          "description": "Create a new parent collection"
+        },
+        {
+          "name": "NewBargeDailyExpensesAsChild",
+          "returnType": "BargeDailyExpenses",
+          "scope": "Friend Shared",
+          "description": "Create a new child collection"
+        },
+        {
+          "name": "GetBargeDailyExpenses",
+          "returnType": "BargeDailyExpenses",
+          "parameters": [],
+          "scope": "Public Shared",
+          "description": "Get all expenses"
+        },
+        {
+          "name": "GetBargeDailyExpenses",
+          "returnType": "BargeDailyExpenses",
+          "parameters": [
+            {
+              "name": "ParentID",
+              "type": "Int32"
+            }
+          ],
+          "scope": "Public Shared",
+          "description": "Get expenses by parent ID"
+        }
+      ],
+      "collectionMethods": [
+        {
+          "name": "Add",
+          "returnType": "Integer",
+          "parameters": [
+            {
+              "name": "BargeDailyExpense",
+              "type": "BargeDailyExpense"
+            },
+            {
+              "name": "Parent",
+              "type": "BargeDailyExpenseDate"
+            }
+          ],
+          "scope": "Public",
+          "description": "Adds a new expense to the collection, assigns negative ID for new items, and sets parent foreign key"
+        },
+        {
+          "name": "Remove",
+          "returnType": "void",
+          "parameters": [
+            {
+              "name": "child",
+              "type": "BargeDailyExpense"
+            }
+          ],
+          "scope": "Public",
+          "description": "Removes expense from collection"
+        },
+        {
+          "name": "Remove",
+          "returnType": "void",
+          "parameters": [
+            {
+              "name": "ID",
+              "type": "Int32"
+            }
+          ],
+          "scope": "Public",
+          "description": "Removes expense by ID, loads from database if not in collection"
+        },
+        {
+          "name": "GetItemByID",
+          "returnType": "BargeDailyExpense",
+          "parameters": [
+            {
+              "name": "ID",
+              "type": "Int32"
+            }
+          ],
+          "scope": "Public",
+          "description": "Retrieves expense by ID, loads from database if not in collection"
+        },
+        {
+          "name": "GetIndexByID",
+          "returnType": "Int32",
+          "parameters": [
+            {
+              "name": "ID",
+              "type": "Int32"
+            }
+          ],
+          "scope": "Public",
+          "description": "Returns the index of an item by ID, or -1 if not found"
+        },
+        {
+          "name": "Contains",
+          "returnType": "Boolean",
+          "parameters": [
+            {
+              "name": "item",
+              "type": "BargeDailyExpense"
+            }
+          ],
+          "scope": "Public",
+          "description": "Checks if an expense exists in the collection"
+        },
+        {
+          "name": "ContainsDeleted",
+          "returnType": "Boolean",
+          "parameters": [
+            {
+              "name": "item",
+              "type": "BargeDailyExpense"
+            }
+          ],
+          "scope": "Public",
+          "description": "Checks if an expense exists in the deleted collection"
+        }
+      ]
+    }
+  },
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "BargeDailyExpenseID",
+        "value": "0"
+      },
+      {
+        "property": "BargeDailyExpenseDateID",
+        "value": "0"
+      },
+      {
+        "property": "DailyExpense",
+        "value": "String.Empty"
+      },
+      {
+        "property": "SizeCategory",
+        "value": "String.Empty"
+      },
+      {
+        "property": "CoverType",
+        "value": "String.Empty"
+      },
+      {
+        "property": "CoverSubTypeID",
+        "value": "String.Empty"
+      },
+      {
+        "property": "IsCharteredIn",
+        "value": "False"
+      }
+    ],
+    "storedProcedures": {
+      "fetch": "BargeDailyExpenseSelect",
+      "fetchAll": "BargeDailyExpensesSelect",
+      "insert": "BargeDailyExpenseInsert",
+      "update": "BargeDailyExpenseUpdate",
+      "delete": "BargeDailyExpenseDelete"
+    },
+    "customDisplayNames": [
+      {
+        "property": "DailyExpense",
+        "displayName": "Daily Expense"
+      },
+      {
+        "property": "SizeCategory",
+        "displayName": "Size Category"
+      },
+      {
+        "property": "CoverType",
+        "displayName": "Cover Type"
+      },
+      {
+        "property": "CoverSubTypeID",
+        "displayName": "Sub Type"
+      },
+      {
+        "property": "IsCharteredIn",
+        "displayName": "Chartered-In"
+      }
+    ]
+  },
+  "dataAccess": {
+    "supportsAuditing": true,
+    "auditedFields": [
+      "BargeDailyExpenseID",
+      "BargeDailyExpenseDateID",
+      "DailyExpense",
+      "SizeCategory",
+      "CoverType",
+      "CoverSubTypeID",
+      "IsCharteredIn"
+    ],
+    "supportsChildObjects": false,
+    "parentKeyUpdate": true,
+    "insertOutputParameters": [
+      "BargeDailyExpenseID"
+    ],
+    "fetchParameters": [
+      "@BargeDailyExpenseID"
+    ],
+    "insertUpdateParameters": [
+      "@BargeDailyExpenseDateID",
+      "@DailyExpense",
+      "@SizeCategory",
+      "@CoverType",
+      "@CoverSubTypeID",
+      "@IsCharteredIn"
+    ]
+  },
+  "validationPatterns": {
+    "legacy": {
+      "framework": "BrokenRules.Assert",
+      "examples": [
+        "BrokenRules.Assert(p_dispDailyExpense & cIsRequiredName, p_dispDailyExpense & cIsRequiredDesc, String.IsNullOrEmpty(p_DailyExpense))",
+        "BrokenRules.Assert(p_dispSizeCategory & cMaxLengthName, p_dispSizeCategory & cMaxLengthDesc & MaxLength.SizeCategory & \".\", (p_SizeCategory.Length > MaxLength.SizeCategory))"
+      ]
+    },
+    "modern": {
+      "dataAnnotations": [
+        "[Required(ErrorMessage = \"Daily Expense is required\")]",
+        "[MaxLength(15, ErrorMessage = \"Size Category cannot exceed 15 characters.\")]",
+        "[MaxLength(3, ErrorMessage = \"Cover Type cannot exceed 3 characters.\")]"
+      ],
+      "fluentValidation": [
+        "RuleFor(x => x.DailyExpense).NotEmpty().WithMessage(\"Daily Expense is required\");",
+        "RuleFor(x => x.SizeCategory).MaximumLength(15).WithMessage(\"Size Category cannot exceed 15 characters.\");",
+        "RuleFor(x => x.CoverType).MaximumLength(3).WithMessage(\"Cover Type cannot exceed 3 characters.\");"
+      ]
+    }
+  },
+  "notes": [
+    "This is a child object - it cannot exist independently of BargeDailyExpenseDate",
+    "Uses CSLA-style DataPortal pattern for data access",
+    "Supports field-level auditing through AuditFieldEvent mechanism",
+    "DailyExpense property uses currency property helpers (GetCurrencyProp/SetCurrencyProp)",
+    "CoverSubTypeID is stored as Int32 but exposed as String through property getter/setter",
+    "Collection supports lazy loading - items can be loaded on demand via GetItemByID",
+    "Parent object (BargeDailyExpenseDate) supports cloning functionality that creates deep copies of all child expenses",
+    "Collection uses negative IDs (-1, -2, etc.) for new items before database insert",
+    "CheckBusinessRules is called automatically on Initialize and after each property change",
+    "All string properties are trimmed and normalized through SetStringProp helper"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "entity": "BargeEvent",
+  "overallStatus": "completed",
+  "startTime": "2025-12-17T23:48:22.027Z",
+  "totalSteps": 10,
+  "completedSteps": 4,
+  "failedSteps": 0,
+  "skippedSteps": 6,
+  "steps": [
+    {
+      "stepNumber": 1,
+      "name": "Form Structure Analyzer (Search)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract search form UI components",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:48:22.027Z",
+      "endTime": "2025-12-17T23:48:22.027Z",
+      "durationMs": 0,
+      "outputFile": "form-structure-search.json"
+    },
+    {
+      "stepNumber": 2,
+      "name": "Form Structure Analyzer (Detail)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract detail form UI components",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:48:22.028Z",
+      "endTime": "2025-12-17T23:48:22.028Z",
+      "durationMs": 0,
+      "outputFile": "form-structure-detail.json"
+    },
+    {
+      "stepNumber": 3,
+      "name": "Business Logic Extractor",
+      "script": "business-logic-extractor.ts",
+      "description": "Extract business rules and validation",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:48:22.028Z",
+      "endTime": "2025-12-17T23:48:22.028Z",
+      "durationMs": 0,
+      "outputFile": "business-logic.json"
+    },
+    {
+      "stepNumber": 4,
+      "name": "Data Access Pattern Analyzer",
+      "script": "data-access-analyzer.ts",
+      "description": "Extract stored procedures and queries",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:48:22.029Z",
+      "endTime": "2025-12-17T23:48:22.029Z",
+      "durationMs": 0,
+      "outputFile": "data-access.json"
+    },
+    {
+      "stepNumber": 5,
+      "name": "Security & Authorization Extractor",
+      "script": "security-extractor.ts",
+      "description": "Extract permissions and authorization",
+      "status": "completed",
+      "startTime": "2025-12-17T23:48:22.029Z",
+      "outputFile": "security.json",
+      "endTime": "2025-12-17T23:52:31.985Z",
+      "durationMs": 249956,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 6,
+      "name": "UI Component Mapper",
+      "script": "ui-component-mapper.ts",
+      "description": "Map legacy controls to modern equivalents",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:52:31.986Z",
+      "endTime": "2025-12-17T23:52:31.986Z",
+      "durationMs": 0,
+      "outputFile": "ui-mapping.json"
+    },
+    {
+      "stepNumber": 7,
+      "name": "Form Workflow Analyzer",
+      "script": "form-workflow-analyzer.ts",
+      "description": "Extract user flows and state management",
+      "status": "completed",
+      "startTime": "2025-12-17T23:52:31.987Z",
+      "outputFile": "workflow.json",
+      "endTime": "2025-12-17T23:59:33.587Z",
+      "durationMs": 421611,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 8,
+      "name": "Detail Form Tab Analyzer",
+      "script": "detail-tab-analyzer.ts",
+      "description": "Extract tab structure and related entities",
+      "status": "completed",
+      "startTime": "2025-12-17T23:59:33.600Z",
+      "outputFile": "tabs.json",
+      "endTime": "2025-12-18T00:05:15.538Z",
+      "durationMs": 341938,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 9,
+      "name": "Validation Rule Extractor",
+      "script": "validation-extractor.ts",
+      "description": "Extract all validation logic",
+      "status": "completed",
+      "startTime": "2025-12-18T00:05:15.540Z",
+      "outputFile": "validation.json",
+      "endTime": "2025-12-18T00:10:42.425Z",
+      "durationMs": 326893,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 10,
+      "name": "Related Entity Analyzer",
+      "script": "related-entity-analyzer.ts",
+      "description": "Extract entity relationships",
+      "status": "skipped",
+      "startTime": "2025-12-18T00:10:42.434Z",
+      "endTime": "2025-12-18T00:10:42.434Z",
+      "durationMs": 0,
+      "outputFile": "related-entities.json"
+    }
+  ],
+  "childForms": [],
+  "endTime": "2025-12-18T00:10:42.435Z",
+  "durationMs": 1340408
+}

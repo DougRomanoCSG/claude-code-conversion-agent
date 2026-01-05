@@ -1,0 +1,278 @@
+{
+  "entityName": "BoatFuelPrices",
+  "subsystem": {
+    "identifier": "frmBoatFuelPrices",
+    "enumValue": 130,
+    "group": "GroupGlobalAdmin",
+    "location": "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore\\Main.vb:130"
+  },
+  "formType": "SearchPanel",
+  "implements": "IBaseSearch",
+  "securityPattern": "ControlAuthorization",
+  "initializationMethod": {
+    "name": "Initialize",
+    "location": "frmBoatFuelPrices.vb:28-36",
+    "implementation": "InitializeBase(SubSystem.frmBoatFuelPrices)"
+  },
+  "buttonSecurity": {
+    "method": "SetButtonTypes",
+    "location": "frmBoatFuelPrices.vb:124-136",
+    "buttons": [
+      {
+        "name": "btnFind",
+        "type": "Open",
+        "description": "Search/Find button",
+        "accessLevelRequired": "Readonly",
+        "modernPermission": "[Authorize(Policy = \"BoatFuelPrices.View\")]"
+      },
+      {
+        "name": "btnReset",
+        "type": "Open",
+        "description": "Reset search criteria",
+        "accessLevelRequired": "Readonly",
+        "modernPermission": "[Authorize(Policy = \"BoatFuelPrices.View\")]"
+      },
+      {
+        "name": "btnSubmit",
+        "type": "Submit",
+        "description": "Save changes button",
+        "accessLevelRequired": "CreateAndUpdate",
+        "modernPermission": "[Authorize(Policy = \"BoatFuelPrices.Edit\")]"
+      },
+      {
+        "name": "btnCancel",
+        "type": "Cancel",
+        "description": "Cancel edit operation",
+        "accessLevelRequired": "None",
+        "modernPermission": "[Authorize(Policy = \"BoatFuelPrices.View\")]"
+      }
+    ]
+  },
+  "accessLevels": {
+    "description": "Access levels from ControlAuthorizationBase.AccessLevel",
+    "levels": [
+      {
+        "name": "None",
+        "value": 0,
+        "allowedButtons": ["Cancel"],
+        "description": "No access except cancel operations"
+      },
+      {
+        "name": "Readonly",
+        "value": 1,
+        "allowedButtons": ["Action", "Open", "Cancel"],
+        "description": "View-only access, can search and view data"
+      },
+      {
+        "name": "CreateAndUpdate",
+        "value": 2,
+        "allowedButtons": ["Action", "Open", "Cancel", "Add", "Submit", "CancelEdit"],
+        "description": "Can create and modify records, but not delete"
+      },
+      {
+        "name": "Full",
+        "value": 3,
+        "allowedButtons": ["All except None"],
+        "description": "Full access including delete operations"
+      }
+    ]
+  },
+  "buttonTypeMapping": {
+    "description": "Mapping from legacy ButtonType to modern authorization policies",
+    "types": [
+      {
+        "legacyType": "None",
+        "description": "Button type not set (developer error)",
+        "modernEquivalent": "N/A",
+        "requiresAccess": "Full"
+      },
+      {
+        "legacyType": "Open",
+        "description": "Opens/views data or dialogs",
+        "modernEquivalent": "[Authorize(Policy = \"{Entity}.View\")]",
+        "requiresAccess": "Readonly"
+      },
+      {
+        "legacyType": "Action",
+        "description": "Performs non-destructive actions",
+        "modernEquivalent": "[Authorize(Policy = \"{Entity}.View\")]",
+        "requiresAccess": "Readonly"
+      },
+      {
+        "legacyType": "Cancel",
+        "description": "Cancels current operation",
+        "modernEquivalent": "[Authorize(Policy = \"{Entity}.View\")]",
+        "requiresAccess": "None"
+      },
+      {
+        "legacyType": "Add",
+        "description": "Creates new records",
+        "modernEquivalent": "[Authorize(Policy = \"{Entity}.Create\")]",
+        "requiresAccess": "CreateAndUpdate"
+      },
+      {
+        "legacyType": "Submit",
+        "description": "Saves changes to database",
+        "modernEquivalent": "[Authorize(Policy = \"{Entity}.Edit\")]",
+        "requiresAccess": "CreateAndUpdate"
+      },
+      {
+        "legacyType": "CancelEdit",
+        "description": "Cancels edit mode",
+        "modernEquivalent": "[Authorize(Policy = \"{Entity}.View\")]",
+        "requiresAccess": "CreateAndUpdate"
+      },
+      {
+        "legacyType": "Remove",
+        "description": "Deletes records",
+        "modernEquivalent": "[Authorize(Policy = \"{Entity}.Delete\")]",
+        "requiresAccess": "Full"
+      }
+    ]
+  },
+  "functionalArea": {
+    "source": "ControlAuthorizationList",
+    "dataSource": "Database table: ControlAuthorization",
+    "assembly": "Retrieved via My.Application.Info.AssemblyName",
+    "note": "Functional areas are loaded from database at application startup via Main.SetFunctionalAreaAccessLevels"
+  },
+  "inheritedSecurity": {
+    "baseForm": "BaseSearch",
+    "securityDll": "Csg.Windows.Forms.Security",
+    "controlAuthorizationBase": {
+      "location": "Inherits from ControlAuthorizationBase",
+      "methods": [
+        "SetButtonType",
+        "GetAccessLevelOfControl",
+        "SetPermissionForButton",
+        "NonButtonMakeReadonly"
+      ]
+    }
+  },
+  "implementedMethods": {
+    "crud": {
+      "ItemAdd": {
+        "location": "frmBoatFuelPrices.vb:39-57",
+        "permission": "CreateAndUpdate",
+        "description": "Creates new BoatFuelPrice object"
+      },
+      "ItemModify": {
+        "location": "frmBoatFuelPrices.vb:59-77",
+        "permission": "CreateAndUpdate",
+        "description": "Loads and edits existing BoatFuelPrice"
+      },
+      "ItemRemove": {
+        "location": "frmBoatFuelPrices.vb:79-88",
+        "permission": "Full",
+        "description": "Deletes BoatFuelPrice record"
+      },
+      "RefreshList": {
+        "location": "frmBoatFuelPrices.vb:108-122",
+        "permission": "Readonly",
+        "description": "Searches and displays results"
+      }
+    }
+  },
+  "modernSecurityRecommendations": {
+    "controllerAttributes": [
+      {
+        "controller": "BoatFuelPricesController",
+        "basePolicy": "[Authorize(Policy = \"BoatFuelPrices.View\")]",
+        "actions": [
+          {
+            "action": "Index",
+            "method": "GET",
+            "policy": "[Authorize(Policy = \"BoatFuelPrices.View\")]"
+          },
+          {
+            "action": "Search",
+            "method": "POST",
+            "policy": "[Authorize(Policy = \"BoatFuelPrices.View\")]"
+          },
+          {
+            "action": "Create",
+            "method": "GET",
+            "policy": "[Authorize(Policy = \"BoatFuelPrices.Create\")]"
+          },
+          {
+            "action": "Create",
+            "method": "POST",
+            "policy": "[Authorize(Policy = \"BoatFuelPrices.Create\")]"
+          },
+          {
+            "action": "Edit",
+            "method": "GET",
+            "policy": "[Authorize(Policy = \"BoatFuelPrices.Edit\")]"
+          },
+          {
+            "action": "Edit",
+            "method": "POST",
+            "policy": "[Authorize(Policy = \"BoatFuelPrices.Edit\")]"
+          },
+          {
+            "action": "Delete",
+            "method": "POST",
+            "policy": "[Authorize(Policy = \"BoatFuelPrices.Delete\")]"
+          }
+        ]
+      }
+    ],
+    "policyDefinitions": [
+      {
+        "policy": "BoatFuelPrices.View",
+        "requirement": "User has Readonly or higher access to frmBoatFuelPrices functional area",
+        "claimType": "FunctionalArea",
+        "claimValue": "frmBoatFuelPrices",
+        "minimumAccessLevel": "Readonly"
+      },
+      {
+        "policy": "BoatFuelPrices.Create",
+        "requirement": "User has CreateAndUpdate or higher access to frmBoatFuelPrices functional area",
+        "claimType": "FunctionalArea",
+        "claimValue": "frmBoatFuelPrices",
+        "minimumAccessLevel": "CreateAndUpdate"
+      },
+      {
+        "policy": "BoatFuelPrices.Edit",
+        "requirement": "User has CreateAndUpdate or higher access to frmBoatFuelPrices functional area",
+        "claimType": "FunctionalArea",
+        "claimValue": "frmBoatFuelPrices",
+        "minimumAccessLevel": "CreateAndUpdate"
+      },
+      {
+        "policy": "BoatFuelPrices.Delete",
+        "requirement": "User has Full access to frmBoatFuelPrices functional area",
+        "claimType": "FunctionalArea",
+        "claimValue": "frmBoatFuelPrices",
+        "minimumAccessLevel": "Full"
+      }
+    ],
+    "authenticationScheme": "IdentityConstants.ApplicationScheme",
+    "note": "Modern implementation should use ASP.NET Core Identity with policy-based authorization"
+  },
+  "dataAccess": {
+    "search": {
+      "procedure": "BoatFuelPriceSearch",
+      "parameters": ["effectiveDate", "fuelVendorBusinessUnitID"],
+      "location": "frmBoatFuelPrices.vb:115-120"
+    },
+    "lists": {
+      "FuelVendorList": "Used to populate fuel vendor combo boxes"
+    }
+  },
+  "notes": [
+    "Form is a panel-based search interface, not a standalone form",
+    "Implements IBaseSearch interface for integration with main application frame",
+    "Security is enforced at UI level via ControlAuthorization and at database level via stored procedures",
+    "SubSystem enum value determines functional area for permission lookups",
+    "Button types control which buttons are enabled based on user's access level",
+    "Modern conversion should implement equivalent authorization policies in ASP.NET Core",
+    "Consider implementing role-based authorization in addition to functional area permissions"
+  ],
+  "extractionMetadata": {
+    "extractedFrom": "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore\\Forms\\frmBoatFuelPrices.vb",
+    "extractionDate": "2025-12-11",
+    "securityFramework": "Csg.Windows.Forms.Security.ControlAuthorizationBase",
+    "targetFramework": "ASP.NET Core with Identity"
+  }
+}

@@ -1,0 +1,111 @@
+@model VendorBusinessUnitEditViewModel
+
+<div class="modal fade" id="businessUnitModal" tabindex="-1" aria-labelledby="businessUnitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="businessUnitModalForm" asp-action="SaveBusinessUnit" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="businessUnitModalLabel">
+                        @(Model.BusinessUnit.VendorBusinessUnitID == 0 ? "Add Business Unit" : "Edit Business Unit")
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="BusinessUnit.VendorID" />
+                    <input type="hidden" asp-for="BusinessUnit.VendorBusinessUnitID" />
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="BusinessUnit.Name" class="form-label"></label>
+                            <input asp-for="BusinessUnit.Name" class="form-control" maxlength="50" required />
+                            <span asp-validation-for="BusinessUnit.Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="BusinessUnit.AccountingCode" class="form-label"></label>
+                            <input asp-for="BusinessUnit.AccountingCode" class="form-control" maxlength="50" />
+                            <span asp-validation-for="BusinessUnit.AccountingCode" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mt-4">
+                                <input asp-for="BusinessUnit.IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="BusinessUnit.IsActive" class="form-check-label"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="BusinessUnit.River" class="form-label"></label>
+                            <select asp-for="BusinessUnit.River" asp-items="Model.Rivers" class="form-select select2">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <span asp-validation-for="BusinessUnit.River" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="BusinessUnit.Mile" class="form-label"></label>
+                            <input asp-for="BusinessUnit.Mile" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="BusinessUnit.Mile" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="BusinessUnit.Bank" class="form-label"></label>
+                            <select asp-for="BusinessUnit.Bank" asp-items="Model.Banks" class="form-select select2">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <span asp-validation-for="BusinessUnit.Bank" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-check mt-4">
+                                <input asp-for="BusinessUnit.IsFuelSupplier" class="form-check-input" type="checkbox" id="chkIsFuelSupplier" />
+                                <label asp-for="BusinessUnit.IsFuelSupplier" class="form-check-label"></label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check mt-4">
+                                <input asp-for="BusinessUnit.IsDefaultFuelSupplier" class="form-check-input" type="checkbox" id="chkIsDefaultFuelSupplier" />
+                                <label asp-for="BusinessUnit.IsDefaultFuelSupplier" class="form-check-label"></label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check mt-4">
+                                <input asp-for="BusinessUnit.IsBoatAssistSupplier" class="form-check-input" type="checkbox" />
+                                <label asp-for="BusinessUnit.IsBoatAssistSupplier" class="form-check-label"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" id="minDiscountQtyGroup">
+                            <label asp-for="BusinessUnit.MinDiscountQty" class="form-label"></label>
+                            <input asp-for="BusinessUnit.MinDiscountQty" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="BusinessUnit.MinDiscountQty" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6" id="minDiscountFrequencyGroup">
+                            <label asp-for="BusinessUnit.MinDiscountFrequency" class="form-label"></label>
+                            <select asp-for="BusinessUnit.MinDiscountFrequency" asp-items="Model.DiscountFrequencies" class="form-select">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <span asp-validation-for="BusinessUnit.MinDiscountFrequency" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+

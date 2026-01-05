@@ -1,0 +1,149 @@
+{
+  "parentEntity": "BargeExVendorDocumentInbox",
+  "entityType": "StagingInbox",
+  "description": "Staging table for BargeEx vendor document imports. Records are processed and deleted after successful import to create TicketEvents or PartsServiceBillItems.",
+  "relationships": [
+    {
+      "relatedEntity": "Alert",
+      "relationshipType": "OneToMany",
+      "parentProperty": "Alert",
+      "childProperty": null,
+      "foreignKey": null,
+      "cascadeDelete": true,
+      "isDeferred": true,
+      "gridName": null,
+      "gridColumns": [],
+      "operations": {
+        "add": "Alert.NewAlertAsChild",
+        "edit": null,
+        "delete": null
+      },
+      "notes": "Deferred-loaded child object. Alert is created as needed but not persisted until parent is saved."
+    }
+  ],
+  "lookupRelationships": [
+    {
+      "property": "SenderTradingPartnerNumber",
+      "lookupEntity": "Vendor",
+      "displayProperty": "VendorName",
+      "required": false,
+      "notes": "Resolved via BargeExVendorDocumentInboxSearch to VendorID"
+    },
+    {
+      "property": "BargeExDocumentTypeID",
+      "lookupEntity": "BargeExDocumentType",
+      "displayProperty": "DocType",
+      "required": false,
+      "notes": "Document type: BargeStatus or BoatStatus"
+    },
+    {
+      "property": "BargeExDocumentSubTypeID",
+      "lookupEntity": "BargeExDocumentSubType",
+      "displayProperty": "SubDocType",
+      "required": false,
+      "notes": "Sub-type of the document (e.g., Fleeting, Clean, Assist, etc.)"
+    },
+    {
+      "property": "BargeUscgNum",
+      "lookupEntity": "Barge",
+      "displayProperty": "BargeNum",
+      "required": false,
+      "notes": "Barge USCG number used to resolve to BargeID"
+    },
+    {
+      "property": "FleetBoatUscgNum",
+      "lookupEntity": "FleetBoat",
+      "displayProperty": "FleetBoatName",
+      "required": false,
+      "notes": "Fleet boat USCG number used to resolve to ServicingBoatID"
+    },
+    {
+      "property": "AssistedBoatUscgNum",
+      "lookupEntity": "Boat",
+      "displayProperty": "AssistedBoatName",
+      "required": false,
+      "notes": "Assisted boat USCG number used to resolve to AssistedBoatID"
+    },
+    {
+      "property": "LocationBargeExCode",
+      "lookupEntity": "FacilityLocation",
+      "displayProperty": "LocationName",
+      "required": false,
+      "notes": "Location BargeEx code used to resolve to LocationID/FromLocationID"
+    },
+    {
+      "property": "EndLocationBargeExCode",
+      "lookupEntity": "FacilityLocation",
+      "displayProperty": "EndLocationName",
+      "required": false,
+      "notes": "End location BargeEx code used to resolve to EndLocationID/ToLocationID"
+    }
+  ],
+  "processedIntoRelationships": [
+    {
+      "targetEntity": "TicketEvent",
+      "relationshipType": "CreatesRecord",
+      "condition": "DocType = 'BargeStatus'",
+      "foreignKeyStored": "BargeExVendorControlNumber",
+      "notes": "BargeStatus documents are imported to create/update TicketEvents on Tickets. After successful import, the inbox record is deleted.",
+      "processMethod": "ProcessBargeStatus",
+      "trackedFields": [
+        "OriginalTicketEventID",
+        "OriginalTicketID"
+      ]
+    },
+    {
+      "targetEntity": "PartsServiceBillItem",
+      "relationshipType": "CreatesRecord",
+      "condition": "DocType = 'BoatStatus'",
+      "foreignKeyStored": "BargeExVendorControlNumber",
+      "notes": "BoatStatus documents are imported to create/update PartsServiceBillItems on PartsServiceBills. After successful import, the inbox record is deleted.",
+      "processMethod": "ProcessBoatStatus",
+      "trackedFields": [
+        "OriginalPartsServiceBillItemID",
+        "OriginalPartsServiceBillID"
+      ]
+    }
+  ],
+  "revisionTracking": {
+    "controlNumberField": "ControlNumber",
+    "originalControlNumberField": "OriginalControlNumber",
+    "revisionNumberField": "RevisionNumber",
+    "primaryControlNumberField": "PrimaryControlNumber",
+    "notes": "Supports revision tracking for documents. Revisions update the original transaction identified by OriginalControlNumber. Additional Clean events reference the primary Clean event via PrimaryControlNumber."
+  },
+  "importProcessing": {
+    "formName": "frmBargeExVendorDocInboxImport",
+    "searchFormName": "frmBargeExVendorDocInboxSearch",
+    "importMethod": "ProcessAll",
+    "deleteMethod": "MultiDelete",
+    "supportedDocTypes": [
+      "BargeStatus",
+      "BoatStatus"
+    ],
+    "supportedEventTypes": [
+      "BreakTow",
+      "Clean",
+      "CoverHandling",
+      "Fleeting",
+      "MakeTow",
+      "MidstreamIn",
+      "MidstreamOut",
+      "Pumping",
+      "Shift"
+    ],
+    "processingOrder": "VendorName ASC, BargeNum ASC, OriginalControlNumber ASC, RevisionNumber ASC",
+    "notes": "Records are processed in batch and deleted immediately upon successful import. Failed imports remain in the inbox with error messages."
+  },
+  "gridStructure": null,
+  "notes": [
+    "This is a staging/inbox table, not a traditional entity with child collections",
+    "Records are transient - they are deleted after successful processing",
+    "The entity does not have traditional one-to-many relationships with persistent child collections",
+    "The Alert child is deferred-loaded and used for notification purposes",
+    "In modern Dapper implementation, this would be a simple DTO without navigation properties",
+    "Processing logic converts inbox records into either TicketEvents or PartsServiceBillItems based on DocType",
+    "The frmBargeExVendorDocInboxImport form handles batch processing, not typical detail editing",
+    "No detail form exists for individual record editing - only batch import processing"
+  ]
+}

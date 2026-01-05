@@ -1,0 +1,531 @@
+{
+  "formName": "frmRiverDetail",
+  "formTitle": "River/Waterway Detail",
+  "inherits": "frmBaseDetailEdit",
+  "implements": ["IBaseDetailEdit"],
+  "businessObject": "BusinessLogic.River",
+  "formType": "DetailEdit",
+  "panels": [
+    {
+      "name": "pnlRiverDetail",
+      "type": "UltraPanel",
+      "dock": "Fill",
+      "controls": [
+        "txtName",
+        "txtCode",
+        "txtStartMile",
+        "txtEndMile",
+        "txtBargeExCode",
+        "txtUpLabel",
+        "txtDownLabel",
+        "chkIsLowToHighDirection",
+        "chkIsActive"
+      ]
+    },
+    {
+      "name": "grpSubmitCancel",
+      "type": "UltraGroupBox",
+      "dock": "Bottom",
+      "controls": ["chkIsActive", "btnSubmit", "btnCancel"]
+    }
+  ],
+  "controls": [
+    {
+      "name": "txtName",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Waterway name",
+      "labelControl": "lblName",
+      "dataBinding": "River.Name",
+      "required": false,
+      "validation": {
+        "type": "String",
+        "maxLength": "River.MaxLength.Name"
+      },
+      "events": ["Validated"],
+      "tabIndex": 1,
+      "location": {
+        "x": 108,
+        "y": 8
+      },
+      "size": {
+        "width": 199,
+        "height": 21
+      },
+      "notes": "Primary name field, displayed in form title when editing existing records"
+    },
+    {
+      "name": "txtCode",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Code",
+      "labelControl": "lblCode",
+      "dataBinding": "River.Code",
+      "required": false,
+      "validation": {
+        "type": "Custom",
+        "maxLength": "River.MaxLength.Code",
+        "customRegEx": "\\w{[River.MaxLength.Code]}",
+        "customErrorMessage": "Abbreviation must be exactly [River.MaxLength.Code] characters long.",
+        "notes": "Must be exact length, converted to uppercase on validation"
+      },
+      "events": ["Validated"],
+      "tabIndex": 3,
+      "location": {
+        "x": 108,
+        "y": 32
+      },
+      "size": {
+        "width": 52,
+        "height": 21
+      },
+      "transformations": ["ToUpper"],
+      "notes": "Fixed-length abbreviation code"
+    },
+    {
+      "name": "txtStartMile",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Start mile",
+      "labelControl": "lblStartMile",
+      "dataBinding": "River.StartMile",
+      "required": false,
+      "validation": {
+        "type": "Decimal"
+      },
+      "events": ["Validated"],
+      "tabIndex": 5,
+      "location": {
+        "x": 108,
+        "y": 57
+      },
+      "size": {
+        "width": 52,
+        "height": 21
+      },
+      "notes": "River starting mile marker (numeric)"
+    },
+    {
+      "name": "txtEndMile",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "End mile",
+      "labelControl": "lblEndMile",
+      "dataBinding": "River.EndMile",
+      "required": false,
+      "validation": {
+        "type": "Decimal"
+      },
+      "events": ["Validated"],
+      "tabIndex": 7,
+      "location": {
+        "x": 108,
+        "y": 81
+      },
+      "size": {
+        "width": 52,
+        "height": 21
+      },
+      "notes": "River ending mile marker (numeric)"
+    },
+    {
+      "name": "txtBargeExCode",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "BargeEx Code",
+      "labelControl": "lblBargeExCode",
+      "dataBinding": "River.BargeExCode",
+      "required": false,
+      "validation": {
+        "type": "String",
+        "maxLength": "River.MaxLength.BargeExCode"
+      },
+      "events": ["Validated"],
+      "tabIndex": 9,
+      "location": {
+        "x": 108,
+        "y": 106
+      },
+      "size": {
+        "width": 106,
+        "height": 21
+      },
+      "notes": "Integration code for BargeEx trading partner system"
+    },
+    {
+      "name": "txtUpLabel",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Upstream",
+      "labelControl": "lblUpLabel",
+      "dataBinding": "River.UpLabel",
+      "required": false,
+      "validation": {
+        "type": "String",
+        "maxLength": "River.MaxLength.UpLabel"
+      },
+      "events": ["Validated"],
+      "tabIndex": 11,
+      "location": {
+        "x": 108,
+        "y": 131
+      },
+      "size": {
+        "width": 106,
+        "height": 21
+      },
+      "notes": "Custom label for upstream direction"
+    },
+    {
+      "name": "txtDownLabel",
+      "type": "UltraTextEditor",
+      "category": "DataEntry",
+      "label": "Downstream",
+      "labelControl": "lblDownLabel",
+      "dataBinding": "River.DownLabel",
+      "required": false,
+      "validation": {
+        "type": "String",
+        "maxLength": "River.MaxLength.DownLabel"
+      },
+      "events": ["Validated"],
+      "tabIndex": 13,
+      "location": {
+        "x": 108,
+        "y": 157
+      },
+      "size": {
+        "width": 106,
+        "height": 21
+      },
+      "notes": "Custom label for downstream direction"
+    },
+    {
+      "name": "chkIsLowToHighDirection",
+      "type": "UltraCheckEditor",
+      "category": "DataEntry",
+      "label": "Direction is low to high (like Mississippi)",
+      "dataBinding": "River.IsLowToHighDirection",
+      "defaultValue": true,
+      "validation": {},
+      "events": ["Validated"],
+      "tabIndex": 15,
+      "location": {
+        "x": 8,
+        "y": 184
+      },
+      "size": {
+        "width": 282,
+        "height": 20
+      },
+      "notes": "Determines if river mile markers increase or decrease in downstream direction"
+    },
+    {
+      "name": "chkIsActive",
+      "type": "UltraCheckEditor",
+      "category": "Status",
+      "label": "Active",
+      "dataBinding": "River.IsActive",
+      "defaultValue": true,
+      "validation": {},
+      "events": ["Validated"],
+      "tabIndex": 1,
+      "location": {
+        "x": 8,
+        "y": 10
+      },
+      "size": {
+        "width": 56,
+        "height": 20
+      },
+      "parentControl": "grpSubmitCancel",
+      "notes": "Indicates if river is active in the system"
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnSubmit",
+      "text": "&Submit",
+      "type": "Submit",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnSubmit_Click",
+      "dialogResult": "OK",
+      "anchor": "Top, Right",
+      "tabIndex": 3,
+      "location": {
+        "x": 150,
+        "y": 8
+      },
+      "size": {
+        "width": 76,
+        "height": 24
+      },
+      "parentControl": "grpSubmitCancel",
+      "businessLogic": "Calls SubmitNoRefreshClick() which applies edits to business object",
+      "securityType": "Submit"
+    },
+    {
+      "name": "btnCancel",
+      "text": "&Cancel",
+      "type": "Cancel",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnCancel_Click",
+      "dialogResult": "Cancel",
+      "causesValidation": false,
+      "anchor": "Top, Right",
+      "tabIndex": 5,
+      "location": {
+        "x": 234,
+        "y": 8
+      },
+      "size": {
+        "width": 76,
+        "height": 24
+      },
+      "parentControl": "grpSubmitCancel",
+      "businessLogic": "Calls CancelClick() which cancels edits to business object",
+      "securityType": "Cancel"
+    }
+  ],
+  "statusBar": {
+    "name": "staStatus",
+    "type": "UltraStatusBar",
+    "purpose": "Displays validation errors from ValidatorExtender",
+    "location": {
+      "x": 0,
+      "y": 247
+    },
+    "size": {
+      "width": 316,
+      "height": 23
+    },
+    "dock": "Bottom"
+  },
+  "validationExtender": {
+    "name": "ValidatorExtender",
+    "displayControl": "staStatus",
+    "rules": [
+      {
+        "control": "txtName",
+        "validationType": "String",
+        "required": false
+      },
+      {
+        "control": "txtCode",
+        "validationType": "Custom",
+        "required": false,
+        "customRegEx": "\\w{[River.MaxLength.Code]}",
+        "customErrorMessage": "Abbreviation must be exactly [River.MaxLength.Code] characters long."
+      },
+      {
+        "control": "txtStartMile",
+        "validationType": "Decimal",
+        "required": false
+      },
+      {
+        "control": "txtEndMile",
+        "validationType": "Decimal",
+        "required": false
+      },
+      {
+        "control": "txtBargeExCode",
+        "validationType": "String",
+        "required": false
+      },
+      {
+        "control": "txtUpLabel",
+        "validationType": "String",
+        "required": false
+      },
+      {
+        "control": "txtDownLabel",
+        "validationType": "String",
+        "required": false
+      }
+    ]
+  },
+  "eventHandlers": {
+    "frmRiverDetail_Load": "Initializes form by calling FormatControls() and LoadControlsForRiver()",
+    "btnSubmit_Click": "Submits changes by calling SubmitNoRefreshClick() from base class",
+    "btnCancel_Click": "Cancels changes by calling CancelClick() from base class",
+    "txtName_Validated": "Updates River.Name property with trimmed text value",
+    "txtCode_Validated": "Updates River.Code property with uppercase text value",
+    "txtBargeExCode_Validated": "Updates River.BargeExCode property",
+    "txtStartMile_Validated": "Updates River.StartMile property with decimal value",
+    "txtEndMile_Validated": "Updates River.EndMile property with decimal value",
+    "txtUpLabel_Validated": "Updates River.UpLabel property",
+    "txtDownLabel_Validated": "Updates River.DownLabel property",
+    "chkIsLowToHighDirection_Validated": "Updates River.IsLowToHighDirection boolean property",
+    "chkIsActive_Validated": "Updates River.IsActive boolean property"
+  },
+  "businessLogicMethods": {
+    "Initialize": {
+      "purpose": "Receives business object reference, casts to River, calls BeginEdit(), initializes base form",
+      "parameters": ["businessObject As BusinessLogic.BusinessLogicBase"],
+      "interface": "IBaseDetailEdit"
+    },
+    "SetButtonTypes": {
+      "purpose": "Configures security authorization for Submit and Cancel buttons",
+      "interface": "IBaseDetailEdit"
+    },
+    "FormatControls": {
+      "purpose": "Sets form title, initializes validator extender, sets max lengths",
+      "calls": ["SetValidatorExtenderForRiver", "SetMaxLengthsForRiver"]
+    },
+    "LoadControlsForRiver": {
+      "purpose": "Populates all form controls with values from River business object"
+    },
+    "SetValidatorExtenderForRiver": {
+      "purpose": "Configures validation types for all controls"
+    },
+    "SetMaxLengthsForRiver": {
+      "purpose": "Sets MaxLength properties on text controls from River.MaxLength constants"
+    }
+  },
+  "dataFlow": {
+    "initialization": [
+      "Initialize() receives River business object",
+      "River.BeginEdit() called to enable change tracking",
+      "Form Load event fires",
+      "FormatControls() sets up validation and max lengths",
+      "LoadControlsForRiver() populates controls from business object"
+    ],
+    "userEdits": [
+      "User modifies control value",
+      "Control's Validated event fires",
+      "Business object property updated",
+      "Control text refreshed from business object (ensures formatting)"
+    ],
+    "submit": [
+      "User clicks Submit button",
+      "SubmitNoRefreshClick() from base class called",
+      "Base class validates using business object IsValid method",
+      "If valid, ApplyEdit() called on business object",
+      "Form closes with DialogResult.OK"
+    ],
+    "cancel": [
+      "User clicks Cancel button",
+      "CancelClick() from base class called",
+      "CancelEdit() called on business object (reverts changes)",
+      "Form closes with DialogResult.Cancel"
+    ]
+  },
+  "formProperties": {
+    "size": {
+      "width": 316,
+      "height": 270
+    },
+    "formBorderStyle": "Fixed3D",
+    "startPosition": "CenterParent",
+    "maximizeBox": false,
+    "minimizeBox": false,
+    "showInTaskbar": false
+  },
+  "modernizationNotes": {
+    "formType": "Modal detail edit form for River entity",
+    "navigationPattern": "Opened from frmRiverSearch (SubSystem.frmRiverSearch)",
+    "securityIntegration": "Uses ControlAuthorizationBase for button-level security",
+    "validationFramework": "Custom ValidatorExtender component for client-side validation",
+    "businessObjectPattern": "CSLA-style business object with BeginEdit/ApplyEdit/CancelEdit",
+    "recommendedModernPattern": {
+      "controller": "RiverController",
+      "actions": ["Details (GET)", "Edit (GET)", "Edit (POST)"],
+      "viewModel": "RiverEditViewModel",
+      "view": "River/Edit.cshtml",
+      "clientValidation": "jQuery Validation Unobtrusive",
+      "serverValidation": "FluentValidation or Data Annotations"
+    }
+  },
+  "layoutStructure": {
+    "sections": [
+      {
+        "section": "Main Data Entry",
+        "order": 1,
+        "controls": [
+          {
+            "control": "txtName",
+            "order": 1
+          },
+          {
+            "control": "txtCode",
+            "order": 2
+          },
+          {
+            "control": "txtStartMile",
+            "order": 3
+          },
+          {
+            "control": "txtEndMile",
+            "order": 4
+          },
+          {
+            "control": "txtBargeExCode",
+            "order": 5
+          },
+          {
+            "control": "txtUpLabel",
+            "order": 6
+          },
+          {
+            "control": "txtDownLabel",
+            "order": 7
+          },
+          {
+            "control": "chkIsLowToHighDirection",
+            "order": 8
+          }
+        ]
+      },
+      {
+        "section": "Form Actions",
+        "order": 2,
+        "panel": "grpSubmitCancel",
+        "controls": [
+          {
+            "control": "chkIsActive",
+            "order": 1,
+            "position": "left"
+          },
+          {
+            "control": "btnSubmit",
+            "order": 2,
+            "position": "right"
+          },
+          {
+            "control": "btnCancel",
+            "order": 3,
+            "position": "right"
+          }
+        ]
+      }
+    ]
+  },
+  "controlTypeMapping": {
+    "UltraTextEditor": {
+      "modernEquivalent": "<input type=\"text\" class=\"form-control\">",
+      "notes": "Standard Bootstrap text input"
+    },
+    "UltraCheckEditor": {
+      "modernEquivalent": "<input type=\"checkbox\" class=\"form-check-input\">",
+      "notes": "Bootstrap checkbox with form-check wrapper"
+    },
+    "UltraButton": {
+      "modernEquivalent": "<button class=\"btn btn-primary\">",
+      "notes": "Bootstrap button with appropriate styling"
+    },
+    "UltraPanel": {
+      "modernEquivalent": "<div class=\"container\">",
+      "notes": "Bootstrap container or card body"
+    },
+    "UltraGroupBox": {
+      "modernEquivalent": "<div class=\"card-footer\">",
+      "notes": "Bootstrap card footer for action buttons"
+    },
+    "UltraStatusBar": {
+      "modernEquivalent": "<div class=\"validation-summary\">",
+      "notes": "ASP.NET Core validation summary component"
+    }
+  }
+}

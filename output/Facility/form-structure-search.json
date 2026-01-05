@@ -1,0 +1,486 @@
+{
+  "formName": "frmFacilitySearch",
+  "formTitle": "Facilities",
+  "implements": ["IBaseSearch"],
+  "inheritsFrom": "frmBaseSearch",
+  "subsystem": "frmFacilitySearch",
+  "gridUniqueIdentifier": "LocationID",
+  "defaultFocusControl": "txtName",
+  "acceptButton": "btnFind",
+  "panels": [
+    {
+      "name": "pnlFacilities",
+      "type": "UltraPanel",
+      "dock": "Fill",
+      "description": "Main container panel for the entire search form",
+      "isLocalPanel": true
+    },
+    {
+      "name": "pnlCriteria",
+      "type": "UltraPanel",
+      "dock": "Top",
+      "description": "Container for search criteria controls"
+    }
+  ],
+  "controls": [
+    {
+      "name": "lblContextTitle",
+      "type": "UltraLabel",
+      "category": "Header",
+      "label": "Facilities",
+      "dock": "Top",
+      "styleSetName": "SearchCaption",
+      "appearance": {
+        "font": "Arial, 12pt, Bold",
+        "backColor": "SystemColors.Highlight",
+        "foreColor": "SystemColors.HighlightText"
+      }
+    },
+    {
+      "name": "txtName",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "Facility name:",
+      "labelControl": "lblName",
+      "tabIndex": 1,
+      "dataBinding": null,
+      "searchParameter": "facilityName",
+      "defaultValue": "String.Empty",
+      "validationRules": []
+    },
+    {
+      "name": "txtShortName",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "Short name:",
+      "labelControl": "lblShortName",
+      "tabIndex": 3,
+      "dataBinding": null,
+      "searchParameter": "shortName",
+      "defaultValue": "String.Empty",
+      "validationRules": []
+    },
+    {
+      "name": "cboBargeExLocationType",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "Facility type:",
+      "labelControl": "lblBargeExLocationType",
+      "tabIndex": 8,
+      "dataBinding": null,
+      "searchParameter": "facilityType",
+      "defaultValue": "String.Empty",
+      "populationMethod": "PopulateValidationListCombo(BusinessLogic.Lists.ValidationList.ValidationTypes.BargeExLocationType, cboBargeExLocationType, True, False)",
+      "validationRules": []
+    },
+    {
+      "name": "txtBargeExCode",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "BargeEx code:",
+      "labelControl": "lblBargeExCode",
+      "tabIndex": 10,
+      "dataBinding": null,
+      "searchParameter": "bargeExCode",
+      "defaultValue": "String.Empty",
+      "validationRules": []
+    },
+    {
+      "name": "cboRiver",
+      "type": "UltraCombo",
+      "category": "SearchCriteria",
+      "label": "River:",
+      "labelControl": "lblRiver",
+      "tabIndex": 12,
+      "dataBinding": null,
+      "searchParameter": "river",
+      "defaultValue": "String.Empty",
+      "populationMethod": "PopulateRiverCombo(cboRiver, True, False)",
+      "validationRules": [
+        {
+          "rule": "RequiredIfMileSpecified",
+          "message": "A beginning or ending mile was specified, but no river was selected.",
+          "condition": "txtStartMile or txtEndMile has value"
+        }
+      ]
+    },
+    {
+      "name": "txtStartMile",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "Mile:",
+      "labelControl": "lblStartMile",
+      "tabIndex": 14,
+      "dataBinding": null,
+      "searchParameter": "startMile",
+      "defaultValue": "String.Empty",
+      "validationRules": [
+        {
+          "rule": "MustBeLessThanEndMile",
+          "message": "The ending mile is less than the beginning mile.",
+          "condition": "txtStartMile > txtEndMile when both have values"
+        }
+      ]
+    },
+    {
+      "name": "txtEndMile",
+      "type": "UltraTextEditor",
+      "category": "SearchCriteria",
+      "label": "to",
+      "labelControl": "lblEndMile",
+      "tabIndex": 16,
+      "dataBinding": null,
+      "searchParameter": "endMile",
+      "defaultValue": "String.Empty",
+      "validationRules": []
+    },
+    {
+      "name": "chkActiveOnly",
+      "type": "UltraCheckEditor",
+      "category": "SearchCriteria",
+      "label": "Active only",
+      "tabIndex": 6,
+      "dataBinding": null,
+      "searchParameter": "activeOnly",
+      "defaultValue": "True",
+      "validationRules": []
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnFind",
+      "type": "UltraButton",
+      "text": "F&ind",
+      "category": "Search",
+      "tabIndex": 17,
+      "anchor": "Top, Right",
+      "eventHandler": "btnFind_Click",
+      "action": "RefreshList(True)",
+      "buttonType": "Open",
+      "isAcceptButton": true
+    },
+    {
+      "name": "btnReset",
+      "type": "UltraButton",
+      "text": "Reset",
+      "category": "Search",
+      "tabIndex": 18,
+      "anchor": "Top, Right",
+      "eventHandler": "btnReset_Click",
+      "action": "ResetControls()",
+      "buttonType": "Open",
+      "causesValidation": false
+    }
+  ],
+  "grids": [
+    {
+      "name": "grdFacilities",
+      "type": "UltraGrid",
+      "dock": "Fill",
+      "uniqueIdentifier": "LocationID",
+      "defaultSort": [
+        {
+          "column": "Name",
+          "direction": "Ascending"
+        }
+      ],
+      "customComparers": [
+        {
+          "column": "Mile",
+          "comparer": "NumericSortComparer"
+        }
+      ],
+      "columns": [
+        {
+          "key": "Name",
+          "header": "Facility Name",
+          "width": 275,
+          "alignment": "Left",
+          "displayOrder": 0
+        },
+        {
+          "key": "ShortName",
+          "header": "Short Name",
+          "width": 70,
+          "alignment": "Left",
+          "displayOrder": 1
+        },
+        {
+          "key": "River",
+          "header": "River",
+          "width": 40,
+          "alignment": "Left",
+          "displayOrder": 2
+        },
+        {
+          "key": "Mile",
+          "header": "Mile",
+          "width": 40,
+          "alignment": "Right",
+          "displayOrder": 3,
+          "customComparer": "NumericSortComparer"
+        },
+        {
+          "key": "Bank",
+          "header": "Bank",
+          "width": 47,
+          "alignment": "Left",
+          "displayOrder": 4
+        },
+        {
+          "key": "BargeExLocationType",
+          "header": "Facility Type",
+          "width": 75,
+          "alignment": "Left",
+          "displayOrder": 5
+        },
+        {
+          "key": "BargeExCode",
+          "header": "BargeEx Code",
+          "width": 82,
+          "alignment": "Left",
+          "displayOrder": 6
+        },
+        {
+          "key": "IsActive",
+          "header": "Active",
+          "width": 53,
+          "alignment": "Center",
+          "displayOrder": 7
+        }
+      ]
+    }
+  ],
+  "dropdowns": [
+    {
+      "name": "cboRiver",
+      "type": "UltraCombo",
+      "populationMethod": "PopulateRiverCombo",
+      "parameters": {
+        "includeBlank": true,
+        "includeAll": false
+      }
+    },
+    {
+      "name": "cboBargeExLocationType",
+      "type": "UltraCombo",
+      "populationMethod": "PopulateValidationListCombo",
+      "validationType": "BargeExLocationType",
+      "parameters": {
+        "includeBlank": true,
+        "includeAll": false
+      }
+    }
+  ],
+  "eventHandlers": [
+    {
+      "event": "pnlFacilities.HandleCreated",
+      "handler": "pnlFacilities_HandleCreated",
+      "description": "Form initialization - formats controls, restores grid settings",
+      "actions": [
+        "FormatControls()",
+        "MyAppSettingHelper.RestoreGrid(Me, Me.UltraGridControl)"
+      ]
+    },
+    {
+      "event": "pnlFacilities.HandleDestroyed",
+      "handler": "pnlFacilities_HandleDestroyed",
+      "description": "Form cleanup - saves grid settings",
+      "actions": [
+        "MyAppSettingHelper.SaveGrid(Me, Me.UltraGridControl, True)"
+      ]
+    },
+    {
+      "event": "btnFind.Click",
+      "handler": "btnFind_Click",
+      "description": "Execute search with current criteria",
+      "actions": [
+        "RefreshList(True)"
+      ]
+    },
+    {
+      "event": "btnReset.Click",
+      "handler": "btnReset_Click",
+      "description": "Reset all search criteria to default values",
+      "actions": [
+        "ResetControls()"
+      ]
+    }
+  ],
+  "validationRules": [
+    {
+      "rule": "MileRequiresRiver",
+      "message": "A beginning or ending mile was specified, but no river was selected.",
+      "condition": "cboRiver.Text is empty AND (txtStartMile has value OR txtEndMile has value)",
+      "implementedIn": "AreFieldsValid"
+    },
+    {
+      "rule": "EndMileGreaterThanStartMile",
+      "message": "The ending mile is less than the beginning mile.",
+      "condition": "Both txtStartMile and txtEndMile have values AND CDec(txtEndMile.Text) < CDec(txtStartMile.Text)",
+      "implementedIn": "AreFieldsValid"
+    }
+  ],
+  "searchMethod": {
+    "name": "RefreshList",
+    "businessLogicCall": "BusinessLogic.Lists.FacilityLocationSearch.GetList",
+    "parameters": [
+      {
+        "name": "facilityName",
+        "control": "txtName",
+        "value": "txtName.Text.Trim"
+      },
+      {
+        "name": "river",
+        "control": "cboRiver",
+        "value": "cboRiver.Text.Trim"
+      },
+      {
+        "name": "facilityType",
+        "control": "cboBargeExLocationType",
+        "value": "cboBargeExLocationType.Text.Trim"
+      },
+      {
+        "name": "startMile",
+        "control": "txtStartMile",
+        "value": "txtStartMile.Text.Trim"
+      },
+      {
+        "name": "endMile",
+        "control": "txtEndMile",
+        "value": "txtEndMile.Text.Trim"
+      },
+      {
+        "name": "shortName",
+        "control": "txtShortName",
+        "value": "txtShortName.Text.Trim"
+      },
+      {
+        "name": "bargeExCode",
+        "control": "txtBargeExCode",
+        "value": "txtBargeExCode.Text.Trim"
+      },
+      {
+        "name": "activeOnly",
+        "control": "chkActiveOnly",
+        "value": "chkActiveOnly.Checked"
+      }
+    ]
+  },
+  "detailForms": [
+    {
+      "name": "frmFacilityDetail",
+      "openMethod": "ItemModify",
+      "businessLogicCall": "BusinessLogic.Location.GetLocation(Me.GridControlIndex)",
+      "purpose": "Edit existing facility"
+    },
+    {
+      "name": "frmFacilityDetail",
+      "openMethod": "ItemAdd",
+      "businessLogicCall": "BusinessLogic.Location.NewLocation(BargeOps.Onshore.BusinessLogic.Location.LocationTypes.Facility)",
+      "purpose": "Add new facility"
+    }
+  ],
+  "businessLogicMethods": [
+    {
+      "method": "BusinessLogic.Location.GetLocation",
+      "purpose": "Retrieve facility by ID for editing",
+      "parameters": ["locationID"]
+    },
+    {
+      "method": "BusinessLogic.Location.NewLocation",
+      "purpose": "Create new facility instance",
+      "parameters": ["locationType"]
+    },
+    {
+      "method": "BusinessLogic.Location.DeleteLocation",
+      "purpose": "Delete facility by ID",
+      "parameters": ["locationID"]
+    },
+    {
+      "method": "BusinessLogic.Lists.FacilityLocationSearch.GetList",
+      "purpose": "Search for facilities with criteria",
+      "parameters": [
+        "facilityName",
+        "river",
+        "facilityType",
+        "startMile",
+        "endMile",
+        "shortName",
+        "bargeExCode",
+        "activeOnly"
+      ]
+    }
+  ],
+  "ibaseSearchImplementation": {
+    "FocusFirstField": {
+      "implementation": "txtName.Focus()",
+      "description": "Sets focus to facility name field when panel loads"
+    },
+    "GridControlIndex": {
+      "implementation": "InfragisticsHelper.GetSelectedRowID(UltraGridControl, GridControlUniqueIdentifierCol(Me.UltraGridControl))",
+      "description": "Returns the LocationID of the selected grid row"
+    },
+    "Initialize": {
+      "implementation": "InitializeBase(SubSystem.frmFacilitySearch)",
+      "description": "Initializes subsystem, control authorization, and permissions"
+    },
+    "ItemAdd": {
+      "implementation": "Opens frmFacilityDetail with new location",
+      "description": "Creates and displays detail form for adding new facility"
+    },
+    "ItemModify": {
+      "implementation": "Opens frmFacilityDetail with existing location",
+      "description": "Creates and displays detail form for editing selected facility"
+    },
+    "ItemRemove": {
+      "implementation": "BusinessLogic.Location.DeleteLocation(Me.GridControlIndex)",
+      "description": "Deletes selected facility after confirmation dialog"
+    },
+    "ItemRun": {
+      "implementation": "Do nothing",
+      "description": "Not used in this search form"
+    },
+    "ItemView": {
+      "implementation": "Do nothing",
+      "description": "Not used in this search form"
+    },
+    "LocalPanel": {
+      "implementation": "Returns pnlFacilities",
+      "description": "Returns the main panel for this search form"
+    },
+    "OnChangeOfFleet": {
+      "implementation": "Do nothing",
+      "description": "Not applicable for facility search"
+    },
+    "RefreshList": {
+      "implementation": "Validates fields, calls business logic search, refreshes grid",
+      "description": "Executes search and populates grid with results"
+    },
+    "SetButtonTypes": {
+      "implementation": "Sets btnFind and btnReset as ButtonType.Open",
+      "description": "Configures button types for security authorization"
+    },
+    "UltraGridControl": {
+      "implementation": "Returns grdFacilities",
+      "description": "Returns the main grid control"
+    }
+  },
+  "layoutNotes": {
+    "hierarchy": "pnlFacilities > [lblContextTitle, pnlCriteria, grdFacilities]",
+    "criteriaLayout": "Two rows of search controls with labels, Find and Reset buttons anchored right",
+    "gridPosition": "Fills remaining space below criteria panel",
+    "headerStyle": "Blue banner with white text displaying 'Facilities'"
+  },
+  "conversionNotes": {
+    "targetPattern": "MVC search controller with Index view and DataTables grid",
+    "referenceController": "BoatLocationSearchController.cs",
+    "referenceView": "BoatLocationSearch/Index.cshtml",
+    "sharedDto": "FacilityDto.cs in BargeOps.Shared/Dto",
+    "viewModel": "FacilitySearchViewModel.cs - contains search criteria and results",
+    "searchCriteria": "All txtName, txtShortName, cboRiver, txtStartMile, txtEndMile, txtBargeExCode, cboBargeExLocationType, chkActiveOnly map to ViewModel properties",
+    "gridColumns": "8 columns matching FormatGridColumns definitions",
+    "validationLocation": "Client-side and server-side validation in controller",
+    "apiEndpoint": "POST /FacilitySearch/Search or similar RESTful endpoint"
+  }
+}

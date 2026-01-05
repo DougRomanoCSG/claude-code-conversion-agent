@@ -1,0 +1,516 @@
+{
+  "entityName": "BoatFuelPrices",
+  "modernizationApproach": "ASP.NET Core MVC with Bootstrap 5 and DataTables",
+  "targetViews": [
+    {
+      "viewName": "Index.cshtml",
+      "type": "SearchAndEditCombined",
+      "description": "Main search screen with integrated add/edit functionality",
+      "path": "/Views/BoatFuelPriceSearch/Index.cshtml",
+      "viewModel": "BoatFuelPriceSearchViewModel",
+      "partials": [
+        "_Search.cshtml",
+        "_SearchResults.cshtml",
+        "_EditForm.cshtml (Modal)"
+      ]
+    }
+  ],
+  "controlMappings": [
+    {
+      "legacyControl": "pnlSearch",
+      "legacyType": "UltraPanel",
+      "modernControl": "div with class='container-fluid'",
+      "modernType": "Bootstrap Container",
+      "implementation": "<div class=\"container-fluid\">...</div>",
+      "notes": "Main container for the entire search interface"
+    },
+    {
+      "legacyControl": "pnlCriteria",
+      "legacyType": "UltraPanel",
+      "modernControl": "div with class='card'",
+      "modernType": "Bootstrap Card",
+      "implementation": "<div class=\"card mb-3\"><div class=\"card-header\"><h5 class=\"card-title mb-0\"><i class=\"fas fa-search\"></i> Search Criteria</h5></div><div class=\"card-body\">...</div></div>",
+      "notes": "Search criteria panel wrapped in a Bootstrap card",
+      "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\_Search.cshtml:3-9"
+    },
+    {
+      "legacyControl": "grpDetail",
+      "legacyType": "UltraGroupBox",
+      "modernControl": "Bootstrap Modal Dialog",
+      "modernType": "Bootstrap Modal",
+      "implementation": "<div class=\"modal fade\" id=\"editModal\" tabindex=\"-1\"><div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-header\"><h5 class=\"modal-title\">Boat Fuel Price Detail</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button></div><div class=\"modal-body\"><!-- Form fields --></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Cancel</button><button type=\"submit\" class=\"btn btn-primary\">Submit</button></div></div></div></div>",
+      "notes": "Detail edit section converted to a modal dialog for better UX; alternative approach is inline expansion below search criteria",
+      "alternativeImplementation": "<div class=\"card mb-3\" id=\"detailPanel\" style=\"display:none;\"><div class=\"card-header\"><h5 class=\"card-title mb-0\">Detail</h5></div><div class=\"card-body\">...</div></div>"
+    },
+    {
+      "legacyControl": "dtEffectiveDateSearch",
+      "legacyType": "UltraDateTimeEditor",
+      "modernControl": "input type='date' with Bootstrap datepicker",
+      "modernType": "Bootstrap Form Input + Datepicker",
+      "implementation": "<div class=\"col-md-3\">\n  <label asp-for=\"EffectiveDateSearch\" class=\"form-label\">Effective Date</label>\n  <input asp-for=\"EffectiveDateSearch\" type=\"date\" class=\"form-control\" />\n</div>",
+      "javaScriptInit": "// Bootstrap datepicker or use native HTML5 date input\n$('#EffectiveDateSearch').datepicker({ format: 'mm/dd/yyyy', autoclose: true });",
+      "notes": "Search criterion for effective date; defaults to today's date",
+      "defaultValue": "DateTime.Today",
+      "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\_Search.cshtml:14"
+    },
+    {
+      "legacyControl": "cboFuelVendorSearch",
+      "legacyType": "UltraCombo",
+      "modernControl": "select with Select2",
+      "modernType": "Select2 Dropdown",
+      "implementation": "<div class=\"col-md-3\">\n  <label asp-for=\"FuelVendorIdSearch\" class=\"form-label\">Fuel Vendor</label>\n  <select asp-for=\"FuelVendorIdSearch\" asp-items=\"Model.FuelVendors\" class=\"form-select select2\">\n    <option value=\"\">-- All Vendors --</option>\n  </select>\n</div>",
+      "javaScriptInit": "$('#FuelVendorIdSearch').select2({\n  placeholder: '-- All Vendors --',\n  allowClear: true,\n  width: '100%'\n});",
+      "dataSource": "Lists.FuelVendorList.GetList",
+      "notes": "Optional search filter for fuel vendor with Select2 for enhanced UX",
+      "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\_Search.cshtml:22-24"
+    },
+    {
+      "legacyControl": "btnFind",
+      "legacyType": "UltraButton",
+      "modernControl": "button type='button' with Bootstrap btn-primary",
+      "modernType": "Bootstrap Button",
+      "implementation": "<button type=\"button\" id=\"btnSearch\" class=\"btn btn-primary\">\n  <i class=\"fas fa-search\"></i> Find\n</button>",
+      "javaScriptHandler": "$('#btnSearch').click(function() {\n  dataTable.ajax.reload();\n});",
+      "notes": "Primary search button that triggers DataTables AJAX reload",
+      "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\_Search.cshtml:62-64 and C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js:217-219"
+    },
+    {
+      "legacyControl": "btnReset",
+      "legacyType": "UltraButton",
+      "modernControl": "button type='button' with Bootstrap btn-secondary",
+      "modernType": "Bootstrap Button",
+      "implementation": "<button type=\"button\" id=\"btnReset\" class=\"btn btn-secondary\">\n  <i class=\"fas fa-undo\"></i> Reset\n</button>",
+      "javaScriptHandler": "$('#btnReset').click(function() {\n  $('#searchForm')[0].reset();\n  $('#FuelVendorIdSearch').val('').trigger('change');\n  dataTable.ajax.reload();\n});",
+      "notes": "Resets search criteria and reloads grid",
+      "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\_Search.cshtml:65-67 and C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js:222-228"
+    },
+    {
+      "legacyControl": "grdSearch",
+      "legacyType": "UltraGrid",
+      "modernControl": "DataTables grid with server-side processing",
+      "modernType": "jQuery DataTables",
+      "implementation": "<div class=\"card\">\n  <div class=\"card-header\">\n    <h5 class=\"card-title mb-0\">\n      <i class=\"fas fa-list\"></i> Boat Fuel Prices\n    </h5>\n  </div>\n  <div class=\"card-body\">\n    <div class=\"table-responsive\">\n      <table id=\"boatFuelPriceTable\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\">\n        <thead>\n          <tr>\n            <th>Actions</th>\n            <th>Effective Date</th>\n            <th>Fuel Price</th>\n            <th>Fuel Vendor</th>\n            <th>Invoice</th>\n          </tr>\n        </thead>\n        <tbody>\n        </tbody>\n      </table>\n    </div>\n  </div>\n</div>",
+      "dataTableConfig": {
+        "processing": true,
+        "serverSide": true,
+        "stateSave": true,
+        "stateKey": "boatFuelPriceTable_v1",
+        "responsive": true,
+        "autoWidth": false,
+        "order": [[1, "desc"], [3, "asc"]],
+        "pageLength": 25,
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]]
+      },
+      "notes": "Main results grid with server-side processing and state persistence",
+      "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\_SearchResults.cshtml:1-38 and C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js:32-214"
+    },
+    {
+      "legacyControl": "dtEffectiveDate",
+      "legacyType": "UltraDateTimeEditor",
+      "modernControl": "input type='date'",
+      "modernType": "Bootstrap Form Input",
+      "implementation": "<div class=\"mb-3\">\n  <label asp-for=\"EffectiveDate\" class=\"form-label fw-bold\">Effective Date <span class=\"text-danger\">*</span></label>\n  <input asp-for=\"EffectiveDate\" type=\"date\" class=\"form-control\" required />\n  <span asp-validation-for=\"EffectiveDate\" class=\"text-danger\"></span>\n</div>",
+      "validation": {
+        "required": true,
+        "validationType": "Date"
+      },
+      "notes": "Required field for detail edit; label is bold per legacy design",
+      "dataBinding": "_BoatFuelPrice.EffectiveDate",
+      "tabIndex": 0
+    },
+    {
+      "legacyControl": "txtPrice",
+      "legacyType": "UltraTextEditor",
+      "modernControl": "input type='text' with currency formatting",
+      "modernType": "Bootstrap Form Input",
+      "implementation": "<div class=\"mb-3\">\n  <label asp-for=\"Price\" class=\"form-label fw-bold\">Fuel Price <span class=\"text-danger\">*</span></label>\n  <div class=\"input-group\">\n    <span class=\"input-group-text\">$</span>\n    <input asp-for=\"Price\" type=\"text\" class=\"form-control currency-input\" required />\n  </div>\n  <span asp-validation-for=\"Price\" class=\"text-danger\"></span>\n</div>",
+      "javaScriptInit": "$('.currency-input').maskMoney({\n  prefix: '',\n  allowNegative: false,\n  thousands: ',',\n  decimal: '.',\n  affixesStay: false\n});",
+      "validation": {
+        "required": true,
+        "validationType": "Currency"
+      },
+      "notes": "Required currency field with $ prefix; label is bold",
+      "dataBinding": "_BoatFuelPrice.Price",
+      "tabIndex": 1
+    },
+    {
+      "legacyControl": "cboFuelVendorBusinessUnitID",
+      "legacyType": "UltraCombo",
+      "modernControl": "select with Select2",
+      "modernType": "Select2 Dropdown",
+      "implementation": "<div class=\"mb-3\">\n  <label asp-for=\"FuelVendorBusinessUnitID\" class=\"form-label\">Fuel Vendor</label>\n  <select asp-for=\"FuelVendorBusinessUnitID\" asp-items=\"Model.FuelVendors\" class=\"form-select select2\" id=\"cboFuelVendor\">\n    <option value=\"\">-- Select Vendor --</option>\n  </select>\n  <span asp-validation-for=\"FuelVendorBusinessUnitID\" class=\"text-danger\"></span>\n</div>",
+      "javaScriptInit": "$('#cboFuelVendor').select2({\n  placeholder: '-- Select Vendor --',\n  allowClear: true,\n  width: '100%'\n});",
+      "conditionalLogic": "$('#cboFuelVendor').on('change', function() {\n  var hasVendor = $(this).val() !== '';\n  $('#txtInvoiceNumber').prop('disabled', !hasVendor);\n  if (!hasVendor) {\n    $('#txtInvoiceNumber').val('');\n  }\n});",
+      "dataSource": "Lists.FuelVendorList.GetList (active only)",
+      "notes": "When vendor is selected, enables Invoice Number field",
+      "dataBinding": "_BoatFuelPrice.FuelVendorBusinessUnitID",
+      "tabIndex": 2
+    },
+    {
+      "legacyControl": "txtInvoiceNumber",
+      "legacyType": "UltraTextEditor",
+      "modernControl": "input type='text'",
+      "modernType": "Bootstrap Form Input",
+      "implementation": "<div class=\"mb-3\">\n  <label asp-for=\"InvoiceNumber\" class=\"form-label\">Vendor Inv #</label>\n  <input asp-for=\"InvoiceNumber\" type=\"text\" class=\"form-control\" id=\"txtInvoiceNumber\" disabled />\n  <span asp-validation-for=\"InvoiceNumber\" class=\"text-danger\"></span>\n</div>",
+      "validation": {
+        "required": false,
+        "validationType": "String",
+        "maxLength": "BoatFuelPrice.MaxLength.InvoiceNumber"
+      },
+      "notes": "Only enabled when FuelVendorBusinessUnitID has a value; cleared if vendor is cleared",
+      "dataBinding": "_BoatFuelPrice.InvoiceNumber",
+      "defaultEnabled": false,
+      "tabIndex": 3
+    },
+    {
+      "legacyControl": "btnSubmit",
+      "legacyType": "UltraButton",
+      "modernControl": "button type='submit' with Bootstrap btn-primary",
+      "modernType": "Bootstrap Button",
+      "implementation": "<button type=\"submit\" class=\"btn btn-primary\" id=\"btnSubmit\">\n  <i class=\"fas fa-save\"></i> Submit\n</button>",
+      "notes": "Saves changes to BoatFuelPrice object; placed in modal footer or inline form",
+      "tabIndex": 4
+    },
+    {
+      "legacyControl": "btnCancel",
+      "legacyType": "UltraButton",
+      "modernControl": "button type='button' with Bootstrap btn-secondary",
+      "modernType": "Bootstrap Button",
+      "implementation": "<button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\" id=\"btnCancel\">\n  <i class=\"fas fa-times\"></i> Cancel\n</button>",
+      "notes": "Cancels edit mode and discards changes; closes modal or hides inline form",
+      "tabIndex": 5
+    },
+    {
+      "legacyControl": "lblContextTitle",
+      "legacyType": "UltraLabel",
+      "modernControl": "h2 element",
+      "modernType": "Bootstrap Heading",
+      "implementation": "<h2>Boat Fuel Prices</h2>",
+      "notes": "Page title heading"
+    }
+  ],
+  "gridColumnMappings": [
+    {
+      "legacyColumn": "Actions (implicit)",
+      "modernColumn": "Actions",
+      "dataTableColumn": {
+        "data": null,
+        "name": "actions",
+        "orderable": false,
+        "searchable": false,
+        "defaultContent": "",
+        "className": "text-center",
+        "width": "80px",
+        "render": "function(data, type, row) {\n  return '<div class=\"btn-group btn-group-sm\" role=\"group\">' +\n    '<a href=\"#\" class=\"btn btn-sm btn-primary btn-edit\" data-id=\"' + row.boatFuelPriceID + '\" title=\"Edit\">' +\n    '<i class=\"fas fa-edit\"></i></a>' +\n    '<a href=\"#\" class=\"btn btn-sm btn-danger btn-delete\" data-id=\"' + row.boatFuelPriceID + '\" title=\"Delete\">' +\n    '<i class=\"fas fa-trash\"></i></a>' +\n    '</div>';\n}"
+      },
+      "notes": "First column with Edit and Delete buttons",
+      "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js:60-75"
+    },
+    {
+      "legacyColumn": "EffectiveDate",
+      "modernColumn": "Effective Date",
+      "dataTableColumn": {
+        "data": "effectiveDate",
+        "name": "effectiveDate",
+        "defaultContent": "",
+        "render": "function(data) { return data ? moment(data).format('MM/DD/YYYY') : ''; }"
+      },
+      "sortOrder": "Descending (Primary)",
+      "width": 100,
+      "alignment": "Left",
+      "dataType": "Date",
+      "notes": "Primary sort column descending"
+    },
+    {
+      "legacyColumn": "Price",
+      "modernColumn": "Fuel Price",
+      "dataTableColumn": {
+        "data": "price",
+        "name": "price",
+        "defaultContent": "",
+        "className": "text-end",
+        "render": "function(data) { return data != null ? '$' + parseFloat(data).toFixed(2) : ''; }"
+      },
+      "width": 100,
+      "alignment": "Right",
+      "dataType": "Currency",
+      "notes": "Currency formatted with $ prefix"
+    },
+    {
+      "legacyColumn": "FuelVendor",
+      "modernColumn": "Fuel Vendor",
+      "dataTableColumn": {
+        "data": "fuelVendor",
+        "name": "fuelVendor",
+        "defaultContent": ""
+      },
+      "sortOrder": "Ascending (Secondary)",
+      "width": 250,
+      "alignment": "Left",
+      "dataType": "String",
+      "notes": "Secondary sort column ascending"
+    },
+    {
+      "legacyColumn": "InvoiceNumber",
+      "modernColumn": "Invoice",
+      "dataTableColumn": {
+        "data": "invoiceNumber",
+        "name": "invoiceNumber",
+        "defaultContent": ""
+      },
+      "width": 100,
+      "alignment": "Left",
+      "dataType": "String"
+    }
+  ],
+  "javaScriptFiles": [
+    {
+      "fileName": "boatFuelPriceSearch.js",
+      "path": "/wwwroot/js/boatFuelPriceSearch.js",
+      "description": "DataTables initialization and AJAX configuration for BoatFuelPrice search",
+      "dependencies": [
+        "jQuery",
+        "DataTables",
+        "Select2",
+        "Bootstrap 5",
+        "Moment.js (for date formatting)",
+        "jQuery MaskMoney (for currency input)"
+      ],
+      "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js"
+    },
+    {
+      "fileName": "boatFuelPriceEdit.js",
+      "path": "/wwwroot/js/boatFuelPriceEdit.js",
+      "description": "Handles add/edit modal interactions and conditional field logic",
+      "conditionalLogic": [
+        "Enable/disable Invoice Number based on Fuel Vendor selection",
+        "Clear Invoice Number when Vendor is cleared",
+        "Currency input formatting for Price field"
+      ]
+    }
+  ],
+  "cssFiles": [
+    {
+      "fileName": "boatFuelPriceSearch.css",
+      "path": "/wwwroot/css/boatFuelPriceSearch.css",
+      "description": "Custom styling for BoatFuelPrice search interface",
+      "notes": "Minimal custom CSS needed; Bootstrap 5 handles most styling"
+    }
+  ],
+  "viewModels": [
+    {
+      "name": "BoatFuelPriceSearchViewModel",
+      "namespace": "BargeOpsAdmin.ViewModels",
+      "properties": [
+        {
+          "name": "EffectiveDateSearch",
+          "type": "DateTime?",
+          "displayName": "Effective Date",
+          "notes": "Search criterion - defaults to today's date"
+        },
+        {
+          "name": "FuelVendorIdSearch",
+          "type": "int?",
+          "displayName": "Fuel Vendor",
+          "notes": "Optional fuel vendor filter"
+        },
+        {
+          "name": "FuelVendors",
+          "type": "SelectList",
+          "notes": "Dropdown list for fuel vendor selection"
+        }
+      ]
+    },
+    {
+      "name": "BoatFuelPriceEditViewModel",
+      "namespace": "BargeOpsAdmin.ViewModels",
+      "properties": [
+        {
+          "name": "BoatFuelPriceID",
+          "type": "int",
+          "notes": "Primary key; 0 for new records"
+        },
+        {
+          "name": "EffectiveDate",
+          "type": "DateTime",
+          "displayName": "Effective Date",
+          "required": true,
+          "validation": "[Required, DataType(DataType.Date)]"
+        },
+        {
+          "name": "Price",
+          "type": "decimal",
+          "displayName": "Fuel Price",
+          "required": true,
+          "validation": "[Required, DataType(DataType.Currency), Range(0, 999999.99)]"
+        },
+        {
+          "name": "FuelVendorBusinessUnitID",
+          "type": "int?",
+          "displayName": "Fuel Vendor",
+          "required": false
+        },
+        {
+          "name": "InvoiceNumber",
+          "type": "string",
+          "displayName": "Vendor Inv #",
+          "required": false,
+          "validation": "[MaxLength(BoatFuelPrice.MaxLength.InvoiceNumber)]"
+        },
+        {
+          "name": "FuelVendors",
+          "type": "SelectList",
+          "notes": "Dropdown list for fuel vendor selection"
+        }
+      ]
+    }
+  ],
+  "dataTableAjaxEndpoint": {
+    "url": "/BoatFuelPriceSearch/BoatFuelPriceTable",
+    "method": "POST",
+    "parameters": [
+      "draw",
+      "start",
+      "length",
+      "search[value]",
+      "order[0][column]",
+      "order[0][dir]",
+      "effectiveDateSearch",
+      "fuelVendorIdSearch"
+    ],
+    "response": {
+      "draw": "int",
+      "recordsTotal": "int",
+      "recordsFiltered": "int",
+      "data": "List<BoatFuelPriceSearchResultDto>"
+    }
+  },
+  "businessRules": [
+    {
+      "rule": "Invoice number is only enabled when a fuel vendor is selected",
+      "implementation": "JavaScript conditional logic",
+      "location": "boatFuelPriceEdit.js"
+    },
+    {
+      "rule": "Invoice number is cleared if fuel vendor is removed",
+      "implementation": "JavaScript change event handler",
+      "location": "boatFuelPriceEdit.js"
+    },
+    {
+      "rule": "Effective date search defaults to today's date",
+      "implementation": "ViewModel initialization or JavaScript",
+      "location": "BoatFuelPriceSearchViewModel constructor or page load script"
+    },
+    {
+      "rule": "Search and edit sections are mutually exclusive (modal vs inline)",
+      "implementation": "Bootstrap modal (recommended) or JavaScript show/hide for inline",
+      "notes": "Modal approach is cleaner and more modern"
+    }
+  ],
+  "securityImplementation": {
+    "authorization": "ASP.NET Core Authorization attributes on controller actions",
+    "policies": [
+      {
+        "action": "Index (Search)",
+        "policy": "RequireBoatFuelPriceRead"
+      },
+      {
+        "action": "Create",
+        "policy": "RequireBoatFuelPriceCreate"
+      },
+      {
+        "action": "Edit",
+        "policy": "RequireBoatFuelPriceUpdate"
+      },
+      {
+        "action": "Delete",
+        "policy": "RequireBoatFuelPriceDelete"
+      }
+    ],
+    "notes": "Map legacy ButtonType security to ASP.NET Core authorization policies"
+  },
+  "userPreferences": {
+    "gridStatePersistence": {
+      "method": "localStorage via DataTables stateSave",
+      "key": "boatFuelPriceTable_v1",
+      "settings": [
+        "Column widths",
+        "Column order",
+        "Sort order",
+        "Page length",
+        "Current page"
+      ],
+      "notes": "Version key allows resetting state when structure changes",
+      "referenceFile": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js:3-14"
+    }
+  },
+  "validationApproach": {
+    "clientSide": {
+      "framework": "jQuery Validation (Unobtrusive)",
+      "implementation": "ASP.NET Core Tag Helpers generate validation attributes",
+      "customValidation": [
+        "Currency format validation for Price field",
+        "Date validation for EffectiveDate field"
+      ]
+    },
+    "serverSide": {
+      "framework": "Data Annotations + FluentValidation",
+      "businessRules": [
+        "Clear InvoiceNumber if FuelVendorBusinessUnitID is empty",
+        "Validate Price is positive",
+        "Validate EffectiveDate is valid date"
+      ]
+    }
+  },
+  "migrationNotes": {
+    "formType": "Search and Edit (Combined)",
+    "recommendedApproach": "Modal-based edit (modern UX)",
+    "alternativeApproach": "Inline expansion below search (closer to legacy)",
+    "complexityLevel": "Low to Medium",
+    "estimatedEffort": "2-3 days",
+    "keyConsiderations": [
+      "Convert UltraGrid to DataTables with server-side processing",
+      "Convert UltraCombo dropdowns to Select2 for enhanced UX",
+      "Implement conditional logic for Invoice Number field (enable/disable based on vendor)",
+      "Preserve grid state persistence using localStorage",
+      "Map security from ButtonType to ASP.NET Core authorization policies",
+      "Implement currency formatting for Price field",
+      "Handle bidirectional data binding via AJAX for edit operations"
+    ],
+    "technicalChallenges": [
+      "Currency input masking and validation",
+      "Conditional field enabling/disabling logic",
+      "State management for add/edit modes (modal vs inline)",
+      "Grid sorting with custom comparers (date, currency)"
+    ]
+  },
+  "testingConsiderations": {
+    "functionalTests": [
+      "Search by Effective Date",
+      "Search by Fuel Vendor",
+      "Add new BoatFuelPrice record",
+      "Edit existing BoatFuelPrice record",
+      "Delete BoatFuelPrice record",
+      "Verify Invoice Number is disabled when no vendor selected",
+      "Verify Invoice Number is enabled when vendor is selected",
+      "Verify Invoice Number is cleared when vendor is removed",
+      "Verify grid sorting by Effective Date (descending) and Fuel Vendor (ascending)",
+      "Verify grid state persistence (column widths, sort order, page size)"
+    ],
+    "validationTests": [
+      "Required field validation (Effective Date, Price)",
+      "Currency format validation (Price field)",
+      "Date format validation (Effective Date field)",
+      "MaxLength validation (Invoice Number field)",
+      "Business rule: Invoice Number cleared if vendor removed"
+    ],
+    "uiTests": [
+      "Responsive layout on mobile/tablet/desktop",
+      "Modal dialog opens/closes correctly",
+      "Bootstrap form validation styling",
+      "Select2 dropdown initialization and behavior",
+      "DataTables initialization and AJAX reload",
+      "Button states and loading indicators"
+    ]
+  }
+}

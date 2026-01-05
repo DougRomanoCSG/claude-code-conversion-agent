@@ -1,0 +1,121 @@
+@model VendorEditViewModel
+@{
+    ViewData["Title"] = Model.PageTitle;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="page-header mb-4">@Model.PageTitle</h2>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <h5>Please correct the following errors:</h5>
+                    <ul>
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form id="vendorForm" asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Vendor.VendorID" />
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs" id="vendorTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+                            <i class="fas fa-info-circle"></i> Details
+                        </button>
+                    </li>
+                    @if (Model.PortalLicenseActive)
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="portal-tab" data-bs-toggle="tab" data-bs-target="#portal" type="button" role="tab">
+                                <i class="fas fa-globe"></i> Portal
+                            </button>
+                        </li>
+                    }
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="business-units-tab" data-bs-toggle="tab" data-bs-target="#business-units" type="button" role="tab">
+                            <i class="fas fa-building"></i> Business Units
+                        </button>
+                    </li>
+                    @if (Model.BargeExGlobalSettingEnabled)
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="bargeex-tab" data-bs-toggle="tab" data-bs-target="#bargeex" type="button" role="tab">
+                                <i class="fas fa-ship"></i> BargeEx Settings
+                            </button>
+                        </li>
+                    }
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content border border-top-0 p-3" id="vendorTabContent">
+                    <!-- Details Tab -->
+                    <div class="tab-pane fade show active" id="details" role="tabpanel">
+                        @await Html.PartialAsync("_DetailsTab", Model)
+                    </div>
+
+                    <!-- Portal Tab -->
+                    @if (Model.PortalLicenseActive)
+                    {
+                        <div class="tab-pane fade" id="portal" role="tabpanel">
+                            @await Html.PartialAsync("_PortalTab", Model)
+                        </div>
+                    }
+
+                    <!-- Business Units Tab -->
+                    <div class="tab-pane fade" id="business-units" role="tabpanel">
+                        @await Html.PartialAsync("_BusinessUnitsTab", Model)
+                    </div>
+
+                    <!-- BargeEx Settings Tab -->
+                    @if (Model.BargeExGlobalSettingEnabled)
+                    {
+                        <div class="tab-pane fade" id="bargeex" role="tabpanel">
+                            @await Html.PartialAsync("_BargeExTab", Model)
+                        </div>
+                    }
+                </div>
+
+                <!-- Form Actions -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input asp-for="Vendor.IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="Vendor.IsActive" class="form-check-label"></label>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/vendor-edit.js"></script>
+    <script>
+        // Pass configuration to JavaScript
+        window.vendorEditConfig = {
+            portalLicenseActive: @Json.Serialize(Model.PortalLicenseActive),
+            unitTowLicenseActive: @Json.Serialize(Model.UnitTowLicenseActive),
+            bargeExGlobalSettingEnabled: @Json.Serialize(Model.BargeExGlobalSettingEnabled),
+            isNew: @Json.Serialize(Model.IsNew)
+        };
+    </script>
+}

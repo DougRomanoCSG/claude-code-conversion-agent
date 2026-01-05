@@ -1,0 +1,327 @@
+{
+  "entity": "BargeTokenMap",
+  "legacy": {
+    "formName": "frmBargeTokenMap",
+    "inheritsFrom": "frmBaseDetailEditList",
+    "subsystem": "None",
+    "sourceFiles": [
+      "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore/Forms/frmBargeTokenMap.vb",
+      "C:/Dev/BargeOps.Admin.Mono/OnShore/apps/Onshore/Forms/frmBargeTokenMap.Designer.vb"
+    ],
+    "securityButtons": [
+      {
+        "button": "btnSubmit",
+        "type": "Submit",
+        "legacyPermission": "CanSubmit",
+        "description": "Save barge token map entry",
+        "sourceReference": "frmBargeTokenMap.vb:50"
+      },
+      {
+        "button": "btnCancel",
+        "type": "CancelEdit",
+        "legacyPermission": "CanCancelEdit",
+        "description": "Cancel editing barge token map",
+        "sourceReference": "frmBargeTokenMap.vb:51"
+      },
+      {
+        "button": "btnClose",
+        "type": "Cancel",
+        "legacyPermission": "CanClose",
+        "description": "Close form",
+        "sourceReference": "frmBargeTokenMap.vb:52"
+      },
+      {
+        "button": "toolbarBargeTokenMap.Tools[\"Add\"]",
+        "type": "Add",
+        "legacyPermission": "CanCreate",
+        "description": "Create new barge token map entry",
+        "sourceReference": "frmBargeTokenMap.vb:63"
+      },
+      {
+        "button": "toolbarBargeTokenMap.Tools[\"Modify\"]",
+        "type": "Open",
+        "legacyPermission": "CanModify",
+        "description": "Edit existing barge token map entry",
+        "sourceReference": "frmBargeTokenMap.vb:64"
+      },
+      {
+        "button": "toolbarBargeTokenMap.Tools[\"Remove\"]",
+        "type": "Remove",
+        "legacyPermission": "CanDelete",
+        "description": "Delete barge token map entry",
+        "sourceReference": "frmBargeTokenMap.vb:65"
+      },
+      {
+        "button": "toolbarBargeTokenMap.Tools[\"Export\"]",
+        "type": "Open",
+        "legacyPermission": "CanExport",
+        "description": "Export barge token map list to file",
+        "sourceReference": "frmBargeTokenMap.vb:66"
+      }
+    ],
+    "controlAuthorizationCalls": [
+      {
+        "location": "frmBargeTokenMap.vb:49-53",
+        "method": "SetButtonTypes",
+        "description": "Sets button types for form-level buttons (Submit, Cancel, Close)"
+      },
+      {
+        "location": "frmBargeTokenMap.vb:345-356",
+        "method": "SetToolState",
+        "description": "Checks ToolbarButtonCanBeEnabled for each toolbar button with security enforcement"
+      }
+    ],
+    "securityPatterns": [
+      {
+        "pattern": "ButtonType Authorization",
+        "description": "Uses CSG ControlAuthorization to enforce button-level security based on ButtonType enum",
+        "implementation": "ControlAuthorization.SetButtonType and ControlAuthorization.ToolbarButtonCanBeEnabled"
+      },
+      {
+        "pattern": "Edit Mode Security",
+        "description": "Toolbar buttons disabled during edit mode (IsEditingChild check)",
+        "implementation": "Lines 345-356 in SetToolState method"
+      },
+      {
+        "pattern": "State-Based Security",
+        "description": "Modify/Remove buttons only enabled when item is selected",
+        "implementation": "itemIsSelected checks in SetToolState"
+      }
+    ]
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "description": "API endpoints use API Key authentication (NOT Windows Auth)",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/BargeTokenMap",
+          "action": "GetList",
+          "parameters": ["fieldName", "displayType", "fleetId"],
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenMapView",
+          "description": "Get list of barge token maps filtered by field name, display type, and fleet"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeTokenMap/{id}",
+          "action": "Get",
+          "parameters": ["id"],
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenMapView",
+          "description": "Get single barge token map by ID"
+        },
+        {
+          "method": "POST",
+          "route": "api/BargeTokenMap",
+          "action": "Create",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenMapModify",
+          "description": "Create new barge token map entry"
+        },
+        {
+          "method": "PUT",
+          "route": "api/BargeTokenMap/{id}",
+          "action": "Update",
+          "parameters": ["id"],
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenMapModify",
+          "description": "Update existing barge token map entry"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/BargeTokenMap/{id}",
+          "action": "Delete",
+          "parameters": ["id"],
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenMapModify",
+          "description": "Delete barge token map entry (soft delete via SetActive)"
+        },
+        {
+          "method": "GET",
+          "route": "api/BargeTokenMap/fieldvalues",
+          "action": "GetFieldValues",
+          "parameters": ["fieldValue", "fleetId"],
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenMapView",
+          "description": "Get available field values for dropdown population"
+        }
+      ],
+      "implementation": {
+        "controllerPattern": "ApiControllerBase",
+        "exampleCode": "[ApiController]\n[ApiKey]\npublic class BargeTokenMapController : ApiControllerBase\n{\n    [HttpGet]\n    public async Task<IActionResult> GetList([FromQuery] string fieldName, [FromQuery] string displayType, [FromQuery] int fleetId)\n    {\n        // API Key authentication required\n    }\n}"
+      }
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "description": "UI uses OIDC (Azure AD) in production, DevelopmentAutoSignInMiddleware in development",
+      "permissions": [
+        {
+          "name": "BargeTokenMapView",
+          "enumValue": "AuthPermissions.BargeTokenMapView",
+          "description": "View barge token maps (field value to display type mappings)",
+          "granularity": "ReadOnly",
+          "requiredFor": ["Index", "Search", "Details"],
+          "mappedFromLegacy": ["CanView", "Implicit for form access"]
+        },
+        {
+          "name": "BargeTokenMapModify",
+          "enumValue": "AuthPermissions.BargeTokenMapModify",
+          "description": "Create, update, and delete barge token map entries",
+          "granularity": "Modify",
+          "requiredFor": ["Create", "Edit", "Delete", "SetActive"],
+          "mappedFromLegacy": ["CanCreate (Add)", "CanModify (Modify)", "CanDelete (Remove)", "CanSubmit"]
+        }
+      ],
+      "uiElements": [
+        {
+          "element": "Add button",
+          "permission": "BargeTokenMapModify",
+          "visibility": "Hidden if permission not granted",
+          "description": "Create new token map entry"
+        },
+        {
+          "element": "Modify button",
+          "permission": "BargeTokenMapModify",
+          "visibility": "Hidden if permission not granted",
+          "description": "Edit existing token map entry"
+        },
+        {
+          "element": "Remove button",
+          "permission": "BargeTokenMapModify",
+          "visibility": "Hidden if permission not granted",
+          "description": "Delete token map entry"
+        },
+        {
+          "element": "Submit button",
+          "permission": "BargeTokenMapModify",
+          "visibility": "Hidden if permission not granted",
+          "description": "Save changes to token map"
+        },
+        {
+          "element": "Export button",
+          "permission": "BargeTokenMapView",
+          "visibility": "Hidden if permission not granted",
+          "description": "Export list to file"
+        }
+      ],
+      "implementation": {
+        "controllerPattern": "AppController",
+        "exampleCode": "[Authorize]\npublic class BargeTokenMapSearchController : AppController\n{\n    [Authorize(Policy = \"BargeTokenMapView\")]\n    public IActionResult Index()\n    {\n        // Requires BargeTokenMapView permission\n    }\n\n    [Authorize(Policy = \"BargeTokenMapModify\")]\n    public IActionResult Create()\n    {\n        // Requires BargeTokenMapModify permission\n    }\n}"
+      }
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BargeTokenMapView",
+          "value": "Auto-assigned",
+          "description": "View barge token maps"
+        },
+        {
+          "name": "BargeTokenMapModify",
+          "value": "Auto-assigned",
+          "description": "Modify barge token maps (create, edit, delete)"
+        }
+      ],
+      "notes": [
+        "No separate BargeTokenMapDelete permission - soft delete uses BargeTokenMapModify",
+        "Export functionality requires only BargeTokenMapView"
+      ]
+    }
+  },
+  "permissionGranularity": {
+    "readOnly": {
+      "permission": "BargeTokenMapView",
+      "actions": ["View", "Search", "Export"],
+      "description": "Users can view and export token map configurations but not modify them"
+    },
+    "modify": {
+      "permission": "BargeTokenMapModify",
+      "actions": ["Create", "Edit", "Delete (soft delete via SetActive)"],
+      "description": "Users can create, update, and deactivate token maps",
+      "notes": "Includes all view permissions implicitly"
+    }
+  },
+  "licenseBasedFeatures": [],
+  "specialSecurityConsiderations": [
+    {
+      "consideration": "SubSystem.None",
+      "description": "Form passes SubSystem.None to InitializeBase, indicating this form does not affect a search screen and has minimal subsystem-level security",
+      "impact": "Security is enforced primarily at button/action level rather than subsystem level"
+    },
+    {
+      "consideration": "Configuration Data",
+      "description": "BargeTokenMap manages visual configuration data (pictures, symbols, colors) used throughout the application",
+      "impact": "Changes affect visual representation system-wide; modify permission should be restricted to administrators"
+    },
+    {
+      "consideration": "Fleet-Scoped Security",
+      "description": "Token maps are scoped by FleetID, but no fleet-level security enforcement is visible in legacy code",
+      "impact": "Modern implementation should consider fleet-based data isolation"
+    },
+    {
+      "consideration": "Soft Delete Pattern",
+      "description": "Delete operations likely use soft delete (deactivation) rather than hard delete",
+      "impact": "No separate delete permission needed; use BargeTokenMapModify"
+    }
+  ],
+  "authenticationFlowModern": {
+    "api": {
+      "method": "API Key",
+      "configuration": "appsettings.json",
+      "attribute": "[ApiKey]",
+      "flow": "Request includes API key in header → ApiKeyAttribute validates → Request proceeds if valid"
+    },
+    "ui": {
+      "production": {
+        "method": "OIDC (Azure AD)",
+        "attribute": "[Authorize]",
+        "flow": "User redirects to Azure AD → Authenticates → Returns with token → App validates token → Creates user principal"
+      },
+      "development": {
+        "method": "DevelopmentAutoSignInMiddleware",
+        "attribute": "[Authorize]",
+        "flow": "Middleware auto-creates authenticated user for development → No actual login required"
+      }
+    }
+  },
+  "migrationNotes": {
+    "legacySecurityFramework": "CSG ControlAuthorization with ButtonType enum",
+    "modernSecurityFramework": "ASP.NET Core Identity with OIDC + CSG Authorization framework",
+    "apiSecurityChange": "Windows Authentication (legacy) → API Key authentication (modern)",
+    "uiSecurityChange": "Windows Authentication (legacy) → OIDC/Azure AD (modern production) + DevelopmentAutoSignInMiddleware (modern dev)",
+    "permissionMapping": {
+      "CanCreate": "BargeTokenMapModify",
+      "CanModify": "BargeTokenMapModify",
+      "CanDelete": "BargeTokenMapModify (soft delete)",
+      "CanSubmit": "BargeTokenMapModify",
+      "CanView": "BargeTokenMapView",
+      "CanExport": "BargeTokenMapView"
+    },
+    "criticalConsiderations": [
+      "Ensure API endpoints use [ApiKey] attribute, NOT Windows Auth",
+      "Ensure UI controllers use [Authorize] with OIDC configuration",
+      "Hide/disable UI elements based on permissions (follow MVVM pattern)",
+      "Implement fleet-based data isolation if required by business rules",
+      "Validate that soft delete pattern is preserved in modern implementation"
+    ]
+  },
+  "extractionMetadata": {
+    "extractedDate": "2025-12-19",
+    "sourceVersion": "Legacy VB.NET",
+    "targetFramework": "ASP.NET Core with CSG Authorization",
+    "securityPatternConfidence": "High",
+    "notes": [
+      "SubSystem is None - minimal subsystem-level security",
+      "Button-level security well-defined via ControlAuthorization",
+      "No license-based features identified",
+      "ReadOnly and Modify granularity patterns identified",
+      "Fleet scoping present but no fleet-level security enforcement visible"
+    ]
+  }
+}

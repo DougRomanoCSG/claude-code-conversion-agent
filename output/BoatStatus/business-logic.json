@@ -1,0 +1,1224 @@
+{
+  "businessObject": "BoatLocation",
+  "baseClass": "BoatLocationBase",
+  "namespace": "BargeOps.BusinessObjects",
+  "legacyNamespace": "Onshore.BusinessLogic.Business Objects",
+  "properties": [
+    {
+      "name": "LocationID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "description": "Primary key identifier for the boat location"
+    },
+    {
+      "name": "FleetID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "isRequired": false,
+      "description": "Fleet identifier the boat belongs to",
+      "conditionalRequired": "Required when IsFleetBoat is true"
+    },
+    {
+      "name": "UscgNum",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "isRequired": false,
+      "description": "USCG VIN (Vessel Identification Number)",
+      "displayName": "USCG VIN",
+      "conditionalRequired": "Required when IsFleetBoat is true"
+    },
+    {
+      "name": "Mmsi",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "isRequired": false,
+      "description": "Maritime Mobile Service Identity",
+      "displayName": "MMSI",
+      "conditionalRequired": "Required when IsTrackedInAis is true"
+    },
+    {
+      "name": "CallSign",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "description": "Radio call sign for the boat",
+      "displayName": "Call Sign"
+    },
+    {
+      "name": "OwnerID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Owner entity identifier"
+    },
+    {
+      "name": "OperatorID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Operator entity identifier"
+    },
+    {
+      "name": "ContactName",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 100,
+      "description": "Contact person name"
+    },
+    {
+      "name": "ContactPhone",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 10,
+      "format": "Phone10",
+      "description": "Contact phone number (10 digits)"
+    },
+    {
+      "name": "ContactEmail",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 100,
+      "description": "Contact email address"
+    },
+    {
+      "name": "Horsepower",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Engine horsepower"
+    },
+    {
+      "name": "ExternalLength",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "format": "OneDecimalPlace",
+      "roundingMethod": "Nearest",
+      "roundingIncrement": "0.1",
+      "description": "External length of the boat in feet",
+      "displayName": "External Length",
+      "isOverridden": true
+    },
+    {
+      "name": "ExternalWidth",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "format": "OneDecimalPlace",
+      "roundingMethod": "Nearest",
+      "roundingIncrement": "0.1",
+      "description": "External width of the boat in feet",
+      "displayName": "External Width",
+      "isOverridden": true
+    },
+    {
+      "name": "LoadDraft",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "format": "OneDecimalPlace",
+      "roundingMethod": "Nearest",
+      "roundingIncrement": "0.1",
+      "description": "Load draft depth in feet",
+      "displayName": "Load Draft",
+      "isOverridden": true
+    },
+    {
+      "name": "LightDraft",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "format": "OneDecimalPlace",
+      "roundingMethod": "Nearest",
+      "roundingIncrement": "0.1",
+      "description": "Light draft depth in feet",
+      "displayName": "Light Draft",
+      "isOverridden": true
+    },
+    {
+      "name": "MaximumHeight",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "format": "OneDecimalPlace",
+      "roundingMethod": "Nearest",
+      "roundingIncrement": "0.1",
+      "description": "Maximum height of the boat in feet",
+      "displayName": "Max. height",
+      "isOverridden": true
+    },
+    {
+      "name": "MinimumHeight",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "format": "OneDecimalPlace",
+      "roundingMethod": "Nearest",
+      "roundingIncrement": "0.1",
+      "description": "Minimum height of the boat in feet",
+      "displayName": "Min. height",
+      "isOverridden": true
+    },
+    {
+      "name": "CurrentYearBuilt",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 4,
+      "exactLength": 4,
+      "description": "Year the boat was built (4 characters)",
+      "displayName": "Year Built"
+    },
+    {
+      "name": "PositionUpdatedDateTime",
+      "type": "SmartDate",
+      "access": "ReadWrite",
+      "format": "SmartDateTime",
+      "description": "Date/time of the position update occurrence",
+      "accessModifier": "Public (Get) / Friend (Set)",
+      "isOverridden": true,
+      "notes": "Shadowed to force callers through parent Location object; triggers BoatArrival recalculation"
+    },
+    {
+      "name": "Direction",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "description": "Direction of travel on the river",
+      "accessModifier": "Public (Get) / Friend (Set)",
+      "isOverridden": true,
+      "notes": "Shadowed to force updates through parent Location object for BoatPositionHistory"
+    },
+    {
+      "name": "ConvFmsLocationMasterID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Conversion FMS Location Master ID"
+    },
+    {
+      "name": "IsAssistTug",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Indicates if boat is an assist tug"
+    },
+    {
+      "name": "EnableOnboard",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Indicates if boat is Onboard-enabled",
+      "displayName": "Onboard enabled",
+      "isOverridden": true,
+      "notes": "Overridden to cascade value changes to BoatFuels collection"
+    },
+    {
+      "name": "StartOnboardRecovery",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Indicates if onboard recovery should start"
+    },
+    {
+      "name": "BoatUniqueIdentifer",
+      "type": "Guid",
+      "access": "ReadWrite",
+      "defaultValue": "Guid.NewGuid",
+      "description": "Unique identifier for the boat"
+    },
+    {
+      "name": "GlAccountNum",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "description": "General Ledger account number",
+      "displayName": "G/L Code"
+    },
+    {
+      "name": "Division",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "description": "Division the boat belongs to",
+      "accessModifier": "Public (Get) / Private (Set)",
+      "isOverridden": true,
+      "notes": "Shadowed to make Set private; updated from BoatMaintenanceLogs collection"
+    },
+    {
+      "name": "PortFacilityID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Current port facility ID",
+      "accessModifier": "Public (Get) / Private (Set)",
+      "isOverridden": true,
+      "notes": "Shadowed to make Set private; updated from BoatMaintenanceLogs collection"
+    },
+    {
+      "name": "VendorID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Vendor identifier",
+      "displayName": "Vendor",
+      "conditionalRequired": "Required when Division is 'Outside Vendor'"
+    },
+    {
+      "name": "BoatRoleID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Current boat role ID",
+      "accessModifier": "Public (Get) / Private (Set)",
+      "isOverridden": true,
+      "notes": "Shadowed to make Set private; updated from BoatMaintenanceLogs collection"
+    },
+    {
+      "name": "OnboardRegistrationDateTime",
+      "type": "SmartDate",
+      "access": "ReadWrite",
+      "format": "SmartDateTime",
+      "description": "Onboard registration date/time"
+    },
+    {
+      "name": "EngineMake",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "description": "Engine manufacturer",
+      "displayName": "Engine make"
+    },
+    {
+      "name": "EngineModel",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "description": "Engine model",
+      "displayName": "Engine model"
+    },
+    {
+      "name": "MaxFuelLevel",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "description": "Maximum fuel level capacity",
+      "displayName": "Max. fuel level"
+    },
+    {
+      "name": "LowFuelLevel",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "description": "Low fuel level threshold",
+      "displayName": "Low fuel level"
+    },
+    {
+      "name": "CriticalFuelLevel",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "description": "Critical fuel level threshold",
+      "displayName": "Critical fuel level"
+    },
+    {
+      "name": "ShowPositionOnPortal",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Indicates if position should be shown on portal",
+      "displayName": "Show position on Portal"
+    },
+    {
+      "name": "WheelhouseRotationID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Wheelhouse rotation schedule identifier"
+    },
+    {
+      "name": "DeckRotationID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Deck rotation schedule identifier"
+    },
+    {
+      "name": "Bunks",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "description": "Number of bunks available"
+    },
+    {
+      "name": "Rooms",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "description": "Number of rooms available"
+    },
+    {
+      "name": "GRT",
+      "type": "String (Decimal)",
+      "access": "ReadWrite",
+      "description": "Gross Registered Tonnage"
+    },
+    {
+      "name": "CrewChangeMon",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Crew change occurs on Monday"
+    },
+    {
+      "name": "CrewChangeTue",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Crew change occurs on Tuesday"
+    },
+    {
+      "name": "CrewChangeWed",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Crew change occurs on Wednesday"
+    },
+    {
+      "name": "CrewChangeThu",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Crew change occurs on Thursday"
+    },
+    {
+      "name": "CrewChangeFri",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Crew change occurs on Friday"
+    },
+    {
+      "name": "CrewChangeSat",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Crew change occurs on Saturday"
+    },
+    {
+      "name": "CrewChangeSun",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Crew change occurs on Sunday"
+    },
+    {
+      "name": "DepartmentCode",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "description": "Department code"
+    },
+    {
+      "name": "EngineTier",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Engine tier classification",
+      "displayName": "Engine tier"
+    },
+    {
+      "name": "CrewCoordinatorID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Crew coordinator identifier"
+    },
+    {
+      "name": "PortCaptainID",
+      "type": "String (Int32)",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Port captain identifier"
+    },
+    {
+      "name": "TrackPositionInAis",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": false,
+      "description": "Indicates if position should be tracked in AIS"
+    },
+    {
+      "name": "IsFleetBoat",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isCalculated": true,
+      "description": "Derived property indicating if boat belongs to a fleet",
+      "calculationLogic": "Not String.IsNullOrEmpty(FleetID) AndAlso CType(FleetID, Int32) > 0"
+    },
+    {
+      "name": "IsTrackedInAis",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "description": "Custom property indicating if boat is tracked in AIS"
+    },
+    {
+      "name": "CurrentStatus",
+      "type": "String",
+      "access": "ReadOnly",
+      "isCalculated": true,
+      "description": "Current boat status from latest BoatMaintenanceLog",
+      "calculationSource": "BoatMaintenanceLogs collection (type 'Boat Status')"
+    },
+    {
+      "name": "PortFacility",
+      "type": "String",
+      "access": "ReadOnly",
+      "isCalculated": true,
+      "description": "Current port facility name from latest BoatMaintenanceLog",
+      "calculationSource": "BoatMaintenanceLogs collection (type 'Change Division/Facility')"
+    },
+    {
+      "name": "BoatRole",
+      "type": "String",
+      "access": "ReadOnly",
+      "isCalculated": true,
+      "description": "Current boat role from latest BoatMaintenanceLog",
+      "calculationSource": "BoatMaintenanceLogs collection (type 'Change Boat Role')"
+    },
+    {
+      "name": "ArrivalFleetID",
+      "type": "Int32",
+      "access": "WriteOnly",
+      "description": "Fleet ID for arrival calculations"
+    },
+    {
+      "name": "River",
+      "type": "String",
+      "access": "WriteOnly",
+      "description": "Current river location"
+    },
+    {
+      "name": "Mile",
+      "type": "String",
+      "access": "WriteOnly",
+      "description": "Current mile marker location"
+    },
+    {
+      "name": "InitialEnableOnboard",
+      "type": "Boolean",
+      "access": "Friend ReadOnly",
+      "description": "Original EnableOnboard value for change tracking"
+    },
+    {
+      "name": "InitialFleetID",
+      "type": "String",
+      "access": "Friend ReadOnly",
+      "description": "Original FleetID value for change tracking"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "MmsiRequired",
+      "property": "Mmsi",
+      "condition": "_IsTrackedInAis AndAlso String.IsNullOrEmpty(p_Mmsi)",
+      "message": "MMSI is required",
+      "severity": "Error",
+      "context": "When IsTrackedInAis is checked",
+      "modernEquivalent": "RuleFor(x => x.Mmsi).NotEmpty().When(x => x.IsTrackedInAis).WithMessage(\"MMSI is required\")"
+    },
+    {
+      "ruleName": "YearBuiltLength",
+      "property": "CurrentYearBuilt",
+      "condition": "p_CurrentYearBuilt.Trim.Length <> 0 And p_CurrentYearBuilt.Trim.Length <> 4",
+      "message": "Year Built must be exactly 4 characters.",
+      "severity": "Error",
+      "context": "When Year Built is provided",
+      "modernEquivalent": "RuleFor(x => x.CurrentYearBuilt).Length(4).When(x => !string.IsNullOrEmpty(x.CurrentYearBuilt)).WithMessage(\"Year Built must be exactly 4 characters.\")"
+    },
+    {
+      "ruleName": "ExternalWidthReasonable",
+      "property": "ExternalWidth",
+      "condition": "(p_ExternalWidth <> String.Empty) AndAlso (CType(p_ExternalWidth, Decimal) > 10000.0)",
+      "message": "[Value] is not a reasonable value for External Width",
+      "severity": "Error",
+      "context": "Always",
+      "modernEquivalent": "RuleFor(x => x.ExternalWidth).LessThanOrEqualTo(10000m).When(x => x.ExternalWidth.HasValue).WithMessage(\"{PropertyValue} is not a reasonable value for External Width\")"
+    },
+    {
+      "ruleName": "ExternalLengthReasonable",
+      "property": "ExternalLength",
+      "condition": "(p_ExternalLength <> String.Empty) AndAlso (CType(p_ExternalLength, Decimal) > 10000.0)",
+      "message": "[Value] is not a reasonable value for External Length",
+      "severity": "Error",
+      "context": "Always",
+      "modernEquivalent": "RuleFor(x => x.ExternalLength).LessThanOrEqualTo(10000m).When(x => x.ExternalLength.HasValue).WithMessage(\"{PropertyValue} is not a reasonable value for External Length\")"
+    },
+    {
+      "ruleName": "FleetBoatRequiredFields",
+      "property": "UscgNum, FleetID",
+      "condition": "_IsFleetBoat AndAlso (String.IsNullOrEmpty(p_UscgNum) OrElse String.IsNullOrEmpty(p_FleetID))",
+      "message": "Both USCG VIN and business unit selection required for business unit boat.",
+      "severity": "Error",
+      "context": "When IsFleetBoat is checked",
+      "modernEquivalent": "RuleFor(x => x.UscgNum).NotEmpty().When(x => x.IsFleetBoat).WithMessage(\"Both USCG VIN and business unit selection required for business unit boat.\");\nRuleFor(x => x.FleetID).NotEmpty().When(x => x.IsFleetBoat).WithMessage(\"Both USCG VIN and business unit selection required for business unit boat.\")"
+    },
+    {
+      "ruleName": "VendorConditionalRequired",
+      "property": "VendorID",
+      "condition": "String.IsNullOrEmpty(p_VendorID) OrElse (CInt(p_VendorID) <= 0) when Division = 'Outside Vendor'",
+      "message": "Vendor is required",
+      "severity": "Error",
+      "context": "When Division is 'Outside Vendor'",
+      "modernEquivalent": "RuleFor(x => x.VendorID).NotEmpty().GreaterThan(0).When(x => x.Division?.ToLower() == \"outside vendor\").WithMessage(\"Vendor is required\")"
+    },
+    {
+      "ruleName": "VendorMustBeBlank",
+      "property": "VendorID",
+      "condition": "Not String.IsNullOrEmpty(p_VendorID) when Division <> 'Outside Vendor'",
+      "message": "Vendor is required when Division is 'Outside Vendor', otherwise it must be blank.",
+      "severity": "Error",
+      "context": "When Division is not 'Outside Vendor'",
+      "modernEquivalent": "RuleFor(x => x.VendorID).Empty().When(x => x.Division?.ToLower() != \"outside vendor\").WithMessage(\"Vendor is required when Division is 'Outside Vendor', otherwise it must be blank.\")"
+    },
+    {
+      "ruleName": "UscgNumMaxLength",
+      "property": "UscgNum",
+      "condition": "p_UscgNum.Length > MaxLength.UscgNum",
+      "message": "USCG VIN exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "ContactNameMaxLength",
+      "property": "ContactName",
+      "condition": "p_ContactName.Length > MaxLength.ContactName",
+      "message": "ContactName exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "ContactPhoneMaxLength",
+      "property": "ContactPhone",
+      "condition": "p_ContactPhone.Length > MaxLength.ContactPhone",
+      "message": "ContactPhone exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "ContactEmailMaxLength",
+      "property": "ContactEmail",
+      "condition": "p_ContactEmail.Length > MaxLength.ContactEmail",
+      "message": "ContactEmail exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "GlAccountNumMaxLength",
+      "property": "GlAccountNum",
+      "condition": "p_GlAccountNum.Length > MaxLength.GlAccountNum",
+      "message": "G/L Code exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DirectionMaxLength",
+      "property": "Direction",
+      "condition": "p_Direction.Length > MaxLength.Direction",
+      "message": "Direction exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DivisionMaxLength",
+      "property": "Division",
+      "condition": "p_Division.Length > MaxLength.Division",
+      "message": "Division exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "EngineMakeMaxLength",
+      "property": "EngineMake",
+      "condition": "p_EngineMake.Length > MaxLength.EngineMake",
+      "message": "Engine make exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "EngineModelMaxLength",
+      "property": "EngineModel",
+      "condition": "p_EngineModel.Length > MaxLength.EngineModel",
+      "message": "Engine model exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DepartmentCodeMaxLength",
+      "property": "DepartmentCode",
+      "condition": "p_DepartmentCode.Length > MaxLength.DepartmentCode",
+      "message": "DepartmentCode exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "CallSignMaxLength",
+      "property": "CallSign",
+      "condition": "p_CallSign.Length > MaxLength.CallSign",
+      "message": "Call Sign exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "MmsiMaxLength",
+      "property": "Mmsi",
+      "condition": "p_Mmsi.Length > MaxLength.Mmsi",
+      "message": "MMSI exceeds maximum length of [MaxLength].",
+      "severity": "Error",
+      "context": "Always"
+    }
+  ],
+  "methods": {
+    "factory": [
+      {
+        "name": "NewBoatLocation",
+        "returnType": "BoatLocation",
+        "parameters": [],
+        "visibility": "Public Shared",
+        "description": "Creates a new BoatLocation instance with default values"
+      },
+      {
+        "name": "NewBoatLocationAsChild",
+        "returnType": "BoatLocation",
+        "parameters": [],
+        "visibility": "Friend Shared",
+        "description": "Creates a new BoatLocation instance as a child object"
+      },
+      {
+        "name": "GetBoatLocation",
+        "returnType": "BoatLocation",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "visibility": "Public Shared",
+        "description": "Retrieves an existing BoatLocation by ID"
+      },
+      {
+        "name": "GetBoatLocation",
+        "returnType": "BoatLocation",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          },
+          {
+            "name": "river",
+            "type": "String"
+          },
+          {
+            "name": "mile",
+            "type": "String"
+          }
+        ],
+        "visibility": "Friend Shared",
+        "description": "Retrieves an existing BoatLocation by ID with river and mile for BoatArrival initialization"
+      },
+      {
+        "name": "GetBoatLocationChild",
+        "returnType": "BoatLocation",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "visibility": "Friend Shared",
+        "description": "Retrieves an existing BoatLocation as a child object by ID"
+      },
+      {
+        "name": "GetBoatLocationChild",
+        "returnType": "BoatLocation",
+        "parameters": [
+          {
+            "name": "dr",
+            "type": "SafeDataReader"
+          }
+        ],
+        "visibility": "Friend Shared",
+        "description": "Retrieves an existing BoatLocation as a child object from data reader"
+      }
+    ],
+    "crud": [
+      {
+        "name": "Update",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "tr",
+            "type": "SqlTransaction"
+          },
+          {
+            "name": "parent",
+            "type": "BusinessLogicBase"
+          }
+        ],
+        "visibility": "Protected Friend Overrides",
+        "description": "Persists entity changes to database",
+        "notes": "Requires Preprocessing method to be called first"
+      },
+      {
+        "name": "DeleteBoatLocation",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "visibility": "Public Shared Shadows",
+        "description": "Throws exception - deletes must go through Location.DeleteLocation method",
+        "notes": "Method not supported; redirects to Location business object"
+      }
+    ],
+    "businessLogic": [
+      {
+        "name": "CalculateEstimatedArrivalDateTime",
+        "returnType": "String",
+        "parameters": [
+          {
+            "name": "originRiver",
+            "type": "String"
+          },
+          {
+            "name": "originMile",
+            "type": "String"
+          },
+          {
+            "name": "originDateTime",
+            "type": "String"
+          },
+          {
+            "name": "fleetID",
+            "type": "Int32"
+          }
+        ],
+        "visibility": "Public Shared",
+        "description": "Calculates estimated arrival date/time based on origin and fleet location"
+      },
+      {
+        "name": "CalculateEstimatedArrivalDateTime",
+        "returnType": "String",
+        "parameters": [
+          {
+            "name": "originRiver",
+            "type": "String"
+          },
+          {
+            "name": "originMile",
+            "type": "String"
+          },
+          {
+            "name": "originDateTime",
+            "type": "String"
+          },
+          {
+            "name": "destinationRiver",
+            "type": "String"
+          },
+          {
+            "name": "destinationMile",
+            "type": "String"
+          }
+        ],
+        "visibility": "Public Shared",
+        "description": "Calculates estimated arrival date/time based on origin and destination",
+        "notes": "Uses global setting BoatMilesPerDay for calculation"
+      },
+      {
+        "name": "Preprocessing",
+        "returnType": "void",
+        "parameters": [],
+        "visibility": "Friend",
+        "description": "Ensures pre-processing is completed before database transaction enrollment",
+        "notes": "Must be called before Update"
+      },
+      {
+        "name": "AddToNewCollection",
+        "returnType": "Integer",
+        "parameters": [
+          {
+            "name": "boatFuel",
+            "type": "BoatFuel"
+          },
+          {
+            "name": "parent",
+            "type": "BoatLocation"
+          }
+        ],
+        "visibility": "Public",
+        "description": "Adds a BoatFuel child to collection without loading existing records",
+        "notes": "Creates new collection if not already loaded; used by frmBoatPositions"
+      },
+      {
+        "name": "GetLatestChangeDivisionFacilityLog",
+        "returnType": "BoatMaintenanceLog",
+        "parameters": [],
+        "visibility": "Public",
+        "description": "Gets the latest Change Division/Facility maintenance log entry"
+      },
+      {
+        "name": "GetLatestChangeBoatRoleLog",
+        "returnType": "BoatMaintenanceLog",
+        "parameters": [],
+        "visibility": "Public",
+        "description": "Gets the latest Change Boat Role maintenance log entry"
+      },
+      {
+        "name": "MarkBoatLocationDirty",
+        "returnType": "void",
+        "parameters": [],
+        "visibility": "Public",
+        "description": "Marks the boat location as dirty to ensure database update"
+      }
+    ],
+    "initialization": [
+      {
+        "name": "Initialize",
+        "returnType": "void",
+        "parameters": [],
+        "visibility": "Public Overrides",
+        "description": "Initializes object with default values and user-friendly display names"
+      },
+      {
+        "name": "LoadProperties",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "dr",
+            "type": "SafeDataReader"
+          }
+        ],
+        "visibility": "Protected Overrides",
+        "description": "Loads property values from database reader and initializes derived properties"
+      }
+    ],
+    "validation": [
+      {
+        "name": "CheckBusinessRules",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "PropertyName",
+            "type": "String"
+          }
+        ],
+        "visibility": "Public Overrides",
+        "description": "Validates business rules for specified property or all properties if empty string"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "property": "Alert",
+      "relatedEntity": "Alert",
+      "type": "OneToOne",
+      "loadingStrategy": "Deferred",
+      "cascadeDelete": false,
+      "description": "Alert configuration for the boat location"
+    },
+    {
+      "property": "BoatArrival",
+      "relatedEntity": "BoatArrival",
+      "type": "OneToOne",
+      "loadingStrategy": "Deferred",
+      "cascadeDelete": false,
+      "description": "Boat arrival information for specific fleet",
+      "notes": "Requires ArrivalFleetID to be set; overloaded to accept fleetID parameter"
+    },
+    {
+      "property": "BoatHourses",
+      "relatedEntity": "BoatHourses",
+      "type": "OneToMany",
+      "loadingStrategy": "Deferred",
+      "cascadeDelete": true,
+      "description": "Collection of boat hours records"
+    },
+    {
+      "property": "BoatMaintenanceLogs",
+      "relatedEntity": "BoatMaintenanceLogs",
+      "type": "OneToMany",
+      "loadingStrategy": "Deferred",
+      "cascadeDelete": true,
+      "description": "Collection of maintenance log entries",
+      "notes": "Source for CurrentStatus, Division, PortFacility, BoatRole calculated properties"
+    },
+    {
+      "property": "BoatFuels",
+      "relatedEntity": "BoatFuels",
+      "type": "OneToMany",
+      "loadingStrategy": "Deferred",
+      "cascadeDelete": true,
+      "description": "Collection of boat fuel records",
+      "notes": "EnableOnboard value cascaded to all children when changed"
+    }
+  ],
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "LocationID",
+        "value": "0"
+      },
+      {
+        "property": "FleetID",
+        "value": "String.Empty"
+      },
+      {
+        "property": "UscgNum",
+        "value": "String.Empty"
+      },
+      {
+        "property": "IsAssistTug",
+        "value": "false"
+      },
+      {
+        "property": "EnableOnboard",
+        "value": "false"
+      },
+      {
+        "property": "StartOnboardRecovery",
+        "value": "false"
+      },
+      {
+        "property": "BoatUniqueIdentifer",
+        "value": "Guid.NewGuid"
+      },
+      {
+        "property": "ShowPositionOnPortal",
+        "value": "false"
+      },
+      {
+        "property": "TrackPositionInAis",
+        "value": "false"
+      },
+      {
+        "property": "CrewChangeMon",
+        "value": "false"
+      },
+      {
+        "property": "CrewChangeTue",
+        "value": "false"
+      },
+      {
+        "property": "CrewChangeWed",
+        "value": "false"
+      },
+      {
+        "property": "CrewChangeThu",
+        "value": "false"
+      },
+      {
+        "property": "CrewChangeFri",
+        "value": "false"
+      },
+      {
+        "property": "CrewChangeSat",
+        "value": "false"
+      },
+      {
+        "property": "CrewChangeSun",
+        "value": "false"
+      },
+      {
+        "property": "PositionUpdatedDateTime",
+        "value": "New SmartDate (SmartDateTimeFormat)"
+      },
+      {
+        "property": "OnboardRegistrationDateTime",
+        "value": "New SmartDate (SmartDateTimeFormat)"
+      },
+      {
+        "property": "_InitialPositionUpdatedDateTime",
+        "value": "Date.MinValue"
+      },
+      {
+        "property": "CurrentStatus",
+        "value": "String.Empty"
+      },
+      {
+        "property": "PortFacility",
+        "value": "String.Empty"
+      },
+      {
+        "property": "BoatRole",
+        "value": "String.Empty"
+      }
+    ],
+    "displayNameOverrides": [
+      {
+        "property": "FleetID",
+        "displayName": "Fleet"
+      },
+      {
+        "property": "UscgNum",
+        "displayName": "USCG VIN"
+      },
+      {
+        "property": "Mmsi",
+        "displayName": "MMSI"
+      },
+      {
+        "property": "CallSign",
+        "displayName": "Call Sign"
+      },
+      {
+        "property": "ExternalLength",
+        "displayName": "External Length"
+      },
+      {
+        "property": "ExternalWidth",
+        "displayName": "External Width"
+      },
+      {
+        "property": "CurrentYearBuilt",
+        "displayName": "Year Built"
+      },
+      {
+        "property": "EnableOnboard",
+        "displayName": "Onboard enabled"
+      },
+      {
+        "property": "GlAccountNum",
+        "displayName": "G/L Code"
+      },
+      {
+        "property": "VendorID",
+        "displayName": "Vendor"
+      },
+      {
+        "property": "EngineMake",
+        "displayName": "Engine make"
+      },
+      {
+        "property": "EngineModel",
+        "displayName": "Engine model"
+      },
+      {
+        "property": "MaxFuelLevel",
+        "displayName": "Max. fuel level"
+      },
+      {
+        "property": "LowFuelLevel",
+        "displayName": "Low fuel level"
+      },
+      {
+        "property": "CriticalFuelLevel",
+        "displayName": "Critical fuel level"
+      },
+      {
+        "property": "ShowPositionOnPortal",
+        "displayName": "Show position on Portal"
+      },
+      {
+        "property": "EngineTier",
+        "displayName": "Engine tier"
+      },
+      {
+        "property": "MaximumHeight",
+        "displayName": "Max. height"
+      },
+      {
+        "property": "MinimumHeight",
+        "displayName": "Min. height"
+      }
+    ]
+  },
+  "eventHandlers": [
+    {
+      "event": "ChangesApplied",
+      "handler": "BoatLocation_ChangesApplied",
+      "description": "Triggered when ApplyEdit is called; transfers updates from BoatMaintenanceLogs to parent properties",
+      "updatedProperties": [
+        "CurrentStatus",
+        "Division",
+        "PortFacility",
+        "PortFacilityID",
+        "BoatRole",
+        "BoatRoleID"
+      ]
+    }
+  ],
+  "storedProcedures": {
+    "select": "BoatLocationSelect",
+    "selectAll": "BoatLocationsSelect",
+    "insert": "BoatLocationInsert",
+    "update": "BoatLocationUpdate",
+    "delete": "BoatLocationDelete"
+  },
+  "securityContext": {
+    "functionalArea": "General",
+    "notes": "Security setting can be overridden in constructor if needed"
+  },
+  "auditFields": [
+    "FleetID",
+    "UscgNum",
+    "OwnerID",
+    "OperatorID",
+    "ContactName",
+    "ContactPhone",
+    "ContactEmail",
+    "Horsepower",
+    "ExternalLength",
+    "ExternalWidth",
+    "CurrentYearBuilt",
+    "LoadDraft",
+    "LightDraft",
+    "PositionUpdatedDateTime",
+    "ConvFmsLocationMasterID",
+    "IsAssistTug",
+    "EnableOnboard",
+    "GlAccountNum",
+    "Direction",
+    "Division",
+    "VendorID",
+    "EngineMake",
+    "EngineModel",
+    "MaxFuelLevel",
+    "LowFuelLevel",
+    "CriticalFuelLevel",
+    "MaximumHeight",
+    "MinimumHeight"
+  ],
+  "modernizationNotes": {
+    "dataAnnotations": [
+      "[Key] for LocationID",
+      "[Required(ErrorMessage = \"MMSI is required\")] with conditional logic for IsTrackedInAis",
+      "[StringLength(4, MinimumLength = 4, ErrorMessage = \"Year Built must be exactly 4 characters.\")] for CurrentYearBuilt",
+      "[Range(0, 10000, ErrorMessage = \"{0} is not a reasonable value\")] for ExternalWidth and ExternalLength",
+      "[StringLength(50)] for UscgNum, ContactName, ContactEmail, etc.",
+      "[Phone] for ContactPhone"
+    ],
+    "fluentValidation": "See businessRules[].modernEquivalent for FluentValidation mappings",
+    "entityFramework": {
+      "notes": "Convert to EF Core entity with navigation properties for related collections",
+      "relationships": "Alert (1:1), BoatArrival (1:1), BoatHourses (1:n), BoatMaintenanceLogs (1:n), BoatFuels (1:n)"
+    },
+    "architecturePatterns": {
+      "domainModel": "Convert to rich domain model with encapsulated business logic",
+      "repository": "Implement IBoatLocationRepository for data access abstraction",
+      "service": "Implement IBoatLocationService for business logic orchestration",
+      "referenceImplementations": [
+        "BargeOps.Admin.API: BoatLocation.cs domain model",
+        "BargeOps.Admin.API: IBoatLocationService.cs, BoatLocationService.cs",
+        "BargeOps.Crewing.API: Crewing.cs, Boat.cs for patterns"
+      ]
+    },
+    "calculatedProperties": {
+      "CurrentStatus": "Query BoatMaintenanceLogs for latest 'Boat Status' type entry",
+      "PortFacility": "Query BoatMaintenanceLogs for latest 'Change Division/Facility' type entry",
+      "BoatRole": "Query BoatMaintenanceLogs for latest 'Change Boat Role' type entry",
+      "IsFleetBoat": "Simple derived property from FleetID"
+    },
+    "complexBehaviors": [
+      "EnableOnboard change cascades to all BoatFuels children",
+      "PositionUpdatedDateTime change triggers BoatArrival recalculation",
+      "Division, PortFacility, BoatRole updated from BoatMaintenanceLogs via ChangesApplied event",
+      "Preprocessing required before Update transaction"
+    ]
+  }
+}

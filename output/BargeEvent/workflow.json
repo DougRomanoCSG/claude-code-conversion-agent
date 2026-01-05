@@ -1,0 +1,1440 @@
+{
+  "entity": "BargeEvent",
+  "formName": "frmBargeEvent",
+  "formType": "DetailEdit",
+  "searchFormName": "frmBargeEventSearch",
+  "subsystem": "SubSystem.frmTicketSearch",
+  "implements": "IBaseDetailEdit",
+  "primaryWorkflows": [
+    {
+      "name": "SearchAndEdit",
+      "description": "User searches for barge events and edits an existing event",
+      "steps": [
+        {
+          "step": 1,
+          "action": "EnterSearchCriteria",
+          "form": "frmBargeEventSearch",
+          "controls": [
+            "cboEventTypeID",
+            "txtEventRateID",
+            "cboEventCustomerID",
+            "cboFromLocationID",
+            "cboToLocationID",
+            "cboFleetBoatID",
+            "dtStartDateSearch",
+            "dtEndDateSearch",
+            "chkIncludeVoided",
+            "txtContractNumber",
+            "txtBargeNum",
+            "cboTicketCustomerID",
+            "cboFreightCustomerID"
+          ],
+          "validation": "At least one search criteria must be entered"
+        },
+        {
+          "step": 2,
+          "action": "ClickFind",
+          "button": "btnFind",
+          "method": "RefreshList(True)",
+          "businessLogic": "Lists.BargeEventSearch.GetList(...)",
+          "result": "Results displayed in grdSearch with voided events shown with strikethrough"
+        },
+        {
+          "step": 3,
+          "action": "SelectEvent",
+          "control": "grdSearch",
+          "trigger": "Row selection or double-click"
+        },
+        {
+          "step": 4,
+          "action": "OpenDetailForm",
+          "method": "ItemModify()",
+          "navigation": "Opens frmBargeEvent in modal dialog",
+          "parameters": "BargeID, TicketID, TicketEventID",
+          "mode": "Edit"
+        },
+        {
+          "step": 5,
+          "action": "EditEventDetails",
+          "form": "frmBargeEvent",
+          "tabs": [
+            "Barge Details",
+            "Billing",
+            "Freight Billing",
+            "Demurrage Billing",
+            "Billing Audit"
+          ],
+          "description": "User modifies event and barge details across multiple tabs"
+        },
+        {
+          "step": 6,
+          "action": "SaveChanges",
+          "button": "btnSubmit",
+          "method": "SubmitNoRefreshClick()",
+          "businessLogic": "_BargeEvent.ApplyEdit()",
+          "validation": "IsValid() checks before save",
+          "notifications": [
+            "Main.Notifier.Updated(SubSystem.frmTicketSearch)",
+            "Main.Notifier.Updated(SubSystem.frmBargeSearch)",
+            "Main.Notifier.Updated(SubSystem.frmBargeEventSearch)"
+          ],
+          "result": "Form closes and search results refresh"
+        }
+      ]
+    },
+    {
+      "name": "CreateNewMultiBargeEvent",
+      "description": "User creates a new event for multiple barges",
+      "steps": [
+        {
+          "step": 1,
+          "action": "LaunchNewEventForm",
+          "method": "Initialize(selectedFleetID, menuItem, commaDelimitedBargeNums, isMultiShiftComplete, ignoreOnboardOrderShifts)",
+          "businessLogic": "BargeEvent.NewBargeEvent(...)",
+          "description": "Form loads with multiple barges pre-selected"
+        },
+        {
+          "step": 2,
+          "action": "EnterEventDetails",
+          "controls": [
+            "cboEventTypeID",
+            "cboCustomerID",
+            "cboFromLocationID",
+            "cboToLocationID",
+            "dtStartDateTime",
+            "dtCompleteDateTime",
+            "cboFleetBoatID",
+            "txtLoadUnloadTons",
+            "cboCommodityID"
+          ],
+          "validation": "EventType, StartDateTime, at least one barge required"
+        },
+        {
+          "step": 3,
+          "action": "ManageBargeList",
+          "subActions": [
+            {
+              "action": "AddBargesToList",
+              "button": "btnAddToList or toolbar:c_BtnKeyAddToList",
+              "method": "ItemAdd()",
+              "control": "txtBargeNumbers",
+              "description": "Enter comma-delimited barge numbers to add multiple barges"
+            },
+            {
+              "action": "RemoveBargesFromList",
+              "button": "toolbar:c_BtnKeyRemoveFromList",
+              "method": "ItemRemove()",
+              "confirmation": "Yes/No dialog before removal"
+            },
+            {
+              "action": "ModifyBargeDetails",
+              "button": "toolbar:c_BtnKeyModifyDetails",
+              "method": "ItemModify(grdBargeList)",
+              "description": "Opens detail panel to edit selected barge(s) properties",
+              "enabledWhen": "One or more barges selected in grid"
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "action": "EditBillingDetails",
+          "tabs": [
+            "c_TabBilling",
+            "c_TabFreightBilling",
+            "c_TabDemurrageBilling"
+          ],
+          "description": "Configure rates, amounts, and billing options",
+          "accessLevel": "AccessLevelBilling"
+        },
+        {
+          "step": 5,
+          "action": "SaveNewEvent",
+          "button": "btnSubmit",
+          "method": "SubmitNoRefreshClick()",
+          "validation": [
+            "Barges.Count > 0",
+            "IsValid() checks",
+            "Conditional dialogs based on event type"
+          ],
+          "result": "Event saved, notifications sent to multiple subsystems"
+        }
+      ]
+    },
+    {
+      "name": "EditBargeDetailsInEvent",
+      "description": "User modifies details for one or more barges within an event",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectBargesInGrid",
+          "control": "grdBargeList",
+          "description": "Select one or more barges using multi-row selection"
+        },
+        {
+          "step": 2,
+          "action": "OpenModifyDetails",
+          "button": "toolbar:c_BtnKeyModifyDetails",
+          "method": "ItemModify(grdBargeList)",
+          "state": "IsEditingChild = True",
+          "description": "Opens detail panel tabs for editing barge-specific properties"
+        },
+        {
+          "step": 3,
+          "action": "EditDetailsAndBilling",
+          "tabs": [
+            "tpgBargeDetails (Barge-specific details)",
+            "tpgBilling (Billing rates/amounts)"
+          ],
+          "managedBy": "ModifyBargeDetails object",
+          "description": "Edit properties like commodity, cover type, draft, rake direction, billing rates"
+        },
+        {
+          "step": 4,
+          "action": "SaveDetailChanges",
+          "button": "btnDetailSet",
+          "method": "TransferModifyBargeDetails() then _BargeEvent.ApplyEdit()",
+          "validation": "_ModifyBargeDetails.IsValid(_BargeEvent.BargesInEditBrokenRulesCollection)",
+          "result": "Detail panel closes, grid refreshes, _ModifyBargeDetails = Nothing"
+        },
+        {
+          "step": 5,
+          "action": "CancelDetailChanges",
+          "button": "btnDetailCancel",
+          "confirmation": "If IsDirty, Yes/No dialog to confirm cancel",
+          "method": "_BargeEvent.CancelEdit()",
+          "result": "Changes discarded, detail panel closes, _ModifyBargeDetails = Nothing"
+        }
+      ]
+    },
+    {
+      "name": "ManageBargePositions",
+      "description": "User sets tier positions for barges being shifted",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenBargePositions",
+          "button": "toolbar:c_BtnKeyBargePositions",
+          "method": "SetBargePositions()",
+          "condition": "Event is Shift Complete and ToLocation is not fleet facility",
+          "description": "Opens BargePositions form to set workspace tier positions"
+        },
+        {
+          "step": 2,
+          "action": "SetTierPositions",
+          "form": "frmBargePositions (modal)",
+          "description": "User assigns tier/position for each barge in workspace"
+        },
+        {
+          "step": 3,
+          "action": "SavePositions",
+          "savePoint": "On Submit of main form",
+          "method": "UpdateBargePositions()",
+          "businessLogic": "_BargePositions.ApplyEdit() and .Save()",
+          "validation": "Validates no duplicate positions, shows errors if conflicts exist",
+          "result": "If errors, user can fix or submit again to leave barges in workspace"
+        }
+      ]
+    },
+    {
+      "name": "MarkEventsForRebill",
+      "description": "User marks or unmarks events for rebilling from search grid",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectMultipleEvents",
+          "control": "grdSearch (frmBargeEventSearch)",
+          "description": "Select one or more event rows using extended selection"
+        },
+        {
+          "step": 2,
+          "action": "OpenContextMenu",
+          "trigger": "Right-click on grid",
+          "options": [
+            "MarkForRebill",
+            "UnMarkForRebill"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "ConfirmRebillOperation",
+          "confirmation": "Yes/No warning dialog",
+          "method": "MarkForRebill() or UnMarkForRebill()"
+        },
+        {
+          "step": 4,
+          "action": "ProcessTickets",
+          "method": "ProcessTickets(results, brknRules, isRebill)",
+          "businessLogic": "Ticket.UpdateRebillForTicketEvents(ticketEventIDs, isRebill, results)",
+          "description": "Groups selected events by TicketID and updates rebill status"
+        },
+        {
+          "step": 5,
+          "action": "ShowResults",
+          "dialog": "frmTextEditor or BrokenRules form",
+          "result": "Search grid refreshes with RefreshList(False)"
+        }
+      ]
+    },
+    {
+      "name": "CreateNewBarge",
+      "description": "User creates a new barge from within the event form",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickNewBarge",
+          "button": "toolbar:c_BtnKeyNewBarge",
+          "method": "EditNewBarge()"
+        },
+        {
+          "step": 2,
+          "action": "OpenBargeDetailForm",
+          "form": "frmBargeDetail (modal)",
+          "businessLogic": "Barge.NewBarge(_SelectedFleetID)",
+          "description": "Opens barge master form to create new barge record"
+        },
+        {
+          "step": 3,
+          "action": "SaveNewBarge",
+          "result": "On OK, barge number captured and added to txtBargeNumbers control"
+        },
+        {
+          "step": 4,
+          "action": "AddBargeToEvent",
+          "method": "ItemAdd() called automatically",
+          "description": "Newly created barge is automatically added to event"
+        }
+      ]
+    },
+    {
+      "name": "ModifyExistingBarge",
+      "description": "User opens and edits the barge master record",
+      "steps": [
+        {
+          "step": 1,
+          "action": "SelectSingleBarge",
+          "control": "grdBargeList",
+          "description": "Exactly one barge must be selected"
+        },
+        {
+          "step": 2,
+          "action": "ClickModifyBarge",
+          "button": "toolbar:c_BtnKeyModifyBarge",
+          "method": "ModifyBarge()"
+        },
+        {
+          "step": 3,
+          "action": "OpenBargeDetailForm",
+          "form": "frmBargeDetail (modal)",
+          "businessLogic": "Barge.GetBarge(bargeNum, _SelectedFleetID)",
+          "description": "Opens barge master form for editing"
+        },
+        {
+          "step": 4,
+          "action": "SaveBargeChanges",
+          "result": "On OK, barge is removed and re-added to collection to refresh data",
+          "method": "_BargeEvent.RemoveAndAddModifiedBarge()",
+          "refresh": "LoadControlsForBargeEvent() and RefreshList(False)"
+        }
+      ]
+    },
+    {
+      "name": "EnterTonnages",
+      "description": "Quick entry of tonnage/quantity for all barges in event",
+      "steps": [
+        {
+          "step": 1,
+          "action": "OpenEnterTonnages",
+          "button": "toolbar:c_BtnKeyEnterTonnages",
+          "method": "EnterTonnages()",
+          "condition": "Terminal license active and EnableCargoOnBargeEvent setting enabled"
+        },
+        {
+          "step": 2,
+          "action": "EnterTonnagesForBarges",
+          "form": "frmEnterTonnages (modal)",
+          "description": "Provides grid for quick tonnage entry across all barges"
+        },
+        {
+          "step": 3,
+          "action": "SaveTonnages",
+          "result": "Changes saved to _BargeEvent object, form closes"
+        }
+      ]
+    },
+    {
+      "name": "ManageBoats",
+      "description": "User opens boat search to view/manage boats",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickManageBoats",
+          "button": "toolbar:c_BtnKeyManageBoats",
+          "method": "ManageBoats()"
+        },
+        {
+          "step": 2,
+          "action": "OpenBoatSearch",
+          "form": "frmModalSearch with SubSystem.frmBoatSearch (modal)",
+          "description": "Opens boat search form in modal dialog"
+        },
+        {
+          "step": 3,
+          "action": "ViewBoatDetails",
+          "description": "User can search and view boat records"
+        }
+      ]
+    },
+    {
+      "name": "ViewDelays",
+      "description": "User views or manages event delays",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickDelays",
+          "button": "btnDelays",
+          "method": "btnDelays_Click"
+        },
+        {
+          "step": 2,
+          "action": "OpenDelaysForm",
+          "form": "frmBoatEventDelays (modal)",
+          "businessLogic": "Passes BargeEvent object",
+          "description": "Shows/manages delay records for the event"
+        }
+      ]
+    },
+    {
+      "name": "ViewDraftDetails",
+      "description": "User views draft survey details for single barge",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickDraftDetail",
+          "button": "btnDraftDetail",
+          "condition": "Single barge selected AND not Draft Survey event type",
+          "method": "btnDraftDetail_Click"
+        },
+        {
+          "step": 2,
+          "action": "OpenDraftForm",
+          "form": "frmBargeDraft (modal)",
+          "businessLogic": "Draft.NewDraft with _ModifyBargeDetails data",
+          "description": "Shows/edits draft measurements for barge"
+        },
+        {
+          "step": 3,
+          "action": "SaveDraftChanges",
+          "result": "Draft values captured back to _ModifyBargeDetails object"
+        }
+      ]
+    },
+    {
+      "name": "ViewSurveyDraftDetail",
+      "description": "User views full draft survey detail",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickSurveyDraftDetail",
+          "button": "btnSurveyDraftDetail",
+          "method": "btnSurveyDraftDetail_Click"
+        },
+        {
+          "step": 2,
+          "action": "OpenDraftForm",
+          "form": "frmBargeDraft (modal)",
+          "businessLogic": "Uses _BargeEvent draft data",
+          "description": "Shows/edits full draft survey information"
+        },
+        {
+          "step": 3,
+          "action": "SaveDraftChanges",
+          "result": "Draft values captured back to _BargeEvent object"
+        }
+      ]
+    },
+    {
+      "name": "ViewEventBillingDetail",
+      "description": "User views detailed billing information",
+      "steps": [
+        {
+          "step": 1,
+          "action": "ClickEventBillingDetail",
+          "button": "btnEventBillingDetail",
+          "method": "btnEventBillingDetail_Click",
+          "condition": "_ModifyBargeDetails must be active (in edit detail mode)"
+        },
+        {
+          "step": 2,
+          "action": "OpenBillingDetailForm",
+          "form": "frmBargeEventBillingDetail (modal)",
+          "parameters": "_ModifyBargeDetails, ChargeType, RateType",
+          "description": "Shows detailed billing calculations and breakdown"
+        }
+      ]
+    },
+    {
+      "name": "CreateOnboardOrder",
+      "description": "User creates onboard order when saving new event",
+      "steps": [
+        {
+          "step": 1,
+          "action": "CheckCreateOnboardOrder",
+          "control": "chkCreateOnboardOrder",
+          "condition": "Onboard license active and specific event types",
+          "description": "User opts to create onboard order on submit"
+        },
+        {
+          "step": 2,
+          "action": "SaveEvent",
+          "button": "btnSubmit",
+          "description": "Event saves successfully"
+        },
+        {
+          "step": 3,
+          "action": "HideFormAndShowOnboardOrder",
+          "form": "frmOnboardOrderDetail (modal)",
+          "businessLogic": "OnboardOrder.NewOnboardOrder(...)",
+          "description": "Main form hidden, onboard order form shown to prevent confusion"
+        },
+        {
+          "step": 4,
+          "action": "CompleteOnboardOrder",
+          "result": "User completes onboard order, then main event form closes"
+        }
+      ]
+    }
+  ],
+  "formStates": [
+    {
+      "state": "Initial_Search",
+      "form": "frmBargeEventSearch",
+      "description": "Search form first loaded",
+      "gridState": "Empty",
+      "enabledControls": [
+        "All search criteria fields",
+        "btnFind",
+        "btnReset"
+      ],
+      "focusControl": "cboEventTypeID"
+    },
+    {
+      "state": "ResultsDisplayed_Search",
+      "form": "frmBargeEventSearch",
+      "description": "Search results shown in grid",
+      "gridState": "Populated with BargeEventSearch results",
+      "enabledControls": [
+        "All search fields",
+        "btnFind",
+        "btnReset",
+        "Grid row selection",
+        "Context menu (MarkForRebill/UnMarkForRebill)"
+      ],
+      "formatting": "Voided events display with strikethrough and gray text"
+    },
+    {
+      "state": "NewEvent_DetailForm",
+      "form": "frmBargeEvent",
+      "description": "Detail form loaded for new event creation",
+      "businessObject": "BargeEvent.NewBargeEvent(...)",
+      "enabledControls": [
+        "All event fields editable",
+        "btnSubmit",
+        "btnCancel",
+        "btnAddToList",
+        "All toolbar buttons based on AccessLevelNonBilling"
+      ],
+      "tabsVisible": [
+        "Operations Management",
+        "Billing (if AccessLevelBilling permits)"
+      ],
+      "isEditingChild": false
+    },
+    {
+      "state": "EditEvent_DetailForm",
+      "form": "frmBargeEvent",
+      "description": "Detail form loaded for editing existing event",
+      "businessObject": "BargeEvent.GetBargeEvent(...)",
+      "stateFlags": {
+        "_IsVoidOnLoad": "Set based on event void status",
+        "_IsClosedOnLoad": "Set based on event closed status",
+        "_IsBillable": "Set based on event billable status"
+      },
+      "enabledControls": "Based on void/closed status and access level",
+      "conditionalBehavior": [
+        "Void events: most fields readonly",
+        "Closed events: certain fields locked",
+        "Freight license: additional fields visible"
+      ]
+    },
+    {
+      "state": "EditingBargeDetails",
+      "form": "frmBargeEvent",
+      "description": "User is editing barge-specific details in detail panel",
+      "isEditingChild": true,
+      "managedBy": "_ModifyBargeDetails object",
+      "enabledControls": [
+        "Detail tabs (tpgBargeDetails, tpgBilling)",
+        "btnDetailSet",
+        "btnDetailCancel",
+        "Detail-specific fields based on selections"
+      ],
+      "disabledControls": [
+        "Main form Submit/Cancel buttons",
+        "Event-level fields",
+        "Barge list grid (except for viewing)",
+        "Toolbar buttons disabled"
+      ],
+      "tabsVisible": [
+        "tpgBargeDetails",
+        "tpgBilling"
+      ]
+    },
+    {
+      "state": "Saving_DetailForm",
+      "form": "frmBargeEvent",
+      "description": "Form is in process of saving changes",
+      "method": "SubmitNoRefreshClick()",
+      "validations": [
+        "Barges.Count > 0",
+        "_BargeEvent.IsValid()",
+        "IsOkToSaveDialogs() - conditional prompts",
+        "UpdateBargePositions() - if applicable"
+      ],
+      "businessLogic": "_BargeEvent.ApplyEdit()",
+      "notifications": [
+        "Main.Notifier.Updated(SubSystem.frmTicketSearch)",
+        "Main.Notifier.Updated(SubSystem.frmBargeSearch)",
+        "Main.Notifier.Updated(SubSystem.frmBargeEventSearch)"
+      ],
+      "postSave": [
+        "DialogAutoAddedCpToUnloadBarges (if multi-shift complete)",
+        "Create Onboard Order (if chkCreateOnboardOrder.Checked)"
+      ]
+    },
+    {
+      "state": "Cancelled_DetailForm",
+      "form": "frmBargeEvent",
+      "description": "User cancelled changes",
+      "method": "CancelClick()",
+      "confirmation": "If IsDirty, shows Yes/No dialog",
+      "businessLogic": "_BargeEvent.CancelEdit()",
+      "result": "Form closes without saving"
+    },
+    {
+      "state": "MultiShiftComplete_Initial",
+      "form": "frmBargeEvent",
+      "description": "Form launched for multi-shift complete operation",
+      "stateFlags": {
+        "_IsMultiShiftComplete": true,
+        "_IgnoreOnboardOrderShifts": "May be true"
+      },
+      "specialHandling": [
+        "Multiple barges with potentially different FromLocationIDs allowed",
+        "If ToLocationID mismatch: cleared and user warned on Shown event",
+        "If multiple default facilities: user warned to verify facility"
+      ],
+      "autoFeatures": [
+        "chkAutoCreateUnloadCpEvents available for checked barges"
+      ]
+    }
+  ],
+  "navigationPatterns": [
+    {
+      "from": "frmBargeEventSearch",
+      "to": "frmBargeEvent",
+      "trigger": "ItemModify() - via double-click or Edit button",
+      "method": "frmBargeEvent.Initialize(_SelectedFleetID, bargeID, ticketID, ticketEventID)",
+      "dataPassed": {
+        "BargeID": "From selected grid row",
+        "TicketID": "From selected grid row",
+        "TicketEventID": "From selected grid row"
+      },
+      "mode": "Edit existing event",
+      "modalDialog": true
+    },
+    {
+      "from": "frmMain menu",
+      "to": "frmBargeEvent",
+      "trigger": "New event menu item selected",
+      "method": "frmBargeEvent.Initialize(selectedFleetID, menuItem, commaDelimitedBargeNums, isMultiShiftComplete, ignoreOnboardOrderShifts)",
+      "dataPassed": {
+        "selectedFleetID": "Current fleet",
+        "menuItem": "EventMenuItem enum determining event type",
+        "commaDelimitedBargeNums": "Pre-selected barge numbers",
+        "isMultiShiftComplete": "Boolean flag",
+        "ignoreOnboardOrderShifts": "Boolean flag"
+      },
+      "mode": "Create new event",
+      "modalDialog": true
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmBargeDetail",
+      "trigger": "toolbar:c_BtnKeyNewBarge or toolbar:c_BtnKeyModifyBarge",
+      "method": "EditNewBarge() or ModifyBarge()",
+      "dataPassed": {
+        "forNew": "Barge.NewBarge(_SelectedFleetID)",
+        "forEdit": "Barge.GetBarge(bargeNum, _SelectedFleetID)"
+      },
+      "modalDialog": true,
+      "onReturn": "If OK, barge added/refreshed in event"
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmBoatEventDelays",
+      "trigger": "btnDelays",
+      "method": "btnDelays_Click",
+      "dataPassed": "BargeEvent business object",
+      "modalDialog": true
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmBargeDraft",
+      "trigger": "btnDraftDetail or btnSurveyDraftDetail",
+      "method": "btnDraftDetail_Click or btnSurveyDraftDetail_Click",
+      "dataPassed": "Draft.NewDraft with draft measurements",
+      "modalDialog": true,
+      "onReturn": "Draft values captured back to business object"
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmBargeEventBillingDetail",
+      "trigger": "btnEventBillingDetail",
+      "method": "btnEventBillingDetail_Click",
+      "dataPassed": {
+        "ModifyBargeDetails": "_ModifyBargeDetails object",
+        "ChargeType": "Current charge type selection",
+        "RateType": "Current rate type"
+      },
+      "modalDialog": true
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmEnterTonnages",
+      "trigger": "toolbar:c_BtnKeyEnterTonnages",
+      "method": "EnterTonnages()",
+      "dataPassed": "_BargeEvent object",
+      "modalDialog": true,
+      "condition": "Terminal license and EnableCargoOnBargeEvent"
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmModalSearch (frmBoatSearch)",
+      "trigger": "toolbar:c_BtnKeyManageBoats",
+      "method": "ManageBoats()",
+      "dataPassed": "SubSystem.frmBoatSearch, _SelectedFleetID",
+      "modalDialog": true
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmBargePositions",
+      "trigger": "toolbar:c_BtnKeyBargePositions",
+      "method": "SetBargePositions()",
+      "dataPassed": "_BargePositions object",
+      "modalDialog": true,
+      "onReturn": "Position data saved on main form Submit via UpdateBargePositions()"
+    },
+    {
+      "from": "frmBargeEvent",
+      "to": "frmTextEditor",
+      "trigger": "btnNoteEdit or btnVoidNoteEdit",
+      "method": "btnNoteEdit_Click or btnVoidNoteEdit_Click",
+      "dataPassed": {
+        "text": "Current note text",
+        "title": "Note editor title",
+        "accessLevel": "ControlAuthorization.GetAccessLevelForFunctionalArea()",
+        "maxLength": "Field max length"
+      },
+      "modalDialog": true,
+      "onReturn": "Note text updated if not cancelled"
+    },
+    {
+      "from": "frmBargeEvent (on save)",
+      "to": "frmOnboardOrderDetail",
+      "trigger": "btnSubmit with chkCreateOnboardOrder.Checked",
+      "method": "CreateOnboardOrderForBargeEvent()",
+      "dataPassed": "OnboardOrder.NewOnboardOrder(...)",
+      "modalDialog": true,
+      "specialBehavior": "Main form hidden during onboard order creation to prevent confusion"
+    }
+  ],
+  "stateManagement": {
+    "sessionVariables": [
+      {
+        "variable": "_BargeEvent",
+        "type": "BargeEvent",
+        "description": "Main business object managing the event and collection of barges"
+      },
+      {
+        "variable": "_ModifyBargeDetails",
+        "type": "ModifyBargeDetails (WithEvents)",
+        "description": "Manages editing of barge-specific details when in IsEditingChild mode",
+        "lifecycle": "Created when entering detail edit mode, set to Nothing when exiting"
+      },
+      {
+        "variable": "_BargePositions",
+        "type": "BargePositions",
+        "description": "Manages tier positions for barges in workspace",
+        "persistedUntil": "Save via UpdateBargePositions() or cancelled"
+      },
+      {
+        "variable": "_SelectedFleetID",
+        "type": "Int32",
+        "description": "Currently selected fleet ID, passed to all child forms"
+      },
+      {
+        "variable": "_IsVoidOnLoad",
+        "type": "Boolean",
+        "description": "Cached state whether event was void when form loaded",
+        "purpose": "Controls field editability and toolbar button states"
+      },
+      {
+        "variable": "_IsClosedOnLoad",
+        "type": "Boolean",
+        "description": "Cached state whether event was closed when form loaded",
+        "purpose": "Controls field editability"
+      },
+      {
+        "variable": "_IsBillable",
+        "type": "Boolean",
+        "description": "Whether event is billable",
+        "purpose": "Controls billing tab visibility and calculations"
+      },
+      {
+        "variable": "_IsLoadingEvents",
+        "type": "Boolean",
+        "description": "Flag set during LoadControlsForBargeEvent to prevent recursive calls",
+        "purpose": "Prevents event handlers from firing during form load"
+      },
+      {
+        "variable": "_IsLoadingBargeDetail",
+        "type": "Boolean",
+        "description": "Flag set during detail panel loading",
+        "purpose": "Prevents event handlers from firing during detail load"
+      },
+      {
+        "variable": "_IsLoadingBilling",
+        "type": "Boolean",
+        "description": "Flag set during billing panel refresh",
+        "purpose": "Prevents event handlers from firing during billing refresh"
+      },
+      {
+        "variable": "_IsMultiShiftComplete",
+        "type": "Boolean",
+        "description": "Flag indicating form launched as multi-shift complete",
+        "purpose": "Changes FromLocation behavior, enables auto-create unload CP events"
+      },
+      {
+        "variable": "_IgnoreOnboardOrderShifts",
+        "type": "Boolean",
+        "description": "Flag to ignore onboard order shifts during initialization"
+      },
+      {
+        "variable": "_IsMismatchForMultiShiftToLocationID",
+        "type": "Boolean",
+        "description": "Set when multi-shift barges have different ToLocationIDs",
+        "purpose": "Triggers warning dialog on form Shown event"
+      },
+      {
+        "variable": "_EventTypeEnumVal",
+        "type": "EventTypes enum",
+        "description": "Cached event type enum value",
+        "purpose": "Controls conditional field visibility and validation"
+      },
+      {
+        "variable": "_EventStatus",
+        "type": "EventStatus enum",
+        "description": "Cached event status (Order, Start, Complete)",
+        "purpose": "Controls field requirements and business logic"
+      }
+    ],
+    "licenseFlags": [
+      {
+        "flag": "_IsTerminalActive",
+        "license": "Terminal",
+        "controls": [
+          "toolbar:c_BtnKeyEnterTonnages visibility",
+          "Cargo-related fields"
+        ]
+      },
+      {
+        "flag": "_IsOnboardActive",
+        "license": "Onboard",
+        "controls": [
+          "chkCreateOnboardOrder visibility",
+          "Onboard order integration features"
+        ]
+      },
+      {
+        "flag": "_IsTowingActive",
+        "license": "Towing",
+        "controls": "Towing-specific operations"
+      },
+      {
+        "flag": "_IsFreightActive",
+        "license": "Freight",
+        "controls": [
+          "Freight billing tab visibility",
+          "Freight customer fields",
+          "Contract number fields",
+          "Freight rate calculations"
+        ]
+      }
+    ],
+    "expandableComboTracking": [
+      {
+        "variable": "_cboFromLocationIDContents",
+        "type": "LocationComboType enum",
+        "description": "Tracks what type of list is loaded in FromLocationID combo",
+        "values": [
+          "Invalid",
+          "ExternalBoat",
+          "Facility",
+          "FleetBoat"
+        ],
+        "purpose": "Determines which list to toggle when user clicks column header"
+      },
+      {
+        "variable": "_cboToLocationIDContents",
+        "type": "LocationComboType enum",
+        "description": "Tracks what type of list is loaded in ToLocationID combo",
+        "purpose": "Determines which list to toggle when user clicks column header"
+      }
+    ],
+    "accessLevels": [
+      {
+        "property": "AccessLevelNonBilling",
+        "functionalArea": "tpgBargeDetails",
+        "description": "Access level for non-billing operations and fields",
+        "cached": true
+      },
+      {
+        "property": "AccessLevelBilling",
+        "functionalArea": "tpgBilling",
+        "description": "Access level for billing tab operations",
+        "cached": true,
+        "note": "Can differ from non-billing access level"
+      }
+    ]
+  },
+  "eventHandlerChains": [
+    {
+      "trigger": "btnSubmit_Click",
+      "chain": [
+        "SubmitNoRefreshClick()",
+        "ClearUnusedEventFields()",
+        "IsOkToSaveDialogs() - conditional user prompts",
+        "MyBase.SubmitNoRefreshClick(_BargeEvent, True)",
+        "_BargeEvent.IsValid()",
+        "_BargeEvent.ApplyEdit()",
+        "DialogAutoAddedCpToUnloadBarges() - if multi-shift",
+        "Main.Notifier.Updated(SubSystem.frmTicketSearch)",
+        "Main.Notifier.Updated(SubSystem.frmBargeSearch)",
+        "Main.Notifier.Updated(SubSystem.frmBargeEventSearch)",
+        "CreateOnboardOrderForBargeEvent() - if chkCreateOnboardOrder",
+        "UpdateBargePositions() - if _BargePositions set",
+        "Me.Close()"
+      ]
+    },
+    {
+      "trigger": "btnCancel_Click",
+      "chain": [
+        "CancelClick()",
+        "Confirmation dialog if IsDirty",
+        "_BargeEvent.CancelEdit()",
+        "ClearControls()",
+        "EnableDisableControls(False)",
+        "RefreshList(False)",
+        "Me.Close() via base form"
+      ]
+    },
+    {
+      "trigger": "btnDetailSet_Click",
+      "chain": [
+        "ClearUnusedDetailFields()",
+        "TransferModifyBargeDetails() - copies UI to business object",
+        "BoldBargesInTowCountLabel()",
+        "_ModifyBargeDetails.IsValid(_BargeEvent.BargesInEditBrokenRulesCollection)",
+        "_BargeEvent.ApplyEdit()",
+        "ClearControls()",
+        "EnableDisableControls(False)",
+        "RefreshList(False)",
+        "_ModifyBargeDetails = Nothing"
+      ]
+    },
+    {
+      "trigger": "btnDetailCancel_Click",
+      "chain": [
+        "Confirmation dialog if _ModifyBargeDetails.IsDirty",
+        "_BargeEvent.CancelEdit()",
+        "ClearControls()",
+        "EnableDisableControls(False)",
+        "RefreshList(False)",
+        "_ModifyBargeDetails = Nothing"
+      ]
+    },
+    {
+      "trigger": "ItemModify(grdBargeList)",
+      "chain": [
+        "Check IsEditingChild (exit if true)",
+        "EnableDisableControls(True) - enter edit mode",
+        "tabBargeDetail.Tabs visible/enabled based on conditions",
+        "_ModifyBargeDetails = New ModifyBargeDetails(_BargeEvent.EventTypeID)",
+        "LoadModifyBargeDetails() - populate object from UI",
+        "Populate combos with current values",
+        "LoadBillingControls() - populate billing panel",
+        "IsEditingChild = True"
+      ]
+    },
+    {
+      "trigger": "ItemAdd() - Add barges to event",
+      "chain": [
+        "Parse txtBargeNumbers.Text (comma-delimited)",
+        "Loop: _BargeEvent.AddToList(bargeNum, _SelectedFleetID, _IgnoreOnboardOrderShifts)",
+        "LoadControlsForBargeEvent() - refresh event fields",
+        "RefreshList(True) - refresh grid",
+        "Display message if unknown barges not added"
+      ]
+    },
+    {
+      "trigger": "ItemRemove() - Remove barges from event",
+      "chain": [
+        "Check if rows selected in grdBargeList",
+        "Confirmation dialog (Yes/No)",
+        "Loop selected rows: _BargeEvent.RemoveFromList(bargeNum)",
+        "RefreshList(False)"
+      ]
+    },
+    {
+      "trigger": "frmBargeEvent_Load",
+      "chain": [
+        "Check for _BargeEvent.IsMismatchForMultiShiftToLocationID",
+        "If mismatch: _BargeEvent.ToLocationID = String.Empty, set flag",
+        "FormatControls()",
+        "LoadControlsForBargeEvent()",
+        "RefreshList(True)"
+      ]
+    },
+    {
+      "trigger": "frmBargeEvent_Shown",
+      "chain": [
+        "Check if Me.Top < 0, adjust position",
+        "If _IsMismatchForMultiShiftToLocationID: show warning dialog",
+        "If _HasMoreThanOneLoadDefaultFacility: show warning dialog"
+      ]
+    },
+    {
+      "trigger": "cboFromLocationType_ValueChanged",
+      "chain": [
+        "PopulateLocationCombo(cboFromLocationID, locationType)",
+        "_cboFromLocationIDContents = LocationComboType enum",
+        "If Boat selected: cboToLocationType = Facility and set readonly",
+        "If Facility: cboToLocationType set to enabled"
+      ]
+    },
+    {
+      "trigger": "optChargeType_ValueChanged",
+      "chain": [
+        "_ModifyBargeDetails.ChargeType = selected value",
+        "SetIsPortShiftCheckBox()",
+        "RefreshBillingPanel(BillingPanelRefreshType.All)",
+        "Fires _ModifyBargeDetails events which cascade to more refreshes"
+      ]
+    },
+    {
+      "trigger": "_ModifyBargeDetails.RateChanged event",
+      "chain": [
+        "RefreshBillingPanel(BillingPanelRefreshType.Rates)",
+        "LoadBillingControls() with rate data"
+      ]
+    },
+    {
+      "trigger": "_ModifyBargeDetails.AmountChanged event",
+      "chain": [
+        "RefreshBillingPanel(BillingPanelRefreshType.Amounts)",
+        "LoadBillingControls() with amount data"
+      ]
+    },
+    {
+      "trigger": "_ModifyBargeDetails.DivisionChanged event",
+      "chain": [
+        "RefreshBillingPanel(BillingPanelRefreshType.Division)",
+        "Update division-related fields"
+      ]
+    }
+  ],
+  "refreshTriggers": [
+    {
+      "trigger": "RefreshList(Boolean selectFirstRow)",
+      "method": "RefreshListBase(grdBargeList, selectFirstRow, _BargeEvent.Barges, True)",
+      "description": "Refreshes barge list grid with current collection",
+      "calledBy": [
+        "Form Load",
+        "ItemAdd",
+        "ItemRemove",
+        "ModifyBarge (after OK)",
+        "btnDetailSet_Click",
+        "btnDetailCancel_Click"
+      ]
+    },
+    {
+      "trigger": "LoadControlsForBargeEvent()",
+      "description": "Reloads all event-level controls from _BargeEvent object",
+      "sets": "_IsLoadingEvents = True during execution",
+      "calledBy": [
+        "Form Load",
+        "ItemAdd (after adding barges)",
+        "ModifyBarge (after OK)"
+      ],
+      "cascades": [
+        "LoadFromLocationID()",
+        "LoadToLocationID()",
+        "LoadDestinationLocationID()",
+        "Populate all event field combos and textboxes"
+      ]
+    },
+    {
+      "trigger": "LoadModifyBargeDetails()",
+      "description": "Populates _ModifyBargeDetails object from _BargeEvent",
+      "sets": "_IsLoadingBargeDetail = True during execution",
+      "calledBy": [
+        "ItemModify (entering detail edit mode)"
+      ]
+    },
+    {
+      "trigger": "LoadBillingControls()",
+      "description": "Populates billing tab controls from _ModifyBargeDetails",
+      "sets": "_IsLoadingBilling = True during execution",
+      "calledBy": [
+        "ItemModify",
+        "RefreshBillingPanel"
+      ]
+    },
+    {
+      "trigger": "RefreshBillingPanel(BillingPanelRefreshType)",
+      "description": "Refreshes billing controls based on refresh type",
+      "types": [
+        "All - full refresh",
+        "Rates - rate fields only",
+        "Amounts - amount fields only",
+        "Division - division field only"
+      ],
+      "calledBy": [
+        "_ModifyBargeDetails event handlers",
+        "optChargeType_ValueChanged",
+        "Various billing field changes"
+      ]
+    },
+    {
+      "trigger": "TransferModifyBargeDetails()",
+      "description": "Copies UI values to _ModifyBargeDetails and then to _BargeEvent.BargesInEdit",
+      "calledBy": [
+        "btnDetailSet_Click"
+      ]
+    },
+    {
+      "trigger": "Main.Notifier.Updated(SubSystem)",
+      "description": "Raises notification to refresh other forms",
+      "subsystems": [
+        "SubSystem.frmTicketSearch",
+        "SubSystem.frmBargeSearch",
+        "SubSystem.frmBargeEventSearch"
+      ],
+      "calledBy": [
+        "SubmitNoRefreshClick (after successful save)"
+      ]
+    },
+    {
+      "trigger": "frmBargeEventSearch.RefreshList(selectFirstRow)",
+      "description": "Search form refresh triggered by btnFind or programmatically",
+      "businessLogic": "Lists.BargeEventSearch.GetList(...)",
+      "validation": "AtLeastOneSearchCriteria() - prevents overly broad queries",
+      "calledBy": [
+        "btnFind_Click",
+        "CheckForBrokenRules (after rebill operations)"
+      ]
+    },
+    {
+      "trigger": "OnChangeOfFleet(newFleetID)",
+      "description": "Search form responds to fleet change from main form",
+      "actions": [
+        "Clear location combos",
+        "Default location types to Facility",
+        "Repopulate fleet boat combo",
+        "Clear search results grid"
+      ]
+    }
+  ],
+  "modalDialogPatterns": [
+    {
+      "pattern": "StandardDetailDialog",
+      "example": "frmBargeDetail, frmBoatEventDelays",
+      "usage": "Using frm As New [FormType]\n  frm.Initialize(...)\n  frm.ShowDialog(Me)\nEnd Using",
+      "returnHandling": "Check frm.DialogResult for OK/Cancel"
+    },
+    {
+      "pattern": "TextEditorDialog",
+      "example": "frmTextEditor for notes",
+      "usage": "Using frm As New frmTextEditor\n  .Initialize(text, title, accessLevel, maxLength)\n  .ShowDialog()\n  If .DialogResult <> Cancel Then\n    field.Text = .TextEntered",
+      "purpose": "Edit large text fields with proper access control"
+    },
+    {
+      "pattern": "BrokenRulesDialog",
+      "example": "BrokenRules form, frmTextEditor for results",
+      "usage": "If brknRules Is Nothing Then\n  [Show results]\nElse\n  Using frm As New BrokenRules\n    frm.Initialize(brknRules)\n    frm.ShowDialog()",
+      "purpose": "Display validation errors or operation results"
+    },
+    {
+      "pattern": "ModalSearchDialog",
+      "example": "frmModalSearch hosting frmBoatSearch",
+      "usage": "Using frm As New frmModalSearch(SubSystem.frmBoatSearch, fleetID)\n  frm.ShowDialog(Me)",
+      "purpose": "Open search forms in modal context"
+    },
+    {
+      "pattern": "DraftEntryDialog",
+      "example": "frmBargeDraft",
+      "usage": "Draft object created, form shown, if OK then values captured back",
+      "bidirectional": true,
+      "purpose": "Edit complex draft measurements with immediate feedback"
+    }
+  ],
+  "validationPoints": [
+    {
+      "point": "Before Search",
+      "method": "AtLeastOneSearchCriteria()",
+      "message": "Please enter at least one of the search criteria.",
+      "preventAction": true
+    },
+    {
+      "point": "Before Save Event",
+      "method": "_BargeEvent.IsValid()",
+      "showsDialog": "BrokenRules form",
+      "preventAction": true
+    },
+    {
+      "point": "Before Save Event",
+      "check": "Barges.Count = 0",
+      "message": "At least one barge is required. Add a barge to the list and try again.",
+      "preventAction": true
+    },
+    {
+      "point": "Before Save Detail",
+      "method": "_ModifyBargeDetails.IsValid(_BargeEvent.BargesInEditBrokenRulesCollection)",
+      "showsDialog": "BrokenRules form",
+      "preventAction": true
+    },
+    {
+      "point": "During Save",
+      "method": "IsOkToSaveDialogs()",
+      "description": "Multiple conditional validation checks with user prompts",
+      "examples": [
+        "Check for valid vessel IDs",
+        "Warn about special conditions",
+        "Confirm save with specific event type conditions"
+      ],
+      "canAbortSave": true
+    },
+    {
+      "point": "During Save",
+      "method": "UpdateBargePositions()",
+      "validation": "Checks for duplicate tier positions",
+      "onError": "Shows errors, user can fix or submit again to close",
+      "canAbortSave": true
+    },
+    {
+      "point": "Before Remove Barges",
+      "method": "Main.ItemRemoveDialog('Barge')",
+      "confirmation": "Yes/No dialog",
+      "preventAction": "If No selected"
+    },
+    {
+      "point": "Before Cancel Changes",
+      "check": "IsDirty or _ModifyBargeDetails.IsDirty",
+      "message": "Changes not saved. Are you sure you want to cancel?",
+      "confirmation": "Yes/No dialog",
+      "preventAction": "If No selected"
+    },
+    {
+      "point": "Before Rebill Operations",
+      "confirmation": "Are you sure you want to mark/unmark the selected events for rebill?",
+      "dialog": "Yes/No warning"
+    }
+  ],
+  "userExperience": {
+    "searchForm": {
+      "defaultFocus": "cboEventTypeID",
+      "enterKeyBehavior": "Not explicitly mapped, standard form behavior",
+      "gridBehavior": "Double-click row opens detail form via ItemModify",
+      "selectionType": "Extended (multi-row) for context menu operations",
+      "voidDisplay": "Strikethrough with gray text"
+    },
+    "detailForm": {
+      "defaultFocus": "Set by FormatControls based on event type",
+      "bargeListGrid": {
+        "selectionType": "Extended (multi-row)",
+        "doubleClick": "Opens detail edit mode via ItemModify"
+      },
+      "toolbarButtons": [
+        "c_BtnKeyAddToList - Add barge to event",
+        "c_BtnKeyModifyDetails - Edit selected barge(s) details",
+        "c_BtnKeyRemoveFromList - Remove selected barge(s)",
+        "c_BtnKeyModifyBarge - Open barge master form",
+        "c_BtnKeyBargePositions - Set tier positions",
+        "c_BtnKeyNewBarge - Create new barge",
+        "c_BtnKeyEnterTonnages - Quick tonnage entry",
+        "c_BtnKeyManageBoats - Open boat search",
+        "c_BtnKeyExport - Export to Excel"
+      ],
+      "expandableCombos": {
+        "behavior": "Click column header to toggle between full/filtered lists",
+        "applies": [
+          "cboFleetBoatID",
+          "cboFromLocationID",
+          "cboToLocationID",
+          "cboBargeConsignLocationID"
+        ]
+      },
+      "conditionalLocationType": {
+        "FromLocationBoat": "ToLocationType forced to Facility and readonly",
+        "ToLocationBoat": "FromLocationType forced to Facility and readonly"
+      }
+    },
+    "warnings": {
+      "multiShiftToLocationMismatch": "The selected barges have more than one To Location. Please select the To Location.",
+      "multipleDefaultFacilities": "The selected barges have more than one default facility. Please verify the correct facility is selected.",
+      "positionConflicts": "Could not save the new tier positions... You may click Barge Positions to fix the situation now, or click Submit again to leave the barge(s) in the workspace."
+    },
+    "saveNotifications": [
+      "DialogAutoAddedCpToUnloadBarges - lists barges for which Unload C/P events were auto-created",
+      "Various conditional dialogs based on event type and conditions"
+    ]
+  },
+  "specialFeatures": {
+    "multiBargeManagement": {
+      "description": "Event can manage multiple barges in single transaction",
+      "addMethod": "ItemAdd() - comma-delimited barge numbers",
+      "removeMethod": "ItemRemove() - multi-select and remove",
+      "modifyMethod": "ItemModify() - edit details for one or more barges simultaneously",
+      "validation": "At least one barge required for event"
+    },
+    "detailEditMode": {
+      "description": "Nested editing mode for barge-specific details within event form",
+      "state": "IsEditingChild = True",
+      "managedBy": "_ModifyBargeDetails object (WithEvents)",
+      "tabs": [
+        "tpgBargeDetails",
+        "tpgBilling"
+      ],
+      "separateButtons": "btnDetailSet, btnDetailCancel",
+      "disables": "Main form Submit/Cancel and toolbar during detail editing"
+    },
+    "multiShiftComplete": {
+      "description": "Special mode for completing shifts for multiple barges",
+      "flag": "_IsMultiShiftComplete",
+      "features": [
+        "Allow different FromLocationIDs for barges",
+        "Warn if different ToLocationIDs (must be unified)",
+        "chkAutoCreateUnloadCpEvents - auto-create Unload C/P events",
+        "DialogAutoAddedCpToUnloadBarges - shows results after save"
+      ]
+    },
+    "bargePositions": {
+      "description": "Manages workspace tier positions for shifted barges",
+      "object": "_BargePositions",
+      "form": "frmBargePositions",
+      "savedWhen": "Main form Submit",
+      "validation": "Checks for duplicate positions, allows retry or proceed",
+      "applicableEvents": "Shift Complete to non-fleet facilities"
+    },
+    "onboardOrderIntegration": {
+      "description": "Create onboard order when saving new event",
+      "control": "chkCreateOnboardOrder",
+      "condition": "Onboard license and specific event types",
+      "behavior": "Main form hides, onboard order form shows, prevents user confusion",
+      "savesEventFirst": true
+    },
+    "expandableCombos": {
+      "description": "Combos that toggle between full/filtered lists on header click",
+      "globalSetting": "Lists.GlobalSettingList.ShowAllFacilitiesBoatsInCombos",
+      "modes": [
+        "Full - all items",
+        "Filtered - only relevant items (consign facilities, fleet boats)"
+      ],
+      "tracking": "_cboFromLocationIDContents, _cboToLocationIDContents",
+      "method": "RepopulateExpandable[Type]Combo"
+    },
+    "licenseBasedVisibility": {
+      "Freight": [
+        "c_TabFreightBilling",
+        "Freight customer search fields",
+        "Contract number",
+        "Freight-specific grid columns"
+      ],
+      "Terminal": [
+        "toolbar:c_BtnKeyEnterTonnages",
+        "Cargo fields (if EnableCargoOnBargeEvent)"
+      ],
+      "Onboard": [
+        "chkCreateOnboardOrder",
+        "Onboard order creation workflow"
+      ]
+    },
+    "accessLevelSeparation": {
+      "description": "Billing and non-billing operations have separate access levels",
+      "nonBilling": "AccessLevelNonBilling from tpgBargeDetails",
+      "billing": "AccessLevelBilling from tpgBilling",
+      "note": "User can have different permissions for operations vs billing"
+    },
+    "gridSettings": {
+      "persistence": "MyAppSettingHelper.SaveGrid/RestoreGrid",
+      "scope": "Per-user settings saved to database",
+      "includes": [
+        "Column widths",
+        "Column order",
+        "Sort order"
+      ]
+    },
+    "eventTypeConditionals": {
+      "description": "Many fields and behaviors conditional on event type enum",
+      "examples": [
+        "IsRequiredCommodity based on Load/Unload Complete events",
+        "Location combo expandability based on event type",
+        "Draft fields visibility",
+        "Billing calculations"
+      ]
+    },
+    "rebillingSupport": {
+      "description": "Multi-select rebill operations from search grid",
+      "methods": [
+        "MarkForRebill",
+        "UnMarkForRebill"
+      ],
+      "businessLogic": "Ticket.UpdateRebillForTicketEvents",
+      "grouping": "Events grouped by TicketID for processing",
+      "showsResults": "frmTextEditor or BrokenRules dialog"
+    }
+  },
+  "notes": [
+    "BargeEvent is a complex multi-entity form managing tickets, events, and multiple barges",
+    "Form implements nested editing mode (IsEditingChild) for barge-specific detail editing",
+    "Uses ModifyBargeDetails object with events to manage detail panel state and billing recalculations",
+    "Three separate subsystems notified on save: frmTicketSearch, frmBargeSearch, frmBargeEventSearch",
+    "Search form requires at least one search criterion to prevent overly broad queries",
+    "Expandable combos toggle between full/filtered lists when user clicks column header",
+    "License-based feature visibility: Freight, Terminal, Onboard, Towing",
+    "Access levels separated: AccessLevelNonBilling vs AccessLevelBilling",
+    "Multi-shift complete mode has special handling for location mismatches",
+    "Barge positions saved via separate validation on main form submit",
+    "Grid settings persisted per-user to database via MyAppSettingHelper",
+    "Voided events display with strikethrough formatting in search grid",
+    "Detail form can be launched for new event, edit existing, or multi-shift complete",
+    "ModifyBargeDetails raises events (RateChanged, AmountChanged, etc.) that trigger cascading UI refreshes",
+    "Loading flags prevent recursive event handler calls during form/control population",
+    "Onboard order creation hides main form during order entry to prevent user confusion",
+    "Rebill operations process events grouped by TicketID with confirmation dialogs",
+    "UpdateBargePositions can abort save if validation fails, allowing user to retry",
+    "Form supports both keyboard and toolbar navigation with extensive button security",
+    "ConditionalLocationType: selecting Boat in one location forces other to Facility",
+    "IsOkToSaveDialogs method centralizes multiple conditional save-time validations"
+  ]
+}

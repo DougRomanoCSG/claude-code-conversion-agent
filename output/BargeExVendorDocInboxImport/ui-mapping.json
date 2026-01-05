@@ -1,0 +1,582 @@
+{
+  "entity": "BargeExVendorDocInboxImport",
+  "formType": "ImportProcessor",
+  "description": "Import processor for BargeEx Vendor Document Inbox. This is NOT a search form but a long-running import execution form launched from frmBargeExVendorDocInboxSearch. Processes selected vendor documents to create barge events and/or parts and service bills.",
+  "architecture": {
+    "pattern": "Background Job Processing with Real-time Updates",
+    "framework": "ASP.NET Core 8 MVC",
+    "realTimeLibrary": "SignalR",
+    "jobProcessor": "Hangfire or BackgroundService",
+    "styling": "Bootstrap 5"
+  },
+  "controlMappings": [
+    {
+      "legacyControl": "UltraLabel (lblInstructions)",
+      "legacyProperties": {
+        "type": "UltraLabel",
+        "text": "Selected vendor documents will be imported to create barge events and/or parts and service bills.",
+        "backColor": "Transparent",
+        "textVAlign": "Middle"
+      },
+      "modernEquivalent": "Bootstrap Alert - Informational",
+      "html": "<div class=\"alert alert-info\" role=\"alert\">\n    <i class=\"fas fa-info-circle me-2\"></i>\n    Selected vendor documents will be imported to create barge events and/or parts and service bills.\n</div>",
+      "cssClasses": ["alert", "alert-info"],
+      "javascript": null,
+      "notes": "Display as informational alert box to provide context to user before starting import"
+    },
+    {
+      "legacyControl": "UltraTextEditor (txtLog)",
+      "legacyProperties": {
+        "type": "UltraTextEditor",
+        "multiline": true,
+        "acceptsReturn": true,
+        "scrollbars": "Both",
+        "readOnly": true,
+        "alwaysInEditMode": true,
+        "tabStop": false,
+        "size": "840x343",
+        "anchor": "Top, Bottom, Left, Right"
+      },
+      "modernEquivalent": "Bootstrap Textarea with Auto-scroll",
+      "html": "<textarea id=\"txtLog\" class=\"form-control font-monospace\" rows=\"20\" readonly aria-label=\"Import log\"></textarea>",
+      "cssClasses": ["form-control", "font-monospace"],
+      "javascript": "// Auto-scroll to bottom as new log entries arrive\nfunction appendLog(message) {\n    const log = $('#txtLog');\n    log.val(log.val() + message + '\\n');\n    log.scrollTop(log[0].scrollHeight);\n}",
+      "notes": "Real-time processing log display. Use monospace font for better readability. Auto-scroll to bottom as new entries arrive via SignalR."
+    },
+    {
+      "legacyControl": "UltraProgressBar (proProgress)",
+      "legacyProperties": {
+        "type": "UltraProgressBar",
+        "text": "[Formatted]",
+        "maximum": "Set dynamically to record count",
+        "size": "840x24",
+        "anchor": "Top, Left, Right"
+      },
+      "modernEquivalent": "Bootstrap Progress Bar",
+      "html": "<div class=\"progress mb-3\" style=\"height: 30px;\">\n    <div id=\"progressBar\" class=\"progress-bar progress-bar-striped progress-bar-animated\" \n         role=\"progressbar\" \n         aria-valuenow=\"0\" \n         aria-valuemin=\"0\" \n         aria-valuemax=\"100\" \n         style=\"width: 0%;\">\n        <span id=\"progressText\">0%</span>\n    </div>\n</div>",
+      "cssClasses": ["progress", "progress-bar", "progress-bar-striped", "progress-bar-animated"],
+      "javascript": "// Update progress bar via SignalR\nfunction updateProgress(current, total) {\n    const percentage = Math.round((current / total) * 100);\n    $('#progressBar')\n        .css('width', percentage + '%')\n        .attr('aria-valuenow', percentage)\n        .find('#progressText')\n        .text(current + ' / ' + total + ' (' + percentage + '%)');\n}",
+      "notes": "Bootstrap progress bar with percentage display. Update dynamically via SignalR during processing. Use animated stripes while processing is active."
+    },
+    {
+      "legacyControl": "UltraPanel (pnlDailyReports)",
+      "legacyProperties": {
+        "type": "UltraPanel",
+        "dock": "Fill",
+        "size": "858x457",
+        "controls": ["lblInstructions", "btnStart", "btnCancel", "proProgress", "txtLog"]
+      },
+      "modernEquivalent": "Bootstrap Card",
+      "html": "<div class=\"card shadow-sm\">\n    <div class=\"card-header bg-primary text-white\">\n        <h5 class=\"mb-0\">Import BargeEx Vendor Documents</h5>\n    </div>\n    <div class=\"card-body\">\n        <!-- Alert, buttons, progress bar, and log textarea go here -->\n    </div>\n</div>",
+      "cssClasses": ["card", "shadow-sm", "card-header", "card-body"],
+      "javascript": null,
+      "notes": "Use Bootstrap card component to contain all import processor controls. Card provides visual grouping and elevation."
+    },
+    {
+      "legacyControl": "Button (btnStart)",
+      "legacyProperties": {
+        "type": "Button",
+        "text": "&Start",
+        "enabled": "Conditional on selected records",
+        "anchor": "Top, Right",
+        "handler": "btnStart_Click",
+        "behavior": "Disabled after first click to prevent duplicate runs"
+      },
+      "modernEquivalent": "Bootstrap Button with Loading State",
+      "html": "<button type=\"button\" id=\"btnStart\" class=\"btn btn-primary\" disabled>\n    <i class=\"fas fa-play me-2\"></i>Start Import\n</button>\n<!-- During processing -->\n<button type=\"button\" id=\"btnStart\" class=\"btn btn-primary\" disabled>\n    <span class=\"spinner-border spinner-border-sm me-2\" role=\"status\" aria-hidden=\"true\"></span>\n    Processing...\n</button>",
+      "cssClasses": ["btn", "btn-primary"],
+      "javascript": "// Disable button and show loading spinner\n$('#btnStart').on('click', function() {\n    const btn = $(this);\n    btn.prop('disabled', true)\n       .html('<span class=\"spinner-border spinner-border-sm me-2\"></span>Processing...');\n    startImport();\n});",
+      "notes": "Enable only if selected records exist. Disable after click and show loading spinner. Button state managed by job status updates via SignalR."
+    },
+    {
+      "legacyControl": "Button (btnCancel)",
+      "legacyProperties": {
+        "type": "Button",
+        "text": "&Close",
+        "enabled": true,
+        "anchor": "Top, Right",
+        "handler": "btnCancel_Click",
+        "behavior": "Caption dynamically changes between 'Close' and 'Cancel' based on processing state",
+        "causesValidation": false
+      },
+      "modernEquivalent": "Bootstrap Button with Dynamic Text/Behavior",
+      "html": "<!-- Initial state (before processing) -->\n<button type=\"button\" id=\"btnCancel\" class=\"btn btn-secondary\" onclick=\"window.location.href='/BargeExVendorDocInboxSearch';\">\n    <i class=\"fas fa-times me-2\"></i>Close\n</button>\n<!-- During processing -->\n<button type=\"button\" id=\"btnCancel\" class=\"btn btn-warning\" onclick=\"cancelImport();\">\n    <i class=\"fas fa-ban me-2\"></i>Cancel\n</button>\n<!-- After processing complete -->\n<button type=\"button\" id=\"btnCancel\" class=\"btn btn-secondary\" onclick=\"window.location.href='/BargeExVendorDocInboxSearch';\">\n    <i class=\"fas fa-times me-2\"></i>Close\n</button>",
+      "cssClasses": ["btn", "btn-secondary", "btn-warning"],
+      "javascript": "// Toggle button between Close and Cancel\nfunction setButtonState(isProcessing) {\n    const btn = $('#btnCancel');\n    if (isProcessing) {\n        btn.removeClass('btn-secondary')\n           .addClass('btn-warning')\n           .html('<i class=\"fas fa-ban me-2\"></i>Cancel')\n           .off('click').on('click', cancelImport);\n    } else {\n        btn.removeClass('btn-warning')\n           .addClass('btn-secondary')\n           .html('<i class=\"fas fa-times me-2\"></i>Close')\n           .off('click').on('click', function() {\n               window.location.href = '/BargeExVendorDocInboxSearch';\n           });\n    }\n}",
+      "notes": "Dynamically changes text, style, and behavior: 'Close' (secondary) before/after processing, 'Cancel' (warning) during processing. Cancel sends cancellation request to background job via CancellationToken."
+    }
+  ],
+  "formPatterns": {
+    "layoutPattern": {
+      "container": "Bootstrap Card",
+      "layout": "Vertical Stack",
+      "components": [
+        "Card Header with Title",
+        "Card Body containing:",
+        "  - Informational Alert",
+        "  - Button Group (Start, Cancel)",
+        "  - Job Status Badge",
+        "  - Progress Bar with Percentage",
+        "  - Log Textarea (monospace, read-only, auto-scroll)"
+      ]
+    },
+    "backgroundJobPattern": {
+      "library": "Hangfire or BackgroundService",
+      "workflow": [
+        "User clicks Start button",
+        "AJAX POST to /api/bargeex-vendor-doc-inbox-import/start",
+        "Server enqueues background job and returns jobId",
+        "JavaScript establishes SignalR connection for job updates",
+        "Server sends real-time updates: progress, log messages, status changes",
+        "Client updates UI: progress bar, log textarea, button states",
+        "On completion: show summary, enable Close button, disable Cancel",
+        "On error: show error badge, log error details",
+        "On cancellation: mark job as canceled, show cancellation message"
+      ]
+    },
+    "signalRPattern": {
+      "hubConnection": "BargeExImportHub",
+      "clientMethods": [
+        "ReceiveProgress(current, total) - update progress bar",
+        "ReceiveLogMessage(message) - append to log textarea",
+        "ReceiveStatusChange(status) - update status badge",
+        "ReceiveCompletion(successCount, errorCount) - show summary"
+      ],
+      "serverMethods": [
+        "StartImport(vendorDocInboxIds[]) - initiate job",
+        "CancelImport(jobId) - request cancellation"
+      ]
+    },
+    "validationPattern": {
+      "enableStartButton": "Only when vendorDocInboxList has selected records (IsSelected = 1)",
+      "preventDuplicateRuns": "Disable Start button after first click",
+      "cancellationCheck": "Background job checks CancellationToken.IsCancellationRequested after each record"
+    }
+  },
+  "modernApiEndpoints": [
+    {
+      "method": "POST",
+      "route": "/api/bargeex-vendor-doc-inbox-import/start",
+      "description": "Start import job for selected vendor documents",
+      "requestBody": {
+        "vendorDocInboxIds": "int[]",
+        "fleetId": "int",
+        "subSystem": "string"
+      },
+      "response": {
+        "jobId": "string",
+        "message": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/api/bargeex-vendor-doc-inbox-import/cancel/{jobId}",
+      "description": "Request cancellation of running import job",
+      "response": {
+        "success": "bool",
+        "message": "string"
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/api/bargeex-vendor-doc-inbox-import/status/{jobId}",
+      "description": "Get current status of import job",
+      "response": {
+        "jobId": "string",
+        "status": "Queued|Running|Completed|Canceled|Failed",
+        "currentRecord": "int",
+        "totalRecords": "int",
+        "successCount": "int",
+        "errorCount": "int",
+        "startTime": "DateTime",
+        "endTime": "DateTime?"
+      }
+    }
+  ],
+  "signalRHubMethods": {
+    "hubName": "BargeExImportHub",
+    "serverToClient": [
+      {
+        "method": "ReceiveProgress",
+        "parameters": ["currentRecord: int", "totalRecords: int"],
+        "description": "Update progress bar as records are processed"
+      },
+      {
+        "method": "ReceiveLogMessage",
+        "parameters": ["message: string", "timestamp: DateTime"],
+        "description": "Append log message to log textarea"
+      },
+      {
+        "method": "ReceiveStatusChange",
+        "parameters": ["status: string"],
+        "description": "Update job status badge (Running, Completed, Canceled, Failed)"
+      },
+      {
+        "method": "ReceiveCompletion",
+        "parameters": ["successCount: int", "errorCount: int"],
+        "description": "Display final summary and update UI to completion state"
+      },
+      {
+        "method": "ReceiveError",
+        "parameters": ["errorMessage: string"],
+        "description": "Display error alert and log error details"
+      }
+    ],
+    "clientToServer": [
+      {
+        "method": "JoinImportGroup",
+        "parameters": ["jobId: string"],
+        "description": "Subscribe to updates for specific import job"
+      }
+    ]
+  },
+  "javascriptImplementation": {
+    "filename": "bargeExVendorDocInboxImport.js",
+    "dependencies": [
+      "jQuery",
+      "Bootstrap 5",
+      "SignalR Client Library",
+      "Font Awesome Icons"
+    ],
+    "keyFunctions": [
+      {
+        "name": "initializeSignalR",
+        "purpose": "Establish SignalR connection and register client-side event handlers",
+        "parameters": [],
+        "workflow": [
+          "Create HubConnectionBuilder for /hubs/bargeex-import",
+          "Register ReceiveProgress handler",
+          "Register ReceiveLogMessage handler",
+          "Register ReceiveStatusChange handler",
+          "Register ReceiveCompletion handler",
+          "Start connection"
+        ]
+      },
+      {
+        "name": "startImport",
+        "purpose": "Initiate background import job",
+        "parameters": [],
+        "workflow": [
+          "Disable Start button, show spinner",
+          "POST to /api/bargeex-vendor-doc-inbox-import/start",
+          "Receive jobId from server",
+          "Join SignalR group for job updates",
+          "Change Cancel button to 'Cancel' mode",
+          "Update status badge to 'Running'"
+        ]
+      },
+      {
+        "name": "cancelImport",
+        "purpose": "Request cancellation of running import job",
+        "parameters": [],
+        "workflow": [
+          "Show confirmation dialog",
+          "POST to /api/bargeex-vendor-doc-inbox-import/cancel/{jobId}",
+          "Display cancellation request message in log",
+          "Disable Cancel button temporarily"
+        ]
+      },
+      {
+        "name": "updateProgress",
+        "purpose": "Update progress bar with current/total counts",
+        "parameters": ["current: int", "total: int"],
+        "workflow": [
+          "Calculate percentage",
+          "Update progress bar width and aria attributes",
+          "Update progress text display"
+        ]
+      },
+      {
+        "name": "appendLog",
+        "purpose": "Append new log message and auto-scroll to bottom",
+        "parameters": ["message: string"],
+        "workflow": [
+          "Append message to textarea value",
+          "Scroll to bottom of textarea"
+        ]
+      },
+      {
+        "name": "handleCompletion",
+        "purpose": "Handle import completion",
+        "parameters": ["successCount: int", "errorCount: int"],
+        "workflow": [
+          "Update progress bar to 100%",
+          "Display completion summary in log",
+          "Show success/error counts in status badges",
+          "Change Cancel button back to 'Close' mode",
+          "Remove animated stripes from progress bar",
+          "If successCount > 0: show success toast notification"
+        ]
+      }
+    ]
+  },
+  "cssCustomizations": {
+    "filename": "bargeExVendorDocInboxImport.css",
+    "customStyles": [
+      {
+        "selector": "#txtLog",
+        "properties": {
+          "font-family": "'Courier New', monospace",
+          "font-size": "13px",
+          "line-height": "1.4",
+          "background-color": "#f8f9fa",
+          "border": "1px solid #dee2e6",
+          "resize": "vertical",
+          "min-height": "400px"
+        },
+        "notes": "Monospace font for log display with subtle background"
+      },
+      {
+        "selector": ".import-status-badge",
+        "properties": {
+          "font-size": "0.9rem",
+          "padding": "0.5rem 1rem",
+          "border-radius": "0.25rem"
+        },
+        "notes": "Status badge styling for job state (Queued, Running, Completed, etc.)"
+      },
+      {
+        "selector": ".import-summary",
+        "properties": {
+          "display": "flex",
+          "gap": "1rem",
+          "margin-top": "1rem"
+        },
+        "notes": "Flexbox layout for success/error count badges"
+      }
+    ]
+  },
+  "viewModelStructure": {
+    "namespace": "BargeOpsAdmin.ViewModels",
+    "className": "BargeExVendorDocInboxImportViewModel",
+    "properties": [
+      {
+        "name": "JobId",
+        "type": "string",
+        "description": "Background job identifier for tracking"
+      },
+      {
+        "name": "SelectedDocumentIds",
+        "type": "List<int>",
+        "description": "IDs of selected vendor documents to import"
+      },
+      {
+        "name": "FleetId",
+        "type": "int",
+        "description": "Fleet ID context for import"
+      },
+      {
+        "name": "SubSystem",
+        "type": "string",
+        "description": "Subsystem identifier"
+      },
+      {
+        "name": "Status",
+        "type": "ImportJobStatus (enum)",
+        "description": "Current job status: Queued, Running, Completed, Canceled, Failed"
+      },
+      {
+        "name": "TotalRecords",
+        "type": "int",
+        "description": "Total number of documents to process"
+      },
+      {
+        "name": "CurrentRecord",
+        "type": "int",
+        "description": "Current record being processed (for progress)"
+      },
+      {
+        "name": "SuccessCount",
+        "type": "int",
+        "description": "Count of successfully imported records"
+      },
+      {
+        "name": "ErrorCount",
+        "type": "int",
+        "description": "Count of failed import records"
+      }
+    ]
+  },
+  "controllerStructure": {
+    "namespace": "BargeOpsAdmin.Controllers",
+    "className": "BargeExVendorDocInboxImportController",
+    "inheritsFrom": "AppController",
+    "actions": [
+      {
+        "name": "Index",
+        "httpMethod": "GET",
+        "returnType": "IActionResult",
+        "description": "Display import processor page (launched from search with selected document IDs)"
+      },
+      {
+        "name": "Start",
+        "httpMethod": "POST",
+        "route": "/api/bargeex-vendor-doc-inbox-import/start",
+        "returnType": "JsonResult",
+        "description": "Enqueue background import job and return job ID"
+      },
+      {
+        "name": "Cancel",
+        "httpMethod": "POST",
+        "route": "/api/bargeex-vendor-doc-inbox-import/cancel/{jobId}",
+        "returnType": "JsonResult",
+        "description": "Request cancellation of running job via CancellationToken"
+      },
+      {
+        "name": "Status",
+        "httpMethod": "GET",
+        "route": "/api/bargeex-vendor-doc-inbox-import/status/{jobId}",
+        "returnType": "JsonResult",
+        "description": "Get current job status and progress"
+      }
+    ]
+  },
+  "viewStructure": {
+    "path": "src/BargeOps.UI/Views/BargeExVendorDocInboxImport/Index.cshtml",
+    "layout": "_Layout",
+    "sections": [
+      {
+        "name": "Main Content",
+        "components": [
+          "Page Title",
+          "Bootstrap Card Container",
+          "Alert (Informational)",
+          "Button Group (Start, Cancel)",
+          "Status Badge",
+          "Progress Bar",
+          "Log Textarea"
+        ]
+      },
+      {
+        "name": "Scripts Section",
+        "files": [
+          "@microsoft/signalr (CDN or npm)",
+          "bargeExVendorDocInboxImport.js"
+        ]
+      }
+    ]
+  },
+  "bootstrapComponents": {
+    "alert": {
+      "class": "alert alert-info",
+      "icon": "fas fa-info-circle",
+      "usage": "Display informational message before import starts"
+    },
+    "card": {
+      "class": "card shadow-sm",
+      "usage": "Container for all import processor controls",
+      "structure": "card > card-header + card-body"
+    },
+    "progressBar": {
+      "class": "progress-bar progress-bar-striped progress-bar-animated",
+      "usage": "Visual progress indicator updated via SignalR",
+      "attributes": ["role='progressbar'", "aria-valuenow", "aria-valuemin", "aria-valuemax"]
+    },
+    "button": {
+      "primary": "btn btn-primary (Start)",
+      "secondary": "btn btn-secondary (Close)",
+      "warning": "btn btn-warning (Cancel)",
+      "spinner": "spinner-border spinner-border-sm"
+    },
+    "badge": {
+      "class": "badge bg-success/bg-danger/bg-warning/bg-info",
+      "usage": "Display job status and success/error counts"
+    },
+    "textarea": {
+      "class": "form-control font-monospace",
+      "attributes": ["readonly", "rows='20'", "aria-label='Import log'"]
+    }
+  },
+  "accessibilityConsiderations": [
+    {
+      "component": "Progress Bar",
+      "requirements": [
+        "role='progressbar'",
+        "aria-valuenow updates dynamically",
+        "aria-valuemin='0'",
+        "aria-valuemax='100'",
+        "Visual percentage text for screen readers"
+      ]
+    },
+    {
+      "component": "Log Textarea",
+      "requirements": [
+        "aria-label='Import log'",
+        "readonly attribute",
+        "Auto-scroll does not interrupt screen reader"
+      ]
+    },
+    {
+      "component": "Status Badge",
+      "requirements": [
+        "role='status'",
+        "aria-live='polite' for status changes",
+        "Color not sole indicator (use text + icons)"
+      ]
+    },
+    {
+      "component": "Buttons",
+      "requirements": [
+        "Disabled state announced by screen readers",
+        "Loading spinner has aria-hidden='true'",
+        "Button text clearly indicates action"
+      ]
+    }
+  ],
+  "errorHandlingPatterns": {
+    "brokenRules": {
+      "display": "Append to log textarea with timestamp",
+      "format": "[HH:mm:ss] ERROR: {VendorName} - {SubDocType} - {BargeNum} - {ErrorDescription}",
+      "increment": "ErrorCount badge"
+    },
+    "jobFailure": {
+      "display": "Show alert-danger banner above log",
+      "message": "Import job failed. Check log for details.",
+      "actions": ["Change status badge to 'Failed'", "Enable Close button", "Log stack trace (if available)"]
+    },
+    "cancellation": {
+      "display": "Append cancellation message to log",
+      "message": "[HH:mm:ss] Import canceled by user at record {current} of {total}",
+      "actions": ["Change status badge to 'Canceled'", "Show partial success/error counts", "Enable Close button"]
+    }
+  },
+  "modernizationBenefits": [
+    "Non-blocking UI: User can navigate away and return to check progress",
+    "Real-time feedback: SignalR provides instant progress updates without polling",
+    "Graceful cancellation: CancellationToken allows clean job termination",
+    "Audit trail: Job status and results stored in database",
+    "Scalability: Background jobs can be distributed across multiple workers",
+    "Resilience: Job retries and failure handling built into Hangfire",
+    "Better UX: Progress bar, log streaming, and status badges provide clear feedback"
+  ],
+  "relatedForms": {
+    "searchForm": "frmBargeExVendorDocInboxSearch",
+    "launchPattern": "Search form passes selected document IDs to import processor",
+    "returnPattern": "After completion, user clicks Close to return to search form (which refreshes if importSuccessCount > 0)"
+  },
+  "businessLogicIntegration": {
+    "importEngine": "ProcessAll method converted to background job",
+    "recordProcessor": "ProcessRow method called for each document",
+    "documentHandlers": [
+      "ProcessBargeStatus - creates/updates BargeEvent (ticket event)",
+      "ProcessBoatStatus - creates/updates PartsServiceBillItem (assist)"
+    ],
+    "validationChecks": [
+      "Barge exists",
+      "Vendor exists and tied to SenderTradingPartnerNumber",
+      "Valid EventType",
+      "Ticket/TicketEvent not voided",
+      "Not Final Bill adjustment",
+      "Duplicate Fleeting detection"
+    ],
+    "successCriteria": "No broken rules returned from business object save",
+    "failureCriteria": "Broken rules exist after business object validation"
+  },
+  "deploymentConsiderations": {
+    "signalRConfig": "Configure SignalR in Program.cs/Startup.cs with WebSockets fallback",
+    "hangfireConfig": "Configure Hangfire dashboard and storage (SQL Server)",
+    "scalability": "Consider Redis backplane for SignalR in load-balanced environments",
+    "monitoring": "Implement job monitoring and alerting for failed imports",
+    "logging": "Use structured logging (Serilog) to capture job execution details"
+  }
+}

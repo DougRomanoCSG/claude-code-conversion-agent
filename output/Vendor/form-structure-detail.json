@@ -1,0 +1,1162 @@
+{
+  "formName": "frmVendorDetail",
+  "formType": "DetailEdit",
+  "inheritsFrom": "frmBaseDetailEditList",
+  "implements": ["IBaseDetailEdit"],
+  "businessObjects": {
+    "primary": {
+      "name": "Vendor",
+      "namespace": "BargeOps.Onshore.BusinessLogic"
+    },
+    "childObjects": [
+      {
+        "name": "VendorContact",
+        "namespace": "BargeOps.Onshore.BusinessLogic",
+        "collection": "VendorContacts"
+      },
+      {
+        "name": "VendorBusinessUnit",
+        "namespace": "BargeOps.Onshore.BusinessLogic",
+        "collection": "VendorBusinessUnits"
+      }
+    ]
+  },
+  "tabs": [
+    {
+      "key": "Details",
+      "name": "Details",
+      "order": 1,
+      "sections": ["Vendor Information", "Contacts"]
+    },
+    {
+      "key": "Portal",
+      "name": "Portal",
+      "order": 2,
+      "visibilityCondition": "License: Portal",
+      "sections": ["Portal Settings", "Portal Groups"]
+    },
+    {
+      "key": "VendorBusinessUnits",
+      "name": "Vendor Business Units",
+      "order": 3,
+      "sections": ["Business Unit List", "Business Unit Detail"]
+    },
+    {
+      "key": "BargeExSettings",
+      "name": "BargeEx Settings",
+      "order": 4,
+      "visibilityCondition": "GlobalSetting: EnableBargeExBargeLineSupport",
+      "sections": ["BargeEx Configuration"]
+    }
+  ],
+  "controls": [
+    {
+      "name": "txtName",
+      "type": "UltraTextEditor",
+      "category": "VendorInfo",
+      "label": "Name",
+      "dataBinding": "Vendor.Name",
+      "required": true,
+      "validation": ["String"],
+      "maxLength": "Vendor.MaxLength.Name",
+      "tabIndex": 1,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtLongName",
+      "type": "UltraTextEditor",
+      "category": "VendorInfo",
+      "label": "Long name",
+      "dataBinding": "Vendor.LongName",
+      "validation": ["String"],
+      "maxLength": "Vendor.MaxLength.LongName",
+      "tabIndex": 3,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtAccountingCode",
+      "type": "UltraTextEditor",
+      "category": "VendorInfo",
+      "label": "Accounting #",
+      "dataBinding": "Vendor.AccountingCode",
+      "validation": ["String"],
+      "maxLength": "Vendor.MaxLength.AccountingCode",
+      "tabIndex": 17,
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkIsActive",
+      "type": "UltraCheckEditor",
+      "category": "VendorInfo",
+      "label": "Active",
+      "dataBinding": "Vendor.IsActive",
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtAddress",
+      "type": "UltraTextEditor",
+      "category": "VendorInfo",
+      "label": "Address",
+      "dataBinding": "Vendor.Address",
+      "validation": ["String"],
+      "maxLength": "Vendor.MaxLength.Address",
+      "multiline": true,
+      "tabIndex": 5,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtCity",
+      "type": "UltraTextEditor",
+      "category": "VendorInfo",
+      "label": "City",
+      "dataBinding": "Vendor.City",
+      "validation": ["String"],
+      "maxLength": "Vendor.MaxLength.City",
+      "tabIndex": 7,
+      "events": ["Validated"]
+    },
+    {
+      "name": "cboState",
+      "type": "UltraCombo",
+      "category": "VendorInfo",
+      "label": "State",
+      "dataBinding": "Vendor.State",
+      "populationMethod": "Main.PopulateStateCombo",
+      "valueField": "State Code",
+      "displayField": "State Name",
+      "tabIndex": 8,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtZip",
+      "type": "UltraTextEditor",
+      "category": "VendorInfo",
+      "label": "Zip",
+      "dataBinding": "Vendor.Zip",
+      "validation": ["ZipCodeOptionalExtention"],
+      "maxLength": "Vendor.MaxLength.Zip",
+      "tabIndex": 9,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtPhoneNumber",
+      "type": "UltraTextEditor",
+      "category": "VendorInfo",
+      "label": "Phone",
+      "dataBinding": "Vendor.PhoneNumber",
+      "validation": ["Phone10"],
+      "maxLength": "Vendor.MaxLength.PhoneNumber + 4",
+      "tabIndex": 11,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtFaxNumber",
+      "type": "UltraTextEditor",
+      "category": "VendorInfo",
+      "label": "Fax",
+      "dataBinding": "Vendor.FaxNumber",
+      "validation": ["Phone10"],
+      "maxLength": "Vendor.MaxLength.FaxNumber + 4",
+      "tabIndex": 13,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtEmailAddress",
+      "type": "UltraTextEditor",
+      "category": "VendorInfo",
+      "label": "Email",
+      "dataBinding": "Vendor.EmailAddress",
+      "validation": ["Email"],
+      "maxLength": "Vendor.MaxLength.EmailAddress",
+      "tabIndex": 15,
+      "events": ["Validated"]
+    },
+    {
+      "name": "cboTermsCode",
+      "type": "UltraCombo",
+      "category": "VendorInfo",
+      "label": "Payment terms",
+      "dataBinding": "Vendor.TermsCode",
+      "populationMethod": "Main.PopulateValidationListCombo",
+      "validationListType": "VendorBillTermsCode",
+      "tabIndex": 19,
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkIsInternalVendor",
+      "type": "UltraCheckEditor",
+      "category": "VendorInfo",
+      "label": "Internal vendor",
+      "dataBinding": "Vendor.IsInternalVendor",
+      "tabIndex": 20,
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkIsLiquidBroker",
+      "type": "UltraCheckEditor",
+      "category": "VendorInfo",
+      "label": "Liquid broker",
+      "dataBinding": "Vendor.IsLiquidBroker",
+      "visibilityCondition": "License: UnitTow",
+      "tabIndex": 21,
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkIsTankerman",
+      "type": "UltraCheckEditor",
+      "category": "VendorInfo",
+      "label": "Tankerman",
+      "dataBinding": "Vendor.IsTankerman",
+      "visibilityCondition": "License: UnitTow",
+      "tabIndex": 22,
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkEnablePortal",
+      "type": "UltraCheckEditor",
+      "category": "Portal",
+      "label": "Enable Portal",
+      "dataBinding": "Vendor.EnablePortal",
+      "events": ["CheckedChanged"],
+      "notes": "Controls visibility/editability of Portal Groups section"
+    },
+    {
+      "name": "chkIsBargeExEnabled",
+      "type": "UltraCheckEditor",
+      "category": "BargeEx",
+      "label": "BargeEx Enabled",
+      "dataBinding": "Vendor.IsBargeExEnabled",
+      "events": ["CheckedChanged", "Validated"],
+      "notes": "Controls visibility of BargeEx settings"
+    },
+    {
+      "name": "txtBargeExTradingPartnerNum",
+      "type": "UltraTextEditor",
+      "category": "BargeEx",
+      "label": "BargeEx Trading Partner Num",
+      "dataBinding": "Vendor.BargeExTradingPartnerNum",
+      "maxLength": "Vendor.MaxLength.BargeExTradingPartnerNum",
+      "enabledCondition": "chkIsBargeExEnabled.Checked",
+      "events": ["Validated"],
+      "notes": "Padded to 8 characters for char(8) field"
+    },
+    {
+      "name": "cboBargeExConfigID",
+      "type": "UltraCombo",
+      "category": "BargeEx",
+      "label": "BargeEx Config ID",
+      "dataBinding": "Vendor.BargeExConfigID",
+      "populationMethod": "Main.PopulateListCombo",
+      "dataSource": "Lists.BargeExConfigSearch.GetList",
+      "enabledCondition": "chkIsBargeExEnabled.Checked",
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtContactName",
+      "type": "UltraTextEditor",
+      "category": "ContactDetail",
+      "label": "Name",
+      "dataBinding": "VendorContact.Name",
+      "required": true,
+      "validation": ["String"],
+      "maxLength": "VendorContact.MaxLength.Name",
+      "tabIndex": 1,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtContactPhoneNumber",
+      "type": "UltraTextEditor",
+      "category": "ContactDetail",
+      "label": "Phone",
+      "dataBinding": "VendorContact.PhoneNumber",
+      "validation": ["Phone10"],
+      "maxLength": "VendorContact.MaxLength.PhoneNumber + 4",
+      "tabIndex": 3,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtContactPhoneExt",
+      "type": "UltraTextEditor",
+      "category": "ContactDetail",
+      "label": "Ext",
+      "dataBinding": "VendorContact.PhoneExt",
+      "validation": ["String"],
+      "maxLength": "VendorContact.MaxLength.PhoneExt",
+      "tabIndex": 5,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtContactEmailAddress",
+      "type": "UltraTextEditor",
+      "category": "ContactDetail",
+      "label": "Email",
+      "dataBinding": "VendorContact.EmailAddress",
+      "validation": ["Email"],
+      "maxLength": "VendorContact.MaxLength.EmailAddress",
+      "tabIndex": 7,
+      "events": ["Validated"],
+      "notes": "Clearing email deletes portal account with confirmation"
+    },
+    {
+      "name": "txtContactFaxNumber",
+      "type": "UltraTextEditor",
+      "category": "ContactDetail",
+      "label": "Fax",
+      "dataBinding": "VendorContact.FaxNumber",
+      "validation": ["Phone10"],
+      "maxLength": "VendorContact.MaxLength.FaxNumber + 4",
+      "tabIndex": 9,
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkIsPrimary",
+      "type": "UltraCheckEditor",
+      "category": "ContactDetail",
+      "label": "Primary contact",
+      "dataBinding": "VendorContact.IsPrimary",
+      "tabIndex": 10,
+      "events": ["Validated"],
+      "notes": "Only one contact can be primary - others are set to false"
+    },
+    {
+      "name": "chkContactIsDispatcher",
+      "type": "UltraCheckEditor",
+      "category": "ContactDetail",
+      "label": "Dispatcher",
+      "dataBinding": "VendorContact.IsDispatcher",
+      "tabIndex": 11,
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkContactIsLiquidBroker",
+      "type": "UltraCheckEditor",
+      "category": "ContactDetail",
+      "label": "Liquid broker",
+      "dataBinding": "VendorContact.IsLiquidBroker",
+      "visibilityCondition": "License: UnitTow",
+      "tabIndex": 12,
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtVbuName",
+      "type": "UltraTextEditor",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Name",
+      "dataBinding": "VendorBusinessUnit.Name",
+      "required": true,
+      "maxLength": "VendorBusinessUnit.MaxLength.Name",
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtVbuAccountingCode",
+      "type": "UltraTextEditor",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Accounting #",
+      "dataBinding": "VendorBusinessUnit.AccountingCode",
+      "maxLength": "VendorBusinessUnit.MaxLength.AccountingCode",
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkVbuIsActive",
+      "type": "UltraCheckEditor",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Active",
+      "dataBinding": "VendorBusinessUnit.IsActive",
+      "events": ["Validated"]
+    },
+    {
+      "name": "cboRiver",
+      "type": "UltraCombo",
+      "category": "VendorBusinessUnitDetail",
+      "label": "River",
+      "dataBinding": "VendorBusinessUnit.River",
+      "populationMethod": "PopulateRiverCombo",
+      "events": ["Validated"]
+    },
+    {
+      "name": "txtMile",
+      "type": "UltraTextEditor",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Mile",
+      "dataBinding": "VendorBusinessUnit.Mile",
+      "validation": ["Decimal"],
+      "events": ["Validated"]
+    },
+    {
+      "name": "cboBank",
+      "type": "UltraCombo",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Bank",
+      "dataBinding": "VendorBusinessUnit.Bank",
+      "populationMethod": "PopulateValidationListCombo",
+      "validationListType": "RiverBank",
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkIsFuelSupplier",
+      "type": "UltraCheckEditor",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Fuel Supplier",
+      "dataBinding": "VendorBusinessUnit.IsFuelSupplier",
+      "events": ["CheckedChanged", "Validated"],
+      "notes": "Controls enabled state of fuel-related fields"
+    },
+    {
+      "name": "chkIsDefaultFuelSupplier",
+      "type": "UltraCheckEditor",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Default Fuel Supplier",
+      "dataBinding": "VendorBusinessUnit.IsDefaultFuelSupplier",
+      "enabledCondition": "chkIsFuelSupplier.Checked",
+      "events": ["CheckedChanged", "Validated"],
+      "notes": "Only one VBU can be default - shows confirmation message"
+    },
+    {
+      "name": "txtMinDiscountQty",
+      "type": "UltraTextEditor",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Min Discount Qty",
+      "dataBinding": "VendorBusinessUnit.MinDiscountQty",
+      "enabledCondition": "chkIsFuelSupplier.Checked",
+      "events": ["Validated"]
+    },
+    {
+      "name": "cboMinDiscountFrequency",
+      "type": "UltraCombo",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Min Discount Frequency",
+      "dataBinding": "VendorBusinessUnit.MinDiscountFrequency",
+      "populationMethod": "GetFrequencyList",
+      "dataSource": "Weekly, Monthly, Quarterly, Yearly",
+      "valueField": "Value",
+      "displayField": "Value",
+      "enabledCondition": "chkIsFuelSupplier.Checked",
+      "events": ["Validated"]
+    },
+    {
+      "name": "chkIsBoatAssistSupplier",
+      "type": "UltraCheckEditor",
+      "category": "VendorBusinessUnitDetail",
+      "label": "Boat Assist",
+      "dataBinding": "VendorBusinessUnit.IsBoatAssistSupplier",
+      "events": ["Validated"]
+    }
+  ],
+  "grids": [
+    {
+      "name": "grdContacts",
+      "type": "UltraGrid",
+      "category": "ContactList",
+      "uniqueIdentifier": "VendorContactID",
+      "dataSource": "Vendor.VendorContacts",
+      "columns": [
+        {
+          "key": "Name",
+          "header": "Name",
+          "dataType": "String",
+          "width": 142,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "IsPrimary",
+          "header": "Primary",
+          "dataType": "Boolean",
+          "width": 50,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "IsDispatcher",
+          "header": "Dispatcher",
+          "dataType": "Boolean",
+          "width": 90,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "IsLiquidBroker",
+          "header": "Liquid Broker",
+          "dataType": "Boolean",
+          "width": 90,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true,
+          "visibilityCondition": "License: UnitTow"
+        },
+        {
+          "key": "PhoneNumber",
+          "header": "Phone",
+          "dataType": "String",
+          "width": 90,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "PhoneExt",
+          "header": "Ext",
+          "dataType": "String",
+          "width": 44,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "EmailAddress",
+          "header": "Email",
+          "dataType": "String",
+          "width": 168,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true
+        }
+      ],
+      "events": ["DoubleClick"],
+      "initialSort": [
+        {
+          "column": "Name",
+          "direction": "Ascending"
+        }
+      ],
+      "autoFitStyle": "ExtendLastColumn",
+      "allowColumnChooser": false
+    },
+    {
+      "name": "grdPortalGroups",
+      "type": "UltraGrid",
+      "category": "PortalGroupList",
+      "uniqueIdentifier": "VendorPortalGroupID",
+      "dataSource": "Lists.VendorPortalGroupSearch.GetList(VendorID)",
+      "columns": [
+        {
+          "key": "Name",
+          "header": "Name",
+          "dataType": "String",
+          "width": 200,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "EventHistoryDays",
+          "header": "Event History Days",
+          "dataType": "Numeric",
+          "width": 110,
+          "alignment": "Right",
+          "sortable": true,
+          "filterable": true,
+          "customComparer": "NumericSortComparer"
+        },
+        {
+          "key": "LimitBargeEvents",
+          "header": "Limit Events",
+          "dataType": "Boolean",
+          "width": 90,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "LimitDestinations",
+          "header": "Limit Destinations",
+          "dataType": "Boolean",
+          "width": 90,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "LimitCustomers",
+          "header": "Limit Customers",
+          "dataType": "Boolean",
+          "width": 90,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "IsActive",
+          "header": "Active",
+          "dataType": "Boolean",
+          "width": 90,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        }
+      ],
+      "events": ["DoubleClick"],
+      "initialSort": [
+        {
+          "column": "Name",
+          "direction": "Ascending"
+        }
+      ],
+      "autoFitStyle": "ResizeAllColumns",
+      "allowColumnChooser": false,
+      "notes": "Opens frmVendorPortalGroup dialog for add/modify/copy"
+    },
+    {
+      "name": "grdVendorBusinessUnits",
+      "type": "UltraGrid",
+      "category": "VendorBusinessUnitList",
+      "uniqueIdentifier": "VendorBusinessUnitID",
+      "dataSource": "Vendor.VendorBusinessUnits",
+      "columns": [
+        {
+          "key": "Name",
+          "header": "Name",
+          "dataType": "String",
+          "width": 200,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "AccountingCode",
+          "header": "Accounting #",
+          "dataType": "String",
+          "width": 100,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "River",
+          "header": "River",
+          "dataType": "String",
+          "width": 50,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "Mile",
+          "header": "Mile",
+          "dataType": "Decimal",
+          "width": 50,
+          "alignment": "Right",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "Bank",
+          "header": "Bank",
+          "dataType": "String",
+          "width": 60,
+          "alignment": "Left",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "IsFuelSupplier",
+          "header": "Fuel Supplier",
+          "dataType": "Boolean",
+          "width": 100,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "IsDefaultFuelSupplier",
+          "header": "Default",
+          "dataType": "Boolean",
+          "width": 60,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "IsBoatAssistSupplier",
+          "header": "Boat Assist",
+          "dataType": "Boolean",
+          "width": 80,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        },
+        {
+          "key": "IsActive",
+          "header": "Active",
+          "dataType": "Boolean",
+          "width": 50,
+          "alignment": "Center",
+          "sortable": true,
+          "filterable": true
+        }
+      ],
+      "events": ["DoubleClick"],
+      "initialSort": [
+        {
+          "column": "Name",
+          "direction": "Ascending"
+        }
+      ],
+      "autoFitStyle": "ResizeAllColumns",
+      "allowColumnChooser": false
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnSubmit",
+      "text": "Submit",
+      "type": "Submit",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnSubmit_Click",
+      "purpose": "Save vendor changes and close form"
+    },
+    {
+      "name": "btnCancel",
+      "text": "Cancel",
+      "type": "Cancel",
+      "enabled": true,
+      "visible": true,
+      "causesValidation": false,
+      "handler": "btnCancel_Click",
+      "purpose": "Discard vendor changes and close form"
+    },
+    {
+      "name": "btnSet",
+      "text": "Set",
+      "type": "Submit",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnSet_Click",
+      "purpose": "Save contact detail changes",
+      "notes": "Confirms portal account deletion if email cleared"
+    },
+    {
+      "name": "btnCancelEdit",
+      "text": "Cancel",
+      "type": "Cancel",
+      "enabled": true,
+      "visible": true,
+      "causesValidation": false,
+      "handler": "btnCancelEdit_Click",
+      "purpose": "Discard contact detail changes"
+    },
+    {
+      "name": "btnVbuSet",
+      "text": "Set",
+      "type": "Submit",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnVbuSet_Click",
+      "purpose": "Save vendor business unit detail changes",
+      "notes": "Clears fuel fields if not fuel supplier, checks default fuel supplier"
+    },
+    {
+      "name": "btnVbuCancel",
+      "text": "Cancel",
+      "type": "Cancel",
+      "enabled": true,
+      "visible": true,
+      "causesValidation": false,
+      "handler": "btnVbuCancel_Click",
+      "purpose": "Discard vendor business unit detail changes"
+    }
+  ],
+  "toolbars": [
+    {
+      "name": "ContactsToolbarManager",
+      "category": "Contacts",
+      "buttons": [
+        {
+          "key": "Add",
+          "text": "Add",
+          "type": "Add",
+          "image": "Add.png",
+          "handler": "ContactsToolbarManager_ToolClick",
+          "purpose": "Add new contact"
+        },
+        {
+          "key": "Modify",
+          "text": "Modify",
+          "type": "Open",
+          "image": "Modify.png",
+          "handler": "ContactsToolbarManager_ToolClick",
+          "enabledCondition": "Row selected",
+          "purpose": "Modify selected contact"
+        },
+        {
+          "key": "Remove",
+          "text": "Remove",
+          "type": "Remove",
+          "image": "Remove.png",
+          "handler": "ContactsToolbarManager_ToolClick",
+          "enabledCondition": "Row selected",
+          "purpose": "Remove selected contact",
+          "notes": "Special confirmation if contact has portal account"
+        },
+        {
+          "key": "ExportContacts",
+          "text": "Export",
+          "type": "Open",
+          "image": "ExportResults.png",
+          "handler": "ContactsToolbarManager_ToolClick",
+          "enabledCondition": "At least one row",
+          "purpose": "Export contacts grid to Excel"
+        }
+      ]
+    },
+    {
+      "name": "PortalToolbarManager",
+      "category": "PortalGroups",
+      "buttons": [
+        {
+          "key": "AddPortalGroup",
+          "text": "Add",
+          "type": "Add",
+          "image": "Add.png",
+          "handler": "PortalToolbarManager_ToolClick",
+          "purpose": "Add new portal group"
+        },
+        {
+          "key": "ModifyPortalGroup",
+          "text": "Modify",
+          "type": "Open",
+          "image": "Modify.png",
+          "handler": "PortalToolbarManager_ToolClick",
+          "enabledCondition": "Row selected",
+          "purpose": "Modify selected portal group"
+        },
+        {
+          "key": "RemovePortalGroup",
+          "text": "Remove",
+          "type": "Remove",
+          "image": "Remove.png",
+          "handler": "PortalToolbarManager_ToolClick",
+          "enabledCondition": "Row selected",
+          "purpose": "Remove selected portal group"
+        },
+        {
+          "key": "CopyPortalGroup",
+          "text": "Copy",
+          "type": "Add",
+          "image": "Copy.png",
+          "handler": "PortalToolbarManager_ToolClick",
+          "enabledCondition": "Row selected",
+          "purpose": "Copy selected portal group"
+        },
+        {
+          "key": "ExportPortalGroup",
+          "text": "Export",
+          "type": "Open",
+          "image": "ExportResults.png",
+          "handler": "PortalToolbarManager_ToolClick",
+          "enabledCondition": "At least one row",
+          "purpose": "Export portal groups grid to Excel"
+        }
+      ]
+    },
+    {
+      "name": "VendorBusinessUnitsToolbarManager",
+      "category": "VendorBusinessUnits",
+      "buttons": [
+        {
+          "key": "AddVbu",
+          "text": "Add",
+          "type": "Add",
+          "image": "Add.png",
+          "handler": "VendorBusinessUnitsToolbarManager_ToolClick",
+          "purpose": "Add new vendor business unit"
+        },
+        {
+          "key": "ModifyVbu",
+          "text": "Modify",
+          "type": "Open",
+          "image": "Modify.png",
+          "handler": "VendorBusinessUnitsToolbarManager_ToolClick",
+          "enabledCondition": "Row selected",
+          "purpose": "Modify selected vendor business unit"
+        },
+        {
+          "key": "RemoveVbu",
+          "text": "Remove",
+          "type": "Remove",
+          "image": "Remove.png",
+          "handler": "VendorBusinessUnitsToolbarManager_ToolClick",
+          "enabledCondition": "Row selected",
+          "purpose": "Remove selected vendor business unit"
+        },
+        {
+          "key": "ExportVbu",
+          "text": "Export",
+          "type": "Open",
+          "image": "ExportResults.png",
+          "handler": "VendorBusinessUnitsToolbarManager_ToolClick",
+          "enabledCondition": "At least one row",
+          "purpose": "Export vendor business units grid to Excel"
+        }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "name": "pnlVendor",
+      "label": "Vendor Information",
+      "controls": [
+        "txtName",
+        "txtLongName",
+        "txtAddress",
+        "txtCity",
+        "cboState",
+        "txtZip",
+        "txtPhoneNumber",
+        "txtFaxNumber",
+        "txtEmailAddress",
+        "txtAccountingCode",
+        "cboTermsCode",
+        "chkIsInternalVendor",
+        "chkIsLiquidBroker",
+        "chkIsTankerman"
+      ]
+    },
+    {
+      "name": "grpContacts",
+      "label": "Contacts",
+      "controls": ["grdContacts", "grpContact"]
+    },
+    {
+      "name": "grpContact",
+      "label": "Detail",
+      "controls": [
+        "txtContactName",
+        "txtContactPhoneNumber",
+        "txtContactPhoneExt",
+        "txtContactEmailAddress",
+        "txtContactFaxNumber",
+        "chkIsPrimary",
+        "chkContactIsDispatcher",
+        "chkContactIsLiquidBroker",
+        "btnSet",
+        "btnCancelEdit"
+      ]
+    },
+    {
+      "name": "pnlPortal",
+      "label": "Portal Settings",
+      "controls": ["chkEnablePortal"]
+    },
+    {
+      "name": "grpPortalGroups",
+      "label": "Portal User Groups",
+      "controls": ["grdPortalGroups"]
+    },
+    {
+      "name": "grpVendorBusinessUnit",
+      "label": "Detail",
+      "controls": [
+        "txtVbuName",
+        "txtVbuAccountingCode",
+        "chkVbuIsActive",
+        "cboRiver",
+        "txtMile",
+        "cboBank",
+        "chkIsFuelSupplier",
+        "chkIsDefaultFuelSupplier",
+        "txtMinDiscountQty",
+        "cboMinDiscountFrequency",
+        "chkIsBoatAssistSupplier",
+        "btnVbuSet",
+        "btnVbuCancel"
+      ]
+    },
+    {
+      "name": "pnlTabPageBargeExSettings",
+      "label": "BargeEx Settings",
+      "controls": [
+        "chkIsBargeExEnabled",
+        "txtBargeExTradingPartnerNum",
+        "cboBargeExConfigID"
+      ]
+    },
+    {
+      "name": "grpSubmitCancel",
+      "label": "Submit/Cancel",
+      "controls": ["chkIsActive", "btnSubmit", "btnCancel"]
+    }
+  ],
+  "validation": {
+    "validatorExtender": "ValidatorExtender",
+    "displayControl": "staStatus",
+    "rules": [
+      {
+        "control": "txtName",
+        "type": "String",
+        "required": true,
+        "message": "Name is required"
+      },
+      {
+        "control": "txtLongName",
+        "type": "String",
+        "required": false
+      },
+      {
+        "control": "txtAccountingCode",
+        "type": "String",
+        "required": false
+      },
+      {
+        "control": "txtAddress",
+        "type": "String",
+        "required": false
+      },
+      {
+        "control": "txtCity",
+        "type": "String",
+        "required": false
+      },
+      {
+        "control": "txtZip",
+        "type": "ZipCodeOptionalExtention",
+        "required": false
+      },
+      {
+        "control": "txtPhoneNumber",
+        "type": "Phone10",
+        "required": false
+      },
+      {
+        "control": "txtFaxNumber",
+        "type": "Phone10",
+        "required": false
+      },
+      {
+        "control": "txtEmailAddress",
+        "type": "Email",
+        "required": false
+      },
+      {
+        "control": "txtContactName",
+        "type": "String",
+        "required": true,
+        "message": "Contact name is required"
+      },
+      {
+        "control": "txtContactPhoneNumber",
+        "type": "Phone10",
+        "required": false
+      },
+      {
+        "control": "txtContactPhoneExt",
+        "type": "String",
+        "required": false
+      },
+      {
+        "control": "txtContactEmailAddress",
+        "type": "Email",
+        "required": false
+      },
+      {
+        "control": "txtContactFaxNumber",
+        "type": "Phone10",
+        "required": false
+      },
+      {
+        "control": "txtMile",
+        "type": "Decimal",
+        "required": false
+      }
+    ]
+  },
+  "eventHandlers": {
+    "Form_Load": "Initialize form, format controls, load vendor data, refresh grids, enable/disable controls",
+    "btnSubmit_Click": "Clear unused fields, mark cache dirty if VBUs changed, save vendor, close form",
+    "btnCancel_Click": "Clear unused fields, cancel vendor changes, close form",
+    "btnSet_Click": "Confirm portal deletion if email cleared, save contact, update grid, enforce IsPrimary uniqueness",
+    "btnCancelEdit_Click": "Cancel contact changes, clear controls, disable edit mode",
+    "btnVbuSet_Click": "Clear fuel fields if not supplier, check default fuel supplier, save VBU, update grid",
+    "btnVbuCancel_Click": "Cancel VBU changes, clear controls, disable edit mode",
+    "ContactsToolbarManager_ToolClick": "Route to ItemAdd, ItemModify, ItemRemove, or ExportGrid based on tool key",
+    "PortalToolbarManager_ToolClick": "Save unsaved changes first, open frmVendorPortalGroup dialog, reload vendor",
+    "VendorBusinessUnitsToolbarManager_ToolClick": "Route to ItemAdd, ItemModify, ItemRemove, or ExportGrid based on tool key",
+    "tabMain_SelectedTabChanged": "Enable/disable controls based on selected tab",
+    "chkIsBargeExEnabled_CheckedChanged": "Enable/disable BargeEx fields based on checkbox state",
+    "chkEnablePortal_CheckedChanged": "Enable/disable portal groups section based on checkbox state",
+    "chkIsFuelSupplier_CheckedChanged": "Enable/disable fuel-related fields based on checkbox state",
+    "chkIsDefaultFuelSupplier_CheckedChanged": "Show confirmation message about replacing existing default"
+  },
+  "businessLogic": {
+    "onSave": [
+      "ClearUnusedFields - clears BargeEx fields if disabled",
+      "Mark VendorBusinessUnitList cache dirty if VBUs changed"
+    ],
+    "onContactSave": [
+      "Enforce single IsPrimary contact - set others to false",
+      "Confirm portal account deletion if email address cleared"
+    ],
+    "onContactRemove": [
+      "Special confirmation if contact has portal account (PortalUserID not empty)"
+    ],
+    "onVbuSave": [
+      "Clear IsDefaultFuelSupplier and discount fields if not fuel supplier",
+      "CheckDefaultFuelSuppliers - set other VBUs IsDefaultFuelSupplier to false"
+    ],
+    "onPortalGroupAdd": [
+      "Save unsaved vendor changes first (SaveUnsavedChanges)",
+      "Vendor must not be new",
+      "Open frmVendorPortalGroup dialog",
+      "Reload vendor after changes"
+    ]
+  },
+  "dataflow": {
+    "onLoad": {
+      "source": "Vendor.GetVendor(VendorID)",
+      "target": "Form controls",
+      "method": "LoadControlsForVendor"
+    },
+    "onSave": {
+      "source": "Form controls",
+      "target": "Vendor business object",
+      "method": "Validated event handlers"
+    },
+    "collections": {
+      "VendorContacts": {
+        "source": "_Vendor.VendorContacts",
+        "gridBinding": "grdContacts",
+        "addMethod": "_Vendor.VendorContacts.Add",
+        "removeMethod": "_Vendor.VendorContacts.Remove"
+      },
+      "VendorBusinessUnits": {
+        "source": "_Vendor.VendorBusinessUnits",
+        "gridBinding": "grdVendorBusinessUnits",
+        "addMethod": "_Vendor.VendorBusinessUnits.Add",
+        "removeMethod": "_Vendor.VendorBusinessUnits.Remove"
+      },
+      "PortalGroups": {
+        "source": "Lists.VendorPortalGroupSearch.GetList(_Vendor.VendorID.ToString).List",
+        "gridBinding": "grdPortalGroups",
+        "addMethod": "frmVendorPortalGroup dialog",
+        "removeMethod": "VendorPortalGroup.DeleteVendorPortalGroup"
+      }
+    }
+  },
+  "modernEquivalents": {
+    "form": "ASP.NET Core MVC Edit View with tabs",
+    "grids": "DataTables with server-side processing",
+    "dropdowns": "Select2 or native select with search",
+    "validation": "jQuery Validation with unobtrusive validation",
+    "tabs": "Bootstrap tabs or custom tab component",
+    "toolbars": "Button groups with icon buttons"
+  },
+  "conversionNotes": [
+    "Form has complex master-detail-detail structure with three entities",
+    "Three separate toolbars for Contacts, Portal Groups, and Vendor Business Units",
+    "License-based visibility for UnitTow features (liquid broker, tankerman)",
+    "License-based visibility for Portal tab",
+    "Global setting controls BargeEx Settings tab visibility",
+    "Portal groups use separate dialog form (frmVendorPortalGroup) instead of inline edit",
+    "Complex enable/disable logic based on tab selection and edit mode",
+    "Portal account deletion requires special confirmation",
+    "Default fuel supplier enforcement with confirmation messages",
+    "Unsaved changes must be saved before working with portal groups",
+    "Cache invalidation for VendorBusinessUnitList when VBUs are modified",
+    "MaxLength properties include +4 for phone fields to accommodate formatting",
+    "BargeEx trading partner number is padded to 8 characters for char(8) database field"
+  ]
+}

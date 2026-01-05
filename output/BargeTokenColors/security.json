@@ -1,0 +1,381 @@
+{
+  "entity": "BargeTokenColors",
+  "actualTableName": "ColorPair",
+  "legacy": {
+    "formName": "frmBargeTokenColors",
+    "subsystem": "None",
+    "subsystemLocation": "frmBargeTokenColors.vb:33",
+    "subsystemNotes": "SubSystem.None indicates this form does not affect search screen authorization",
+    "securityButtons": [
+      {
+        "button": "btnDetailSubmit",
+        "type": "Submit",
+        "legacyPermission": "Submit",
+        "description": "Submit changes to color pair",
+        "location": "frmBargeTokenColors.vb:43"
+      },
+      {
+        "button": "btnClose",
+        "type": "Cancel",
+        "legacyPermission": "Cancel",
+        "description": "Close form without saving",
+        "location": "frmBargeTokenColors.vb:44"
+      },
+      {
+        "button": "btnDetailCancel",
+        "type": "CancelEdit",
+        "legacyPermission": "CancelEdit",
+        "description": "Cancel current edit operation",
+        "location": "frmBargeTokenColors.vb:45"
+      }
+    ],
+    "toolbarButtons": [
+      {
+        "button": "Add",
+        "type": "Add",
+        "legacyPermission": "CanCreate",
+        "description": "Create new barge token color pair",
+        "hashtableKey": "c_BtnKeyAdd",
+        "location": "frmBargeTokenColors.vb:56",
+        "enabledLogic": "frmBargeTokenColors.vb:356-357"
+      },
+      {
+        "button": "Modify",
+        "type": "Open",
+        "legacyPermission": "CanModify",
+        "description": "Edit existing color pair",
+        "hashtableKey": "c_BtnKeyModify",
+        "location": "frmBargeTokenColors.vb:57",
+        "enabledLogic": "frmBargeTokenColors.vb:359-360",
+        "notes": "ButtonType.Open used instead of ButtonType.Modify"
+      },
+      {
+        "button": "Remove",
+        "type": "Remove",
+        "legacyPermission": "CanDelete",
+        "description": "Hard delete color pair",
+        "hashtableKey": "c_BtnKeyRemove",
+        "location": "frmBargeTokenColors.vb:58",
+        "enabledLogic": "frmBargeTokenColors.vb:362-363"
+      },
+      {
+        "button": "Export",
+        "type": "Open",
+        "legacyPermission": "CanExport",
+        "description": "Export color pairs to file",
+        "hashtableKey": "c_BtnKeyExport",
+        "location": "frmBargeTokenColors.vb:59",
+        "enabledLogic": "frmBargeTokenColors.vb:366-367",
+        "notes": "ButtonType.Open used for export functionality"
+      }
+    ],
+    "securityPatterns": [
+      {
+        "pattern": "ControlAuthorization.SetButtonType",
+        "location": "frmBargeTokenColors.vb:42-46",
+        "description": "Maps UI buttons to security ButtonTypes for authorization checks"
+      },
+      {
+        "pattern": "ControlAuthorization.ToolbarButtonCanBeEnabled",
+        "location": "frmBargeTokenColors.vb:357, 360, 363, 367",
+        "description": "Runtime authorization check for toolbar buttons using hashtable lookup"
+      },
+      {
+        "pattern": "SubSystem.None",
+        "location": "frmBargeTokenColors.vb:33",
+        "description": "No subsystem-level authorization (form-level only)"
+      }
+    ],
+    "authorizationLogic": {
+      "addButton": "Enabled when not editing AND user has Add permission",
+      "modifyButton": "Enabled when item selected AND not editing AND user has Open permission",
+      "removeButton": "Enabled when item selected AND not editing AND user has Remove permission",
+      "exportButton": "Enabled when at least one row exists AND not editing AND user has Open permission"
+    }
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "description": "API endpoints use API Key authentication (NOT Windows Auth)",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/bargetokencolors/{id}",
+          "action": "GetById",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenColorsView",
+          "description": "Fetch single color pair by ID"
+        },
+        {
+          "method": "GET",
+          "route": "api/bargetokencolors",
+          "action": "Search",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenColorsView",
+          "description": "Search/list color pairs with filtering"
+        },
+        {
+          "method": "POST",
+          "route": "api/bargetokencolors",
+          "action": "Create",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenColorsModify",
+          "description": "Create new color pair"
+        },
+        {
+          "method": "PUT",
+          "route": "api/bargetokencolors/{id}",
+          "action": "Update",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenColorsModify",
+          "description": "Update existing color pair"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/bargetokencolors/{id}",
+          "action": "Delete",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "BargeTokenColorsModify",
+          "description": "Hard delete color pair",
+          "notes": "Uses Modify permission, not separate Delete permission (follows soft delete pattern even though this is hard delete)"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "description": "UI uses OIDC in production, dev middleware in development",
+      "permissions": [
+        {
+          "name": "BargeTokenColorsView",
+          "enumValue": "AuthPermissions.BargeTokenColorsView",
+          "description": "View barge token color pairs",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "Search",
+            "Details"
+          ],
+          "legacyMapping": "ButtonType.Open (read context)"
+        },
+        {
+          "name": "BargeTokenColorsModify",
+          "enumValue": "AuthPermissions.BargeTokenColorsModify",
+          "description": "Create, update, and delete barge token color pairs",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Create",
+            "Edit",
+            "Delete"
+          ],
+          "legacyMapping": "ButtonType.Add, ButtonType.Open (modify context), ButtonType.Remove",
+          "notes": "Includes hard delete - no separate Delete permission needed"
+        },
+        {
+          "name": "BargeTokenColorsExport",
+          "enumValue": "AuthPermissions.BargeTokenColorsExport",
+          "description": "Export barge token color pairs to file",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Export"
+          ],
+          "legacyMapping": "ButtonType.Open (export context)",
+          "optional": true,
+          "notes": "Consider consolidating with View permission if export is always allowed with view"
+        }
+      ],
+      "controllerAuthorization": [
+        {
+          "controller": "BargeTokenColorsSearchController",
+          "baseAuthorization": "[Authorize]",
+          "actions": [
+            {
+              "action": "Index",
+              "authorization": "[Authorize(Policy = \"BargeTokenColorsView\")]",
+              "description": "Display color pairs list/search"
+            },
+            {
+              "action": "Search",
+              "authorization": "[Authorize(Policy = \"BargeTokenColorsView\")]",
+              "description": "AJAX search endpoint"
+            },
+            {
+              "action": "Details",
+              "authorization": "[Authorize(Policy = \"BargeTokenColorsView\")]",
+              "description": "View color pair details"
+            },
+            {
+              "action": "Create",
+              "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+              "description": "Display create form"
+            },
+            {
+              "action": "Create (POST)",
+              "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+              "description": "Handle create submission"
+            },
+            {
+              "action": "Edit",
+              "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+              "description": "Display edit form"
+            },
+            {
+              "action": "Edit (POST)",
+              "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+              "description": "Handle edit submission"
+            },
+            {
+              "action": "Delete",
+              "authorization": "[Authorize(Policy = \"BargeTokenColorsModify\")]",
+              "description": "Hard delete color pair (uses Modify, not separate Delete permission)"
+            },
+            {
+              "action": "Export",
+              "authorization": "[Authorize(Policy = \"BargeTokenColorsExport\")]",
+              "description": "Export to Excel/CSV",
+              "notes": "Consider consolidating with View permission"
+            }
+          ]
+        }
+      ],
+      "viewAuthorization": [
+        {
+          "view": "Index.cshtml",
+          "hiddenElements": [
+            {
+              "element": "Create button",
+              "condition": "!User.HasPermission(AuthPermissions.BargeTokenColorsModify)",
+              "razorPattern": "@if (User.HasPermission(AuthPermissions.BargeTokenColorsModify)) { ... }"
+            },
+            {
+              "element": "Edit button (grid row)",
+              "condition": "!User.HasPermission(AuthPermissions.BargeTokenColorsModify)",
+              "razorPattern": "@if (User.HasPermission(AuthPermissions.BargeTokenColorsModify)) { ... }"
+            },
+            {
+              "element": "Delete button (grid row)",
+              "condition": "!User.HasPermission(AuthPermissions.BargeTokenColorsModify)",
+              "razorPattern": "@if (User.HasPermission(AuthPermissions.BargeTokenColorsModify)) { ... }"
+            },
+            {
+              "element": "Export button",
+              "condition": "!User.HasPermission(AuthPermissions.BargeTokenColorsExport)",
+              "razorPattern": "@if (User.HasPermission(AuthPermissions.BargeTokenColorsExport)) { ... }",
+              "notes": "Or use BargeTokenColorsView if export is consolidated"
+            }
+          ]
+        },
+        {
+          "view": "Create.cshtml / Edit.cshtml",
+          "authorization": "Entire view protected by controller [Authorize] attribute",
+          "notes": "No row-level security needed - form access is binary"
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "BargeTokenColorsView",
+          "description": "View barge token color pairs",
+          "value": "Auto-assigned",
+          "category": "BargeTokenColors"
+        },
+        {
+          "name": "BargeTokenColorsModify",
+          "description": "Create, update, and delete barge token color pairs",
+          "value": "Auto-assigned",
+          "category": "BargeTokenColors"
+        },
+        {
+          "name": "BargeTokenColorsExport",
+          "description": "Export barge token color pairs",
+          "value": "Auto-assigned",
+          "category": "BargeTokenColors",
+          "optional": true,
+          "notes": "Consider consolidating with View permission"
+        }
+      ]
+    },
+    "authenticationConfiguration": {
+      "api": {
+        "scheme": "ApiKey",
+        "configuration": "appsettings.json",
+        "example": {
+          "ApiKeys": {
+            "ValidKeys": [
+              "key1",
+              "key2"
+            ]
+          }
+        }
+      },
+      "ui": {
+        "productionScheme": "OIDC",
+        "developmentScheme": "DevelopmentAutoSignInMiddleware",
+        "identityScheme": "IdentityConstants.ApplicationScheme",
+        "configuration": "Program.cs / Startup.cs",
+        "notes": "Uses IdentityConstants.ApplicationScheme (NOT 'Cookies')"
+      }
+    }
+  },
+  "securityMapping": {
+    "legacyToModern": [
+      {
+        "legacyButton": "Add",
+        "legacyType": "ButtonType.Add",
+        "modernPermission": "BargeTokenColorsModify",
+        "modernAction": "Create"
+      },
+      {
+        "legacyButton": "Modify",
+        "legacyType": "ButtonType.Open",
+        "modernPermission": "BargeTokenColorsModify",
+        "modernAction": "Edit",
+        "notes": "Legacy uses ButtonType.Open instead of ButtonType.Modify"
+      },
+      {
+        "legacyButton": "Remove",
+        "legacyType": "ButtonType.Remove",
+        "modernPermission": "BargeTokenColorsModify",
+        "modernAction": "Delete",
+        "notes": "Hard delete - uses Modify permission (no separate Delete permission)"
+      },
+      {
+        "legacyButton": "Export",
+        "legacyType": "ButtonType.Open",
+        "modernPermission": "BargeTokenColorsExport",
+        "modernAction": "Export",
+        "notes": "Consider consolidating with View permission"
+      },
+      {
+        "legacyButton": "Grid/Details View",
+        "legacyType": "Implicit (no button)",
+        "modernPermission": "BargeTokenColorsView",
+        "modernAction": "Index, Search, Details"
+      }
+    ]
+  },
+  "implementationNotes": [
+    "SubSystem.None means no search-screen-level authorization in legacy app",
+    "Master-detail form on single screen (not separate search/edit forms)",
+    "Legacy uses ButtonType.Open for both Modify and Export actions",
+    "Hard delete operation - no soft delete/IsActive pattern",
+    "Consider consolidating Export permission with View permission",
+    "API uses [ApiKey] attribute (NOT Windows Auth)",
+    "UI uses [Authorize] with OIDC in production, dev middleware in development",
+    "Always use IdentityConstants.ApplicationScheme (NOT 'Cookies')",
+    "FleetID scoping may require tenant-aware authorization checks",
+    "Color values need hex conversion for web (stored as .NET color names)",
+    "No separate Delete permission - use Modify for delete operations (standard pattern)"
+  ],
+  "csgAuthorizationIntegration": {
+    "status": "Future implementation",
+    "subsystemIdentifier": "None",
+    "description": "CSG Authorization framework will be implemented after initial conversion",
+    "currentApproach": "Use [ApiKey] for API and [Authorize] with permission policies for UI",
+    "futureApproach": "Replace with CSG Authorization attributes and permission checks"
+  }
+}

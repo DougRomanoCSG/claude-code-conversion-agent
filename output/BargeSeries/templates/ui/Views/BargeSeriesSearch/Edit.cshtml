@@ -1,0 +1,189 @@
+@model BargeOpsAdmin.ViewModels.BargeSeriesEditViewModel
+@{
+    ViewData["Title"] = Model.BargeSeriesID == 0 ? "New Barge Series" : $"{Model.Name} - Barge Series Detail";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2>@ViewData["Title"]</h2>
+        </div>
+    </div>
+
+    <form asp-action="Edit" method="post">
+        <input asp-for="BargeSeriesID" type="hidden" />
+
+        <!-- Main Details Card -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Barge Series Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" readonly="@Model.IsReadOnly" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="HullType" class="form-label"></label>
+                        <select asp-for="HullType" asp-items="Model.HullTypes" class="form-select" data-select2="true" disabled="@Model.IsReadOnly">
+                        </select>
+                        <span asp-validation-for="HullType" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="CoverType" class="form-label"></label>
+                        <select asp-for="CoverType" asp-items="Model.CoverTypes" class="form-select" data-select2="true" disabled="@Model.IsReadOnly">
+                        </select>
+                        <span asp-validation-for="CoverType" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="CustomerID" class="form-label"></label>
+                        <select asp-for="CustomerID" asp-items="Model.Customers" class="form-select" data-select2="true" disabled="@Model.IsReadOnly">
+                        </select>
+                        <span asp-validation-for="CustomerID" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label asp-for="Length" class="form-label"></label>
+                        <input asp-for="Length" class="form-control" type="number" step="0.1" readonly="@Model.IsReadOnly" />
+                        <span asp-validation-for="Length" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Width" class="form-label"></label>
+                        <input asp-for="Width" class="form-control" type="number" step="0.1" readonly="@Model.IsReadOnly" />
+                        <span asp-validation-for="Width" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Depth" class="form-label"></label>
+                        <input asp-for="Depth" class="form-control" type="number" step="0.1" readonly="@Model.IsReadOnly" />
+                        <span asp-validation-for="Depth" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="TonsPerInch" class="form-label"></label>
+                        <input asp-for="TonsPerInch" class="form-control" type="number" step="0.1" readonly="@Model.IsReadOnly" />
+                        <span asp-validation-for="TonsPerInch" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label asp-for="DraftLightFeet" class="form-label"></label>
+                        <input asp-for="DraftLightFeet" class="form-control" type="number" readonly="@Model.IsReadOnly" />
+                        <span asp-validation-for="DraftLightFeet" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="DraftLightInches" class="form-label"></label>
+                        <input asp-for="DraftLightInches" class="form-control" type="number" readonly="@Model.IsReadOnly" />
+                        <span asp-validation-for="DraftLightInches" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Draft Tonnage Grid Card -->
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Draft Tonnage</h5>
+                @if (Model.CanModify && !Model.IsReadOnly)
+                {
+                    <div class="btn-toolbar" role="toolbar">
+                        <div class="btn-group" role="group">
+                            <button type="button" id="btnPaste" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-paste"></i> Paste from Clipboard
+                            </button>
+                            <button type="button" id="btnExport" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-file-export"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="draftGrid" class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Feet</th>
+                                <th>0"</th>
+                                <th>1"</th>
+                                <th>2"</th>
+                                <th>3"</th>
+                                <th>4"</th>
+                                <th>5"</th>
+                                <th>6"</th>
+                                <th>7"</th>
+                                <th>8"</th>
+                                <th>9"</th>
+                                <th>10"</th>
+                                <th>11"</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Drafts.Count; i++)
+                            {
+                                <tr data-row="@i">
+                                    <td class="text-end">
+                                        <input asp-for="Drafts[i].BargeSeriesDraftID" type="hidden" />
+                                        <input asp-for="Drafts[i].BargeSeriesID" type="hidden" />
+                                        <input asp-for="Drafts[i].DraftFeet" class="form-control form-control-sm text-end" readonly />
+                                    </td>
+                                    <td><input asp-for="Drafts[i].Tons00" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons01" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons02" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons03" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons04" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons05" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons06" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons07" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons08" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons09" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons10" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                    <td><input asp-for="Drafts[i].Tons11" class="form-control form-control-sm text-end" type="number" readonly="@Model.IsReadOnly" /></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row">
+            <div class="col-12">
+                <div class="float-start">
+                    <div class="form-check">
+                        <input asp-for="IsActive" class="form-check-input" disabled="@Model.IsReadOnly" />
+                        <label asp-for="IsActive" class="form-check-label"></label>
+                    </div>
+                </div>
+                <div class="float-end">
+                    @if (Model.CanModify && !Model.IsReadOnly)
+                    {
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Submit
+                        </button>
+                    }
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/barge-series-detail.js"></script>
+    <script>
+        window.bargeSeriesDetail.init({
+            isReadOnly: @Model.IsReadOnly.ToString().ToLower()
+        });
+    </script>
+}

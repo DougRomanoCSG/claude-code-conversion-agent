@@ -1,0 +1,680 @@
+{
+  "businessObject": "Vendor",
+  "baseClass": "VendorBase",
+  "namespace": "BargeOps.BusinessObjects",
+  "inheritsFrom": "BusinessLogicBase",
+  "properties": [
+    {
+      "name": "VendorID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "defaultValue": 0,
+      "description": "Unique identifier for the vendor"
+    },
+    {
+      "name": "Name",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": "",
+      "trimOnSet": true,
+      "isAudited": true,
+      "description": "Vendor short name"
+    },
+    {
+      "name": "LongName",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": "",
+      "displayName": "Long name",
+      "trimOnSet": true,
+      "isAudited": true,
+      "description": "Vendor full legal name"
+    },
+    {
+      "name": "AccountingCode",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "trimOnSet": true,
+      "isAudited": true,
+      "description": "Accounting system reference code"
+    },
+    {
+      "name": "IsActive",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": true,
+      "isAudited": true,
+      "description": "Indicates if vendor is active in the system"
+    },
+    {
+      "name": "EnablePortal",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": false,
+      "isAudited": true,
+      "description": "Enables vendor portal access"
+    },
+    {
+      "name": "Address",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 80,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "trimOnSet": true,
+      "isAudited": true,
+      "description": "Vendor street address"
+    },
+    {
+      "name": "City",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 30,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "trimOnSet": true,
+      "isAudited": true,
+      "description": "Vendor city"
+    },
+    {
+      "name": "State",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 2,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "trimOnSet": true,
+      "isAudited": true,
+      "formatType": "CharProp",
+      "description": "Vendor state (2-letter code)"
+    },
+    {
+      "name": "Zip",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 10,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "trimOnSet": true,
+      "isAudited": true,
+      "formatType": "ZipCodeOptionalExtension",
+      "description": "Vendor ZIP code with optional extension"
+    },
+    {
+      "name": "PhoneNumber",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 10,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "displayName": "Phone number",
+      "trimOnSet": true,
+      "isAudited": true,
+      "formatType": "Phone10",
+      "description": "10-digit phone number"
+    },
+    {
+      "name": "FaxNumber",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 10,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "displayName": "Fax number",
+      "trimOnSet": true,
+      "isAudited": true,
+      "formatType": "Phone10",
+      "description": "10-digit fax number"
+    },
+    {
+      "name": "EmailAddress",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 100,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "displayName": "Email address",
+      "trimOnSet": true,
+      "isAudited": true,
+      "description": "Vendor email address"
+    },
+    {
+      "name": "IsBargeExEnabled",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": false,
+      "displayName": "BargeEx enabled",
+      "isAudited": true,
+      "description": "Enables BargeEx integration for this vendor"
+    },
+    {
+      "name": "BargeExTradingPartnerNum",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 8,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "displayName": "Trading partner number",
+      "trimOnSet": true,
+      "isAudited": true,
+      "formatType": "CharProp",
+      "description": "BargeEx trading partner number"
+    },
+    {
+      "name": "BargeExConfigID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "displayName": "Configuration",
+      "trimOnSet": true,
+      "isAudited": true,
+      "formatType": "Int32",
+      "underlyingType": "Int32",
+      "description": "BargeEx configuration ID"
+    },
+    {
+      "name": "IsLiquidBroker",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": false,
+      "isAudited": true,
+      "description": "Indicates if vendor is a liquid commodities broker"
+    },
+    {
+      "name": "TermsCode",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 8,
+      "isRequired": false,
+      "isNullable": true,
+      "defaultValue": "",
+      "trimOnSet": true,
+      "isAudited": true,
+      "description": "Payment terms code"
+    },
+    {
+      "name": "IsInternalVendor",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": false,
+      "isAudited": true,
+      "description": "Indicates if vendor is internal to the organization"
+    },
+    {
+      "name": "IsTankerman",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": false,
+      "isAudited": true,
+      "description": "Indicates if vendor provides tankerman services"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "NameRequired",
+      "property": "Name",
+      "condition": "String.IsNullOrEmpty(Name)",
+      "message": "Name is required",
+      "severity": "Error",
+      "context": "Always",
+      "modernEquivalent": "RuleFor(x => x.Name).NotEmpty().WithMessage(\"Name is required\")"
+    },
+    {
+      "ruleName": "NameMaxLength",
+      "property": "Name",
+      "condition": "Name.Length > 20",
+      "message": "Name cannot exceed maximum length of 20.",
+      "severity": "Error",
+      "context": "Always",
+      "modernEquivalent": "RuleFor(x => x.Name).MaximumLength(20).WithMessage(\"Name cannot exceed maximum length of 20.\")"
+    },
+    {
+      "ruleName": "LongNameRequired",
+      "property": "LongName",
+      "condition": "String.IsNullOrEmpty(LongName)",
+      "message": "Long name is required",
+      "severity": "Error",
+      "context": "Always",
+      "modernEquivalent": "RuleFor(x => x.LongName).NotEmpty().WithMessage(\"Long name is required\")"
+    },
+    {
+      "ruleName": "LongNameMaxLength",
+      "property": "LongName",
+      "condition": "LongName.Length > 50",
+      "message": "Long name cannot exceed maximum length of 50.",
+      "severity": "Error",
+      "context": "Always",
+      "modernEquivalent": "RuleFor(x => x.LongName).MaximumLength(50).WithMessage(\"Long name cannot exceed maximum length of 50.\")"
+    },
+    {
+      "ruleName": "AccountingCodeMaxLength",
+      "property": "AccountingCode",
+      "condition": "AccountingCode.Length > 20",
+      "message": "AccountingCode cannot exceed maximum length of 20.",
+      "severity": "Error",
+      "context": "When AccountingCode has value",
+      "modernEquivalent": "RuleFor(x => x.AccountingCode).MaximumLength(20).WithMessage(\"AccountingCode cannot exceed maximum length of 20.\")"
+    },
+    {
+      "ruleName": "AddressMaxLength",
+      "property": "Address",
+      "condition": "Address.Length > 80",
+      "message": "Address cannot exceed maximum length of 80.",
+      "severity": "Error",
+      "context": "When Address has value",
+      "modernEquivalent": "RuleFor(x => x.Address).MaximumLength(80).WithMessage(\"Address cannot exceed maximum length of 80.\")"
+    },
+    {
+      "ruleName": "CityMaxLength",
+      "property": "City",
+      "condition": "City.Length > 30",
+      "message": "City cannot exceed maximum length of 30.",
+      "severity": "Error",
+      "context": "When City has value",
+      "modernEquivalent": "RuleFor(x => x.City).MaximumLength(30).WithMessage(\"City cannot exceed maximum length of 30.\")"
+    },
+    {
+      "ruleName": "StateMaxLength",
+      "property": "State",
+      "condition": "State.Length > 2",
+      "message": "State cannot exceed maximum length of 2.",
+      "severity": "Error",
+      "context": "When State has value",
+      "modernEquivalent": "RuleFor(x => x.State).MaximumLength(2).WithMessage(\"State cannot exceed maximum length of 2.\")"
+    },
+    {
+      "ruleName": "ZipMaxLength",
+      "property": "Zip",
+      "condition": "Zip.Length > 10",
+      "message": "Zip cannot exceed maximum length of 10.",
+      "severity": "Error",
+      "context": "When Zip has value",
+      "modernEquivalent": "RuleFor(x => x.Zip).MaximumLength(10).WithMessage(\"Zip cannot exceed maximum length of 10.\")"
+    },
+    {
+      "ruleName": "PhoneNumberMaxLength",
+      "property": "PhoneNumber",
+      "condition": "PhoneNumber.Length > 10",
+      "message": "Phone number cannot exceed maximum length of 10.",
+      "severity": "Error",
+      "context": "When PhoneNumber has value",
+      "modernEquivalent": "RuleFor(x => x.PhoneNumber).MaximumLength(10).WithMessage(\"Phone number cannot exceed maximum length of 10.\")"
+    },
+    {
+      "ruleName": "FaxNumberMaxLength",
+      "property": "FaxNumber",
+      "condition": "FaxNumber.Length > 10",
+      "message": "Fax number cannot exceed maximum length of 10.",
+      "severity": "Error",
+      "context": "When FaxNumber has value",
+      "modernEquivalent": "RuleFor(x => x.FaxNumber).MaximumLength(10).WithMessage(\"Fax number cannot exceed maximum length of 10.\")"
+    },
+    {
+      "ruleName": "EmailAddressMaxLength",
+      "property": "EmailAddress",
+      "condition": "EmailAddress.Length > 100",
+      "message": "Email address cannot exceed maximum length of 100.",
+      "severity": "Error",
+      "context": "When EmailAddress has value",
+      "modernEquivalent": "RuleFor(x => x.EmailAddress).MaximumLength(100).WithMessage(\"Email address cannot exceed maximum length of 100.\")"
+    },
+    {
+      "ruleName": "BargeExTradingPartnerNumMaxLength",
+      "property": "BargeExTradingPartnerNum",
+      "condition": "BargeExTradingPartnerNum.Length > 8",
+      "message": "Trading partner number cannot exceed maximum length of 8.",
+      "severity": "Error",
+      "context": "When BargeExTradingPartnerNum has value",
+      "modernEquivalent": "RuleFor(x => x.BargeExTradingPartnerNum).MaximumLength(8).WithMessage(\"Trading partner number cannot exceed maximum length of 8.\")"
+    },
+    {
+      "ruleName": "TermsCodeMaxLength",
+      "property": "TermsCode",
+      "condition": "TermsCode.Length > 8",
+      "message": "TermsCode cannot exceed maximum length of 8.",
+      "severity": "Error",
+      "context": "When TermsCode has value",
+      "modernEquivalent": "RuleFor(x => x.TermsCode).MaximumLength(8).WithMessage(\"TermsCode cannot exceed maximum length of 8.\")"
+    },
+    {
+      "ruleName": "BargeExEnabledTwoRequiredFields",
+      "property": "IsBargeExEnabled",
+      "condition": "IsBargeExEnabled == true && (String.IsNullOrEmpty(BargeExTradingPartnerNum.Trim) || String.IsNullOrEmpty(BargeExConfigID.Trim))",
+      "message": "Both Trading partner number & Configuration required for BargeEx enabled.",
+      "severity": "Error",
+      "context": "When IsBargeExEnabled is true",
+      "modernEquivalent": "RuleFor(x => x.BargeExTradingPartnerNum).NotEmpty().When(x => x.IsBargeExEnabled).WithMessage(\"Both Trading partner number & Configuration required for BargeEx enabled.\");\nRuleFor(x => x.BargeExConfigID).NotEmpty().When(x => x.IsBargeExEnabled).WithMessage(\"Both Trading partner number & Configuration required for BargeEx enabled.\")"
+    }
+  ],
+  "methods": {
+    "factory": [
+      {
+        "name": "NewVendor",
+        "returnType": "Vendor",
+        "parameters": [],
+        "visibility": "Public",
+        "isShared": true,
+        "description": "Creates a new parent Vendor instance with default values"
+      },
+      {
+        "name": "NewVendorAsChild",
+        "returnType": "Vendor",
+        "parameters": [],
+        "visibility": "Friend",
+        "isShared": true,
+        "description": "Creates a new child Vendor instance for use in collections"
+      },
+      {
+        "name": "GetVendor",
+        "returnType": "Vendor",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "visibility": "Public",
+        "isShared": true,
+        "description": "Loads an existing Vendor by VendorID"
+      },
+      {
+        "name": "GetVendorChild",
+        "returnType": "Vendor",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "visibility": "Friend",
+        "isShared": true,
+        "description": "Loads an existing Vendor as a child object by ID"
+      },
+      {
+        "name": "GetVendorChild",
+        "returnType": "Vendor",
+        "parameters": [
+          {
+            "name": "dr",
+            "type": "SafeDataReader"
+          }
+        ],
+        "visibility": "Friend",
+        "isShared": true,
+        "description": "Loads an existing Vendor child from a data reader"
+      },
+      {
+        "name": "DeleteVendor",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "visibility": "Public",
+        "isShared": true,
+        "description": "Deletes a Vendor by VendorID"
+      }
+    ],
+    "lifecycle": [
+      {
+        "name": "Initialize",
+        "returnType": "void",
+        "parameters": [],
+        "visibility": "Public",
+        "description": "Initializes the Vendor object with default values and sets up business rules"
+      },
+      {
+        "name": "CheckBusinessRules",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "PropertyName",
+            "type": "String"
+          }
+        ],
+        "visibility": "Public",
+        "description": "Validates business rules for the specified property or all properties if empty string"
+      }
+    ],
+    "dataAccess": [
+      {
+        "name": "AddFetchParameters",
+        "visibility": "Protected",
+        "description": "Adds VendorID parameter for SELECT stored procedure"
+      },
+      {
+        "name": "AddInsertParameters",
+        "visibility": "Protected",
+        "description": "Adds all non-primary key parameters for INSERT stored procedure"
+      },
+      {
+        "name": "AddUpdateParameters",
+        "visibility": "Protected",
+        "description": "Adds all parameters for UPDATE stored procedure"
+      },
+      {
+        "name": "AddDeleteParameters",
+        "visibility": "Protected",
+        "description": "Adds VendorID parameter for DELETE stored procedure"
+      },
+      {
+        "name": "LoadProperties",
+        "visibility": "Protected",
+        "description": "Loads Vendor properties from SafeDataReader"
+      },
+      {
+        "name": "LoadChildObjects",
+        "visibility": "Protected",
+        "description": "Loads child collections (VendorContacts loaded immediately, others deferred)"
+      },
+      {
+        "name": "UpdateChildObjects",
+        "visibility": "Protected",
+        "description": "Updates all child collections and audit field events within transaction"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "property": "VendorContacts",
+      "relatedEntity": "VendorContacts",
+      "type": "OneToMany",
+      "cascadeDelete": true,
+      "loadingStrategy": "Immediate",
+      "description": "Collection of contact persons for this vendor"
+    },
+    {
+      "property": "VendorBusinessUnits",
+      "relatedEntity": "VendorBusinessUnits",
+      "type": "OneToMany",
+      "cascadeDelete": true,
+      "loadingStrategy": "Deferred",
+      "description": "Collection of business units associated with this vendor"
+    },
+    {
+      "property": "VendorPortalGroups",
+      "relatedEntity": "VendorPortalGroups",
+      "type": "OneToMany",
+      "cascadeDelete": true,
+      "loadingStrategy": "Deferred",
+      "description": "Collection of vendor portal groups for access control"
+    }
+  ],
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "VendorID",
+        "value": "0"
+      },
+      {
+        "property": "IsActive",
+        "value": "true",
+        "notes": "Set to true by default in custom Initialize override"
+      },
+      {
+        "property": "EnablePortal",
+        "value": "false"
+      },
+      {
+        "property": "IsBargeExEnabled",
+        "value": "false"
+      },
+      {
+        "property": "IsLiquidBroker",
+        "value": "false"
+      },
+      {
+        "property": "IsInternalVendor",
+        "value": "false"
+      },
+      {
+        "property": "IsTankerman",
+        "value": "false"
+      },
+      {
+        "property": "Name",
+        "value": "\"\""
+      },
+      {
+        "property": "LongName",
+        "value": "\"\""
+      },
+      {
+        "property": "AccountingCode",
+        "value": "\"\""
+      },
+      {
+        "property": "Address",
+        "value": "\"\""
+      },
+      {
+        "property": "City",
+        "value": "\"\""
+      },
+      {
+        "property": "State",
+        "value": "\"\""
+      },
+      {
+        "property": "Zip",
+        "value": "\"\""
+      },
+      {
+        "property": "PhoneNumber",
+        "value": "\"\""
+      },
+      {
+        "property": "FaxNumber",
+        "value": "\"\""
+      },
+      {
+        "property": "EmailAddress",
+        "value": "\"\""
+      },
+      {
+        "property": "BargeExTradingPartnerNum",
+        "value": "\"\""
+      },
+      {
+        "property": "BargeExConfigID",
+        "value": "\"\""
+      },
+      {
+        "property": "TermsCode",
+        "value": "\"\""
+      }
+    ]
+  },
+  "storedProcedures": {
+    "fetch": "VendorSelect",
+    "fetchAll": "VendorsSelect",
+    "insert": "VendorInsert",
+    "update": "VendorUpdate",
+    "delete": "VendorDelete"
+  },
+  "auditingFeatures": {
+    "isAuditEnabled": true,
+    "auditedProperties": [
+      "VendorID",
+      "Name",
+      "LongName",
+      "AccountingCode",
+      "IsActive",
+      "EnablePortal",
+      "Address",
+      "City",
+      "State",
+      "Zip",
+      "PhoneNumber",
+      "FaxNumber",
+      "EmailAddress",
+      "IsBargeExEnabled",
+      "BargeExTradingPartnerNum",
+      "BargeExConfigID",
+      "IsLiquidBroker",
+      "TermsCode",
+      "IsInternalVendor",
+      "IsTankerman"
+    ],
+    "auditMethod": "FieldAudit",
+    "description": "Field-level auditing tracks old and new values for all audited properties"
+  },
+  "validationFramework": {
+    "legacyFramework": "BrokenRules.Assert",
+    "modernRecommendation": "FluentValidation",
+    "validationTrigger": "Property setter",
+    "validationScope": "Per-property and all-properties",
+    "compositeValidation": "IsValid aggregates parent and all child collection validation"
+  },
+  "additionalNotes": [
+    "The business object uses the CSLA (Component-based Scalable Logical Architecture) framework pattern",
+    "Data access uses stored procedures via DataPortal pattern",
+    "Child collections use lazy loading (deferred) except VendorContacts which loads immediately",
+    "The object supports both parent and child instantiation modes for collection scenarios",
+    "All string properties are trimmed on set via SetStringProp helper methods",
+    "Phone numbers and fax numbers use Phone10 formatting (10-digit format)",
+    "State field limited to 2 characters via SetCharProp",
+    "BargeEx integration requires conditional validation when enabled",
+    "The object implements dirty tracking, validation state, and transactional updates",
+    "Equals/GetHashCode based on VendorID primary key",
+    "ToString returns 'Vendor - {VendorID}'",
+    "Child collections participate in parent validation (IsValid) and dirty tracking (IsDirty)"
+  ]
+}

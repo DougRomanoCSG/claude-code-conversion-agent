@@ -1,0 +1,326 @@
+{
+  "parentEntity": "BargePosition",
+  "description": "BargePosition is a transactional/workspace entity used to track barge movements. It is NOT a data table but represents in-memory position changes before they are persisted to the Barge table. The BargePositions collection manages multiple BargePosition objects for bulk position updates.",
+  "relationships": [
+    {
+      "relatedEntity": "Barge",
+      "relationshipType": "ManyToOne",
+      "parentProperty": null,
+      "childProperty": "BargePosition",
+      "foreignKey": "BargeID",
+      "cascadeDelete": false,
+      "isRequired": true,
+      "description": "Each BargePosition references a single Barge being moved. The BargePosition updates the Barge table position fields (TierID, TierX, TierY, FacilityBerthID, etc.) via BargePositionUpdate stored procedure.",
+      "persistenceNote": "BargePosition is not stored; it updates fields on the Barge table"
+    },
+    {
+      "relatedEntity": "Fleet",
+      "relationshipType": "ManyToOne",
+      "parentProperty": null,
+      "childProperty": "BargePosition",
+      "foreignKey": "FleetID",
+      "cascadeDelete": false,
+      "isRequired": true,
+      "description": "Each BargePosition is scoped to a specific Fleet context for the position update operation."
+    },
+    {
+      "relatedEntity": "BargeLocation",
+      "relationshipType": "ManyToOne",
+      "parentProperty": null,
+      "childProperty": "BargePosition",
+      "foreignKey": "BargeLocationID",
+      "cascadeDelete": false,
+      "isRequired": false,
+      "description": "References the location where the barge is being moved to. Used for facility/ship/tier tracking."
+    },
+    {
+      "relatedEntity": "Tier",
+      "relationshipType": "ManyToOne",
+      "parentProperty": null,
+      "childProperty": "BargePosition",
+      "foreignKey": "TierID",
+      "cascadeDelete": false,
+      "isRequired": false,
+      "description": "References the tier when PositionType is 'tier'. Includes coordinate properties TierX and TierY for grid positioning.",
+      "conditionalOn": "PositionType = 'tier'"
+    },
+    {
+      "relatedEntity": "TierGroup",
+      "relationshipType": "ManyToOne",
+      "parentProperty": null,
+      "childProperty": "BargePosition",
+      "foreignKey": "TierGroupID",
+      "cascadeDelete": false,
+      "isRequired": false,
+      "description": "References the tier group for organizing barges in facility/berth views. Used for UI visualization only, not persisted to database.",
+      "uiOnly": true
+    },
+    {
+      "relatedEntity": "FacilityBerth",
+      "relationshipType": "ManyToOne",
+      "parentProperty": null,
+      "childProperty": "BargePosition",
+      "foreignKey": "FacilityBerthID",
+      "cascadeDelete": false,
+      "isRequired": false,
+      "description": "References the facility berth when PositionType is 'berth'. Includes coordinate properties FacilityBerthX and FacilityBerthY for grid positioning.",
+      "conditionalOn": "PositionType = 'berth'"
+    },
+    {
+      "relatedEntity": "FleetBoat",
+      "relationshipType": "ManyToOne",
+      "parentProperty": null,
+      "childProperty": "BargePosition",
+      "foreignKey": "FleetBoatID",
+      "cascadeDelete": false,
+      "isRequired": false,
+      "description": "References the boat handling the barge movement. Used in tow diagram mode."
+    }
+  ],
+  "collectionClass": {
+    "name": "BargePositions",
+    "type": "BusinessLogicCollectionBase",
+    "description": "Collection of BargePosition objects representing batch position updates",
+    "properties": {
+      "UpdateResult": {
+        "type": "Int32",
+        "description": "Bitwise result indicating update success/failure: 0=success, 1=position taken, 2=barge not in expected premove position"
+      },
+      "EventType": {
+        "type": "Enum",
+        "values": [
+          "Workspace",
+          "MidstreamInStart",
+          "MidstreamInComplete",
+          "MidstreamOutStart",
+          "MidstreamInUpdate",
+          "MidstreamOutUpdate",
+          "ShiftStart",
+          "ShiftComplete",
+          "Berth",
+          "TowDiagram"
+        ],
+        "description": "Context for the position update operation"
+      }
+    },
+    "methods": [
+      {
+        "name": "Add",
+        "parameters": ["BargePosition"],
+        "returns": "Integer",
+        "description": "Adds a BargePosition to the collection and assigns a temporary negative ID"
+      },
+      {
+        "name": "Find",
+        "parameters": ["BargeID As Int32"],
+        "returns": "Int32",
+        "description": "Finds the index of a BargePosition by BargeID"
+      },
+      {
+        "name": "FindObject",
+        "parameters": ["BargeID As Int32"],
+        "returns": "BargePosition",
+        "description": "Finds and returns a BargePosition object by BargeID"
+      },
+      {
+        "name": "ResetIsDisplayed",
+        "parameters": ["TierGroupID As Int32"],
+        "returns": "void",
+        "description": "Resets the IsDisplayed property for barges in a tier group"
+      }
+    ]
+  },
+  "positionTypes": [
+    {
+      "type": "tier",
+      "description": "Barge positioned in a tier grid",
+      "coordinates": ["TierX", "TierY"],
+      "requiredRelationships": ["TierID"]
+    },
+    {
+      "type": "berth",
+      "description": "Barge positioned in a facility berth",
+      "coordinates": ["FacilityBerthX", "FacilityBerthY"],
+      "requiredRelationships": ["FacilityBerthID"]
+    },
+    {
+      "type": "tow",
+      "description": "Barge in tow configuration",
+      "coordinates": ["TowCut", "TowString"],
+      "requiredRelationships": ["BargeLocationID"]
+    },
+    {
+      "type": "rake",
+      "description": "Special mode for updating RakeDirection only",
+      "coordinates": [],
+      "requiredRelationships": []
+    },
+    {
+      "type": "anchor",
+      "description": "Special mode for setting HasAnchorWire flag",
+      "coordinates": [],
+      "requiredRelationships": []
+    }
+  ],
+  "gridManagement": {
+    "workspaceGrid": {
+      "name": "ctlWorkspace",
+      "type": "CsgContainerGrid",
+      "purpose": "Primary workspace for barge positioning",
+      "dimensions": "3x3",
+      "cellSize": "90x24",
+      "dragAndDrop": true,
+      "relatedEntity": "BargePosition",
+      "displayProperties": [
+        "BargeID",
+        "TokenCaption",
+        "GridX",
+        "IsDisplayed",
+        "TokenIndex"
+      ]
+    },
+    "tierGroupGrid": {
+      "name": "ctlTierGroup",
+      "type": "CsgContainerGrid",
+      "purpose": "Tier group visualization for facility/berth barges",
+      "dimensions": "4x4",
+      "cellSize": "90x24",
+      "dragAndDrop": true,
+      "relatedEntity": "BargePosition",
+      "displayProperties": [
+        "TierGroupID",
+        "TierID",
+        "TierX",
+        "TierY"
+      ]
+    }
+  },
+  "premoveTracking": {
+    "description": "BargePosition tracks original position before move to validate concurrent updates",
+    "properties": [
+      {
+        "name": "PremoveTierID",
+        "description": "Original TierID before move, -1 if coming from workspace"
+      },
+      {
+        "name": "PremoveTierX",
+        "description": "Original TierX coordinate before move"
+      },
+      {
+        "name": "PremoveTierY",
+        "description": "Original TierY coordinate before move"
+      },
+      {
+        "name": "PremoveFacilityBerthID",
+        "description": "Original FacilityBerthID before move, -1 if coming from workspace"
+      },
+      {
+        "name": "PremoveFacilityBerthX",
+        "description": "Original FacilityBerthX coordinate before move"
+      },
+      {
+        "name": "PremoveFacilityBerthY",
+        "description": "Original FacilityBerthY coordinate before move"
+      }
+    ],
+    "validationNote": "BargePositionUpdate stored procedure validates barge is still at premove location before applying update"
+  },
+  "operationalModes": [
+    {
+      "mode": "In Fleet",
+      "description": "View barges currently in the fleet",
+      "gridUsage": "Both workspace and tier group grids"
+    },
+    {
+      "mode": "At Facility/Ship",
+      "description": "View barges at facilities or ships",
+      "gridUsage": "Both workspace and tier group grids",
+      "requiredSelections": ["Facility", "Berth", "Tier Group"]
+    },
+    {
+      "mode": "Midstream-In Update",
+      "description": "Update barges moving into midstream position",
+      "gridUsage": "Both workspace and tier group grids",
+      "restricted": "Limited barge movement"
+    },
+    {
+      "mode": "Midstream-Out Update",
+      "description": "Update barges moving out of midstream position",
+      "gridUsage": "Both workspace and tier group grids",
+      "restricted": "Limited barge movement"
+    },
+    {
+      "mode": "Tow Diagram",
+      "description": "View and edit tow diagrams",
+      "gridUsage": "Workspace grid only",
+      "requiredSelections": ["Servicing Boat"]
+    }
+  ],
+  "storedProcedures": [
+    {
+      "name": "BargePositionUpdate",
+      "purpose": "Updates barge position in Barge table based on BargePosition object",
+      "operations": ["Insert", "Update", "Delete"],
+      "parameters": [
+        "@FleetID",
+        "@BargeID",
+        "@BargeLocationID",
+        "@TierID",
+        "@FacilityBerthID",
+        "@PremoveTierID",
+        "@PremoveFacilityBerthID",
+        "@LocationX",
+        "@LocationY",
+        "@PremoveLocationX",
+        "@PremoveLocationY",
+        "@PositionType",
+        "@RakeDirection",
+        "@FleetBoatID",
+        "@HasAnchorWire",
+        "@CanOverlap",
+        "@Result (OUTPUT)"
+      ],
+      "validations": [
+        "Position not already taken by another barge",
+        "Barge still in expected premove location",
+        "Only one anchor wire barge per tier"
+      ],
+      "resultCodes": {
+        "-1": "Position already taken",
+        "0": "Barge not in expected premove position",
+        "1": "Success"
+      }
+    }
+  ],
+  "modernDapperPattern": {
+    "notes": [
+      "BargePosition is NOT a database entity - it's a transactional object",
+      "In modern implementation, this would be a Command/DTO pattern for batch position updates",
+      "Repository methods would be on BargeRepository, not BargePositionRepository",
+      "Service layer would handle the collection and validation logic",
+      "Consider implementing as: UpdateBargePositionsCommand with list of BargePositionDto objects",
+      "Each BargePositionDto contains: BargeID, new position data, premove position data for optimistic locking"
+    ],
+    "recommendedApproach": {
+      "command": "UpdateBargePositionsCommand",
+      "dto": "BargePositionUpdateDto",
+      "service": "BargePositionService.UpdatePositionsAsync(command)",
+      "repository": "IBargeRepository.UpdatePositionAsync(bargeId, positionData, premoveData)",
+      "validation": "Validate in service layer before calling repository"
+    }
+  },
+  "lookupRelationships": [],
+  "childCollections": [],
+  "notes": [
+    "BargePosition is a workspace/transactional entity, NOT a persisted table",
+    "It represents in-memory position changes before updating the Barge table",
+    "The BargePositions collection manages batch updates of multiple barge positions",
+    "Position changes are validated for conflicts (position already taken, concurrent updates)",
+    "Different PositionType values determine which coordinate system is used (tier/berth/tow)",
+    "Premove tracking enables optimistic concurrency control",
+    "Form supports multiple operational modes with different position update rules",
+    "Drag-and-drop in grids creates/updates BargePosition objects in the collection",
+    "Changes are not saved to database until user clicks Set/Submit",
+    "EventMode allows integration with BargeEvent and BargeDetail forms for deferred saves"
+  ]
+}

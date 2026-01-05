@@ -1,0 +1,466 @@
+{
+  "formName": "frmBoatStatus",
+  "formType": "DetailEditList",
+  "hasTabControl": false,
+  "description": "Detail-Edit-List form for managing boat status history with conditional field visibility based on maintenance type",
+  "mainGrid": {
+    "name": "grdDetailEditList",
+    "purpose": "Display history of boat maintenance log entries",
+    "entity": "BoatMaintenanceLog",
+    "parentEntity": "BoatLocation",
+    "parentKey": "BoatLocationID",
+    "columns": [
+      {
+        "key": "StartDateTime",
+        "header": "Date",
+        "width": 103,
+        "type": "DateTime",
+        "sortable": true,
+        "defaultSort": "Descending"
+      },
+      {
+        "key": "MaintenanceType",
+        "header": "Type",
+        "width": 142,
+        "type": "String"
+      },
+      {
+        "key": "Status",
+        "header": "Status",
+        "width": 207,
+        "type": "String"
+      },
+      {
+        "key": "Division",
+        "header": "Division",
+        "width": 94,
+        "type": "String"
+      },
+      {
+        "key": "PortFacility",
+        "header": "Port Facility",
+        "width": 150,
+        "type": "String"
+      },
+      {
+        "key": "BoatRole",
+        "header": "Boat Role",
+        "width": 125,
+        "type": "String"
+      },
+      {
+        "key": "Note",
+        "header": "Note",
+        "width": 130,
+        "type": "String"
+      }
+    ],
+    "operations": [
+      "Add",
+      "Modify",
+      "Remove",
+      "Export"
+    ],
+    "uniqueIdentifier": "BoatMaintenanceLogID"
+  },
+  "detailEditPanel": {
+    "name": "grpDetailEditChild",
+    "title": "Detail",
+    "purpose": "Edit individual boat maintenance log entries with conditional field visibility",
+    "sections": [
+      {
+        "name": "Date/Time Section",
+        "order": 1,
+        "controls": [
+          {
+            "name": "lblStartDateTime",
+            "type": "UltraLabel",
+            "label": "Start date/time:",
+            "required": true,
+            "section": "Date/Time Section"
+          },
+          {
+            "name": "dtStartDate",
+            "type": "UltraDateTimeEditor",
+            "label": "Start date/time:",
+            "required": true,
+            "propertyName": "StartDateTime",
+            "section": "Date/Time Section"
+          },
+          {
+            "name": "cboStartTime",
+            "type": "UltraCombo",
+            "label": "Start date/time:",
+            "required": false,
+            "propertyName": "StartDateTime",
+            "dataSource": "TimeCombo",
+            "section": "Date/Time Section"
+          }
+        ]
+      },
+      {
+        "name": "Maintenance Type Section",
+        "order": 2,
+        "controls": [
+          {
+            "name": "optMaintenanceType",
+            "type": "UltraOptionSet",
+            "label": "Maintenance Type",
+            "required": true,
+            "propertyName": "MaintenanceType",
+            "options": [
+              {
+                "value": "Boat Status",
+                "displayText": "Boat Status",
+                "enabledControls": [
+                  "lblStatus",
+                  "cboStatus"
+                ]
+              },
+              {
+                "value": "Change Division/Facility",
+                "displayText": "Division / Facility",
+                "enabledControls": [
+                  "lblDivision",
+                  "cboDivision",
+                  "lblPortFacilityID",
+                  "cboPortFacilityID"
+                ]
+              },
+              {
+                "value": "Change Boat Role",
+                "displayText": "Boat Role",
+                "enabledControls": [
+                  "lblBoatRoleID",
+                  "cboBoatRoleID"
+                ]
+              }
+            ],
+            "readOnlyOnEdit": true,
+            "section": "Maintenance Type Section"
+          }
+        ]
+      },
+      {
+        "name": "Boat Status Section",
+        "order": 3,
+        "conditionalVisibility": {
+          "condition": "optMaintenanceType == 'Boat Status'",
+          "reason": "Status field only applies when maintenance type is 'Boat Status'"
+        },
+        "controls": [
+          {
+            "name": "lblStatus",
+            "type": "UltraLabel",
+            "label": "Status:",
+            "required": true,
+            "conditionalEnabled": true,
+            "section": "Boat Status Section"
+          },
+          {
+            "name": "cboStatus",
+            "type": "UltraCombo",
+            "label": "Status:",
+            "required": true,
+            "propertyName": "Status",
+            "dataSource": "ValidationList.BoatStatus",
+            "conditionalEnabled": true,
+            "section": "Boat Status Section"
+          }
+        ]
+      },
+      {
+        "name": "Division/Facility Section",
+        "order": 4,
+        "conditionalVisibility": {
+          "condition": "optMaintenanceType == 'Change Division/Facility'",
+          "reason": "Division and facility fields only apply when changing division/facility"
+        },
+        "controls": [
+          {
+            "name": "lblDivision",
+            "type": "UltraLabel",
+            "label": "Division:",
+            "required": true,
+            "conditionalEnabled": true,
+            "section": "Division/Facility Section"
+          },
+          {
+            "name": "cboDivision",
+            "type": "UltraCombo",
+            "label": "Division:",
+            "required": true,
+            "propertyName": "Division",
+            "dataSource": "ValidationList.Division",
+            "conditionalEnabled": true,
+            "cascadesTo": "cboPortFacilityID",
+            "section": "Division/Facility Section"
+          },
+          {
+            "name": "lblPortFacilityID",
+            "type": "UltraLabel",
+            "label": "Port facility:",
+            "required": false,
+            "conditionalEnabled": true,
+            "section": "Division/Facility Section"
+          },
+          {
+            "name": "cboPortFacilityID",
+            "type": "UltraCombo",
+            "label": "Port facility:",
+            "required": false,
+            "propertyName": "PortFacilityID",
+            "dataSource": "FleetList.Facilities or FacilityLocationList",
+            "conditionalEnabled": true,
+            "cascadeSource": "cboDivision",
+            "section": "Division/Facility Section",
+            "notes": "Populated based on whether boat is a fleet boat and fleet ID"
+          }
+        ]
+      },
+      {
+        "name": "Boat Role Section",
+        "order": 5,
+        "conditionalVisibility": {
+          "condition": "optMaintenanceType == 'Change Boat Role'",
+          "reason": "Boat role field only applies when changing boat role"
+        },
+        "controls": [
+          {
+            "name": "lblBoatRoleID",
+            "type": "UltraLabel",
+            "label": "Boat role:",
+            "required": true,
+            "conditionalEnabled": true,
+            "section": "Boat Role Section"
+          },
+          {
+            "name": "cboBoatRoleID",
+            "type": "UltraCombo",
+            "label": "Boat role:",
+            "required": true,
+            "propertyName": "BoatRoleID",
+            "dataSource": "Lists.BoatRoleList",
+            "conditionalEnabled": true,
+            "section": "Boat Role Section"
+          }
+        ]
+      },
+      {
+        "name": "Notes Section",
+        "order": 6,
+        "controls": [
+          {
+            "name": "lblNote",
+            "type": "UltraLabel",
+            "label": "Note:",
+            "required": false,
+            "section": "Notes Section"
+          },
+          {
+            "name": "txtNote",
+            "type": "UltraTextEditor",
+            "label": "Note:",
+            "required": false,
+            "propertyName": "Note",
+            "multiline": true,
+            "maxLength": "BoatMaintenanceLog.MaxLength.Note",
+            "section": "Notes Section"
+          }
+        ]
+      },
+      {
+        "name": "Detail Buttons",
+        "order": 7,
+        "controls": [
+          {
+            "name": "btnSetEdit",
+            "type": "UltraButton",
+            "text": "S&et",
+            "action": "Save detail edit",
+            "buttonType": "Submit",
+            "section": "Detail Buttons"
+          },
+          {
+            "name": "btnCancelEdit",
+            "type": "UltraButton",
+            "text": "C&ancel",
+            "action": "Cancel detail edit",
+            "buttonType": "CancelEdit",
+            "causesValidation": false,
+            "section": "Detail Buttons"
+          }
+        ]
+      }
+    ]
+  },
+  "toolbar": {
+    "name": "ToolbarsManager",
+    "location": "Top of grid",
+    "toolbarName": "ChildEditToolbar",
+    "buttons": [
+      {
+        "key": "Add",
+        "caption": "&Add",
+        "icon": "Resources.Add",
+        "displayStyle": "ImageAndText",
+        "buttonType": "Add",
+        "action": "Add new boat maintenance log entry",
+        "enabled": "When not editing and user has Add permission"
+      },
+      {
+        "key": "Modify",
+        "caption": "&Modify",
+        "icon": "Resources.Modify",
+        "displayStyle": "ImageAndText",
+        "buttonType": "Open",
+        "action": "Modify selected boat maintenance log entry",
+        "enabled": "When item selected, not editing, and user has Modify permission"
+      },
+      {
+        "key": "Remove",
+        "caption": "&Remove",
+        "icon": "Resources.Remove",
+        "displayStyle": "ImageAndText",
+        "buttonType": "Remove",
+        "action": "Remove selected boat maintenance log entry",
+        "enabled": "When item selected, not editing, and user has Remove permission"
+      },
+      {
+        "key": "Export",
+        "caption": "Export",
+        "icon": "Resources.ExportResults",
+        "displayStyle": "ImageAndText",
+        "buttonType": "Open",
+        "action": "Export grid to Excel",
+        "enabled": "When at least one row exists, not editing, and user has Export permission",
+        "isFirstInGroup": true
+      }
+    ]
+  },
+  "sharedControls": {
+    "location": "Bottom of form",
+    "controls": [
+      {
+        "name": "btnClose",
+        "type": "UltraButton",
+        "text": "&Close",
+        "action": "Close form and save all changes",
+        "buttonType": "Cancel",
+        "causesValidation": true,
+        "dialogResult": "None"
+      }
+    ]
+  },
+  "formLogic": {
+    "conditionalFieldLogic": [
+      {
+        "trigger": "optMaintenanceType selection",
+        "behavior": "Enable/disable fields based on maintenance type",
+        "details": [
+          {
+            "type": "Boat Status",
+            "enabledFields": [
+              "lblStatus",
+              "cboStatus"
+            ],
+            "clearedFields": [
+              "Division",
+              "PortFacilityID",
+              "BoatRoleID"
+            ]
+          },
+          {
+            "type": "Change Division/Facility",
+            "enabledFields": [
+              "lblDivision",
+              "cboDivision",
+              "lblPortFacilityID",
+              "cboPortFacilityID"
+            ],
+            "clearedFields": [
+              "Status",
+              "BoatRoleID"
+            ]
+          },
+          {
+            "type": "Change Boat Role",
+            "enabledFields": [
+              "lblBoatRoleID",
+              "cboBoatRoleID"
+            ],
+            "clearedFields": [
+              "Status",
+              "Division",
+              "PortFacilityID"
+            ]
+          }
+        ]
+      },
+      {
+        "trigger": "cboDivision.ValueChanged",
+        "action": "Populate cboPortFacilityID",
+        "behavior": "Cascading combo behavior - division selection filters port facility list"
+      },
+      {
+        "trigger": "Existing record modification",
+        "field": "optMaintenanceType",
+        "behavior": "Field becomes read-only (cannot change maintenance type on existing records)"
+      }
+    ],
+    "validationLogic": [
+      {
+        "control": "txtNote",
+        "validationType": "String",
+        "required": false,
+        "maxLength": "BoatMaintenanceLog.MaxLength.Note"
+      }
+    ],
+    "loadSequence": [
+      {
+        "order": 1,
+        "action": "FormatControls",
+        "details": "Initialize combos, validators, max lengths, grid settings"
+      },
+      {
+        "order": 2,
+        "action": "RefreshList",
+        "details": "Load BoatMaintenanceLog collection into grid"
+      }
+    ],
+    "saveLogic": {
+      "description": "Clear unused fields before saving based on maintenance type",
+      "method": "ClearUnusedFields",
+      "details": "Fields not applicable to the selected maintenance type are cleared to ensure data integrity"
+    }
+  },
+  "businessObject": {
+    "primary": "BoatLocation",
+    "child": "BoatMaintenanceLog",
+    "collection": "BoatMaintenanceLogs",
+    "relationship": "One-to-Many"
+  },
+  "security": {
+    "interface": "IBaseDetailEdit",
+    "buttonTypes": {
+      "btnClose": "Cancel",
+      "btnSetEdit": "Submit",
+      "btnCancelEdit": "CancelEdit",
+      "Add": "Add",
+      "Modify": "Open",
+      "Remove": "Remove",
+      "Export": "Open"
+    },
+    "formPermissions": "Based on SubSystem.frmBoatSearch"
+  },
+  "modernImplementationNotes": {
+    "tabStrategy": "This is NOT a tabbed form. It's a Detail-Edit-List pattern with conditional field visibility.",
+    "uiPattern": "Master-detail with inline editing panel",
+    "conditionalUI": "Use Bootstrap collapse/show classes to toggle field visibility based on maintenance type selection",
+    "gridImplementation": "DataTables or similar grid component with inline editing support",
+    "toolbarImplementation": "Bootstrap button group or toolbar component",
+    "validationStrategy": "Client-side validation with server-side validation on submit",
+    "cascadingCombos": "Division selection filters Port Facility dropdown via AJAX",
+    "maintenanceTypeControl": "Radio button group that controls field visibility dynamically"
+  }
+}

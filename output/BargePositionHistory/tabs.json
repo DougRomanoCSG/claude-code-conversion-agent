@@ -1,0 +1,422 @@
+{
+  "formName": "frmBargePositionHistory",
+  "formType": "DetailEditList",
+  "hasTabControl": false,
+  "layout": "MasterDetail",
+  "sections": [
+    {
+      "sectionName": "Search Panel",
+      "sectionType": "SearchCriteria",
+      "containerName": "pnlDetailEdit",
+      "order": 1,
+      "dockStyle": "Top",
+      "purpose": "Search and filter barge position history records by date, tier group, and barge number",
+      "controls": [
+        {
+          "name": "lblDateSearch",
+          "type": "UltraLabel",
+          "label": "Date:",
+          "required": true,
+          "bold": true,
+          "section": "Search Criteria"
+        },
+        {
+          "name": "dtDateSearch",
+          "type": "UltraDateTimeEditor",
+          "label": "Date:",
+          "required": true,
+          "defaultValue": "Date.Today",
+          "section": "Search Criteria"
+        },
+        {
+          "name": "lblTierGroupSearch",
+          "type": "UltraLabel",
+          "label": "Tier group:",
+          "required": true,
+          "bold": true,
+          "section": "Search Criteria"
+        },
+        {
+          "name": "cboTierGroupSearch",
+          "type": "UltraCombo",
+          "label": "Tier group:",
+          "required": true,
+          "dataSource": "Lists.TierGroupSearch.GetList(_SelectedFleetID)",
+          "section": "Search Criteria"
+        },
+        {
+          "name": "lblBargeNumSearch",
+          "type": "UltraLabel",
+          "label": "Barge:",
+          "required": false,
+          "section": "Search Criteria"
+        },
+        {
+          "name": "txtBargeNumSearch",
+          "type": "UltraTextEditor",
+          "label": "Barge:",
+          "required": false,
+          "section": "Search Criteria"
+        },
+        {
+          "name": "chkIncludeBlankTierPos",
+          "type": "UltraCheckEditor",
+          "label": "Include blank tier positions",
+          "required": false,
+          "section": "Search Criteria"
+        },
+        {
+          "name": "btnFind",
+          "type": "Button",
+          "text": "Find",
+          "action": "Search for barge position records",
+          "buttonType": "Action",
+          "section": "Search Actions"
+        },
+        {
+          "name": "btnReset",
+          "type": "Button",
+          "text": "Reset",
+          "action": "Reset search criteria to defaults",
+          "buttonType": "Action",
+          "section": "Search Actions"
+        }
+      ]
+    },
+    {
+      "sectionName": "Grid List",
+      "sectionType": "DataGrid",
+      "containerName": "grpDetailEditList",
+      "order": 2,
+      "dockStyle": "Fill",
+      "purpose": "Display list of barge position history records",
+      "hasGrid": true,
+      "grid": {
+        "name": "grdDetailEditList",
+        "entity": "FleetPositionHistory",
+        "uniqueIdentifierColumn": "FleetPositionHistoryID",
+        "dataSource": "Lists.FleetPositionHistorySearch.GetList()",
+        "operations": ["Add", "Edit", "Delete", "Export"],
+        "columns": [
+          {
+            "key": "PositionStartDateTime",
+            "header": "Date/Time",
+            "type": "DateTime",
+            "width": 105,
+            "alignment": "Left",
+            "customSorter": "DateTimeSortComparer"
+          },
+          {
+            "key": "BargeNum",
+            "header": "Barge",
+            "type": "String",
+            "width": 146,
+            "alignment": "Left"
+          },
+          {
+            "key": "LeftFleet",
+            "header": "Left Fleet",
+            "type": "Boolean",
+            "width": 62,
+            "alignment": "Center"
+          },
+          {
+            "key": "TierName",
+            "header": "Tier",
+            "type": "String",
+            "width": 195,
+            "alignment": "Left"
+          },
+          {
+            "key": "TierPos",
+            "header": "Tier Pos",
+            "type": "String",
+            "width": 57,
+            "alignment": "Left"
+          }
+        ],
+        "autoFitStyle": "ExtendLastColumn",
+        "initialSortColumn": "PositionStartDateTime",
+        "initialSortOrder": "Ascending"
+      },
+      "toolbar": {
+        "name": "ChildEditToolbar",
+        "location": "Top of grid panel",
+        "tools": [
+          {
+            "key": "Add",
+            "caption": "Add",
+            "buttonType": "Add",
+            "displayStyle": "ImageAndText",
+            "image": "Add",
+            "action": "Create new barge position record"
+          },
+          {
+            "key": "Modify",
+            "caption": "Modify",
+            "buttonType": "Open",
+            "displayStyle": "ImageAndText",
+            "image": "Modify",
+            "action": "Edit selected barge position record"
+          },
+          {
+            "key": "Remove",
+            "caption": "Remove",
+            "buttonType": "Remove",
+            "displayStyle": "ImageAndText",
+            "image": "Remove",
+            "action": "Delete selected barge position record",
+            "confirmationMessage": "Barge Position"
+          },
+          {
+            "key": "Export",
+            "caption": "Export",
+            "buttonType": "Open",
+            "displayStyle": "ImageAndText",
+            "image": "ExportResults",
+            "action": "Export grid data to file",
+            "isFirstInGroup": true
+          }
+        ]
+      }
+    },
+    {
+      "sectionName": "Detail Edit",
+      "sectionType": "DetailForm",
+      "containerName": "grpDetailEditChild",
+      "order": 3,
+      "dockStyle": "Bottom",
+      "headerText": "Detail",
+      "purpose": "Add or edit a single barge position record",
+      "controls": [
+        {
+          "name": "lblPositionStartDateTime",
+          "type": "UltraLabel",
+          "label": "Date/Time:",
+          "required": true,
+          "bold": true,
+          "section": "Position Details"
+        },
+        {
+          "name": "dtPositionStartDate",
+          "type": "UltraDateTimeEditor",
+          "label": "Date/Time:",
+          "required": true,
+          "section": "Position Details",
+          "propertyPath": "FleetPositionHistory.PositionStartDateTime"
+        },
+        {
+          "name": "cboPositionStartTime",
+          "type": "UltraCombo",
+          "label": "Date/Time:",
+          "required": true,
+          "dataSource": "InfragisticsHelper.PopulateTimeCombo",
+          "validationType": "Time",
+          "section": "Position Details",
+          "propertyPath": "FleetPositionHistory.PositionStartDateTime"
+        },
+        {
+          "name": "lblBargeNum",
+          "type": "UltraLabel",
+          "label": "Barge:",
+          "required": true,
+          "bold": true,
+          "section": "Position Details"
+        },
+        {
+          "name": "txtBargeNum",
+          "type": "UltraTextEditor",
+          "label": "Barge:",
+          "required": false,
+          "section": "Position Details",
+          "propertyPath": "FleetPositionHistory.BargeNum"
+        },
+        {
+          "name": "chkLeftFleet",
+          "type": "UltraCheckEditor",
+          "label": "Left fleet",
+          "required": false,
+          "section": "Position Details",
+          "propertyPath": "FleetPositionHistory.LeftFleet",
+          "affectsOtherControls": true,
+          "conditionalLogic": "When checked, disables TierID, TierX, TierY fields"
+        },
+        {
+          "name": "lblTierID",
+          "type": "UltraLabel",
+          "label": "Tier:",
+          "required": false,
+          "section": "Tier Information"
+        },
+        {
+          "name": "cboTierID",
+          "type": "UltraCombo",
+          "label": "Tier:",
+          "required": false,
+          "dataSource": "Lists.TierList.GetList(cboTierGroupSearch.ValueOrNull)",
+          "section": "Tier Information",
+          "propertyPath": "FleetPositionHistory.TierID",
+          "conditionallyDisabled": "Disabled when LeftFleet is checked"
+        },
+        {
+          "name": "lblTierX",
+          "type": "UltraLabel",
+          "label": "Tier X:",
+          "required": false,
+          "section": "Tier Information"
+        },
+        {
+          "name": "txtTierX",
+          "type": "UltraTextEditor",
+          "label": "Tier X:",
+          "required": false,
+          "validationType": "Int16",
+          "section": "Tier Information",
+          "propertyPath": "FleetPositionHistory.TierX",
+          "conditionallyDisabled": "Disabled when LeftFleet is checked"
+        },
+        {
+          "name": "lblTierY",
+          "type": "UltraLabel",
+          "label": "Tier Y:",
+          "required": false,
+          "section": "Tier Information"
+        },
+        {
+          "name": "txtTierY",
+          "type": "UltraTextEditor",
+          "label": "Tier Y:",
+          "required": false,
+          "validationType": "Int16",
+          "section": "Tier Information",
+          "propertyPath": "FleetPositionHistory.TierY",
+          "conditionallyDisabled": "Disabled when LeftFleet is checked"
+        },
+        {
+          "name": "btnSubmit",
+          "type": "Button",
+          "text": "Submit",
+          "action": "Save barge position record",
+          "buttonType": "Submit",
+          "anchor": "BottomRight",
+          "section": "Edit Actions"
+        },
+        {
+          "name": "btnCancel",
+          "type": "Button",
+          "text": "Cancel",
+          "action": "Cancel editing and clear detail form",
+          "buttonType": "CancelEdit",
+          "anchor": "BottomRight",
+          "section": "Edit Actions"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Position Details",
+          "controls": ["dtPositionStartDate", "cboPositionStartTime", "txtBargeNum", "chkLeftFleet"]
+        },
+        {
+          "name": "Tier Information",
+          "controls": ["cboTierID", "txtTierX", "txtTierY"],
+          "conditionalVisibility": "Fields disabled when LeftFleet is checked"
+        },
+        {
+          "name": "Edit Actions",
+          "controls": ["btnSubmit", "btnCancel"]
+        }
+      ]
+    }
+  ],
+  "sharedControls": {
+    "location": "Bottom of form",
+    "containerName": "grpSubmitCancel",
+    "controls": [
+      {
+        "name": "btnClose",
+        "type": "Button",
+        "text": "Close",
+        "action": "Close the form",
+        "buttonType": "Cancel",
+        "anchor": "BottomRight"
+      }
+    ]
+  },
+  "formLogic": {
+    "editMode": {
+      "trigger": "Add or Modify toolbar button clicked",
+      "behavior": [
+        "Enable grpDetailEditChild section",
+        "Disable pnlDetailEdit search panel",
+        "Set IsEditingChild = true",
+        "Disable toolbar buttons"
+      ]
+    },
+    "conditionalVisibility": [
+      {
+        "trigger": "chkLeftFleet.Checked = true",
+        "action": "Disable and clear TierID, TierX, TierY fields",
+        "reason": "Tier position not applicable when barge has left fleet"
+      },
+      {
+        "trigger": "chkLeftFleet.Checked = false",
+        "action": "Enable TierID, TierX, TierY fields",
+        "reason": "Allow tier position entry"
+      }
+    ],
+    "loadSequence": [
+      {
+        "order": 1,
+        "action": "FormatControls",
+        "details": "Populate TierGroupSearch combo, PositionStartTime combo, set grid unique identifier"
+      },
+      {
+        "order": 2,
+        "action": "ResetControls",
+        "details": "Set default search values (today's date, clear tier group and barge number)"
+      },
+      {
+        "order": 3,
+        "action": "EnableDisableControls(false)",
+        "details": "Start with detail edit section disabled"
+      }
+    ],
+    "validation": [
+      {
+        "field": "txtTierX",
+        "validationType": "Int16"
+      },
+      {
+        "field": "txtTierY",
+        "validationType": "Int16"
+      },
+      {
+        "field": "cboPositionStartTime",
+        "validationType": "Time"
+      }
+    ],
+    "businessRules": [
+      {
+        "rule": "Search requires Date and Tier Group",
+        "enforcement": "MessageBox shown if either is missing"
+      },
+      {
+        "rule": "When LeftFleet is checked, TierID/TierX/TierY must be cleared",
+        "enforcement": "ClearUnusedFields method clears values on submit"
+      },
+      {
+        "rule": "New records default to today's date with FleetingDayStartTime",
+        "enforcement": "ItemAdd sets PositionStartDateTime to dtDateSearch + GlobalSettingList.FleetingDayStartTime"
+      }
+    ]
+  },
+  "notes": [
+    "This is NOT a tabbed form - it's a master-detail form with three sections: search panel, grid list, and detail edit panel",
+    "The form inherits from frmBaseDetailEditList which provides standard list-edit functionality",
+    "The detail edit section is shown/hidden based on edit mode (triggered by toolbar buttons)",
+    "The form maintains a _FleetPositionHistory business object for the currently edited record",
+    "Grid settings are persisted using MyAppSettingHelper.SaveGrid on form close",
+    "Toolbar button enabling is controlled by security via ControlAuthorization",
+    "The form accepts a FleetID parameter in Initialize method to filter results by fleet"
+  ]
+}

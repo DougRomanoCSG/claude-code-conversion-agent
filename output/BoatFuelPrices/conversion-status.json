@@ -1,0 +1,125 @@
+{
+  "entity": "BoatFuelPrices",
+  "overallStatus": "completed",
+  "startTime": "2025-12-17T23:50:32.027Z",
+  "totalSteps": 10,
+  "completedSteps": 1,
+  "failedSteps": 0,
+  "skippedSteps": 9,
+  "steps": [
+    {
+      "stepNumber": 1,
+      "name": "Form Structure Analyzer (Search)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract search form UI components",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:50:32.032Z",
+      "endTime": "2025-12-17T23:50:32.032Z",
+      "durationMs": 0,
+      "outputFile": "form-structure-search.json"
+    },
+    {
+      "stepNumber": 2,
+      "name": "Form Structure Analyzer (Detail)",
+      "script": "form-structure-analyzer.ts",
+      "description": "Extract detail form UI components",
+      "status": "completed",
+      "startTime": "2025-12-17T23:50:32.033Z",
+      "outputFile": "form-structure-detail.json",
+      "endTime": "2025-12-17T23:53:11.539Z",
+      "durationMs": 159506,
+      "exitCode": 0
+    },
+    {
+      "stepNumber": 3,
+      "name": "Business Logic Extractor",
+      "script": "business-logic-extractor.ts",
+      "description": "Extract business rules and validation",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:53:11.547Z",
+      "endTime": "2025-12-17T23:53:11.547Z",
+      "durationMs": 0,
+      "outputFile": "business-logic.json"
+    },
+    {
+      "stepNumber": 4,
+      "name": "Data Access Pattern Analyzer",
+      "script": "data-access-analyzer.ts",
+      "description": "Extract stored procedures and queries",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:53:11.548Z",
+      "endTime": "2025-12-17T23:53:11.548Z",
+      "durationMs": 0,
+      "outputFile": "data-access.json"
+    },
+    {
+      "stepNumber": 5,
+      "name": "Security & Authorization Extractor",
+      "script": "security-extractor.ts",
+      "description": "Extract permissions and authorization",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:53:11.549Z",
+      "endTime": "2025-12-17T23:53:11.549Z",
+      "durationMs": 0,
+      "outputFile": "security.json"
+    },
+    {
+      "stepNumber": 6,
+      "name": "UI Component Mapper",
+      "script": "ui-component-mapper.ts",
+      "description": "Map legacy controls to modern equivalents",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:53:11.550Z",
+      "endTime": "2025-12-17T23:53:11.550Z",
+      "durationMs": 0,
+      "outputFile": "ui-mapping.json"
+    },
+    {
+      "stepNumber": 7,
+      "name": "Form Workflow Analyzer",
+      "script": "form-workflow-analyzer.ts",
+      "description": "Extract user flows and state management",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:53:11.550Z",
+      "endTime": "2025-12-17T23:53:11.550Z",
+      "durationMs": 0,
+      "outputFile": "workflow.json"
+    },
+    {
+      "stepNumber": 8,
+      "name": "Detail Form Tab Analyzer",
+      "script": "detail-tab-analyzer.ts",
+      "description": "Extract tab structure and related entities",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:53:11.551Z",
+      "endTime": "2025-12-17T23:53:11.551Z",
+      "durationMs": 0,
+      "outputFile": "tabs.json"
+    },
+    {
+      "stepNumber": 9,
+      "name": "Validation Rule Extractor",
+      "script": "validation-extractor.ts",
+      "description": "Extract all validation logic",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:53:11.553Z",
+      "endTime": "2025-12-17T23:53:11.553Z",
+      "durationMs": 0,
+      "outputFile": "validation.json"
+    },
+    {
+      "stepNumber": 10,
+      "name": "Related Entity Analyzer",
+      "script": "related-entity-analyzer.ts",
+      "description": "Extract entity relationships",
+      "status": "skipped",
+      "startTime": "2025-12-17T23:53:11.555Z",
+      "endTime": "2025-12-17T23:53:11.555Z",
+      "durationMs": 0,
+      "outputFile": "related-entities.json"
+    }
+  ],
+  "childForms": [],
+  "endTime": "2025-12-17T23:53:11.558Z",
+  "durationMs": 159526
+}

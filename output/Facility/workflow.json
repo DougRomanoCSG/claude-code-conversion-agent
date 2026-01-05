@@ -1,0 +1,1303 @@
+{
+  "formName": "frmFacilityDetail",
+  "entityName": "Facility",
+  "analysisDate": "2025-12-11",
+  "formType": "Master-Detail-Edit",
+  "baseForm": "frmBaseDetailEditList",
+  "implements": ["IBaseDetailEdit"],
+  "subSystem": "frmFacilitySearch",
+  "userFlows": {
+    "mainFormFlow": {
+      "description": "Primary facility editing workflow",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Form Load",
+          "trigger": "frmFacilityDetail_Load",
+          "activities": [
+            "FormatControls - Apply UI formatting and control setup",
+            "LoadControlsForLocation - Populate Location entity controls",
+            "LoadControlsForFacilityLocation - Populate FacilityLocation entity controls",
+            "EnableDisableControls - Apply security and state-based control enablement",
+            "Set focus to txtName"
+          ],
+          "stateChanges": [
+            "Form initialized",
+            "Controls populated with business object data",
+            "Security authorization applied",
+            "Default tab (Details) displayed"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "User edits main form fields",
+          "trigger": "Control Validated events",
+          "activities": [
+            "Control value changed",
+            "Validated event fires",
+            "Business object property updated",
+            "Business rules checked",
+            "UI validation feedback displayed"
+          ],
+          "stateChanges": [
+            "Business object marked dirty",
+            "Validation state updated",
+            "BrokenRules collection updated"
+          ],
+          "affectedControls": [
+            "txtName",
+            "txtShortName",
+            "txtLocationNote",
+            "chkIsActive",
+            "cboRiver",
+            "txtMile",
+            "txtBargeExCode",
+            "cboBargeExLocationType",
+            "cboBank",
+            "Lock/Gauge fields"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "Facility Type changes",
+          "trigger": "cboBargeExLocationType.ValueChanged",
+          "activities": [
+            "EnableDisableLockControls method called",
+            "Check if value is 'Lock' or 'Gauge Location'",
+            "Enable Lock/Gauge controls if match, disable and clear if not"
+          ],
+          "conditionalLogic": {
+            "condition": "BargeExLocationType = 'Lock' OR 'Gauge Location'",
+            "ifTrue": "Enable Lock/Gauge fields",
+            "ifFalse": "Disable and clear Lock/Gauge fields"
+          },
+          "affectedControls": [
+            "txtLockUsaceName",
+            "txtLockFloodStage",
+            "txtLockPoolStage",
+            "txtLockLowWater",
+            "txtLockNormalCurrent",
+            "txtLockHighFlow",
+            "txtLockHighWater",
+            "txtLockCatastrophicLevel"
+          ],
+          "stateChanges": [
+            "Lock/Gauge controls enabled/disabled",
+            "Lock/Gauge field values cleared if disabled"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "User navigates to different tab",
+          "trigger": "tabMain.SelectedTabChanged",
+          "activities": [
+            "tabMain_SelectedTabChanged event fires",
+            "LoadTabControls method called",
+            "Lazy load grid data if first visit to tab"
+          ],
+          "lazyLoadingLogic": {
+            "description": "Grid data for Berths and Status tabs loaded only when user first visits tab",
+            "tabs": ["Berths", "Status"],
+            "implementation": "Check if tab data already loaded, populate grids if not"
+          },
+          "stateChanges": [
+            "Active tab changed",
+            "Tab content loaded (if first visit)",
+            "Appropriate toolbar enabled"
+          ]
+        },
+        {
+          "step": 5,
+          "action": "Submit main form",
+          "trigger": "btnSubmit.Click",
+          "activities": [
+            "btnSubmit_Click event fires",
+            "ClearUnusedFields method called",
+            "SubmitNoRefreshClick method called",
+            "Business object validation",
+            "Save to database",
+            "Main.Notifier.UserFleetsChanging notification",
+            "Main.Notifier.BerthsChanging notification"
+          ],
+          "validations": [
+            "Required field validation (Name)",
+            "MaxLength validation for all string fields",
+            "Lock/Gauge conditional validation",
+            "Business rules validation"
+          ],
+          "stateChanges": [
+            "Business object saved to database",
+            "Form state reset to non-dirty",
+            "Fleet list refreshed",
+            "Berth positions updated"
+          ],
+          "notifications": [
+            {
+              "event": "Main.Notifier.UserFleetsChanging",
+              "purpose": "Refresh fleet list combo boxes in other forms"
+            },
+            {
+              "event": "Main.Notifier.BerthsChanging",
+              "purpose": "Update Barge Positions form with new berth data"
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "action": "Cancel main form",
+          "trigger": "btnCancel.Click",
+          "activities": [
+            "btnCancel_Click event fires",
+            "CancelClick method called",
+            "Discard changes",
+            "Close form"
+          ],
+          "stateChanges": [
+            "Business object changes discarded",
+            "Form closed"
+          ]
+        }
+      ]
+    },
+    "berthChildFlow": {
+      "description": "Managing facility berths (child collection)",
+      "collectionType": "FacilityBerths",
+      "grid": "grdBerths",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Add new berth",
+          "trigger": "AddBerth toolbar button click",
+          "activities": [
+            "BerthToolbarManager_ToolClick event fires",
+            "ItemAddBerth method called",
+            "BusinessLogic.FacilityBerths.NewFacilityBerth creates new object",
+            "Enter edit mode for new berth",
+            "Clear berth edit controls",
+            "Enable berth edit controls and buttons"
+          ],
+          "stateChanges": [
+            "IsEditingChild = true",
+            "Main form controls disabled",
+            "Main form tabs disabled",
+            "Berth edit group visible and enabled",
+            "_FacilityBerth set to new object"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "Edit existing berth",
+          "trigger": "ModifyBerth toolbar button or grid double-click",
+          "activities": [
+            "ItemModify method called with grdBerths parameter",
+            "Get selected berth from grid",
+            "_FacilityBerth.BeginEdit() called",
+            "Load berth data to edit controls",
+            "Enable berth edit controls and buttons"
+          ],
+          "stateChanges": [
+            "IsEditingChild = true",
+            "Main form controls disabled",
+            "Berth edit group populated with selected berth data",
+            "_FacilityBerth in edit mode"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "Save berth changes",
+          "trigger": "btnSetBerth.Click",
+          "activities": [
+            "SetClickListAndDetail method called with _FacilityBerth",
+            "Validate berth data (Name required)",
+            "Add or update berth in collection",
+            "Refresh berth grid",
+            "Exit edit mode"
+          ],
+          "validations": [
+            {
+              "field": "txtBerthName",
+              "rule": "Required",
+              "message": "Berth name is required"
+            },
+            {
+              "field": "txtBerthName",
+              "rule": "MaxLength",
+              "value": 100
+            }
+          ],
+          "stateChanges": [
+            "Berth added/updated in collection",
+            "IsEditingChild = false",
+            "Main form controls re-enabled",
+            "Berth grid refreshed",
+            "Berth edit group cleared"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "Cancel berth edit",
+          "trigger": "btnCancelEditBerth.Click",
+          "activities": [
+            "CancelClickListAndDetail method called with _FacilityBerth",
+            "_FacilityBerth.CancelEdit() called",
+            "Discard berth changes",
+            "Exit edit mode"
+          ],
+          "stateChanges": [
+            "Berth changes discarded",
+            "IsEditingChild = false",
+            "Main form controls re-enabled",
+            "Berth edit group cleared"
+          ]
+        },
+        {
+          "step": 5,
+          "action": "Remove berth",
+          "trigger": "RemoveBerth toolbar button",
+          "activities": [
+            "ItemRemoveBerth method called",
+            "Main.ItemRemoveDialog('Berth') confirmation",
+            "If confirmed, remove berth from collection",
+            "Refresh berth grid"
+          ],
+          "confirmation": {
+            "dialog": "Main.ItemRemoveDialog",
+            "message": "Are you sure you want to remove this Berth?"
+          },
+          "stateChanges": [
+            "Berth removed from collection",
+            "Berth grid refreshed"
+          ]
+        },
+        {
+          "step": 6,
+          "action": "Grid row selection changed",
+          "trigger": "grdBerths.AfterSelectChange",
+          "activities": [
+            "SetToolState method called",
+            "Enable/disable toolbar buttons based on selection"
+          ],
+          "stateChanges": [
+            "Modify and Remove buttons enabled if row selected",
+            "Modify and Remove buttons disabled if no selection"
+          ]
+        }
+      ]
+    },
+    "statusChildFlow": {
+      "description": "Managing facility status history (child collection)",
+      "collectionType": "FacilityStatuses",
+      "grid": "grdFacilityStatus",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Add new status",
+          "trigger": "AddStatus toolbar button click",
+          "activities": [
+            "StatusToolbarsManager_ToolClick event fires",
+            "ItemAddStatus method called",
+            "BusinessLogic.FacilityStatuses.NewFacilityStatus creates new object",
+            "Enter edit mode for new status",
+            "Clear status edit controls",
+            "Set StartDateTime to current date/time",
+            "Enable status edit controls and buttons"
+          ],
+          "stateChanges": [
+            "IsEditingChild = true",
+            "Main form controls disabled",
+            "Main form tabs disabled",
+            "Status edit group visible and enabled",
+            "_FacilityStatus set to new object"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "Edit existing status",
+          "trigger": "ModifyStatus toolbar button or grid double-click",
+          "activities": [
+            "ItemModify method called with grdFacilityStatus parameter",
+            "Get selected status from grid",
+            "_FacilityStatus.BeginEdit() called",
+            "Load status data to edit controls",
+            "Split DateTime into date and time controls",
+            "Enable status edit controls and buttons"
+          ],
+          "stateChanges": [
+            "IsEditingChild = true",
+            "Main form controls disabled",
+            "Status edit group populated with selected status data",
+            "_FacilityStatus in edit mode"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "Open text editor for status note",
+          "trigger": "txtStatusNote.EditorButtonClick",
+          "activities": [
+            "txtStatusNote_EditorButtonClick event fires",
+            "ControlAuthorization.GetAccessLevelForFunctionalArea called",
+            "Open frmTextEditor modal dialog",
+            "Pass current note text and access level",
+            "User edits note in modal",
+            "Return note text to txtStatusNote"
+          ],
+          "modalDialog": {
+            "form": "frmTextEditor",
+            "purpose": "Multi-line text editing",
+            "parameters": [
+              "Current note text",
+              "Access level for security"
+            ]
+          },
+          "stateChanges": [
+            "Modal dialog opened",
+            "Note text updated if user saves",
+            "Modal dialog closed"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "Save status changes",
+          "trigger": "btnSetStatus.Click",
+          "activities": [
+            "SetClickListAndDetail method called with _FacilityStatus",
+            "Validate status data",
+            "Combine date and time controls to StartDateTime/EndDateTime",
+            "Add or update status in collection",
+            "Refresh status grid",
+            "Exit edit mode"
+          ],
+          "validations": [
+            {
+              "field": "dtStartDate",
+              "rule": "Required",
+              "message": "Start date is required"
+            },
+            {
+              "field": "cboFacilityStatus",
+              "rule": "Required",
+              "message": "Status is required"
+            },
+            {
+              "field": "txtStatusNote",
+              "rule": "MaxLength",
+              "value": 500
+            }
+          ],
+          "stateChanges": [
+            "Status added/updated in collection",
+            "IsEditingChild = false",
+            "Main form controls re-enabled",
+            "Status grid refreshed",
+            "Status edit group cleared"
+          ]
+        },
+        {
+          "step": 5,
+          "action": "Cancel status edit",
+          "trigger": "btnCancelEditStatus.Click",
+          "activities": [
+            "CancelClickListAndDetail method called with _FacilityStatus",
+            "_FacilityStatus.CancelEdit() called",
+            "Discard status changes",
+            "Exit edit mode"
+          ],
+          "stateChanges": [
+            "Status changes discarded",
+            "IsEditingChild = false",
+            "Main form controls re-enabled",
+            "Status edit group cleared"
+          ]
+        },
+        {
+          "step": 6,
+          "action": "Remove status",
+          "trigger": "RemoveStatus toolbar button",
+          "activities": [
+            "ItemRemoveStatus method called",
+            "Main.ItemRemoveDialog('Status') confirmation",
+            "If confirmed, remove status from collection",
+            "Refresh status grid"
+          ],
+          "confirmation": {
+            "dialog": "Main.ItemRemoveDialog",
+            "message": "Are you sure you want to remove this Status?"
+          },
+          "stateChanges": [
+            "Status removed from collection",
+            "Status grid refreshed"
+          ]
+        },
+        {
+          "step": 7,
+          "action": "Export status grid",
+          "trigger": "ExportStatus toolbar button",
+          "activities": [
+            "Main.ExportGrid method called",
+            "Parameters: grdFacilityStatus, staStatus, form title",
+            "Export grid data to Excel/CSV"
+          ],
+          "stateChanges": [
+            "File save dialog displayed",
+            "Grid data exported to file"
+          ]
+        },
+        {
+          "step": 8,
+          "action": "Grid row selection changed",
+          "trigger": "grdFacilityStatus.AfterSelectChange",
+          "activities": [
+            "SetToolState method called",
+            "Enable/disable toolbar buttons based on selection"
+          ],
+          "stateChanges": [
+            "Modify and Remove buttons enabled if row selected",
+            "Modify and Remove buttons disabled if no selection",
+            "Export button enabled if any rows exist"
+          ]
+        }
+      ]
+    }
+  },
+  "formLifecycle": {
+    "initialization": {
+      "event": "frmFacilityDetail_Load",
+      "sequence": [
+        {
+          "order": 1,
+          "method": "FormatControls",
+          "description": "Apply control formatting, tooltips, and UI setup"
+        },
+        {
+          "order": 2,
+          "method": "LoadControlsForLocation",
+          "description": "Populate Location entity controls with data binding"
+        },
+        {
+          "order": 3,
+          "method": "LoadControlsForFacilityLocation",
+          "description": "Populate FacilityLocation entity controls with data binding"
+        },
+        {
+          "order": 4,
+          "method": "EnableDisableControls",
+          "description": "Apply security authorization and state-based control enablement"
+        },
+        {
+          "order": 5,
+          "method": "SetFocus",
+          "description": "Set initial focus to txtName"
+        }
+      ],
+      "businessObjectInit": {
+        "method": "Initialize(businessObject, optionalParams)",
+        "variants": [
+          {
+            "signature": "Initialize(businessObject As BusinessLogicBase)",
+            "description": "Standard initialization with existing Location object"
+          },
+          {
+            "signature": "Initialize(businessObject, facilityName, bargeExCode)",
+            "description": "Pre-fill Name and BargeExCode (used from frmBargeExVendorDocInboxSearch)"
+          }
+        ],
+        "activities": [
+          "Call MyBase.InitializeBase(businessObject, SubSystem.frmFacilitySearch)",
+          "Set ControlAuthorization button types",
+          "Load dropdown data sources",
+          "Apply default values"
+        ]
+      }
+    },
+    "validation": {
+      "clientSide": {
+        "library": "ValidatorExtender",
+        "displayControl": "staStatus",
+        "triggers": [
+          "Control Validated events",
+          "Before submit"
+        ],
+        "validationRules": [
+          {
+            "control": "txtName",
+            "rules": ["Required", "MaxLength:100"]
+          },
+          {
+            "control": "txtShortName",
+            "rules": ["MaxLength:50"]
+          },
+          {
+            "control": "txtLocationNote",
+            "rules": ["MaxLength:500"]
+          },
+          {
+            "control": "txtMile",
+            "rules": ["Decimal"]
+          },
+          {
+            "control": "txtBargeExCode",
+            "rules": ["MaxLength:10"]
+          },
+          {
+            "control": "txtBerthName",
+            "rules": ["Required", "MaxLength:100"]
+          },
+          {
+            "control": "dtStartDate",
+            "rules": ["Required"]
+          },
+          {
+            "control": "cboFacilityStatus",
+            "rules": ["Required"]
+          },
+          {
+            "control": "txtStatusNote",
+            "rules": ["MaxLength:500"]
+          }
+        ]
+      },
+      "businessRules": {
+        "method": "CheckBusinessRules",
+        "triggers": [
+          "Property value changes",
+          "Before save"
+        ],
+        "rules": [
+          {
+            "rule": "LockUsaceNameMustBeBlank",
+            "condition": "BargeExLocationType not in ['Lock', 'Gauge Location']",
+            "message": "USACE name must be blank if Facility type is not 'Lock' or 'Gauge Location'."
+          },
+          {
+            "rule": "LockFloodStageMustBeBlank",
+            "condition": "BargeExLocationType not in ['Lock', 'Gauge Location']",
+            "message": "Flood stage must be blank if Facility type is not 'Lock' or 'Gauge Location'."
+          },
+          {
+            "rule": "LockPoolStageMustBeBlank",
+            "condition": "BargeExLocationType not in ['Lock', 'Gauge Location']",
+            "message": "Pool stage must be blank if Facility type is not 'Lock' or 'Gauge Location'."
+          },
+          {
+            "rule": "LockLowWaterMustBeBlank",
+            "condition": "BargeExLocationType not in ['Lock', 'Gauge Location']",
+            "message": "Low water must be blank if Facility type is not 'Lock' or 'Gauge Location'."
+          },
+          {
+            "rule": "LockNormalCurrentMustBeBlank",
+            "condition": "BargeExLocationType not in ['Lock', 'Gauge Location']",
+            "message": "Normal current must be blank if Facility type is not 'Lock' or 'Gauge Location'."
+          },
+          {
+            "rule": "LockHighFlowMustBeBlank",
+            "condition": "BargeExLocationType not in ['Lock', 'Gauge Location']",
+            "message": "High flow must be blank if Facility type is not 'Lock' or 'Gauge Location'."
+          },
+          {
+            "rule": "LockHighWaterMustBeBlank",
+            "condition": "BargeExLocationType not in ['Lock', 'Gauge Location']",
+            "message": "High water must be blank if Facility type is not 'Lock' or 'Gauge Location'."
+          },
+          {
+            "rule": "LockCatastrophicLevelMustBeBlank",
+            "condition": "BargeExLocationType not in ['Lock', 'Gauge Location']",
+            "message": "Catastrophic level must be blank if Facility type is not 'Lock' or 'Gauge Location'."
+          }
+        ]
+      }
+    },
+    "saveProcess": {
+      "method": "btnSubmit_Click",
+      "sequence": [
+        {
+          "order": 1,
+          "method": "ClearUnusedFields",
+          "description": "Clear Lock/Gauge fields if BargeExLocationType is not Lock or Gauge Location"
+        },
+        {
+          "order": 2,
+          "method": "SubmitNoRefreshClick",
+          "description": "Validate and save business object to database"
+        },
+        {
+          "order": 3,
+          "method": "Main.Notifier.UserFleetsChanging",
+          "description": "Notify other forms to refresh fleet list combos"
+        },
+        {
+          "order": 4,
+          "method": "Main.Notifier.BerthsChanging",
+          "description": "Notify Barge Positions form to update berth data"
+        }
+      ],
+      "database": {
+        "mainEntity": {
+          "table": "Location / FacilityLocation",
+          "operation": "Insert or Update",
+          "storedProcedure": "FacilityLocationInsert / FacilityLocationUpdate"
+        },
+        "childCollections": [
+          {
+            "collection": "FacilityBerths",
+            "updateMethod": "FacilityBerths.Update(transaction, parentObject)",
+            "operations": ["Insert new berths", "Update modified berths", "Delete removed berths"]
+          },
+          {
+            "collection": "FacilityStatuses",
+            "updateMethod": "FacilityStatuses.Update(transaction, parentObject)",
+            "operations": ["Insert new statuses", "Update modified statuses", "Delete removed statuses"]
+          }
+        ],
+        "transactionScope": "All operations within single transaction"
+      }
+    },
+    "cleanup": {
+      "event": "Form closing",
+      "activities": [
+        "Dispose business objects",
+        "Dispose UI controls",
+        "Unsubscribe from events"
+      ]
+    }
+  },
+  "statePersistence": {
+    "businessObject": {
+      "pattern": "CSLA-like EditableBusinessObject",
+      "stateMachine": [
+        {
+          "state": "New",
+          "description": "Newly created, not yet saved",
+          "isDirty": true,
+          "isNew": true,
+          "isDeleted": false
+        },
+        {
+          "state": "Loaded",
+          "description": "Loaded from database, unchanged",
+          "isDirty": false,
+          "isNew": false,
+          "isDeleted": false
+        },
+        {
+          "state": "Modified",
+          "description": "Loaded from database, has changes",
+          "isDirty": true,
+          "isNew": false,
+          "isDeleted": false
+        },
+        {
+          "state": "Deleted",
+          "description": "Marked for deletion",
+          "isDirty": true,
+          "isNew": false,
+          "isDeleted": true
+        }
+      ],
+      "dirtyTracking": {
+        "mechanism": "MarkDirty() called on property changes",
+        "propertyChanges": "Automatic via property setters",
+        "childChanges": "Child collections notify parent when changed"
+      },
+      "originalValues": {
+        "purpose": "Audit tracking and CancelEdit support",
+        "storage": "p_AuditFieldEvents collection",
+        "capturedAt": "BeginEdit or after load from database",
+        "usage": [
+          "Field-level audit logging",
+          "CancelEdit rollback",
+          "Change detection"
+        ]
+      }
+    },
+    "childEditState": {
+      "flag": "IsEditingChild",
+      "purpose": "Track when editing a child object (Berth or Status)",
+      "effects": [
+        "Disable main form controls",
+        "Disable main form tabs",
+        "Disable main Submit button",
+        "Enable child edit controls and buttons"
+      ],
+      "transitions": [
+        {
+          "from": "false",
+          "to": "true",
+          "trigger": "ItemAddBerth, ItemAddStatus, ItemModify (child)"
+        },
+        {
+          "from": "true",
+          "to": "false",
+          "trigger": "SetClickListAndDetail (save), CancelClickListAndDetail (cancel)"
+        }
+      ]
+    },
+    "validationState": {
+      "brokenRules": {
+        "collection": "BrokenRules",
+        "itemType": "BrokenRule",
+        "properties": ["PropertyName", "Description", "Severity"],
+        "display": "ValidatorExtender displays on staStatus"
+      },
+      "isValid": {
+        "calculation": "BrokenRules.Count = 0",
+        "checked": "Before save operations"
+      }
+    },
+    "uiState": {
+      "tabSelection": {
+        "property": "tabMain.SelectedTab",
+        "persistence": "In-memory only (not saved)",
+        "lazyLoading": "Grid data loaded on first tab visit"
+      },
+      "gridSelection": {
+        "grids": ["grdBerths", "grdFacilityStatus"],
+        "persistence": "In-memory only",
+        "usage": "Enable/disable toolbar buttons"
+      },
+      "editMode": {
+        "modes": ["View", "Edit", "EditingChild"],
+        "determined": "Based on permissions and IsEditingChild flag"
+      }
+    },
+    "formInputs": {
+      "initialization": {
+        "businessObject": "Location with FacilityLocation child",
+        "optionalParameters": ["facilityName", "bargeExCode"]
+      },
+      "inMemoryState": "All changes kept in business object until save",
+      "unsavedChanges": "Tracked via IsDirty flag"
+    }
+  },
+  "modalDialogPatterns": {
+    "textEditor": {
+      "dialog": "frmTextEditor",
+      "trigger": "txtStatusNote EditorButton click",
+      "purpose": "Multi-line text editing for status notes",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "String",
+          "description": "Current note text"
+        },
+        {
+          "name": "accessLevel",
+          "type": "AccessLevel",
+          "description": "User's security access level"
+        }
+      ],
+      "return": {
+        "type": "String",
+        "description": "Updated note text"
+      },
+      "usage": {
+        "control": "txtStatusNote",
+        "event": "EditorButtonClick",
+        "securityCheck": "ControlAuthorization.GetAccessLevelForFunctionalArea(Me.FunctionalAreaOfForm)"
+      }
+    },
+    "confirmationDialogs": {
+      "itemRemove": {
+        "method": "Main.ItemRemoveDialog",
+        "purpose": "Confirm deletion of child items",
+        "parameters": [
+          {
+            "name": "itemType",
+            "type": "String",
+            "description": "Type of item being removed (e.g., 'Berth', 'Status')"
+          }
+        ],
+        "return": {
+          "type": "DialogResult",
+          "description": "User's confirmation choice"
+        },
+        "usage": [
+          "ItemRemoveBerth before deleting berth",
+          "ItemRemoveStatus before deleting status"
+        ]
+      }
+    },
+    "childObjectEditing": {
+      "pattern": "In-form editing with group box",
+      "description": "Child objects edited in dedicated group box on same form, not separate modal",
+      "implementation": [
+        {
+          "entity": "FacilityBerth",
+          "groupBox": "grpBerth",
+          "controls": ["txtBerthName", "txtShipName", "btnSetBerth", "btnCancelEditBerth"]
+        },
+        {
+          "entity": "FacilityStatus",
+          "groupBox": "grpStatus",
+          "controls": ["dtStartDate", "cboStartTime", "cboFacilityStatus", "txtStatusNote", "dtEndDate", "cboEndTime", "btnSetStatus", "btnCancelEditStatus"]
+        }
+      ],
+      "stateManagement": {
+        "beginEdit": "Called when starting to edit child object",
+        "cancelEdit": "Rollback changes to child object",
+        "saveEdit": "Add/update child in collection"
+      }
+    }
+  },
+  "refreshTriggers": {
+    "formLoad": {
+      "trigger": "frmFacilityDetail_Load",
+      "refreshes": [
+        "Main form controls populated from business object",
+        "Dropdowns populated (River, BargeExLocationType, Bank)",
+        "Validation state initialized"
+      ]
+    },
+    "tabChange": {
+      "trigger": "tabMain.SelectedTabChanged",
+      "refreshes": [
+        "Lazy load grid data for Berths tab (first visit)",
+        "Lazy load grid data for Status tab (first visit)",
+        "Enable appropriate toolbar"
+      ]
+    },
+    "berthOperations": {
+      "trigger": "SetClickListAndDetail (Berth save) or ItemRemoveBerth",
+      "refreshes": [
+        "grdBerths grid rebind",
+        "Toolbar button states"
+      ]
+    },
+    "statusOperations": {
+      "trigger": "SetClickListAndDetail (Status save) or ItemRemoveStatus",
+      "refreshes": [
+        "grdFacilityStatus grid rebind",
+        "Toolbar button states"
+      ]
+    },
+    "externalNotifications": {
+      "userFleetsChanging": {
+        "trigger": "Main.Notifier.UserFleetsChanging",
+        "source": "After facility saved",
+        "subscribers": [
+          "Fleet list combo boxes in other forms"
+        ],
+        "purpose": "Ensure facility appears in fleet selection dropdowns"
+      },
+      "berthsChanging": {
+        "trigger": "Main.Notifier.BerthsChanging",
+        "source": "After facility saved with berth changes",
+        "subscribers": [
+          "Barge Positions form"
+        ],
+        "purpose": "Update berth availability and assignments"
+      }
+    },
+    "conditionalRefresh": {
+      "facilityTypeChange": {
+        "trigger": "cboBargeExLocationType.ValueChanged",
+        "refreshes": [
+          "Enable/disable Lock/Gauge controls",
+          "Clear Lock/Gauge field values if disabled"
+        ]
+      }
+    }
+  },
+  "eventHandlerChains": {
+    "controlValidated": {
+      "trigger": "UltraTextEditor, UltraCombo, UltraCheckEditor Validated event",
+      "chain": [
+        {
+          "order": 1,
+          "handler": "Control_Validated",
+          "description": "Control-specific validated event handler"
+        },
+        {
+          "order": 2,
+          "method": "Business object property setter",
+          "description": "Update business object property value"
+        },
+        {
+          "order": 3,
+          "method": "MarkDirty",
+          "description": "Mark business object as modified"
+        },
+        {
+          "order": 4,
+          "method": "CheckBusinessRules(PropertyName)",
+          "description": "Validate business rules for changed property"
+        },
+        {
+          "order": 5,
+          "method": "FieldAudit",
+          "description": "Log field change for audit tracking"
+        },
+        {
+          "order": 6,
+          "method": "ValidatorExtender update",
+          "description": "Update UI validation display"
+        }
+      ]
+    },
+    "facilityTypeValueChanged": {
+      "trigger": "cboBargeExLocationType.ValueChanged",
+      "chain": [
+        {
+          "order": 1,
+          "handler": "cboBargeExLocationType_ValueChanged",
+          "description": "Event handler for dropdown value change"
+        },
+        {
+          "order": 2,
+          "method": "EnableDisableLockControls",
+          "description": "Enable/disable Lock/Gauge controls based on selection"
+        },
+        {
+          "order": 3,
+          "method": "ClearLockControls (if disabled)",
+          "description": "Clear Lock/Gauge field values if not applicable"
+        }
+      ]
+    },
+    "toolbarClick": {
+      "trigger": "Toolbar button click",
+      "chains": {
+        "berthToolbar": [
+          {
+            "order": 1,
+            "handler": "BerthToolbarManager_ToolClick",
+            "description": "Toolbar click event handler"
+          },
+          {
+            "order": 2,
+            "method": "Determine which button clicked (AddBerth, ModifyBerth, RemoveBerth)",
+            "description": "Route to appropriate action method"
+          },
+          {
+            "order": 3,
+            "method": "ItemAddBerth / ItemModify / ItemRemoveBerth",
+            "description": "Execute action-specific logic"
+          },
+          {
+            "order": 4,
+            "method": "SetToolState",
+            "description": "Update toolbar button enabled states"
+          }
+        ],
+        "statusToolbar": [
+          {
+            "order": 1,
+            "handler": "StatusToolbarsManager_ToolClick",
+            "description": "Toolbar click event handler"
+          },
+          {
+            "order": 2,
+            "method": "Determine which button clicked (AddStatus, ModifyStatus, RemoveStatus, ExportStatus)",
+            "description": "Route to appropriate action method"
+          },
+          {
+            "order": 3,
+            "method": "ItemAddStatus / ItemModify / ItemRemoveStatus / Main.ExportGrid",
+            "description": "Execute action-specific logic"
+          },
+          {
+            "order": 4,
+            "method": "SetToolState",
+            "description": "Update toolbar button enabled states"
+          }
+        ]
+      }
+    },
+    "gridDoubleClick": {
+      "trigger": "Grid row double-click",
+      "chains": {
+        "berthGrid": [
+          {
+            "order": 1,
+            "handler": "grdBerths_DoubleClick",
+            "description": "Grid double-click event handler"
+          },
+          {
+            "order": 2,
+            "method": "ItemModify(grdBerths)",
+            "description": "Enter edit mode for selected berth"
+          }
+        ],
+        "statusGrid": [
+          {
+            "order": 1,
+            "handler": "grdFacilityStatus_DoubleClick",
+            "description": "Grid double-click event handler"
+          },
+          {
+            "order": 2,
+            "method": "ItemModify(grdFacilityStatus)",
+            "description": "Enter edit mode for selected status"
+          }
+        ]
+      }
+    },
+    "gridSelectionChanged": {
+      "trigger": "Grid selection changed",
+      "chain": [
+        {
+          "order": 1,
+          "handler": "Grid_AfterSelectChange",
+          "description": "Grid selection change event handler"
+        },
+        {
+          "order": 2,
+          "method": "SetToolState",
+          "description": "Enable/disable toolbar buttons based on selection"
+        }
+      ]
+    },
+    "submitClick": {
+      "trigger": "btnSubmit.Click",
+      "chain": [
+        {
+          "order": 1,
+          "handler": "btnSubmit_Click",
+          "description": "Submit button click event handler"
+        },
+        {
+          "order": 2,
+          "method": "ClearUnusedFields",
+          "description": "Clear Lock/Gauge fields if not applicable"
+        },
+        {
+          "order": 3,
+          "method": "SubmitNoRefreshClick",
+          "description": "Validate and save business object"
+        },
+        {
+          "order": 4,
+          "method": "Main.Notifier.UserFleetsChanging",
+          "description": "Notify subscribers to refresh fleet lists"
+        },
+        {
+          "order": 5,
+          "method": "Main.Notifier.BerthsChanging",
+          "description": "Notify subscribers to refresh berth data"
+        },
+        {
+          "order": 6,
+          "method": "Close form (if save successful)",
+          "description": "Return to search form"
+        }
+      ]
+    }
+  },
+  "securityIntegration": {
+    "authorization": {
+      "library": "Csg.Windows.Forms.Security.ControlAuthorizationBase",
+      "functionalArea": "frmFacilitySearch (SubSystem)",
+      "accessLevels": [
+        {
+          "level": "None",
+          "description": "No access to form"
+        },
+        {
+          "level": "ReadOnly",
+          "description": "View data, cancel operations, but cannot save",
+          "allowedControls": ["btnCancel", "View data", "Navigate tabs"]
+        },
+        {
+          "level": "Modify",
+          "description": "Full access to edit and save data",
+          "allowedControls": [
+            "btnSubmit",
+            "All input controls",
+            "Child collection operations (Add, Modify, Remove)",
+            "Export"
+          ]
+        }
+      ],
+      "buttonTypes": [
+        {
+          "control": "btnSubmit",
+          "type": "Submit",
+          "requiresLevel": "Modify"
+        },
+        {
+          "control": "btnCancel",
+          "type": "Cancel",
+          "requiresLevel": "ReadOnly"
+        },
+        {
+          "control": "btnSetBerth",
+          "type": "Submit",
+          "requiresLevel": "Modify"
+        },
+        {
+          "control": "btnCancelEditBerth",
+          "type": "CancelEdit",
+          "requiresLevel": "ReadOnly"
+        },
+        {
+          "control": "btnSetStatus",
+          "type": "Submit",
+          "requiresLevel": "Modify"
+        },
+        {
+          "control": "btnCancelEditStatus",
+          "type": "CancelEdit",
+          "requiresLevel": "ReadOnly"
+        },
+        {
+          "toolbar": "AddBerth",
+          "type": "Add",
+          "requiresLevel": "Modify"
+        },
+        {
+          "toolbar": "ModifyBerth",
+          "type": "Open",
+          "requiresLevel": "Modify"
+        },
+        {
+          "toolbar": "RemoveBerth",
+          "type": "Remove",
+          "requiresLevel": "Modify"
+        },
+        {
+          "toolbar": "AddStatus",
+          "type": "Add",
+          "requiresLevel": "Modify"
+        },
+        {
+          "toolbar": "ModifyStatus",
+          "type": "Open",
+          "requiresLevel": "Modify"
+        },
+        {
+          "toolbar": "RemoveStatus",
+          "type": "Remove",
+          "requiresLevel": "Modify"
+        },
+        {
+          "toolbar": "ExportStatus",
+          "type": "Open",
+          "requiresLevel": "Modify"
+        }
+      ]
+    },
+    "toolbarButtonEnabling": {
+      "method": "SetToolState",
+      "conditions": [
+        {
+          "button": "Add",
+          "condition": "(Not IsEditingChild) AND ControlAuthorization.ToolbarButtonCanBeEnabled"
+        },
+        {
+          "button": "Modify",
+          "condition": "itemIsSelected AND (Not IsEditingChild) AND ControlAuthorization.ToolbarButtonCanBeEnabled"
+        },
+        {
+          "button": "Remove",
+          "condition": "itemIsSelected AND (Not IsEditingChild) AND ControlAuthorization.ToolbarButtonCanBeEnabled"
+        },
+        {
+          "button": "Export",
+          "condition": "atLeastOneRow AND (Not IsEditingChild) AND ControlAuthorization.ToolbarButtonCanBeEnabled"
+        }
+      ]
+    }
+  },
+  "modernConversionGuidance": {
+    "aspNetCoreMvc": {
+      "controller": "FacilityController",
+      "actions": [
+        {
+          "action": "Edit",
+          "method": "GET",
+          "route": "/Facility/Edit/{id}",
+          "returns": "View with FacilityViewModel",
+          "authorization": "[Authorize(Policy = \"FacilityRead\")]"
+        },
+        {
+          "action": "Edit",
+          "method": "POST",
+          "route": "/Facility/Edit/{id}",
+          "accepts": "FacilityViewModel",
+          "returns": "RedirectToAction or View with errors",
+          "authorization": "[Authorize(Policy = \"FacilityModify\")]"
+        },
+        {
+          "action": "Create",
+          "method": "GET",
+          "route": "/Facility/Create",
+          "returns": "View with FacilityViewModel",
+          "authorization": "[Authorize(Policy = \"FacilityModify\")]"
+        },
+        {
+          "action": "Create",
+          "method": "POST",
+          "route": "/Facility/Create",
+          "accepts": "FacilityViewModel",
+          "returns": "RedirectToAction or View with errors",
+          "authorization": "[Authorize(Policy = \"FacilityModify\")]"
+        }
+      ],
+      "childOperations": {
+        "pattern": "AJAX API endpoints for child collections",
+        "endpoints": [
+          {
+            "entity": "FacilityBerth",
+            "operations": [
+              "POST /api/FacilityBerth - Create berth",
+              "PUT /api/FacilityBerth/{id} - Update berth",
+              "DELETE /api/FacilityBerth/{id} - Delete berth"
+            ]
+          },
+          {
+            "entity": "FacilityStatus",
+            "operations": [
+              "POST /api/FacilityStatus - Create status",
+              "PUT /api/FacilityStatus/{id} - Update status",
+              "DELETE /api/FacilityStatus/{id} - Delete status"
+            ]
+          }
+        ]
+      }
+    },
+    "javascriptWorkflow": {
+      "file": "wwwroot/js/facility.js",
+      "patterns": [
+        {
+          "pattern": "Tab lazy loading",
+          "implementation": "Use shown.bs.tab event to load grid data on first visit"
+        },
+        {
+          "pattern": "Conditional field enabling",
+          "implementation": "jQuery change handler on facility type dropdown to enable/disable Lock/Gauge fields"
+        },
+        {
+          "pattern": "Child collection management",
+          "implementation": "Modal dialogs for Add/Edit, AJAX calls to save/delete, refresh grid after operations"
+        },
+        {
+          "pattern": "Form validation",
+          "implementation": "jQuery unobtrusive validation + custom validation rules"
+        },
+        {
+          "pattern": "Multi-line text editing",
+          "implementation": "Bootstrap modal with textarea for status notes"
+        },
+        {
+          "pattern": "Export functionality",
+          "implementation": "Server-side export with file download"
+        }
+      ]
+    },
+    "stateManagement": {
+      "serverSide": {
+        "approach": "Stateless controller actions",
+        "validation": "Data annotations + FluentValidation",
+        "transactions": "UnitOfWork pattern with repository"
+      },
+      "clientSide": {
+        "approach": "JavaScript state management",
+        "validation": "jQuery validation",
+        "dirtyTracking": "Custom JavaScript to track form changes and warn on navigate"
+      }
+    },
+    "notificationPattern": {
+      "legacy": "Main.Notifier event-driven notifications",
+      "modern": "SignalR for real-time updates or polling for background refresh"
+    }
+  }
+}

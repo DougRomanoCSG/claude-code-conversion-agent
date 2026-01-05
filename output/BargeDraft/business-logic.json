@@ -1,0 +1,800 @@
+{
+  "businessObject": "Draft",
+  "entityAlias": "BargeDraft",
+  "baseClass": "DraftBase",
+  "namespace": "BargeOps.Onshore.BusinessLogic",
+  "description": "Business object for managing barge draft measurements at four corners (port/starboard bow/stern), calculating average draft, and computing tonnage for draft surveys. This is a standalone business object that stores barge draft measurements and is referenced by BargeEvent and TicketEvent.",
+  "properties": [
+    {
+      "name": "DraftID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "description": "Unique identifier for draft record"
+    },
+    {
+      "name": "Draft",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "precision": "0.001",
+      "roundingMethod": "Nearest",
+      "description": "Overall maximum draft in feet (decimal), automatically set to highest corner draft",
+      "calculatedFrom": ["DraftPortBow", "DraftStarboardBow", "DraftPortStern", "DraftStarboardStern"]
+    },
+    {
+      "name": "DraftFeet",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Feet portion of overall draft (derived from Draft property)"
+    },
+    {
+      "name": "DraftInches",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Inches portion of overall draft (0-11)"
+    },
+    {
+      "name": "DraftPortBow",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "precision": "0.001",
+      "roundingMethod": "Nearest",
+      "description": "Draft measurement at port bow corner in feet (decimal)"
+    },
+    {
+      "name": "DraftPortBowFeet",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Feet portion of port bow draft"
+    },
+    {
+      "name": "DraftPortBowInches",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Inches portion of port bow draft (0-11)"
+    },
+    {
+      "name": "DraftStarboardBow",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "precision": "0.001",
+      "roundingMethod": "Nearest",
+      "description": "Draft measurement at starboard bow corner in feet (decimal)"
+    },
+    {
+      "name": "DraftStarboardBowFeet",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Feet portion of starboard bow draft"
+    },
+    {
+      "name": "DraftStarboardBowInches",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Inches portion of starboard bow draft (0-11)"
+    },
+    {
+      "name": "DraftPortStern",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "precision": "0.001",
+      "roundingMethod": "Nearest",
+      "description": "Draft measurement at port stern corner in feet (decimal)"
+    },
+    {
+      "name": "DraftPortSternFeet",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Feet portion of port stern draft"
+    },
+    {
+      "name": "DraftPortSternInches",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Inches portion of port stern draft (0-11)"
+    },
+    {
+      "name": "DraftStarboardStern",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "precision": "0.001",
+      "roundingMethod": "Nearest",
+      "description": "Draft measurement at starboard stern corner in feet (decimal)"
+    },
+    {
+      "name": "DraftStarboardSternFeet",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Feet portion of starboard stern draft"
+    },
+    {
+      "name": "DraftStarboardSternInches",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Inches portion of starboard stern draft (0-11)"
+    },
+    {
+      "name": "DraftAverage",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "precision": "0.001",
+      "roundingMethod": "Nearest",
+      "description": "Average of four corner drafts (only calculated for Draft Survey events), rounded to nearest inch with midpoint rounding away from zero",
+      "calculatedFrom": ["DraftPortBow", "DraftStarboardBow", "DraftPortStern", "DraftStarboardStern"],
+      "visibilityCondition": "EventTypeEnumVal == DraftSurvey"
+    },
+    {
+      "name": "DraftAverageFeet",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Feet portion of average draft",
+      "visibilityCondition": "EventTypeEnumVal == DraftSurvey"
+    },
+    {
+      "name": "DraftAverageInches",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Inches portion of average draft (0-11)",
+      "visibilityCondition": "EventTypeEnumVal == DraftSurvey"
+    },
+    {
+      "name": "EstimatedCargoDeadweight",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "format": "TwoDecimalPlaces",
+      "isCalculated": true,
+      "description": "Estimated cargo tonnage based on draft and load status",
+      "calculationLogic": "For Load/PartLoad: calculated from DraftAverage using BargeSeries draft tables. For Empty: tonnage from most recent Load/PartLoad Draft Survey event on same ticket",
+      "visibilityCondition": "EventTypeEnumVal == DraftSurvey"
+    },
+    {
+      "name": "LightshipCorrection",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "format": "TwoDecimalPlaces",
+      "isCalculated": true,
+      "description": "Lightship correction tonnage for empty barge weight adjustment",
+      "calculationLogic": "For Load/PartLoad: calculated from DraftAverage of most recent Empty Draft Survey event. For Empty: calculated from current DraftAverage using BargeSeries draft tables",
+      "visibilityCondition": "EventTypeEnumVal == DraftSurvey"
+    },
+    {
+      "name": "AdjustmentTons",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "format": "TwoDecimalPlaces",
+      "description": "Manual tonnage adjustment value",
+      "visibilityCondition": "EventTypeEnumVal == DraftSurvey"
+    },
+    {
+      "name": "LoadUnloadTons",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "format": "TwoDecimalPlaces",
+      "isCalculated": true,
+      "description": "Final calculated tonnage: EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+      "calculationLogic": "LoadUnloadTons = EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons",
+      "visibilityCondition": "EventTypeEnumVal == DraftSurvey"
+    },
+    {
+      "name": "ConvFesDraftID",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "description": "Conversion FES Draft ID (legacy conversion field)"
+    },
+    {
+      "name": "IsVoidOnLoad",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isNullable": false,
+      "isPersisted": false,
+      "description": "Indicates if associated ticket/event is voided (used to disable form controls)"
+    },
+    {
+      "name": "BargeSeriesID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "isPersisted": false,
+      "description": "Reference to BargeSeries for draft/tonnage table lookups"
+    },
+    {
+      "name": "EventTypeEnumVal",
+      "type": "EventTypeList.EventTypes",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "isPersisted": false,
+      "description": "Type of event (DraftSurvey, Load, etc.) - determines calculation behavior"
+    },
+    {
+      "name": "LoadStatus",
+      "type": "String",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "isPersisted": false,
+      "description": "Load status of barge (Empty, Load, PartLoad) - affects tonnage calculations"
+    },
+    {
+      "name": "LoadStatusEnumVal",
+      "type": "ValidationList.LoadStatusType",
+      "access": "ReadOnly",
+      "isNullable": false,
+      "isPersisted": false,
+      "description": "Enumeration value derived from LoadStatus string"
+    },
+    {
+      "name": "TicketEventID",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": false,
+      "isPersisted": false,
+      "description": "Reference to associated TicketEvent"
+    },
+    {
+      "name": "TicketEvents",
+      "type": "TicketEvents",
+      "access": "ReadWrite",
+      "isNullable": false,
+      "isPersisted": false,
+      "description": "Collection of all ticket events for finding prior draft survey events"
+    },
+    {
+      "name": "DraftSurveyEvents",
+      "type": "List<TicketEvent>",
+      "access": "ReadWrite",
+      "isNullable": false,
+      "isPersisted": false,
+      "description": "Filtered list of non-voided draft survey events for current ticket"
+    },
+    {
+      "name": "CoverType",
+      "type": "String",
+      "access": "Private",
+      "isNullable": true,
+      "isPersisted": false,
+      "description": "Type of barge cover (affects tonnage calculations via weight adjustment)"
+    },
+    {
+      "name": "DefaultCoverSubTypeID",
+      "type": "String",
+      "access": "Private",
+      "isNullable": true,
+      "isPersisted": false,
+      "description": "Default cover subtype ID for the cover type"
+    },
+    {
+      "name": "CoverSubTypeID",
+      "type": "String",
+      "access": "Private",
+      "isNullable": true,
+      "isPersisted": false,
+      "description": "Specific cover subtype ID (overrides default if specified)"
+    },
+    {
+      "name": "CoverConfig",
+      "type": "String",
+      "access": "Private",
+      "isNullable": true,
+      "isPersisted": false,
+      "description": "Cover configuration (Open, Spread, Stacked) - affects weight adjustment"
+    },
+    {
+      "name": "CoverWeightAdjustment",
+      "type": "Decimal",
+      "access": "Private",
+      "isNullable": false,
+      "isPersisted": false,
+      "description": "Calculated weight of cover in tons (affects draft/tonnage conversions)"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "DraftMaximumGreaterThanCorners",
+      "property": "Draft",
+      "condition": "(Draft <> Empty) AND ((DraftPortBow > Draft) OR (DraftPortStern > Draft) OR (DraftStarboardBow > Draft) OR (DraftStarboardStern > Draft))",
+      "message": "Overall draft must be >= the highest corner draft.",
+      "severity": "Error",
+      "context": "Always",
+      "ruleKey": "Draft & \"MAX\""
+    },
+    {
+      "ruleName": "DraftRangeValidation",
+      "property": "Draft",
+      "condition": "(Draft <> Empty) AND ((Draft > 99.999) OR (Draft < 0.0))",
+      "message": "Draft must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftInchesRangeValidation",
+      "property": "DraftInches",
+      "condition": "(DraftInches <> Empty) AND ((DraftInches < 0) OR (DraftInches > 11))",
+      "message": "Draft Inches must be between 0 and 11.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftAverageRangeValidation",
+      "property": "DraftAverage",
+      "condition": "(_IsFreightActive OR _IsTowingActive) AND (DraftAverage <> Empty) AND ((DraftAverage > 99.999) OR (DraftAverage < 0.0))",
+      "message": "Average Draft must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "When Freight or Towing license is active"
+    },
+    {
+      "ruleName": "DraftAverageInchesRangeValidation",
+      "property": "DraftAverageInches",
+      "condition": "(_IsFreightActive OR _IsTowingActive) AND (DraftAverageInches <> Empty) AND ((DraftAverageInches < 0) OR (DraftAverageInches > 11))",
+      "message": "Average Draft Inches must be between 0 and 11.",
+      "severity": "Error",
+      "context": "When Freight or Towing license is active"
+    },
+    {
+      "ruleName": "DraftPortBowRangeValidation",
+      "property": "DraftPortBow",
+      "condition": "(DraftPortBow <> Empty) AND ((DraftPortBow > 99.999) OR (DraftPortBow < 0.0))",
+      "message": "Draft Port Bow must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftPortBowInchesRangeValidation",
+      "property": "DraftPortBowInches",
+      "condition": "(DraftPortBowInches <> Empty) AND ((DraftPortBowInches < 0) OR (DraftPortBowInches > 11))",
+      "message": "Draft Port Bow Inches must be between 0 and 11.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftStarboardBowRangeValidation",
+      "property": "DraftStarboardBow",
+      "condition": "(DraftStarboardBow <> Empty) AND ((DraftStarboardBow > 99.999) OR (DraftStarboardBow < 0.0))",
+      "message": "Draft Starboard Bow must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftStarboardBowInchesRangeValidation",
+      "property": "DraftStarboardBowInches",
+      "condition": "(DraftStarboardBowInches <> Empty) AND ((DraftStarboardBowInches < 0) OR (DraftStarboardBowInches > 11))",
+      "message": "Draft Starboard Bow Inches must be between 0 and 11.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftPortSternRangeValidation",
+      "property": "DraftPortStern",
+      "condition": "(DraftPortStern <> Empty) AND ((DraftPortStern > 99.999) OR (DraftPortStern < 0.0))",
+      "message": "Draft Port Stern must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftPortSternInchesRangeValidation",
+      "property": "DraftPortSternInches",
+      "condition": "(DraftPortSternInches <> Empty) AND ((DraftPortSternInches < 0) OR (DraftPortSternInches > 11))",
+      "message": "Draft Port Stern Inches must be between 0 and 11.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftStarboardSternRangeValidation",
+      "property": "DraftStarboardStern",
+      "condition": "(DraftStarboardStern <> Empty) AND ((DraftStarboardStern > 99.999) OR (DraftStarboardStern < 0.0))",
+      "message": "Draft Starboard Stern must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftStarboardSternInchesRangeValidation",
+      "property": "DraftStarboardSternInches",
+      "condition": "(DraftStarboardSternInches <> Empty) AND ((DraftStarboardSternInches < 0) OR (DraftStarboardSternInches > 11))",
+      "message": "Draft Starboard Stern Inches must be between 0 and 11.",
+      "severity": "Error",
+      "context": "Always"
+    }
+  ],
+  "methods": {
+    "factory": [
+      {
+        "name": "NewDraft",
+        "returnType": "Draft",
+        "scope": "Public Shared",
+        "parameters": [
+          {"name": "brgDraftPortBow", "type": "String"},
+          {"name": "brgDraftPortStern", "type": "String"},
+          {"name": "brgDraftStarboardBow", "type": "String"},
+          {"name": "brgDraftStarboardStern", "type": "String"},
+          {"name": "isVoidedOnLoad", "type": "Boolean"},
+          {"name": "brgDraftFeet", "type": "String", "optional": true, "default": "-1"},
+          {"name": "brgDraftInches", "type": "String", "optional": true, "default": "-1"},
+          {"name": "evntTypeEnumVal", "type": "EventTypeList.EventTypes", "optional": true, "default": "Invalid"},
+          {"name": "adjstmntTons", "type": "String", "optional": true, "default": "\"\""},
+          {"name": "brgSeriesID", "type": "String", "optional": true, "default": "\"\""},
+          {"name": "tcktEventID", "type": "Integer", "optional": true, "default": "0"},
+          {"name": "loadStatusDraftSurvey", "type": "String", "optional": true, "default": "\"\""},
+          {"name": "tcktEvents", "type": "TicketEvents", "optional": true, "default": "Nothing"}
+        ],
+        "description": "Creates new Draft instance with four corner drafts and optional parameters for draft survey calculations"
+      },
+      {
+        "name": "NewDraftAsChild",
+        "returnType": "Draft",
+        "scope": "Friend Shared",
+        "parameters": [
+          {"name": "brgDraftPortBow", "type": "String"},
+          {"name": "brgDraftPortStern", "type": "String"},
+          {"name": "brgDraftStarboardBow", "type": "String"},
+          {"name": "brgDraftStarboardStern", "type": "String"},
+          {"name": "brgDraftFeet", "type": "String"},
+          {"name": "brgDraftInches", "type": "String"},
+          {"name": "isVoidedOnLoad", "type": "Boolean"},
+          {"name": "evntTypeEnumVal", "type": "EventTypeList.EventTypes", "optional": true, "default": "Invalid"},
+          {"name": "adjstmntTons", "type": "String", "optional": true, "default": "\"\""},
+          {"name": "brgSeriesID", "type": "String", "optional": true, "default": "\"\""},
+          {"name": "tcktEventID", "type": "Integer", "optional": true, "default": "0"},
+          {"name": "loadStatusDraftSurvey", "type": "String", "optional": true, "default": "\"\""},
+          {"name": "tcktEvents", "type": "TicketEvents", "optional": true, "default": "Nothing"}
+        ],
+        "description": "Creates new Draft child instance with all parameters required"
+      },
+      {
+        "name": "GetDraft",
+        "returnType": "Draft",
+        "scope": "Public Shared",
+        "parameters": [
+          {"name": "ID", "type": "Int32"}
+        ],
+        "description": "Loads existing Draft by ID"
+      }
+    ],
+    "crud": [
+      {
+        "name": "Save",
+        "returnType": "Draft",
+        "description": "Persists Draft to database via DataPortal"
+      },
+      {
+        "name": "Delete",
+        "returnType": "void",
+        "description": "Deletes Draft from database"
+      }
+    ],
+    "calculation": [
+      {
+        "name": "CalculateAverageDraft",
+        "returnType": "String",
+        "scope": "Private",
+        "description": "Calculates average of four corner drafts (only for DraftSurvey events). Converts to inches, averages, rounds to nearest inch (midpoint away from zero), returns as decimal feet",
+        "parameters": [],
+        "logic": "Sum all non-empty corner drafts (converted to inches), divide by count, round to nearest inch, convert back to decimal feet"
+      },
+      {
+        "name": "CalculateTonnageFromAvgDraft",
+        "returnType": "String",
+        "scope": "Private",
+        "parameters": [
+          {"name": "draft", "type": "String"},
+          {"name": "priorOpposingDraftSurveyEvent", "type": "TicketEvent"}
+        ],
+        "description": "Looks up tonnage from BargeSeries draft tables for given average draft, adjusts for cover weight based on event type and cover configuration"
+      },
+      {
+        "name": "CalculateDraftFromTonnage",
+        "returnType": "String",
+        "scope": "Public Shared",
+        "parameters": [
+          {"name": "evntTypeEnumVal", "type": "EventTypeList.EventTypes"},
+          {"name": "bargeSeriesID", "type": "String"},
+          {"name": "tonnage", "type": "String"},
+          {"name": "coverType", "type": "String"},
+          {"name": "coverSubTypeID", "type": "String"},
+          {"name": "coverConfig", "type": "String"}
+        ],
+        "description": "Calculates draft from tonnage using BargeSeries draft tables via interpolation. For Load events, adds cover weight to tonnage before lookup"
+      },
+      {
+        "name": "CalculateLoadUnloadTons",
+        "returnType": "String",
+        "scope": "Private",
+        "description": "Calculates final load/unload tonnage: EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons"
+      },
+      {
+        "name": "CalculateEstimatedCargoDeadweightAndLightshipCorrection",
+        "returnType": "void",
+        "scope": "Private",
+        "description": "Sets EstimatedCargoDeadweight and LightshipCorrection based on LoadStatus: For Load/PartLoad - cargo from current draft, lightship from prior Empty survey. For Empty - cargo from prior Load survey, lightship from current draft"
+      },
+      {
+        "name": "CalculateCoverWeightAdjustment",
+        "returnType": "Decimal",
+        "scope": "Private Shared",
+        "parameters": [
+          {"name": "evntTypeEnumVal", "type": "EventTypeList.EventTypes"},
+          {"name": "coverType", "type": "String"},
+          {"name": "coverSubTypeID", "type": "String"},
+          {"name": "defaultCoverSubTypeID", "type": "String"},
+          {"name": "coverConfig", "type": "String"}
+        ],
+        "description": "Calculates cover weight adjustment in tons. Returns negative value for DraftSurvey (subtract weight), positive for Load (add weight). Only applies if cover is not OT and config is Stacked or Spread"
+      },
+      {
+        "name": "MaxDraft",
+        "returnType": "String",
+        "scope": "Private",
+        "description": "Returns the highest value among the four corner drafts"
+      }
+    ],
+    "helper": [
+      {
+        "name": "ConvertToFeetAndInches",
+        "returnType": "void",
+        "scope": "Protected",
+        "description": "Converts decimal draft value to separate feet and inches values"
+      },
+      {
+        "name": "ConvertFromFeetAndInches",
+        "returnType": "String",
+        "scope": "Protected",
+        "description": "Converts feet and inches to decimal draft value"
+      },
+      {
+        "name": "ConvertToInches",
+        "returnType": "Decimal",
+        "scope": "Private",
+        "description": "Converts feet and inches to total inches for precision calculations"
+      },
+      {
+        "name": "PriorOpposingDraftSurveyEvent",
+        "returnType": "TicketEvent",
+        "scope": "Private",
+        "description": "Finds the most recent draft survey event with opposite load status (Empty finds prior Load/PartLoad, Load finds prior Empty)"
+      },
+      {
+        "name": "FindPriorOpposingDraftSurveyEvent",
+        "returnType": "TicketEvent",
+        "scope": "Private",
+        "parameters": [
+          {"name": "curEventCompleteDateTime", "type": "String"}
+        ],
+        "description": "Searches DraftSurveyEvents for most recent opposing load status event before current event datetime"
+      },
+      {
+        "name": "IsOppositeLoadStatus",
+        "returnType": "Boolean",
+        "scope": "Private",
+        "parameters": [
+          {"name": "tcktEventToCompare", "type": "TicketEvent"}
+        ],
+        "description": "Determines if ticket event has opposite load status (Empty vs Load/PartLoad)"
+      },
+      {
+        "name": "BuildBargeSeriesDraftsDictionary",
+        "returnType": "SortedDictionary<Integer, BargeSeriesDraft>",
+        "scope": "Private Shared",
+        "parameters": [
+          {"name": "brgSeriesDrafts", "type": "BargeSeriesDrafts"}
+        ],
+        "description": "Creates sorted dictionary of draft tables indexed by draft feet"
+      },
+      {
+        "name": "BuildDraftSurveyTicketEventsDictionary",
+        "returnType": "List<TicketEvent>",
+        "scope": "Private",
+        "parameters": [
+          {"name": "tcktEvents", "type": "TicketEvents"}
+        ],
+        "description": "Filters ticket events to non-voided draft survey events excluding current event"
+      },
+      {
+        "name": "FoundLowerAndUpper",
+        "returnType": "Boolean",
+        "scope": "Private Shared",
+        "parameters": [
+          {"name": "tons", "type": "Decimal"},
+          {"name": "lower", "type": "BargeSeriesDraft"},
+          {"name": "upper", "type": "BargeSeriesDraft"}
+        ],
+        "description": "Determines if tonnage falls between two draft table rows"
+      },
+      {
+        "name": "FirstNonNullTons",
+        "returnType": "String",
+        "scope": "Private Shared",
+        "parameters": [
+          {"name": "brgSeriesDraft", "type": "BargeSeriesDraft"}
+        ],
+        "description": "Finds first non-null tonnage value across Tons00-Tons11 columns"
+      },
+      {
+        "name": "InterpolateInches",
+        "returnType": "Boolean",
+        "scope": "Private Shared",
+        "parameters": [
+          {"name": "tons", "type": "Decimal"},
+          {"name": "lower", "type": "BargeSeriesDraft"},
+          {"name": "upper", "type": "BargeSeriesDraft"},
+          {"name": "feet", "type": "String", "byRef": true},
+          {"name": "inches", "type": "String", "byRef": true}
+        ],
+        "description": "Interpolates inches value from tonnage using draft table row, rounding up to next whole inch"
+      },
+      {
+        "name": "IsBetween",
+        "returnType": "Boolean",
+        "scope": "Private Shared",
+        "parameters": [
+          {"name": "tons", "type": "Decimal"},
+          {"name": "lowerTons", "type": "String"},
+          {"name": "upperTons", "type": "String"}
+        ],
+        "description": "Checks if tonnage is between two boundary values (exclusive lower, inclusive upper for rounding up)"
+      },
+      {
+        "name": "GetLoadStatusEnumVal",
+        "returnType": "ValidationList.LoadStatusType",
+        "scope": "Private",
+        "parameters": [
+          {"name": "loadStatus", "type": "String"}
+        ],
+        "description": "Converts load status string to enumeration value"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "property": "BargeSeriesID",
+      "relatedEntity": "BargeSeries",
+      "type": "ManyToOne",
+      "description": "References BargeSeries for draft/tonnage conversion tables"
+    },
+    {
+      "property": "TicketEventID",
+      "relatedEntity": "TicketEvent",
+      "type": "ManyToOne",
+      "description": "Associated ticket event for this draft measurement"
+    },
+    {
+      "property": "TicketEvents",
+      "relatedEntity": "TicketEvent",
+      "type": "OneToMany",
+      "description": "Collection of all ticket events for finding prior draft surveys"
+    }
+  ],
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "DraftID",
+        "value": "0"
+      },
+      {
+        "property": "All draft and tonnage properties",
+        "value": "String.Empty"
+      },
+      {
+        "property": "_EventTypeEnumVal",
+        "value": "Nothing"
+      },
+      {
+        "property": "_TicketEvents",
+        "value": "TicketEvents.NewTicketEvents"
+      },
+      {
+        "property": "_DraftSurveyEvents",
+        "value": "BuildDraftSurveyTicketEventsDictionary(_TicketEvents)"
+      },
+      {
+        "property": "Cover-related properties",
+        "value": "String.Empty"
+      }
+    ],
+    "storedProcedures": {
+      "select": "DraftSelect",
+      "selectAll": "DraftsSelect",
+      "insert": "DraftInsert",
+      "update": "DraftUpdate",
+      "delete": "DraftDelete"
+    }
+  },
+  "modernEquivalents": {
+    "dataAnnotations": [
+      "[Range(0, 99.999, ErrorMessage = \"Draft must be between 0 and 99 ft 11 in\")]",
+      "[Range(0, 11, ErrorMessage = \"Inches must be between 0 and 11\")]"
+    ],
+    "fluentValidation": [
+      "RuleFor(x => x.Draft).InclusiveBetween(0, 99.999m).When(x => x.Draft.HasValue).WithMessage(\"Draft must be between 0 and 99 ft 11 in\")",
+      "RuleFor(x => x.DraftInches).InclusiveBetween(0, 11).When(x => x.DraftInches.HasValue).WithMessage(\"Draft Inches must be between 0 and 11\")",
+      "RuleFor(x => x.Draft).Must((draft, d) => ValidateMaxDraftGreaterThanCorners(draft)).WithMessage(\"Overall draft must be >= the highest corner draft\")",
+      "RuleFor(x => x.DraftPortBowInches).InclusiveBetween(0, 11).When(x => x.DraftPortBowInches.HasValue).WithMessage(\"Draft Port Bow Inches must be between 0 and 11\")",
+      "RuleFor(x => x.DraftStarboardBowInches).InclusiveBetween(0, 11).When(x => x.DraftStarboardBowInches.HasValue).WithMessage(\"Draft Starboard Bow Inches must be between 0 and 11\")",
+      "RuleFor(x => x.DraftPortSternInches).InclusiveBetween(0, 11).When(x => x.DraftPortSternInches.HasValue).WithMessage(\"Draft Port Stern Inches must be between 0 and 11\")",
+      "RuleFor(x => x.DraftStarboardSternInches).InclusiveBetween(0, 11).When(x => x.DraftStarboardSternInches.HasValue).WithMessage(\"Draft Starboard Stern Inches must be between 0 and 11\")",
+      "RuleFor(x => x.DraftAverage).InclusiveBetween(0, 99.999m).When(x => x.DraftAverage.HasValue && (x.IsFreightActive || x.IsTowingActive)).WithMessage(\"Average Draft must be between 0 and 99 ft 11 in\")",
+      "RuleFor(x => x.DraftAverageInches).InclusiveBetween(0, 11).When(x => x.DraftAverageInches.HasValue && (x.IsFreightActive || x.IsTowingActive)).WithMessage(\"Average Draft Inches must be between 0 and 11\")"
+    ]
+  },
+  "complexBusinessLogic": {
+    "draftSurveyCalculations": {
+      "description": "Complex tonnage calculations for draft survey events based on load status and prior survey data",
+      "steps": [
+        "1. Calculate average draft from four corners (rounded to nearest inch)",
+        "2. Determine load status (Empty, Load, PartLoad)",
+        "3. For Load/PartLoad: Calculate cargo tonnage from average draft, find lightship correction from prior Empty survey",
+        "4. For Empty: Get cargo tonnage from prior Load survey, calculate lightship correction from current draft",
+        "5. Apply cover weight adjustments based on cover type, subtype, and configuration",
+        "6. Calculate final LoadUnloadTons = EstimatedCargoDeadweight - LightshipCorrection + AdjustmentTons"
+      ]
+    },
+    "draftTonnageConversion": {
+      "description": "Bidirectional conversion between draft measurements and tonnage using BargeSeries tables",
+      "draftFromTonnage": "Uses interpolation with draft tables, adjusts for cover weight, rounds up to next inch",
+      "tonnageFromDraft": "Looks up tonnage from tables based on feet/inches, adjusts for cover weight based on event type"
+    },
+    "coverWeightLogic": {
+      "description": "Accounts for weight of barge covers in tonnage calculations",
+      "conditions": [
+        "Only applies to DraftSurvey and Load events",
+        "Cover type must not be 'OT' (Open Top)",
+        "Cover configuration must be 'Stacked' or 'Spread'",
+        "Uses cover subtype weight if specified, otherwise default subtype weight",
+        "For DraftSurvey: subtract weight (negative adjustment)",
+        "For Load: add weight (positive adjustment)"
+      ]
+    },
+    "priorEventLookup": {
+      "description": "Finds most recent opposing draft survey event for tonnage calculations",
+      "logic": [
+        "Filters to non-voided DraftSurvey events on same ticket",
+        "Excludes current event",
+        "For Empty load status: finds most recent Load or PartLoad (complete date < current)",
+        "For Load/PartLoad: finds most recent Empty (complete date <= current)",
+        "Returns most recent by complete date/time"
+      ]
+    }
+  },
+  "domainKnowledge": {
+    "draftMeasurement": "Barges have draft measured at four corners (port/starboard, bow/stern). Overall draft is maximum of corners. Average draft is used for tonnage calculations in draft surveys.",
+    "feetInchesConversion": "All draft values stored as decimal feet but UI displays as feet and inches. Conversions maintain precision by working in inches for calculations.",
+    "draftSurveyProcess": "Draft surveys measure barge water depth to calculate cargo tonnage. Load status determines calculation direction: loaded surveys calculate cargo from draft, empty surveys establish lightship correction.",
+    "bargeSeriesTables": "Each barge series has tables mapping draft (feet and inches) to tonnage. Tables have rows for each foot (0-99) and columns for each inch (00-11).",
+    "roundingBehavior": "Draft calculations round to nearest 0.001 feet. Average draft rounds to nearest inch with midpoint rounding away from zero. Tonnage lookups round up to next inch.",
+    "coverAdjustment": "Barge covers add weight that affects tonnage calculations. Different cover types, subtypes, and configurations have different weights stored in lookup tables."
+  },
+  "notes": [
+    "This is a complex business object with sophisticated draft/tonnage conversion logic",
+    "The object supports both standalone use (for Barge entity) and event-specific use (for BargeEvent/TicketEvent)",
+    "Many properties are transient (not persisted) and used only for calculations",
+    "The calculation logic varies significantly based on EventType (DraftSurvey vs Load vs other events)",
+    "Cover weight adjustment is a critical part of accuracy for tonnage calculations",
+    "The object maintains relationships to prior draft survey events to support delta calculations",
+    "Precision is maintained by converting to inches for calculations then back to decimal feet",
+    "The legacy VB.NET pattern uses BrokenRules.Assert for validation - modern equivalent is FluentValidation",
+    "Field audit tracking is built into the base class for change history",
+    "Draft is a standalone entity that does NOT have child entities or child grids",
+    "The BargeDraft* columns found in database tables are denormalized fields on TicketEvent, not a separate child entity relationship"
+  ]
+}

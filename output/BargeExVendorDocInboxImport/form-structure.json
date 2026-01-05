@@ -1,0 +1,529 @@
+{
+  "formName": "frmBargeExVendorDocInboxImport",
+  "baseClass": "frmBaseDetailEdit",
+  "implements": ["IBaseDetailEdit"],
+  "purpose": "Import selected BargeEx vendor documents to create barge events and/or parts and service bills",
+  "controls": [
+    {
+      "name": "txtLog",
+      "type": "UltraTextEditor",
+      "category": "Display",
+      "label": null,
+      "dataBinding": null,
+      "properties": {
+        "multiline": true,
+        "scrollbars": "Both",
+        "acceptsReturn": true,
+        "readOnly": true,
+        "alwaysInEditMode": true,
+        "anchor": "Top, Bottom, Left, Right"
+      },
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "textarea",
+        "attributes": {
+          "readonly": true,
+          "class": "form-control font-monospace",
+          "rows": "15",
+          "style": "resize: vertical; white-space: pre;"
+        }
+      },
+      "notes": "Multi-line text log for displaying import progress and errors"
+    },
+    {
+      "name": "lblInstructions",
+      "type": "UltraLabel",
+      "category": "Display",
+      "label": null,
+      "dataBinding": null,
+      "properties": {
+        "text": "Selected vendor documents will be imported to create barge events and/or parts and service bills.",
+        "backColorInternal": "Transparent",
+        "appearance": "TextVAlignAsString = Middle"
+      },
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "label",
+        "element": "p",
+        "attributes": {
+          "class": "mb-3 text-muted"
+        }
+      },
+      "notes": "Instruction text displayed at top of form"
+    },
+    {
+      "name": "proProgress",
+      "type": "UltraProgressBar",
+      "category": "Display",
+      "label": null,
+      "dataBinding": null,
+      "properties": {
+        "maximum": "Set dynamically based on selected row count",
+        "value": "Updated during processing",
+        "anchor": "Top, Left, Right"
+      },
+      "validation": [],
+      "events": [],
+      "modernPattern": {
+        "type": "progressbar",
+        "element": "div",
+        "attributes": {
+          "class": "progress mb-3",
+          "role": "progressbar"
+        },
+        "implementation": "Bootstrap progress bar with aria attributes"
+      },
+      "notes": "Progress bar showing import completion status"
+    }
+  ],
+  "buttons": [
+    {
+      "name": "btnStart",
+      "text": "&Start",
+      "type": "Action",
+      "enabled": "Enabled only if selected rows exist",
+      "visible": true,
+      "handler": "btnStart_Click",
+      "properties": {
+        "anchor": "Top, Right"
+      },
+      "modernPattern": {
+        "type": "button",
+        "attributes": {
+          "class": "btn btn-primary",
+          "id": "btnStart"
+        }
+      },
+      "notes": "Starts the import process; disabled after clicking to prevent re-running"
+    },
+    {
+      "name": "btnCancel",
+      "text": "&Close / &Cancel",
+      "type": "Cancel",
+      "enabled": true,
+      "visible": true,
+      "handler": "btnCancel_Click",
+      "properties": {
+        "anchor": "Top, Right",
+        "causesValidation": false,
+        "defaultText": "&Close",
+        "alternateText": "&Cancel (during processing)"
+      },
+      "modernPattern": {
+        "type": "button",
+        "attributes": {
+          "class": "btn btn-secondary",
+          "id": "btnCancel"
+        }
+      },
+      "notes": "Changes from 'Close' to 'Cancel' during processing, then back to 'Close' when complete"
+    }
+  ],
+  "panels": [
+    {
+      "name": "pnlDailyReports",
+      "type": "UltraPanel",
+      "label": null,
+      "controls": ["lblInstructions", "btnStart", "btnCancel", "proProgress", "txtLog"],
+      "properties": {
+        "dock": "Fill"
+      },
+      "modernPattern": {
+        "type": "container",
+        "element": "div",
+        "attributes": {
+          "class": "container-fluid p-3"
+        }
+      }
+    }
+  ],
+  "grids": [],
+  "dropdowns": [],
+  "validation": {
+    "method": "None",
+    "rules": [
+      {
+        "control": "btnStart",
+        "rule": "Enabled only if _VendorDocInboxList has selected rows (IsSelected = 1)",
+        "message": "No validation message - button simply disabled"
+      }
+    ]
+  },
+  "eventHandlers": {
+    "frmDetailEdit_Load": "Restores form size/location, calls FormatControls()",
+    "frmBargeExVendorDocInboxImport_FormClosed": "Saves form size/location settings",
+    "btnStart_Click": "Disables Start button, changes Cancel to 'Cancel', calls ProcessAll(), changes Cancel to 'Close'",
+    "btnCancel_Click": "If text is 'Close', closes form; otherwise sets _UserCanceledRun = True"
+  },
+  "businessLogic": {
+    "initialize": {
+      "signature": "Initialize(subSys As SubSystem, selectedFleetID As Int32, vendorDocInboxList As DataTable)",
+      "description": "Accepts fleet ID and DataTable of vendor documents to import"
+    },
+    "processAll": {
+      "signature": "ProcessAll(vendorDocInboxList As DataTable) As Int32",
+      "description": "Processes all selected rows in sort order: VendorName ASC, BargeNum ASC, OriginalControlNumber ASC, RevisionNumber ASC",
+      "workflow": [
+        "Log start time to txtLog",
+        "Get selected rows with IsSelected = 1",
+        "Initialize progress bar maximum",
+        "For each selected row:",
+        "  Update progress bar",
+        "  Call ProcessRow() to import",
+        "  Call UpdateIDs() to update revision rows",
+        "  Check CancelRun()",
+        "Log summary with success/error counts"
+      ]
+    },
+    "processRow": {
+      "signature": "ProcessRow(row As DataRow, ByRef tcktEventID, ByRef tcktID, ByRef openTicketID, ByRef brgID, ByRef partsServiceBillItemID, ByRef importSuccessCount, ByRef importErrorCount)",
+      "description": "Processes single row based on DocType (BargeStatus or BoatStatus)",
+      "workflow": [
+        "Determine DocType",
+        "Call ProcessBargeStatus() or ProcessBoatStatus()",
+        "If successful: increment importSuccessCount, delete inbox record",
+        "If failed: increment importErrorCount, log broken rules to txtLog"
+      ]
+    },
+    "processBargeStatus": {
+      "signature": "ProcessBargeStatus(row As DataRow, ByRef tcktEventID, ByRef tcktID, ByRef openTicketID, ByRef brgID) As RulesCollection",
+      "description": "Creates/updates BargeEvent from BargeStatus document",
+      "workflow": [
+        "Log processing to txtLog",
+        "Determine if update (control numbers differ AND OriginalTicketEventID exists)",
+        "Call GetBargeEvent() to load/create event",
+        "Check for void with CheckForVoid()",
+        "Check for duplicate Fleeting events if configured",
+        "Set event properties: StartDateTime, CompleteDateTime, CleanType/PumpType/CoverHandlingType",
+        "Set location properties based on event type",
+        "Set LoadStatus, Division=OutsideVendor, VendorID",
+        "Set InvoiceNote if EstimatedCost exists",
+        "Set MarkedForClose = False",
+        "Set BargeExVendorControlNumber to OriginalControlNumber",
+        "Check for final bill adjustments",
+        "Save via SubmitRefreshClick()",
+        "Return broken rules or Nothing"
+      ]
+    },
+    "processBoatStatus": {
+      "signature": "ProcessBoatStatus(row As DataRow, ByRef newPartsServiceBillItemID) As RulesCollection",
+      "description": "Creates/updates PartsServiceBill from BoatStatus document",
+      "workflow": [
+        "Log processing to txtLog",
+        "Determine if update (control numbers differ AND OriginalPartsServiceBillItemID exists)",
+        "Call GetPartsAndServiceBill() to load/create bill and item",
+        "For new bills: set FleetID, CustomerID, Division=OutsideVendor, VendorID",
+        "Set bill item properties: PartsServiceCodeID, StartDateTime, CompleteDateTime, FleetBoatID, FacilityID, BoatID, River, Mile",
+        "Set InvoiceNote if EstimatedCost exists",
+        "For new items: set RateType=Flat, BargeExVendorControlNumber",
+        "Save via SubmitRefreshClick()",
+        "Return broken rules or Nothing"
+      ]
+    },
+    "getBargeEvent": {
+      "description": "Loads or creates BargeEvent based on row data and update status",
+      "returns": "Broken rules or Nothing; sets brgEvent ByRef parameter"
+    },
+    "getPartsAndServiceBill": {
+      "description": "Loads existing or creates new PartsServiceBill and PartsServiceBillItem",
+      "returns": "Broken rules or Nothing; sets psBill and psBillItem ByRef parameters"
+    },
+    "checkForVoid": {
+      "description": "Validates that ticket and ticket event are not voided",
+      "returns": "Broken rule if voided, otherwise Nothing"
+    },
+    "checkForFinalBillAdjustments": {
+      "description": "Prevents updates that would adjust vendor bills in Final Bill status",
+      "returns": "Broken rule if adjustment would occur, otherwise Nothing"
+    },
+    "findTicketEvent": {
+      "description": "DirectAccess call to BargeExVendorTicketEventSearch stored procedure",
+      "parameters": "brgID, vendorID, controlNumberToFind",
+      "returns": "ByRef ticketEventID and ticketID"
+    },
+    "findPartsServiceBillItem": {
+      "description": "DirectAccess call to BargeExVendorPSBillItemSearch stored procedure",
+      "parameters": "vendorID, controlNumberToFind",
+      "returns": "ByRef psBillItemID and psBillID"
+    },
+    "findFleetingEvent": {
+      "description": "DirectAccess call to BargeExVendorFleetingEventSearch stored procedure",
+      "parameters": "bargeID, vendorID, fromLocationID, startDateTime",
+      "returns": "ByRef ticketEventID"
+    },
+    "updateIDs": {
+      "description": "Updates OriginalTicketEventID or OriginalPartsServiceBillItemID for revision rows with same OriginalControlNumber"
+    },
+    "setProp": {
+      "description": "Updates business object property if new value exists (for new records) or if value differs (for updates)"
+    },
+    "submitRefreshClick": {
+      "description": "Validates and saves business object (BargeEvent or PartsServiceBill) to database",
+      "returns": "Broken rules or Nothing"
+    },
+    "cancelRun": {
+      "description": "Checks _UserCanceledRun flag and logs cancellation message",
+      "returns": "Boolean"
+    },
+    "logSummary": {
+      "description": "Logs completion time and counts to txtLog"
+    }
+  },
+  "memberVariables": [
+    {
+      "name": "_SubSystem",
+      "type": "SubSystem",
+      "description": "Subsystem associated with calling vendor document inbox search form"
+    },
+    {
+      "name": "_SelectedFleetID",
+      "type": "Int32",
+      "description": "Fleet ID for the import context"
+    },
+    {
+      "name": "_VendorDocInboxList",
+      "type": "DataTable",
+      "description": "DataTable containing all vendor document inbox records from search"
+    },
+    {
+      "name": "_UserCanceledRun",
+      "type": "Boolean",
+      "description": "Flag set when user clicks Cancel during processing"
+    },
+    {
+      "name": "_ImportSuccessCount",
+      "type": "Int32",
+      "description": "Counter for successfully imported records"
+    },
+    {
+      "name": "_ImportErrorCount",
+      "type": "Int32",
+      "description": "Counter for failed import records"
+    },
+    {
+      "name": "_SortOrder",
+      "type": "String",
+      "description": "Sort order for processing: VendorName ASC, BargeNum ASC, OriginalControlNumber ASC, RevisionNumber ASC"
+    },
+    {
+      "name": "c_CloseText",
+      "type": "Const String",
+      "value": "&Close",
+      "description": "Default button text for Cancel button"
+    },
+    {
+      "name": "c_CancelText",
+      "type": "Const String",
+      "value": "&Cancel",
+      "description": "Alternate button text during processing"
+    }
+  ],
+  "dataStructures": {
+    "inputDataTable": {
+      "name": "_VendorDocInboxList",
+      "source": "BargeExVendorDocumentInboxSearch.GetList()",
+      "columns": [
+        "BargeExVendorDocumentInboxID",
+        "IsSelected",
+        "VendorName",
+        "BargeNum",
+        "BargeID",
+        "OriginalControlNumber",
+        "ControlNumber",
+        "RevisionNumber",
+        "PrimaryControlNumber",
+        "DocType",
+        "SubDocType",
+        "EventTypeName",
+        "StartDateTime",
+        "EndDateTime",
+        "LocationID",
+        "EndLocationID",
+        "AssistedBoatID",
+        "AssistedBoat",
+        "ServicingBoatID",
+        "FleetBoatID",
+        "VendorID",
+        "SenderTradingPartnerNumber",
+        "LoadStatus",
+        "CleanPumpCoverHandlingType",
+        "River",
+        "Mile",
+        "EstimatedCost",
+        "TicketID",
+        "OriginalTicketID",
+        "OriginalTicketEventID",
+        "OriginalPartsServiceBillItemID",
+        "OriginalPartsServiceBillID",
+        "PsbillCustomerID",
+        "ASPartsServiceCodeID"
+      ]
+    }
+  },
+  "supportedDocTypes": {
+    "BargeStatus": {
+      "description": "Creates or updates BargeEvent records (ticket events)",
+      "supportedEventTypes": [
+        "BreakTow",
+        "Clean",
+        "CoverHandling",
+        "Fleeting",
+        "MakeTow",
+        "MidstreamIn",
+        "MidstreamOut",
+        "Pumping",
+        "Shift"
+      ],
+      "specialHandling": {
+        "AdditionalClean": "Uses PrimaryControlNumber to find original Clean event",
+        "Shift": "Looks for existing Shift with same O/D pair before creating new",
+        "Fleeting": "Can check for duplicate events created by BargeOps logic (controlled by GlobalSetting)"
+      }
+    },
+    "BoatStatus": {
+      "description": "Creates or updates PartsServiceBill records",
+      "supportedSubDocTypes": [
+        "Assist"
+      ]
+    }
+  },
+  "securityAndAuthorization": {
+    "buttonTypes": {
+      "btnStart": "Action",
+      "btnCancel": "Cancel"
+    },
+    "controlAuthorization": "Uses ControlAuthorizationBase to set button access levels"
+  },
+  "formProperties": {
+    "minimizeBox": false,
+    "showInTaskbar": false,
+    "startPosition": "CenterParent",
+    "minimumSize": "755x496",
+    "title": "Import BargeEx Vendor Documents",
+    "backColor": "SystemColors.ControlLight"
+  },
+  "modernConversionNotes": {
+    "architecture": "Convert to ASP.NET Core MVC with API endpoints for import processing",
+    "uiPattern": "Modal dialog or dedicated import page with real-time progress updates via SignalR",
+    "asyncProcessing": "Long-running import should use background job (Hangfire) with progress reporting",
+    "controls": {
+      "txtLog": "Use Bootstrap alert/log panel with auto-scroll, or implement real-time log viewer",
+      "proProgress": "Bootstrap progress bar with percentage display, updated via SignalR",
+      "btnStart": "Primary action button that triggers async import job",
+      "btnCancel": "Secondary button for closing/canceling; toggle text based on state"
+    },
+    "apiEndpoints": [
+      "POST /api/bargeex/vendor-documents/import - Start import job",
+      "DELETE /api/bargeex/vendor-documents/import/{jobId} - Cancel running job",
+      "GET /api/bargeex/vendor-documents/import/{jobId}/progress - Get progress updates",
+      "GET /api/bargeex/vendor-documents/import/{jobId}/log - Get log entries"
+    ],
+    "viewModel": {
+      "name": "BargeExVendorDocImportViewModel",
+      "properties": [
+        "FleetId (int)",
+        "SubSystem (string)",
+        "SelectedDocumentIds (List<int>)",
+        "ImportJobId (string)",
+        "ProgressPercentage (int)",
+        "LogEntries (List<string>)",
+        "SuccessCount (int)",
+        "ErrorCount (int)",
+        "IsRunning (bool)",
+        "CanStart (bool)",
+        "ButtonText (string - 'Close' or 'Cancel')"
+      ]
+    },
+    "dto": {
+      "name": "BargeExVendorDocImportDto",
+      "properties": [
+        "FleetId",
+        "SubSystem",
+        "SelectedDocumentIds",
+        "SortOrder"
+      ]
+    },
+    "signalRHub": {
+      "name": "BargeExImportHub",
+      "methods": [
+        "SendProgressUpdate(jobId, percentage)",
+        "SendLogEntry(jobId, message)",
+        "SendImportComplete(jobId, successCount, errorCount)"
+      ]
+    },
+    "backgroundJob": {
+      "name": "BargeExVendorDocImportJob",
+      "description": "Hangfire background job that processes vendor documents",
+      "features": [
+        "Progress reporting via SignalR",
+        "Cancellation token support",
+        "Error handling and logging",
+        "Transaction management"
+      ]
+    }
+  },
+  "databaseOperations": {
+    "storedProcedures": [
+      "BargeExVendorTicketEventSearch",
+      "BargeExVendorPSBillItemSearch",
+      "BargeExVendorFleetingEventSearch"
+    ],
+    "directAccess": {
+      "BargeExVendorDocumentInbox.MultiDelete": "Immediate delete of successfully imported records"
+    },
+    "businessObjects": [
+      "BargeEvent",
+      "PartsServiceBill",
+      "PartsServiceBillItem",
+      "Ticket",
+      "TicketEvent"
+    ]
+  },
+  "errorHandling": {
+    "brokenRules": [
+      {
+        "rule": "NoBarge",
+        "message": "Transaction could not be imported because barge does not exist in the database."
+      },
+      {
+        "rule": "NoVendor",
+        "message": "Transaction could not be imported because no vendor exists in the database associated with this Sender Trading Partner Number."
+      },
+      {
+        "rule": "InvalidEvent",
+        "message": "Transaction could not be imported because of invalid event type."
+      },
+      {
+        "rule": "InvalidStage",
+        "message": "Transaction could not be imported because the stage of the event could not be determined based on the type of event."
+      },
+      {
+        "rule": "NoOriginal",
+        "message": "Update transaction could not be imported because no original event/bill item could be found."
+      },
+      {
+        "rule": "IsVoided",
+        "message": "Skipping import - cannot add/update event on Ticket or TicketEvent that has been voided."
+      },
+      {
+        "rule": "AdjustmentForFinalBill",
+        "message": "Skipping import - this vendor event is in Final Bill status and cannot be adjusted."
+      },
+      {
+        "rule": "NotSupported",
+        "message": "Unsupported document type - cannot process this row."
+      },
+      {
+        "rule": "Unknown",
+        "message": "Unexpected error - unable to create object for unknown reason."
+      }
+    ]
+  },
+  "conversionPriority": "Medium",
+  "conversionComplexity": "High - Complex business logic with multiple document types, validation rules, and database operations",
+  "relatedForms": [
+    "frmBargeExVendorDocInboxSearch - Parent search form that launches this import form"
+  ]
+}

@@ -1,0 +1,1442 @@
+{
+  "entity": "BargeExVendorDocInbox",
+  "softDelete": false,
+  "hasIsActive": false,
+  "description": "Manages incoming vendor documents from BargeEx for import into BargeOps system. Acts as staging area for BargeStatus and BoatStatus transactions.",
+  "storedProcedures": [
+    {
+      "name": "BargeExVendorDocumentInboxSearch",
+      "operation": "Search",
+      "parameters": [
+        {
+          "name": "@FleetID",
+          "type": "int",
+          "required": true,
+          "description": "Fleet identifier"
+        },
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": false,
+          "description": "Vendor identifier for filtering"
+        },
+        {
+          "name": "@BargeExDocumentSubTypeID",
+          "type": "int",
+          "required": false,
+          "description": "Document sub-type filter (BargeStatus or BoatStatus subtypes)"
+        },
+        {
+          "name": "@ControlNumber",
+          "type": "varchar",
+          "required": false,
+          "description": "Control number for specific document lookup"
+        }
+      ],
+      "resultColumns": [
+        {
+          "column": "BargeExVendorDocumentInboxID",
+          "property": "BargeExVendorDocumentInboxID",
+          "type": "int",
+          "description": "Primary key"
+        },
+        {
+          "column": "IsSelected",
+          "property": "IsSelected",
+          "type": "boolean",
+          "description": "Selection flag for import processing"
+        },
+        {
+          "column": "VendorName",
+          "property": "VendorName",
+          "type": "string"
+        },
+        {
+          "column": "VendorID",
+          "property": "VendorID",
+          "type": "string"
+        },
+        {
+          "column": "TicketID",
+          "property": "TicketID",
+          "type": "string",
+          "description": "Current open ticket for the barge"
+        },
+        {
+          "column": "SubDocType",
+          "property": "SubDocType",
+          "type": "string",
+          "description": "Document subtype (BreakTow, Clean, CoverHandling, Fleeting, MakeTow, MidstreamIn, MidstreamOut, Pump, Shift, Assist)"
+        },
+        {
+          "column": "StartDateTime",
+          "property": "StartDateTime",
+          "type": "datetime"
+        },
+        {
+          "column": "EndDateTime",
+          "property": "EndDateTime",
+          "type": "datetime"
+        },
+        {
+          "column": "BargeNum",
+          "property": "BargeNum",
+          "type": "string"
+        },
+        {
+          "column": "BargeID",
+          "property": "BargeID",
+          "type": "string"
+        },
+        {
+          "column": "AssistedBoat",
+          "property": "AssistedBoat",
+          "type": "string"
+        },
+        {
+          "column": "AssistedBoatID",
+          "property": "AssistedBoatID",
+          "type": "string"
+        },
+        {
+          "column": "Location",
+          "property": "Location",
+          "type": "string"
+        },
+        {
+          "column": "LocationID",
+          "property": "LocationID",
+          "type": "string"
+        },
+        {
+          "column": "EndLocation",
+          "property": "EndLocation",
+          "type": "string"
+        },
+        {
+          "column": "EndLocationID",
+          "property": "EndLocationID",
+          "type": "string"
+        },
+        {
+          "column": "ServicingBoat",
+          "property": "ServicingBoat",
+          "type": "string"
+        },
+        {
+          "column": "ServicingBoatID",
+          "property": "ServicingBoatID",
+          "type": "string"
+        },
+        {
+          "column": "LoadStatus",
+          "property": "LoadStatus",
+          "type": "string"
+        },
+        {
+          "column": "River",
+          "property": "River",
+          "type": "string"
+        },
+        {
+          "column": "Mile",
+          "property": "Mile",
+          "type": "decimal",
+          "formatting": "Two decimal places"
+        },
+        {
+          "column": "EstimatedCost",
+          "property": "EstimatedCost",
+          "type": "money",
+          "formatting": "Currency with two decimal places"
+        },
+        {
+          "column": "ReceivedDateTime",
+          "property": "ReceivedDateTime",
+          "type": "datetime"
+        },
+        {
+          "column": "ControlNumber",
+          "property": "ControlNumber",
+          "type": "string",
+          "description": "Instance identifier - unique per transaction instance/revision"
+        },
+        {
+          "column": "OriginalControlNumber",
+          "property": "OriginalControlNumber",
+          "type": "string",
+          "description": "Transaction identifier - same across all revisions"
+        },
+        {
+          "column": "RevisionNumber",
+          "property": "RevisionNumber",
+          "type": "string"
+        },
+        {
+          "column": "PrimaryControlNumber",
+          "property": "PrimaryControlNumber",
+          "type": "string",
+          "description": "For Additional Clean transactions, points to original Clean event"
+        },
+        {
+          "column": "SenderTradingPartnerNumber",
+          "property": "SenderTradingPartnerNumber",
+          "type": "string"
+        },
+        {
+          "column": "CleanPumpCoverHandlingType",
+          "property": "CleanPumpCoverHandlingType",
+          "type": "string",
+          "description": "Type field for Clean, Pump, or CoverHandling operations"
+        },
+        {
+          "column": "DocType",
+          "property": "DocType",
+          "type": "string",
+          "description": "BargeStatus or BoatStatus"
+        },
+        {
+          "column": "EventTypeName",
+          "property": "EventTypeName",
+          "type": "string",
+          "description": "Maps to EventTypeList enumeration"
+        },
+        {
+          "column": "PsbillCustomerID",
+          "property": "PsbillCustomerID",
+          "type": "string",
+          "description": "Parts & Service Bill customer ID"
+        },
+        {
+          "column": "ASPartsServiceCodeID",
+          "property": "ASPartsServiceCodeID",
+          "type": "string",
+          "description": "Assist Parts Service Code ID for BoatStatus transactions"
+        },
+        {
+          "column": "OriginalTicketEventID",
+          "property": "OriginalTicketEventID",
+          "type": "string",
+          "description": "Links to existing TicketEvent for updates"
+        },
+        {
+          "column": "OriginalTicketID",
+          "property": "OriginalTicketID",
+          "type": "string",
+          "description": "Links to Ticket for TicketEvent"
+        },
+        {
+          "column": "OriginalPartsServiceBillItemID",
+          "property": "OriginalPartsServiceBillItemID",
+          "type": "string",
+          "description": "Links to existing PartsServiceBillItem for updates"
+        },
+        {
+          "column": "OriginalPartsServiceBillID",
+          "property": "OriginalPartsServiceBillID",
+          "type": "string",
+          "description": "Links to PartsServiceBill"
+        },
+        {
+          "column": "BargeExBargeNum",
+          "property": "BargeExBargeNum",
+          "type": "string",
+          "description": "Barge number as provided by BargeEx (may differ from system value)"
+        },
+        {
+          "column": "BargeExBargeUscg",
+          "property": "BargeExBargeUscg",
+          "type": "string",
+          "description": "Barge USCG number from BargeEx"
+        },
+        {
+          "column": "BargeExLocation",
+          "property": "BargeExLocation",
+          "type": "string",
+          "description": "Location name from BargeEx"
+        },
+        {
+          "column": "BargeExLocationCode",
+          "property": "BargeExLocationCode",
+          "type": "string",
+          "description": "Location code from BargeEx"
+        },
+        {
+          "column": "BargeExEndLocation",
+          "property": "BargeExEndLocation",
+          "type": "string",
+          "description": "End location name from BargeEx"
+        },
+        {
+          "column": "BargeExEndLocationCode",
+          "property": "BargeExEndLocationCode",
+          "type": "string",
+          "description": "End location code from BargeEx"
+        },
+        {
+          "column": "BargeExServicingBoat",
+          "property": "BargeExServicingBoat",
+          "type": "string",
+          "description": "Servicing boat name from BargeEx"
+        },
+        {
+          "column": "BargeExServicingBoatUscg",
+          "property": "BargeExServicingBoatUscg",
+          "type": "string",
+          "description": "Servicing boat USCG from BargeEx"
+        },
+        {
+          "column": "BargeExAssistedBoat",
+          "property": "BargeExAssistedBoat",
+          "type": "string",
+          "description": "Assisted boat name from BargeEx"
+        },
+        {
+          "column": "BargeExAssistedBoatUscg",
+          "property": "BargeExAssistedBoatUscg",
+          "type": "string",
+          "description": "Assisted boat USCG from BargeEx"
+        },
+        {
+          "column": "HasPriorImport",
+          "property": "HasPriorImport",
+          "type": "boolean",
+          "description": "Computed: true if OriginalTicketEventID or OriginalPartsServiceBillItemID exists"
+        }
+      ]
+    },
+    {
+      "name": "BargeExVendorDocumentInboxSelect",
+      "operation": "GetById",
+      "parameters": [
+        {
+          "name": "@BargeExVendorDocumentInboxID",
+          "type": "int",
+          "required": true
+        }
+      ],
+      "resultColumns": [
+        {
+          "column": "BargeExVendorDocumentInboxID",
+          "property": "BargeExVendorDocumentInboxID",
+          "type": "int"
+        },
+        {
+          "column": "ControlNumber",
+          "property": "ControlNumber",
+          "type": "varchar(128)"
+        },
+        {
+          "column": "ReceivedDateTime",
+          "property": "ReceivedDateTime",
+          "type": "datetime"
+        },
+        {
+          "column": "XmlTransaction",
+          "property": "XmlTransaction",
+          "type": "text"
+        },
+        {
+          "column": "FailureReason",
+          "property": "FailureReason",
+          "type": "text"
+        },
+        {
+          "column": "SenderTradingPartnerNumber",
+          "property": "SenderTradingPartnerNumber",
+          "type": "varchar(8)"
+        },
+        {
+          "column": "BargeExDocumentTypeID",
+          "property": "BargeExDocumentTypeID",
+          "type": "int"
+        },
+        {
+          "column": "BargeExDocumentSubTypeID",
+          "property": "BargeExDocumentSubTypeID",
+          "type": "int"
+        },
+        {
+          "column": "BargeUscgNum",
+          "property": "BargeUscgNum",
+          "type": "varchar(10)"
+        },
+        {
+          "column": "BargeNum",
+          "property": "BargeNum",
+          "type": "varchar(30)"
+        },
+        {
+          "column": "FleetBoatUscgNum",
+          "property": "FleetBoatUscgNum",
+          "type": "varchar(10)"
+        },
+        {
+          "column": "FleetBoatName",
+          "property": "FleetBoatName",
+          "type": "varchar(50)"
+        },
+        {
+          "column": "StartDateTime",
+          "property": "StartDateTime",
+          "type": "datetime"
+        },
+        {
+          "column": "EndDateTime",
+          "property": "EndDateTime",
+          "type": "datetime"
+        },
+        {
+          "column": "LocationBargeExCode",
+          "property": "LocationBargeExCode",
+          "type": "varchar(20)"
+        },
+        {
+          "column": "LocationName",
+          "property": "LocationName",
+          "type": "varchar(50)"
+        },
+        {
+          "column": "EndLocationBargeExCode",
+          "property": "EndLocationBargeExCode",
+          "type": "varchar(20)"
+        },
+        {
+          "column": "EndLocationName",
+          "property": "EndLocationName",
+          "type": "varchar(50)"
+        },
+        {
+          "column": "AssistedBoatUscgNum",
+          "property": "AssistedBoatUscgNum",
+          "type": "varchar(10)"
+        },
+        {
+          "column": "AssistedBoatName",
+          "property": "AssistedBoatName",
+          "type": "varchar(50)"
+        },
+        {
+          "column": "LoadStatus",
+          "property": "LoadStatus",
+          "type": "varchar(15)"
+        },
+        {
+          "column": "River",
+          "property": "River",
+          "type": "char(3)"
+        },
+        {
+          "column": "Mile",
+          "property": "Mile",
+          "type": "decimal"
+        },
+        {
+          "column": "EstimatedCost",
+          "property": "EstimatedCost",
+          "type": "money"
+        },
+        {
+          "column": "CleanType",
+          "property": "CleanType",
+          "type": "varchar(50)"
+        },
+        {
+          "column": "PumpType",
+          "property": "PumpType",
+          "type": "varchar(50)"
+        },
+        {
+          "column": "CoverHandlingType",
+          "property": "CoverHandlingType",
+          "type": "varchar(50)"
+        },
+        {
+          "column": "OriginalControlNumber",
+          "property": "OriginalControlNumber",
+          "type": "varchar(128)"
+        },
+        {
+          "column": "RevisionNumber",
+          "property": "RevisionNumber",
+          "type": "int"
+        },
+        {
+          "column": "PrimaryControlNumber",
+          "property": "PrimaryControlNumber",
+          "type": "varchar(128)"
+        }
+      ]
+    },
+    {
+      "name": "BargeExVendorDocumentInboxInsert",
+      "operation": "Insert",
+      "parameters": [
+        {
+          "name": "@BargeExVendorDocumentInboxID",
+          "type": "int",
+          "direction": "InputOutput",
+          "description": "Primary key returned after insert"
+        },
+        {
+          "name": "@ControlNumber",
+          "type": "varchar",
+          "required": true
+        },
+        {
+          "name": "@ReceivedDateTime",
+          "type": "datetime",
+          "required": true
+        },
+        {
+          "name": "@XmlTransaction",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "@FailureReason",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "@SenderTradingPartnerNumber",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@BargeExDocumentTypeID",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@BargeExDocumentSubTypeID",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@BargeUscgNum",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@BargeNum",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@FleetBoatUscgNum",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@FleetBoatName",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@StartDateTime",
+          "type": "datetime",
+          "required": false
+        },
+        {
+          "name": "@EndDateTime",
+          "type": "datetime",
+          "required": false
+        },
+        {
+          "name": "@LocationBargeExCode",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@LocationName",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@EndLocationBargeExCode",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@EndLocationName",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@AssistedBoatUscgNum",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@AssistedBoatName",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@LoadStatus",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@River",
+          "type": "char",
+          "required": false
+        },
+        {
+          "name": "@Mile",
+          "type": "decimal",
+          "required": false
+        },
+        {
+          "name": "@EstimatedCost",
+          "type": "money",
+          "required": false
+        },
+        {
+          "name": "@CleanType",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@PumpType",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@CoverHandlingType",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@OriginalControlNumber",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@RevisionNumber",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@PrimaryControlNumber",
+          "type": "varchar",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "BargeExVendorDocumentInboxUpdate",
+      "operation": "Update",
+      "parameters": [
+        {
+          "name": "@BargeExVendorDocumentInboxID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@ControlNumber",
+          "type": "varchar",
+          "required": true
+        },
+        {
+          "name": "@ReceivedDateTime",
+          "type": "datetime",
+          "required": true
+        },
+        {
+          "name": "@XmlTransaction",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "@FailureReason",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "@SenderTradingPartnerNumber",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@BargeExDocumentTypeID",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@BargeExDocumentSubTypeID",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@BargeUscgNum",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@BargeNum",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@FleetBoatUscgNum",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@FleetBoatName",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@StartDateTime",
+          "type": "datetime",
+          "required": false
+        },
+        {
+          "name": "@EndDateTime",
+          "type": "datetime",
+          "required": false
+        },
+        {
+          "name": "@LocationBargeExCode",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@LocationName",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@EndLocationBargeExCode",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@EndLocationName",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@AssistedBoatUscgNum",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@AssistedBoatName",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@LoadStatus",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@River",
+          "type": "char",
+          "required": false
+        },
+        {
+          "name": "@Mile",
+          "type": "decimal",
+          "required": false
+        },
+        {
+          "name": "@EstimatedCost",
+          "type": "money",
+          "required": false
+        },
+        {
+          "name": "@CleanType",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@PumpType",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@CoverHandlingType",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@OriginalControlNumber",
+          "type": "varchar",
+          "required": false
+        },
+        {
+          "name": "@RevisionNumber",
+          "type": "int",
+          "required": false
+        },
+        {
+          "name": "@PrimaryControlNumber",
+          "type": "varchar",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "BargeExVendorDocumentInboxDelete",
+      "operation": "Delete",
+      "parameters": [
+        {
+          "name": "@BargeExVendorDocumentInboxID",
+          "type": "int",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "BargeExVendorDocumentInboxMultiDelete",
+      "operation": "MultiDelete",
+      "description": "Batch delete operation for multiple records in single transaction",
+      "parameters": [
+        {
+          "name": "@BargeExVendorDocumentInboxIDList",
+          "type": "varchar",
+          "required": true,
+          "description": "Comma-delimited list of IDs to delete"
+        }
+      ]
+    }
+  ],
+  "sqlFiles": [
+    {
+      "fileName": "BargeExVendorDocInbox_Search.sql",
+      "operation": "Search",
+      "description": "Search vendor documents with filters for FleetID, VendorID, DocumentSubType, and ControlNumber. Returns enriched data with resolved entity names and IDs for import processing."
+    },
+    {
+      "fileName": "BargeExVendorDocInbox_GetById.sql",
+      "operation": "GetById",
+      "description": "Fetch single document by BargeExVendorDocumentInboxID"
+    },
+    {
+      "fileName": "BargeExVendorDocInbox_Insert.sql",
+      "operation": "Insert",
+      "description": "Insert new vendor document record, returns new ID"
+    },
+    {
+      "fileName": "BargeExVendorDocInbox_Update.sql",
+      "operation": "Update",
+      "description": "Update existing vendor document record"
+    },
+    {
+      "fileName": "BargeExVendorDocInbox_Delete.sql",
+      "operation": "Delete",
+      "description": "Delete single vendor document record"
+    },
+    {
+      "fileName": "BargeExVendorDocInbox_MultiDelete.sql",
+      "operation": "MultiDelete",
+      "description": "Batch delete multiple records by comma-delimited ID list"
+    }
+  ],
+  "repositoryInterface": {
+    "name": "IBargeExVendorDocInboxRepository",
+    "namespace": "Admin.Infrastructure.Abstractions",
+    "methods": [
+      {
+        "name": "SearchAsync",
+        "returnType": "Task<IEnumerable<BargeExVendorDocInboxSearchDto>>",
+        "parameters": [
+          "int fleetId",
+          "int? vendorId",
+          "int? bargeExDocumentSubTypeId",
+          "string controlNumber"
+        ],
+        "description": "Search vendor inbox documents with filtering"
+      },
+      {
+        "name": "GetByIdAsync",
+        "returnType": "Task<BargeExVendorDocInboxDto>",
+        "parameters": ["int id"]
+      },
+      {
+        "name": "InsertAsync",
+        "returnType": "Task<int>",
+        "parameters": ["BargeExVendorDocInboxDto entity"],
+        "description": "Returns new BargeExVendorDocumentInboxID"
+      },
+      {
+        "name": "UpdateAsync",
+        "returnType": "Task",
+        "parameters": ["BargeExVendorDocInboxDto entity"]
+      },
+      {
+        "name": "DeleteAsync",
+        "returnType": "Task",
+        "parameters": ["int id"]
+      },
+      {
+        "name": "MultiDeleteAsync",
+        "returnType": "Task<int>",
+        "parameters": ["string commaDelimitedIds"],
+        "description": "Returns count of deleted records"
+      }
+    ]
+  },
+  "listQueryFields": {
+    "filterable": [
+      "VendorName",
+      "VendorID",
+      "SubDocType",
+      "BargeNum",
+      "ControlNumber",
+      "OriginalControlNumber",
+      "ReceivedDateTime",
+      "StartDateTime",
+      "DocType"
+    ],
+    "sortable": [
+      "VendorName",
+      "BargeNum",
+      "StartDateTime",
+      "EndDateTime",
+      "OriginalControlNumber",
+      "RevisionNumber",
+      "ReceivedDateTime"
+    ],
+    "defaultSort": "VendorName ASC, BargeNum ASC, StartDateTime ASC, EndDateTime ASC, OriginalControlNumber ASC, RevisionNumber ASC"
+  },
+  "relatedStoredProcedures": [
+    {
+      "name": "BargeExVendorTicketEventSearch",
+      "operation": "LookupTicketEvent",
+      "description": "Finds existing TicketEvent by BargeExVendorControlNumber for revision/update imports",
+      "parameters": [
+        {
+          "name": "@FleetID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@BargeID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@BargeExVendorControlNumber",
+          "type": "varchar",
+          "required": true
+        },
+        {
+          "name": "@TicketEventID",
+          "type": "int",
+          "direction": "Output"
+        },
+        {
+          "name": "@TicketID",
+          "type": "int",
+          "direction": "Output"
+        }
+      ]
+    },
+    {
+      "name": "BargeExVendorPSBillItemSearch",
+      "operation": "LookupPartsServiceBillItem",
+      "description": "Finds existing PartsServiceBillItem by BargeExVendorControlNumber for BoatStatus revision/update imports",
+      "parameters": [
+        {
+          "name": "@FleetID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@BargeExVendorControlNumber",
+          "type": "varchar",
+          "required": true
+        },
+        {
+          "name": "@PartsServiceBillItemID",
+          "type": "int",
+          "direction": "Output"
+        },
+        {
+          "name": "@PartsServiceBillID",
+          "type": "int",
+          "direction": "Output"
+        }
+      ]
+    },
+    {
+      "name": "BargeExVendorFleetingEventSearch",
+      "operation": "FindDuplicateFleeting",
+      "description": "Finds existing Fleeting event created by BargeOps logic (not imported) to prevent duplicate imports",
+      "parameters": [
+        {
+          "name": "@FleetID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@BargeID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@VendorID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@FromLocationID",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "@StartDateTime",
+          "type": "datetime",
+          "required": true
+        }
+      ],
+      "returns": "TicketEventID or -1 if not found"
+    }
+  ],
+  "businessRules": [
+    {
+      "rule": "ControlNumber is required and max 128 characters",
+      "validation": "String.IsNullOrEmpty check and max length check"
+    },
+    {
+      "rule": "ReceivedDateTime is required",
+      "validation": "SmartDate.IsEmpty check"
+    },
+    {
+      "rule": "Import creates BargeEvent or PartsServiceBillItem based on DocType",
+      "logic": "DocType='BargeStatus' creates BargeEvent, DocType='BoatStatus' creates PartsServiceBillItem"
+    },
+    {
+      "rule": "Revision detection based on ControlNumber vs OriginalControlNumber",
+      "logic": "If different AND OriginalTicketEventID/OriginalPartsServiceBillItemID exists, treat as update"
+    },
+    {
+      "rule": "Additional Clean transactions linked via PrimaryControlNumber",
+      "logic": "If PrimaryControlNumber has value, must find original Clean event first"
+    },
+    {
+      "rule": "Duplicate Fleeting event prevention",
+      "logic": "Check for existing non-BargeEx Fleeting events before import if global setting enabled"
+    },
+    {
+      "rule": "Void ticket/event validation",
+      "logic": "Cannot import to or update voided tickets or ticket events"
+    },
+    {
+      "rule": "Final Bill adjustment prevention",
+      "logic": "Cannot update vendor events in Final Bill status that would create adjustments"
+    },
+    {
+      "rule": "Successfully imported records are immediately deleted",
+      "logic": "After import success, record removed via MultiDelete stored procedure"
+    }
+  ],
+  "dataTransformations": [
+    {
+      "field": "Mile",
+      "formatting": "Two decimal places via GetDecimalProp",
+      "display": "Formatted for UI display"
+    },
+    {
+      "field": "EstimatedCost",
+      "formatting": "Currency with two decimals via GetCurrencyProp",
+      "display": "Formatted as currency"
+    },
+    {
+      "field": "DateTime fields",
+      "formatting": "SmartDate with SmartDateTimeFormat",
+      "display": "Standard datetime format throughout application"
+    },
+    {
+      "field": "HasPriorImport",
+      "computation": "Calculated field: true if OriginalTicketEventID OR OriginalPartsServiceBillItemID is not empty",
+      "usage": "Determines if revision can be imported without original"
+    }
+  ],
+  "importWorkflow": {
+    "description": "Complex import workflow that transforms BargeEx vendor documents into BargeEvents or PartsServiceBillItems",
+    "steps": [
+      "1. User searches for vendor documents via BargeExVendorDocumentInboxSearch",
+      "2. User selects documents by setting IsSelected = true",
+      "3. Import process validates barges, vendors, locations exist in system",
+      "4. For BargeStatus documents: Create/update TicketEvent on Ticket",
+      "5. For BoatStatus documents: Create/update PartsServiceBillItem on PartsServiceBill",
+      "6. Successfully imported documents deleted via MultiDelete",
+      "7. Failed imports remain in inbox with error messages in log"
+    ],
+    "documentTypes": {
+      "BargeStatus": {
+        "subTypes": [
+          "BreakTow",
+          "Clean",
+          "CoverHandling",
+          "Fleeting",
+          "MakeTow",
+          "MidstreamIn",
+          "MidstreamOut",
+          "Pump",
+          "Shift"
+        ],
+        "creates": "TicketEvent on Ticket",
+        "division": "Outside Vendor",
+        "billing": "InvoiceNote set to 'Vendor estimate via BargeEx: {EstimatedCost}'"
+      },
+      "BoatStatus": {
+        "subTypes": ["Assist"],
+        "creates": "PartsServiceBillItem on PartsServiceBill",
+        "division": "Outside Vendor",
+        "customer": "Operator of Freight division",
+        "billing": "InvoiceNote set to 'Vendor estimate via BargeEx: {EstimatedCost}', RateType set to Flat"
+      }
+    }
+  },
+  "dtoModels": {
+    "BargeExVendorDocInboxDto": {
+      "namespace": "BargeOps.Shared.Dto",
+      "properties": [
+        {
+          "name": "BargeExVendorDocumentInboxID",
+          "type": "int"
+        },
+        {
+          "name": "ControlNumber",
+          "type": "string",
+          "maxLength": 128,
+          "required": true
+        },
+        {
+          "name": "ReceivedDateTime",
+          "type": "DateTime",
+          "required": true
+        },
+        {
+          "name": "XmlTransaction",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "FailureReason",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "SenderTradingPartnerNumber",
+          "type": "string",
+          "maxLength": 8,
+          "nullable": true
+        },
+        {
+          "name": "BargeExDocumentTypeID",
+          "type": "int?",
+          "nullable": true
+        },
+        {
+          "name": "BargeExDocumentSubTypeID",
+          "type": "int?",
+          "nullable": true
+        },
+        {
+          "name": "BargeUscgNum",
+          "type": "string",
+          "maxLength": 10,
+          "nullable": true
+        },
+        {
+          "name": "BargeNum",
+          "type": "string",
+          "maxLength": 30,
+          "nullable": true
+        },
+        {
+          "name": "FleetBoatUscgNum",
+          "type": "string",
+          "maxLength": 10,
+          "nullable": true
+        },
+        {
+          "name": "FleetBoatName",
+          "type": "string",
+          "maxLength": 50,
+          "nullable": true
+        },
+        {
+          "name": "StartDateTime",
+          "type": "DateTime?",
+          "nullable": true
+        },
+        {
+          "name": "EndDateTime",
+          "type": "DateTime?",
+          "nullable": true
+        },
+        {
+          "name": "LocationBargeExCode",
+          "type": "string",
+          "maxLength": 20,
+          "nullable": true
+        },
+        {
+          "name": "LocationName",
+          "type": "string",
+          "maxLength": 50,
+          "nullable": true
+        },
+        {
+          "name": "EndLocationBargeExCode",
+          "type": "string",
+          "maxLength": 20,
+          "nullable": true
+        },
+        {
+          "name": "EndLocationName",
+          "type": "string",
+          "maxLength": 50,
+          "nullable": true
+        },
+        {
+          "name": "AssistedBoatUscgNum",
+          "type": "string",
+          "maxLength": 10,
+          "nullable": true
+        },
+        {
+          "name": "AssistedBoatName",
+          "type": "string",
+          "maxLength": 50,
+          "nullable": true
+        },
+        {
+          "name": "LoadStatus",
+          "type": "string",
+          "maxLength": 15,
+          "nullable": true
+        },
+        {
+          "name": "River",
+          "type": "string",
+          "maxLength": 3,
+          "nullable": true
+        },
+        {
+          "name": "Mile",
+          "type": "decimal?",
+          "nullable": true
+        },
+        {
+          "name": "EstimatedCost",
+          "type": "decimal?",
+          "nullable": true
+        },
+        {
+          "name": "CleanType",
+          "type": "string",
+          "maxLength": 50,
+          "nullable": true
+        },
+        {
+          "name": "PumpType",
+          "type": "string",
+          "maxLength": 50,
+          "nullable": true
+        },
+        {
+          "name": "CoverHandlingType",
+          "type": "string",
+          "maxLength": 50,
+          "nullable": true
+        },
+        {
+          "name": "OriginalControlNumber",
+          "type": "string",
+          "maxLength": 128,
+          "nullable": true
+        },
+        {
+          "name": "RevisionNumber",
+          "type": "int?",
+          "nullable": true
+        },
+        {
+          "name": "PrimaryControlNumber",
+          "type": "string",
+          "maxLength": 128,
+          "nullable": true
+        }
+      ]
+    },
+    "BargeExVendorDocInboxSearchDto": {
+      "namespace": "BargeOps.Shared.Dto",
+      "description": "Extended search DTO with resolved entity names and IDs",
+      "inheritsFrom": "BargeExVendorDocInboxDto",
+      "additionalProperties": [
+        {
+          "name": "IsSelected",
+          "type": "bool",
+          "description": "UI selection flag for import"
+        },
+        {
+          "name": "VendorName",
+          "type": "string"
+        },
+        {
+          "name": "VendorID",
+          "type": "int?"
+        },
+        {
+          "name": "TicketID",
+          "type": "int?",
+          "description": "Current open ticket for barge"
+        },
+        {
+          "name": "SubDocType",
+          "type": "string"
+        },
+        {
+          "name": "BargeID",
+          "type": "int?"
+        },
+        {
+          "name": "AssistedBoatID",
+          "type": "int?"
+        },
+        {
+          "name": "LocationID",
+          "type": "int?"
+        },
+        {
+          "name": "EndLocationID",
+          "type": "int?"
+        },
+        {
+          "name": "ServicingBoatID",
+          "type": "int?"
+        },
+        {
+          "name": "CleanPumpCoverHandlingType",
+          "type": "string"
+        },
+        {
+          "name": "DocType",
+          "type": "string",
+          "values": ["BargeStatus", "BoatStatus"]
+        },
+        {
+          "name": "EventTypeName",
+          "type": "string"
+        },
+        {
+          "name": "PsbillCustomerID",
+          "type": "int?"
+        },
+        {
+          "name": "ASPartsServiceCodeID",
+          "type": "int?"
+        },
+        {
+          "name": "OriginalTicketEventID",
+          "type": "int?"
+        },
+        {
+          "name": "OriginalTicketID",
+          "type": "int?"
+        },
+        {
+          "name": "OriginalPartsServiceBillItemID",
+          "type": "int?"
+        },
+        {
+          "name": "OriginalPartsServiceBillID",
+          "type": "int?"
+        },
+        {
+          "name": "BargeExBargeNum",
+          "type": "string"
+        },
+        {
+          "name": "BargeExBargeUscg",
+          "type": "string"
+        },
+        {
+          "name": "BargeExLocation",
+          "type": "string"
+        },
+        {
+          "name": "BargeExLocationCode",
+          "type": "string"
+        },
+        {
+          "name": "BargeExEndLocation",
+          "type": "string"
+        },
+        {
+          "name": "BargeExEndLocationCode",
+          "type": "string"
+        },
+        {
+          "name": "BargeExServicingBoat",
+          "type": "string"
+        },
+        {
+          "name": "BargeExServicingBoatUscg",
+          "type": "string"
+        },
+        {
+          "name": "BargeExAssistedBoat",
+          "type": "string"
+        },
+        {
+          "name": "BargeExAssistedBoatUscg",
+          "type": "string"
+        },
+        {
+          "name": "HasPriorImport",
+          "type": "bool",
+          "computed": true
+        }
+      ]
+    }
+  },
+  "conversionNotes": {
+    "complexity": "Very High - Complex import workflow with multiple document types",
+    "specialConsiderations": [
+      "This is a staging/inbox table for BargeEx vendor documents, not a core entity",
+      "Import workflow transforms data into TicketEvent or PartsServiceBillItem",
+      "Search SP performs complex joins to resolve BargeEx data to system entities",
+      "Multiple helper stored procedures for lookup operations during import",
+      "Immediate deletion after successful import means records are transient",
+      "Supports revision tracking and update scenarios via control numbers",
+      "Global setting controls duplicate Fleeting event prevention",
+      "Complex validation rules for void tickets and final bill adjustments"
+    ],
+    "dependencies": [
+      "Barge",
+      "Vendor",
+      "Location (Facility, Boat)",
+      "Ticket",
+      "TicketEvent",
+      "PartsServiceBill",
+      "PartsServiceBillItem",
+      "BargeExDocumentType",
+      "BargeExDocumentSubType",
+      "EventTypeList",
+      "GlobalSetting"
+    ],
+    "modernizationStrategy": "Consider keeping import workflow in separate service layer, not standard CRUD repository pattern. Import logic may warrant dedicated controller endpoints and business logic layer."
+  }
+}
