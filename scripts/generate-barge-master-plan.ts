@@ -134,7 +134,11 @@ function analyzeCommands(entity: string, formNames: string[]): string[] {
 }
 
 function templateCommands(entity: string): string[] {
-	return [`bun run generate-template --entity "${entity}"`];
+	return [
+		`bun run generate-template-api --entity "${entity}"`,
+		`bun run generate-template-ui --entity "${entity}"`,
+		`bun run generate-templates --entity "${entity}"`,
+	];
 }
 
 async function main() {

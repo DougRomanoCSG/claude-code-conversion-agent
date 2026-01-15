@@ -16,6 +16,7 @@ This directory contains the complete set of conversion templates for migrating t
 output/Vendor/
 ├── conversion-plan.md           ← Comprehensive conversion plan (START HERE!)
 ├── README.md                     ← This file
+├── GAP_ANALYSIS.md               ← Optional: gaps vs templates
 ├── templates/
 │   ├── shared/                   ⭐ IMPLEMENT THESE FIRST!
 │   │   └── Dto/
@@ -40,14 +41,20 @@ output/Vendor/
 │       ├── Services/                           (Templates to be generated)
 │       ├── Views/                              (Templates to be generated)
 │       └── wwwroot/                            (Templates to be generated)
-└── analysis-files/              Original analysis data (JSON)
+└── *.json                       ← Analysis outputs (in this folder)
+    ├── business-logic.json
+    ├── data-access.json
     ├── form-structure-search.json
     ├── form-structure-detail.json
-    ├── business-logic.json
     ├── security.json
     ├── ui-mapping.json
-    └── validation.json
+    ├── workflow.json
+    ├── tabs.json
+    ├── validation.json
+    └── related-entities.json
 ```
+
+**Note:** You may also see `Vendor_*.json` files. Those are task-sync copies; prefer the non-prefixed `*.json` files listed above.
 
 ---
 

@@ -30,6 +30,8 @@ const agents = [
 	"validation-extractor.ts",
 	"related-entity-analyzer.ts",
 	"conversion-template-generator.ts",
+	"conversion-template-generator-api.ts",
+	"conversion-template-generator-ui.ts",
 	"entity-converter.ts",
 	"viewmodel-creator.ts",
 	"conversion-planner.ts",

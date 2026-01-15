@@ -100,6 +100,100 @@ public class BargeEditViewModel
 
     #endregion
 
+    #region Read-Only Ticket Information
+
+    /// <summary>
+    /// Inspection status from active ticket (read-only)
+    /// </summary>
+    [Display(Name = "Inspection Status")]
+    public string? InspectionStatus { get; set; }
+
+    /// <summary>
+    /// Hold flag - Do not release barge to boat (read-only)
+    /// </summary>
+    [Display(Name = "On Hold")]
+    public bool IsOnHold { get; set; }
+
+    /// <summary>
+    /// Destination In location name (read-only)
+    /// </summary>
+    [Display(Name = "Destination In")]
+    public string? DestinationInName { get; set; }
+
+    /// <summary>
+    /// Load first flag (read-only)
+    /// </summary>
+    [Display(Name = "Load First")]
+    public bool LoadFirst { get; set; }
+
+    /// <summary>
+    /// Load last flag (read-only)
+    /// </summary>
+    [Display(Name = "Load Last")]
+    public bool LoadLast { get; set; }
+
+    /// <summary>
+    /// Load in multiple lots flag (read-only)
+    /// </summary>
+    [Display(Name = "Load Multiple Lots")]
+    public bool LoadMultipleLots { get; set; }
+
+    /// <summary>
+    /// Destination Out location name (read-only)
+    /// </summary>
+    [Display(Name = "Destination Out")]
+    public string? DestinationOutName { get; set; }
+
+    /// <summary>
+    /// Scheduled In location name (read-only)
+    /// </summary>
+    [Display(Name = "Scheduled In")]
+    public string? ScheduleInName { get; set; }
+
+    /// <summary>
+    /// On order flag (read-only)
+    /// </summary>
+    [Display(Name = "On Order")]
+    public bool IsOnOrder { get; set; }
+
+    /// <summary>
+    /// On order schedule date/time (read-only)
+    /// </summary>
+    [Display(Name = "On Order Schedule")]
+    public DateTime? OnOrderScheduleDateTime { get; set; }
+
+    /// <summary>
+    /// On order trip number (read-only)
+    /// </summary>
+    [Display(Name = "On Order Trip Number")]
+    public string? OnOrderTripNumber { get; set; }
+
+    /// <summary>
+    /// Scheduled Out location name (read-only)
+    /// </summary>
+    [Display(Name = "Scheduled Out")]
+    public string? ScheduleOutName { get; set; }
+
+    /// <summary>
+    /// Awaiting pickup flag (read-only)
+    /// </summary>
+    [Display(Name = "Awaiting Pickup")]
+    public bool IsAwaitingPickup { get; set; }
+
+    /// <summary>
+    /// Awaiting pickup ready date/time (read-only)
+    /// </summary>
+    [Display(Name = "Pickup Ready Time")]
+    public DateTime? AwaitingPickupReadyDateTime { get; set; }
+
+    /// <summary>
+    /// Consigned to location name - combines facility and ship (read-only)
+    /// </summary>
+    [Display(Name = "Consigned To")]
+    public string? ConsignLocationName { get; set; }
+
+    #endregion
+
     #region Feature Flags and Configuration
 
     /// <summary>

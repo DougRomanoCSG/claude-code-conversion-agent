@@ -4,13 +4,13 @@ A specialized suite of TypeScript agents designed to systematically extract, ana
 
 ## Overview
 
-This project provides **10 specialized agents** that work together to automate the conversion process from legacy OnShore VB.NET Windows Forms to modern BargeOps.API and BargeOps.UI applications.
+This project provides **10 analysis agents + 2 template generators** that work together to automate the conversion process from legacy OnShore VB.NET Windows Forms to modern BargeOps.API and BargeOps.UI applications.
 
 ### Key Features
 
 - **Automated Analysis**: 10 specialized agents extract form structure, business logic, data access patterns, security, validation, and more
-- **Orchestrated Workflow**: Master orchestrator runs all agents in sequence
-- **Interactive Template Generation**: Agent 10 always runs interactively in Claude Code for collaborative template creation
+- **Orchestrated Workflow**: Master orchestrator runs all analysis steps in sequence
+- **Interactive Template Generation**: API and UI template generators run interactively in Claude Code
 - **Entity-Specific Outputs**: Each conversion creates organized output in `output/{EntityName}/`
 - **Code Examples**: Includes reference implementations from BargeOps.Crewing for clarity
 - **Target-Specific**: Generates code specifically for BargeOps.Shared (DTOs), BargeOps.API, and BargeOps.UI
@@ -90,7 +90,7 @@ The input directory for OnShore source files is configured in `config.json`:
 
 #### Option 1: Use the Orchestrator (Recommended)
 
-Run all 11 steps automatically. You can provide either entity name, form name, or both:
+Run all 10 analysis steps automatically. You can provide either entity name, form name, or both:
 
 ```bash
 # With both entity and form name
@@ -110,14 +110,15 @@ This will:
 1. Run agents 1-10 automatically to extract analysis data
 2. Save all analysis files to `output/{Entity}/`
 
-**After analysis completes, run Step 11 separately:**
+**After analysis completes, run template generation separately:**
 ```bash
-bun run generate-template --entity "Facility"
-# or
-bun run agents/conversion-template-generator.ts --entity "Facility"
+bun run generate-template-api --entity "Facility"
+bun run generate-template-ui --entity "Facility"
+# or run both in sequence
+bun run generate-templates --entity "Facility"
 ```
 
-This will launch the interactive template generator in Claude Code to generate the conversion plan and code templates.
+This will launch the interactive template generators in Claude Code to generate conversion plans and code templates.
 
 #### Option 2: Run Individual Agents
 
@@ -155,7 +156,9 @@ bun run analyze-business --entity "Facility"
 bun run analyze-data --entity "Facility"
 
 # Generate templates (always interactive)
-bun run generate-template --entity "Facility"
+bun run generate-template-api --entity "Facility"
+bun run generate-template-ui --entity "Facility"
+bun run generate-templates --entity "Facility"
 
 # Code quality
 bun run lint
@@ -163,7 +166,7 @@ bun run format
 bun run check
 ```
 
-## The 10 Specialized Agents
+## Analysis Agents + Template Generators
 
 ### Agent 1: Form Structure Analyzer
 **Purpose**: Extract UI components, controls, and layouts from Windows Forms
@@ -274,21 +277,24 @@ bun run check
 
 **Output**: `related-entities.json`
 
-### Step 11: Conversion Template Generator (ALWAYS INTERACTIVE)
-**Purpose**: Generate complete conversion plan, code templates, and ViewModels
+### Step 11: Conversion Template Generators (ALWAYS INTERACTIVE)
+**Purpose**: Generate API + Shared templates and UI templates (detail screens, buttons, look/feel)
 
 **Usage**: Run separately after steps 1-10 complete:
 ```bash
-bun run generate-template --entity "Facility"
+bun run generate-template-api --entity "Facility"
+bun run generate-template-ui --entity "Facility"
+# or run both in sequence
+bun run generate-templates --entity "Facility"
 ```
 
 **Generates**:
-- Comprehensive conversion plan document
+- API + Shared conversion plan (`conversion-plan-api.md`)
+- UI conversion plan (`conversion-plan-ui.md`)
 - **Shared DTOs** (BargeOps.Shared - create first!)
-- Repository interface and implementation
-- Service interface and implementation
-- API Controller with endpoints
-- **ViewModels** (Search, Edit, Details, ListItem) - Interactive prompts
+- Repository interfaces and implementations
+- API Services and Controllers
+- **UI ViewModels** (Search, Edit, Details, ListItem)
 - Razor views (Index, Edit, Details)
 - JavaScript files (DataTables)
 - Step-by-step implementation guide
@@ -299,7 +305,8 @@ bun run generate-template --entity "Facility"
 - Each ViewModel follows MVVM patterns with proper validation and display attributes
 
 **Output**:
-- `conversion-plan.md` - Main conversion plan document
+- `conversion-plan-api.md` - API + Shared conversion plan
+- `conversion-plan-ui.md` - UI conversion plan (detail screens)
 - `templates/shared/` - DTOs for BargeOps.Shared (create first!)
 - `templates/api/` - Code templates for BargeOps.API
 - `templates/ui/` - Code templates for BargeOps.UI
@@ -324,7 +331,9 @@ ClaudeOnshoreConversionAgent/
 │   ├── detail-tab-analyzer.ts      # Agent 7
 │   ├── validation-extractor.ts     # Agent 8
 │   ├── related-entity-analyzer.ts  # Agent 9
-│   └── conversion-template-generator.ts  # Agent 10 (interactive)
+│   ├── conversion-template-generator-api.ts  # Step 10a (interactive)
+│   ├── conversion-template-generator-ui.ts   # Step 10b (interactive)
+│   └── conversion-template-generator.ts      # Wrapper (runs both)
 ├── lib/                            # Shared utilities
 │   ├── claude-flags.types.ts
 │   ├── flags.ts
@@ -339,7 +348,8 @@ ClaudeOnshoreConversionAgent/
 │   ├── Facility/
 │   │   ├── form-structure-search.json
 │   │   ├── business-logic.json
-│   │   ├── conversion-plan.md
+│   │   ├── conversion-plan-api.md
+│   │   ├── conversion-plan-ui.md
 │   │   └── templates/
 │   └── Crewing/
 ├── examples/                       # Reference examples
@@ -371,7 +381,8 @@ output/Facility/
 ├── tabs.json                       # Agent 7 output
 ├── validation.json                 # Agent 8 output
 ├── related-entities.json           # Agent 9 output
-├── conversion-plan.md              # Step 11 output (primary)
+├── conversion-plan-api.md          # Step 11 output (API + Shared)
+├── conversion-plan-ui.md           # Step 11 output (UI)
 └── templates/                      # Step 11 output (code templates)
     ├── shared/                     # BargeOps.Shared (create first!)
     │   └── Dto/
@@ -412,12 +423,15 @@ This will execute steps 1-10:
 9. **Step 9**: Extract validation rules
 10. **Step 10**: Analyze related entities
 
-### Step 2: Run Template Generator (Step 11)
+### Step 2: Run Template Generators (Step 11)
 
-After analysis completes, run the template generator:
+After analysis completes, run the template generators:
 
 ```bash
-bun run generate-template --entity "Facility"
+bun run generate-template-api --entity "Facility"
+bun run generate-template-ui --entity "Facility"
+# or run both in sequence
+bun run generate-templates --entity "Facility"
 ```
 
 This launches Claude Code in interactive mode. You can:
@@ -431,7 +445,8 @@ This launches Claude Code in interactive mode. You can:
 ### Step 3: Review Generated Output
 
 Check the generated output:
-- `output/Facility/conversion-plan.md` - Complete conversion strategy and implementation guide
+- `output/Facility/conversion-plan-api.md` - API + Shared conversion strategy
+- `output/Facility/conversion-plan-ui.md` - UI conversion strategy (detail screens)
 - `output/Facility/templates/shared/` - Shared DTOs (create these first in BargeOps.Shared!)
 - `output/Facility/templates/api/` - All API code templates (repositories, services, controllers, SQL)
 - `output/Facility/templates/ui/` - All UI code templates (ViewModels, Razor views, JavaScript)

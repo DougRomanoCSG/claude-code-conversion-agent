@@ -89,43 +89,43 @@ bun run agents/orchestrator.ts --entity "Vendor" --skip-steps "1,2,3"
 
 ### Phase 2: Template Generation (Step 11) - Interactive
 
-**Generate conversion plan and code templates:**
+**Generate conversion plans and code templates (API + UI):**
 
 ```bash
-bun run generate-template --entity "Vendor"
-# or
-bun run agents/conversion-template-generator.ts --entity "Vendor"
+bun run generate-template-api --entity "Vendor"
+bun run generate-template-ui --entity "Vendor"
+# or run both in sequence
+bun run generate-templates --entity "Vendor"
 ```
 
 **What happens:**
-- Launches Claude Code in interactive mode
+- Launches Claude Code in interactive mode (API and UI sessions)
 - Reviews all analysis files from Phase 1
-- Generates comprehensive conversion plan
-- Creates code templates organized by project
-- Offers to generate ViewModels interactively
+- Generates API plan + Shared DTO templates
+- Generates UI plan + detail screen templates (buttons, child dialogs, look/feel)
 
 **Generated Output:**
 ```
 output/{Entity}/
-├── conversion-plan.md         ← Master conversion plan document
+├── conversion-plan-api.md      ← API + Shared conversion plan
+├── conversion-plan-ui.md       ← UI conversion plan (detail screens + look/feel)
 └── templates/
-    ├── shared/                ← BargeOps.Shared DTOs (create FIRST!)
+    ├── shared/                 ← BargeOps.Shared DTOs (create FIRST!)
     │   └── Dto/
     │       ├── {Entity}Dto.cs
     │       ├── {Entity}SearchRequest.cs
     │       └── {Child}Dto.cs
-    ├── api/                   ← BargeOps.Admin.API templates
+    ├── api/                    ← BargeOps.Admin.API templates
     │   ├── Controllers/
     │   │   └── {Entity}Controller.cs
+    │   ├── Abstractions/
+    │   │   └── I{Entity}Repository.cs
     │   ├── Repositories/
-    │   │   ├── I{Entity}Repository.cs
     │   │   └── {Entity}Repository.cs
-    │   ├── Services/
-    │   │   ├── I{Entity}Service.cs
-    │   │   └── {Entity}Service.cs
-    │   └── Mapping/
-    │       └── {Entity}MappingProfile.cs
-    └── ui/                    ← BargeOps.Admin.UI templates
+    │   └── Services/
+    │       ├── I{Entity}Service.cs
+    │       └── {Entity}Service.cs
+    └── ui/                     ← BargeOps.Admin.UI templates
         ├── Controllers/
         │   └── {Entity}Controller.cs
         ├── Services/
@@ -139,7 +139,8 @@ output/{Entity}/
         ├── Views/
         │   └── {Entity}/
         │       ├── Index.cshtml
-        │       └── Edit.cshtml
+        │       ├── Edit.cshtml
+        │       └── Details.cshtml
         └── wwwroot/
             └── js/
                 ├── {entity}-search.js
@@ -155,7 +156,8 @@ output/{Entity}/
 **Review the generated conversion plan:**
 ```bash
 # Open the conversion plan
-code output/{Entity}/conversion-plan.md
+code output/{Entity}/conversion-plan-api.md
+code output/{Entity}/conversion-plan-ui.md
 ```
 
 **Check:**
@@ -305,8 +307,14 @@ bun run agents/orchestrator.ts --entity "Vendor" --skip-steps "1,2,3"
 
 ### Template Generation
 ```bash
-# Generate templates (interactive)
-bun run generate-template --entity "Vendor"
+# Generate API templates + Shared DTOs (interactive)
+bun run generate-template-api --entity "Vendor"
+
+# Generate UI templates (interactive)
+bun run generate-template-ui --entity "Vendor"
+
+# Run both in sequence
+bun run generate-templates --entity "Vendor"
 ```
 
 ### Deployment
@@ -347,12 +355,17 @@ bun run agents/business-logic-extractor.ts --entity "Vendor" --interactive
        └─> Generates: output/Vendor/*.json
 
 2. Template Generation (Interactive)
-   └─> bun run generate-template --entity "Vendor"
-       └─> Generates: output/Vendor/conversion-plan.md
+   └─> bun run generate-template-api --entity "Vendor"
+       └─> Generates: output/Vendor/conversion-plan-api.md
+   └─> bun run generate-template-ui --entity "Vendor"
+       └─> Generates: output/Vendor/conversion-plan-ui.md
+   └─> bun run generate-templates --entity "Vendor"
+       └─> Generates both conversion plan files
        └─> Generates: output/Vendor/templates/
 
 3. Review Templates
-   └─> Review conversion-plan.md
+   └─> Review conversion-plan-api.md
+   └─> Review conversion-plan-ui.md
    └─> Check template files
 
 4. Deploy Templates (Automated)
@@ -394,7 +407,10 @@ bun run agents/{agent-name}.ts --entity "Vendor" --interactive
 ### Templates Not Generated
 - Ensure analysis completed successfully
 - Check `output/{Entity}/` has all JSON files
-- Rerun template generator: `bun run generate-template --entity "Vendor"`
+- Rerun template generators:
+  - `bun run generate-template-api --entity "Vendor"`
+  - `bun run generate-template-ui --entity "Vendor"`
+  - `bun run generate-templates --entity "Vendor"`
 
 ### Deployment Fails
 - Verify `config.json` paths are correct

@@ -12,7 +12,7 @@
 
 import { parsedArgs } from "../lib/flags";
 import { getProjectRoot, getAdminApiPath, getAdminUiPath, getSharedProjectPath } from "../lib/paths";
-import { existsSync, mkdirSync, readdirSync, statSync, copyFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, statSync, copyFileSync, readFileSync, writeFileSync } from "fs";
 import { join, dirname, relative } from "path";
 
 const projectRoot = getProjectRoot(import.meta.url);
@@ -21,24 +21,46 @@ interface DeployOptions {
 	entity: string;
 	outputDir?: string;
 	dryRun?: boolean;
+	skipExisting?: boolean;
 }
 
 function parseOptions(): DeployOptions {
 	const entity = parsedArgs.values.entity as string;
 	const outputDir = parsedArgs.values.output as string;
 	const dryRun = parsedArgs.values["dry-run"] as boolean;
+	const skipExisting = (parsedArgs.values["skip-existing"] as boolean) || false;
 
 	if (!entity) {
 		console.error("Error: --entity parameter is required");
 		console.error("Usage: bun run scripts/deploy-templates.ts --entity \"Vendor\"");
 		console.error("       bun run scripts/deploy-templates.ts --entity \"Vendor\" --dry-run");
+		console.error("       bun run scripts/deploy-templates.ts --entity \"Vendor\" --skip-existing");
 		process.exit(1);
 	}
 
-	return { entity, outputDir, dryRun };
+	return { entity, outputDir, dryRun, skipExisting };
 }
 
-function copyDirectory(src: string, dest: string, dryRun: boolean): { files: number; errors: string[] } {
+type CopyOverrides = {
+	/**
+	 * Override destination root for a given relative path (within src).
+	 * Return null to use the default dest root.
+	 */
+	resolveDestRoot?: (relativePath: string) => string | null;
+	/**
+	 * Optionally transform file contents before writing to destination.
+	 * Only called for text files we read (currently .cs).
+	 */
+	transformText?: (args: { relativePath: string; srcPath: string; destPath: string; contents: string }) => string;
+};
+
+function copyDirectory(
+	src: string,
+	dest: string,
+	dryRun: boolean,
+	overrides: CopyOverrides = {},
+	skipExisting: boolean = false,
+): { files: number; errors: string[] } {
 	let filesCopied = 0;
 	const errors: string[] = [];
 
@@ -52,7 +74,10 @@ function copyDirectory(src: string, dest: string, dryRun: boolean): { files: num
 
 		for (const entry of entries) {
 			const srcPath = join(currentSrc, entry.name);
-			const destPath = join(currentDest, entry.name);
+			const relFromRoot = relative(src, srcPath);
+			const destRootOverride = overrides.resolveDestRoot ? overrides.resolveDestRoot(relFromRoot) : null;
+			const effectiveDestRoot = destRootOverride ?? dest;
+			const destPath = join(effectiveDestRoot, relFromRoot);
 
 			if (entry.isDirectory()) {
 				if (!dryRun) {
@@ -60,19 +85,38 @@ function copyDirectory(src: string, dest: string, dryRun: boolean): { files: num
 						mkdirSync(destPath, { recursive: true });
 					}
 				}
+				// Keep traversing using the original src tree; destPath already includes relFromRoot
 				copyRecursive(srcPath, destPath);
 			} else {
 				if (dryRun) {
-					console.log(`  [DRY RUN] Would copy: ${relative(src, srcPath)} → ${relative(dest, destPath)}`);
+					if (skipExisting && existsSync(destPath)) {
+						console.log(`  [DRY RUN] Would skip (exists): ${relFromRoot}`);
+					} else {
+						console.log(`  [DRY RUN] Would copy: ${relFromRoot} → ${relative(dest, destPath)}`);
+					}
 				} else {
 					try {
+						if (skipExisting && existsSync(destPath)) {
+							console.log(`  ↷ Skipped (exists): ${relFromRoot}`);
+							continue;
+						}
+
 						// Ensure destination directory exists
 						const destDir = dirname(destPath);
 						if (!existsSync(destDir)) {
 							mkdirSync(destDir, { recursive: true });
 						}
-						copyFileSync(srcPath, destPath);
-						console.log(`  ✓ Copied: ${relative(src, srcPath)}`);
+
+						// Apply optional text transforms for C# files when requested.
+						if (srcPath.toLowerCase().endsWith(".cs") && overrides.transformText) {
+							const contents = readFileSync(srcPath, "utf8");
+							const transformed = overrides.transformText({ relativePath: relFromRoot, srcPath, destPath, contents });
+							writeFileSync(destPath, transformed, "utf8");
+						} else {
+							copyFileSync(srcPath, destPath);
+						}
+
+						console.log(`  ✓ Copied: ${relFromRoot}`);
 					} catch (error: any) {
 						errors.push(`Failed to copy ${srcPath}: ${error.message}`);
 					}
@@ -93,7 +137,9 @@ async function deployTemplates(options: DeployOptions): Promise<number> {
 	if (!existsSync(templatesPath)) {
 		console.error(`\n❌ Error: Templates directory not found: ${templatesPath}`);
 		console.error(`\nPlease run the template generator first:`);
-		console.error(`   bun run agents/conversion-template-generator.ts --entity "${options.entity}"\n`);
+		console.error(`   bun run generate-template-api --entity "${options.entity}"`);
+		console.error(`   bun run generate-template-ui --entity "${options.entity}"`);
+		console.error(`   bun run generate-templates --entity "${options.entity}"\n`);
 		return 1;
 	}
 
@@ -141,7 +187,7 @@ ${options.dryRun ? `║  Mode: DRY RUN (preview only)${" ".padEnd(50, " ")}║\n
 				console.log(`  [DRY RUN] Would create directory: Dto/`);
 			}
 		}
-		const result = copyDirectory(sharedTemplates, sharedPath, options.dryRun || false);
+		const result = copyDirectory(sharedTemplates, sharedPath, options.dryRun || false, {}, options.skipExisting || false);
 		totalFiles += result.files;
 		allErrors.push(...result.errors);
 	} else {
@@ -159,12 +205,53 @@ ${options.dryRun ? `║  Mode: DRY RUN (preview only)${" ".padEnd(50, " ")}║\n
 			{ src: "Repositories", dest: `${apiPath}/src/Admin.Infrastructure/Repositories` },
 			{ src: "Services", dest: `${apiPath}/src/Admin.Infrastructure/Services` },
 			{ src: "Mapping", dest: `${apiPath}/src/Admin.Infrastructure/Mapping` },
+			// Enhancements: support additional generated folders
+			{ src: "Sql", dest: `${apiPath}/src/Admin.Infrastructure/DataAccess/Sql/${options.entity}` },
+			{ src: "Validation", dest: `${apiPath}/src/Admin.Infrastructure/Validators` },
+			{ src: "Utilities", dest: `${apiPath}/src/Admin.Infrastructure/Utilities` },
 		];
 
 		for (const mapping of apiMappings) {
 			const srcPath = `${apiTemplates}/${mapping.src}`;
 			if (existsSync(srcPath)) {
-				const result = copyDirectory(srcPath, mapping.dest, options.dryRun || false);
+				if (mapping.src === "Repositories") {
+					// Route repository interfaces (I*Repository.cs) to Admin.Infrastructure/Abstractions to match MonoRepo conventions.
+					const abstractionsPath = `${apiPath}/src/Admin.Infrastructure/Abstractions`;
+					const result = copyDirectory(srcPath, mapping.dest, options.dryRun || false, {
+						resolveDestRoot: (relPath) => {
+							const fileName = relPath.replace(/\\/g, "/").split("/").pop() ?? relPath;
+							if (/^I[A-Z].*Repository\.cs$/i.test(fileName)) return abstractionsPath;
+							return null;
+						},
+						transformText: ({ relativePath, destPath, contents }) => {
+							const fileName = relativePath.replace(/\\/g, "/").split("/").pop() ?? relativePath;
+							const movedToAbstractions =
+								/^I[A-Z].*Repository\.cs$/i.test(fileName) && destPath.includes(`${apiPath}/src/Admin.Infrastructure/Abstractions`);
+
+							if (!movedToAbstractions) return contents;
+
+							// Normalize namespace for interfaces moved into Abstractions.
+							// (Some generators output namespace Admin.Infrastructure.Repositories for interfaces.)
+							return contents.replace(/namespace\s+Admin\.Infrastructure\.Repositories\s*;/g, "namespace Admin.Infrastructure.Abstractions;");
+						},
+					}, options.skipExisting || false);
+					totalFiles += result.files;
+					allErrors.push(...result.errors);
+					continue;
+				}
+
+				if (mapping.src === "Validation") {
+					// Normalize namespace to match Admin.Infrastructure.Validators used in MonoRepo.
+					const result = copyDirectory(srcPath, mapping.dest, options.dryRun || false, {
+						transformText: ({ contents }) =>
+							contents.replace(/namespace\s+Admin\.Infrastructure\.Validation\s*;/g, "namespace Admin.Infrastructure.Validators;"),
+					}, options.skipExisting || false);
+					totalFiles += result.files;
+					allErrors.push(...result.errors);
+					continue;
+				}
+
+				const result = copyDirectory(srcPath, mapping.dest, options.dryRun || false, {}, options.skipExisting || false);
 				totalFiles += result.files;
 				allErrors.push(...result.errors);
 			}
@@ -190,7 +277,7 @@ ${options.dryRun ? `║  Mode: DRY RUN (preview only)${" ".padEnd(50, " ")}║\n
 		for (const mapping of uiMappings) {
 			const srcPath = `${uiTemplates}/${mapping.src}`;
 			if (existsSync(srcPath)) {
-				const result = copyDirectory(srcPath, mapping.dest, options.dryRun || false);
+				const result = copyDirectory(srcPath, mapping.dest, options.dryRun || false, {}, options.skipExisting || false);
 				totalFiles += result.files;
 				allErrors.push(...result.errors);
 			}

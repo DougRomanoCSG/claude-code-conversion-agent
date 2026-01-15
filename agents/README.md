@@ -18,7 +18,9 @@ These are the extraction agents that analyze legacy forms and generate templates
 - **detail-tab-analyzer.ts** - Step 7: Extracts tab structure and related entities
 - **validation-extractor.ts** - Step 8: Extracts all validation logic
 - **related-entity-analyzer.ts** - Step 9: Extracts entity relationships
-- **conversion-template-generator.ts** - Step 10: Interactive template and ViewModel generation (run separately)
+- **conversion-template-generator-api.ts** - Step 10a: API + Shared template generation (run separately)
+- **conversion-template-generator-ui.ts** - Step 10b: UI template generation (run separately)
+- **conversion-template-generator.ts** - Wrapper to run API + UI generators in sequence
 
 **Orchestrator Usage:**
 ```bash
@@ -40,8 +42,14 @@ bun run agents/orchestrator.ts --entity "Facility" --skip-steps "3,5,7"
 
 **Template Generator Usage:**
 ```bash
-# Generate conversion templates interactively
-bun run generate-template --entity "Facility"
+# Generate API + Shared templates
+bun run generate-template-api --entity "Facility"
+
+# Generate UI templates (detail screens)
+bun run generate-template-ui --entity "Facility"
+
+# Run both in sequence
+bun run generate-templates --entity "Facility"
 
 # Or direct invocation
 bun run agents/conversion-template-generator.ts --entity "Facility"
@@ -152,8 +160,10 @@ bun run plan-conversion [--entity <name>] [prompt]
 bun run convert [--entity <name>] [--form-name <name>]
 bun run agents/orchestrator.ts --entity "Facility"
 
-# Generate templates (Step 10) - INTERACTIVE
-bun run generate-template --entity <name>
+# Generate templates (Step 10a/10b) - INTERACTIVE
+bun run generate-template-api --entity <name>
+bun run generate-template-ui --entity <name>
+bun run generate-templates --entity <name>
 bun run agents/conversion-template-generator.ts --entity "Facility"
 ```
 
@@ -189,10 +199,14 @@ bun run agents/orchestrator.ts --form-name "frmFuelPrices"
 # - validation.json, related-entities.json
 # - child-forms.json (if child forms detected)
 
-# 3. Generate conversion templates interactively (Step 10)
-bun run generate-template --entity "Facility"
-# This launches interactive Claude session to create:
-# - conversion-plan.md
+# 3. Generate conversion templates interactively (Step 10a/10b)
+bun run generate-template-api --entity "Facility"
+bun run generate-template-ui --entity "Facility"
+# or run both in sequence:
+# bun run generate-templates --entity "Facility"
+# This launches interactive Claude sessions to create:
+# - conversion-plan-api.md
+# - conversion-plan-ui.md
 # - Code templates in templates/shared/, templates/api/, templates/ui/
 
 # 4. Review and implement generated templates
@@ -256,10 +270,11 @@ output/<Entity>/
 └── child-forms.json              # Detected child forms
 ```
 
-### Template Generator (Step 10)
+### Template Generators (Step 10a/10b)
 ```
 output/<Entity>/
-├── conversion-plan.md            # Comprehensive conversion guide
+├── conversion-plan-api.md        # API + Shared conversion guide
+├── conversion-plan-ui.md         # UI conversion guide (detail screens)
 └── templates/
     ├── shared/                   # BargeOps.Shared DTOs (create first!)
     │   └── Dto/

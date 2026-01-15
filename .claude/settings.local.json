@@ -9,12 +9,16 @@
       "Bash(BoatFuelPriceRepository.cs)",
       "Bash(\"C:/source/agents/ClaudeOnshoreConversionAgent/output/BoatFuelPrices/templates/ui/wwwroot/js/boatFuelPriceSearch.js\")",
       "Bash(\"C:/source/agents/ClaudeOnshoreConversionAgent/output/BoatFuelPrices/README.md\")",
-      "Bash(xargs basename:*)"
+      "Bash(xargs basename:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": [],
     "additionalDirectories": [
-      "C:\\Dev\\BargeOps.Admin.Mono"
+      "C:\\Dev\\BargeOps.Admin.Mono",
+      "C:\\source\\BargeOps\\BargeOps.Crewing.API"
     ]
   }
 }
+

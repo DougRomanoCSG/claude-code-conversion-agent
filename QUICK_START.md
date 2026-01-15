@@ -31,7 +31,10 @@ bun run agents/orchestrator.ts
 
 **Then run Step 11 separately to generate templates:**
 ```bash
-bun run generate-template --entity "Facility"
+bun run generate-template-api --entity "Facility"
+bun run generate-template-ui --entity "Facility"
+# or run both in sequence
+bun run generate-templates --entity "Facility"
 ```
 
 This launches Claude Code interactively for template generation. You can rerun this step multiple times without re-running the analysis.
@@ -59,7 +62,8 @@ output/{EntityName}/
 ├── tabs.json
 ├── validation.json
 ├── related-entities.json
-├── conversion-plan.md          ← Main conversion plan
+├── conversion-plan-api.md      ← API + Shared conversion plan
+├── conversion-plan-ui.md       ← UI conversion plan (detail screens)
 └── templates/                   ← Code templates
     ├── shared/                  ← BargeOps.Shared DTOs (create first!)
     ├── api/                     ← BargeOps.API templates
@@ -82,7 +86,9 @@ bun run agents/orchestrator.ts --entity "Facility" --output "./my-output"
 bun run agents/form-structure-analyzer.ts --entity "Facility" --form-type "Search" --interactive
 
 # Generate templates only (assumes analysis already done)
-bun run agents/conversion-template-generator.ts --entity "Facility"
+bun run generate-template-api --entity "Facility"
+bun run generate-template-ui --entity "Facility"
+bun run generate-templates --entity "Facility"
 ```
 
 ## Agent Overview
@@ -119,7 +125,8 @@ bun run agents/conversion-template-generator.ts --entity "Facility"
 bun run agents/orchestrator.ts --entity "Facility"
 
 # Step 2: Review output
-code output/Facility/conversion-plan.md
+code output/Facility/conversion-plan-api.md
+code output/Facility/conversion-plan-ui.md
 
 # Step 3: Implement using generated templates
 # Templates are in: output/Facility/templates/
@@ -130,7 +137,10 @@ code output/Facility/conversion-plan.md
 If you've already run agents 1-9 and want to regenerate templates:
 
 ```bash
-bun run agents/conversion-template-generator.ts --entity "Facility"
+bun run generate-template-api --entity "Facility"
+bun run generate-template-ui --entity "Facility"
+# or run both in sequence
+bun run generate-templates --entity "Facility"
 ```
 
 This launches Claude Code interactively to regenerate templates.
@@ -199,8 +209,11 @@ After analysis completes, you have multiple options for implementation:
 
 ### Option 1: Generate Templates First (Recommended)
 ```bash
-# Generate conversion plan, code templates, AND ViewModels interactively
-bun run generate-template --entity "Facility"
+# Generate conversion plans and templates interactively
+bun run generate-template-api --entity "Facility"
+bun run generate-template-ui --entity "Facility"
+# or run both in sequence
+bun run generate-templates --entity "Facility"
 ```
 
 **What it generates:**
@@ -216,10 +229,11 @@ bun run generate-template --entity "Facility"
 - Each ViewModel follows MVVM patterns with proper validation
 
 Then review:
-1. `output/Facility/conversion-plan.md` - Complete conversion strategy
-2. `output/Facility/templates/shared/` - Shared DTOs (create first!)
-3. `output/Facility/templates/api/` - API code templates
-4. `output/Facility/templates/ui/` - UI code templates (including ViewModels!)
+1. `output/Facility/conversion-plan-api.md` - API + Shared conversion strategy
+2. `output/Facility/conversion-plan-ui.md` - UI conversion strategy (detail screens)
+3. `output/Facility/templates/shared/` - Shared DTOs (create first!)
+4. `output/Facility/templates/api/` - API code templates
+5. `output/Facility/templates/ui/` - UI code templates (including ViewModels!)
 
 ### Option 2: Use Interactive Implementation Agents
 

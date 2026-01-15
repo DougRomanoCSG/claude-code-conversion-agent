@@ -21,6 +21,11 @@ export const parsedArgs = parseArgs({
 		resume: { type: "boolean" },
 		"rerun-failed": { type: "boolean" },
 		"dry-run": { type: "boolean" },
+		"generate-templates": { type: "boolean" },
+		"generate-templates-api": { type: "boolean" },
+		"generate-templates-ui": { type: "boolean" },
+		"api-only": { type: "boolean" },
+		"ui-only": { type: "boolean" },
 	},
 	strict: false,
 	allowPositionals: true,
@@ -53,7 +58,21 @@ export function buildClaudeFlags(
 	const merged = { ...baseFlags, ...userFlags };
 
 	// Filter out custom agent-specific flags that shouldn't be passed to Claude
-	const customFlags = ["entity", "form-name", "form-type", "output", "skip-steps", "resume", "rerun-failed"];
+	const customFlags = [
+		"entity",
+		"form-name",
+		"form-type",
+		"output",
+		"skip-steps",
+		"resume",
+		"rerun-failed",
+		"dry-run",
+		"generate-templates",
+		"generate-templates-api",
+		"generate-templates-ui",
+		"api-only",
+		"ui-only",
+	];
 	const claudeFlags: ClaudeFlags = {};
 
 	for (const [key, value] of Object.entries(merged)) {

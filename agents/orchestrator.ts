@@ -15,13 +15,18 @@
  *   bun run agents/orchestrator.ts --form-name "frmFuelPrices"  (single form, entity extracted)
  *   bun run agents/orchestrator.ts --entity "Facility"  (form names will be constructed)
  *   bun run agents/orchestrator.ts  (will prompt for form selection)
+ *   bun run agents/orchestrator.ts --entity "Facility" --generate-templates
+ *   bun run agents/orchestrator.ts --entity "Facility" --generate-templates-api
+ *   bun run agents/orchestrator.ts --entity "Facility" --generate-templates-ui
  *
  * Resume/Rerun Options:
  *   --resume              Resume from where conversion left off (runs pending and failed steps)
  *   --rerun-failed        Rerun only the steps that previously failed
  *
- * Note: This runs analysis steps only. Template generation should be run separately:
- *       bun run generate-template --entity "Facility"
+ * Note: This runs analysis steps only. Template generation can be run separately:
+ *       bun run generate-template-api --entity "Facility"
+ *       bun run generate-template-ui --entity "Facility"
+ *       bun run generate-templates --entity "Facility"
  */
 
 import { spawn } from "bun";
@@ -55,6 +60,9 @@ interface OrchestratorOptions {
 	childForms?: string[];
 	resume?: boolean;
 	rerunFailed?: boolean;
+	generateTemplates?: boolean;
+	generateTemplatesApi?: boolean;
+	generateTemplatesUi?: boolean;
 }
 
 interface AgentStep {
@@ -148,6 +156,9 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 	const skipSteps = skipStepsStr ? skipStepsStr.split(",").map(Number) : [];
 	const resume = parsedArgs.values.resume as boolean;
 	const rerunFailed = parsedArgs.values["rerun-failed"] as boolean;
+	const generateTemplates = parsedArgs.values["generate-templates"] as boolean;
+	const generateTemplatesApi = parsedArgs.values["generate-templates-api"] as boolean;
+	const generateTemplatesUi = parsedArgs.values["generate-templates-ui"] as boolean;
 
 	// Node's parseArgs can return string[] if an option is repeated; normalize to a single string.
 	const entity = Array.isArray(rawEntity) ? rawEntity[0] : rawEntity;
@@ -254,7 +265,19 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 		}
 	}
 
-	return { entity: finalEntity, formName: finalFormName, outputDir, skipSteps, isSingleForm, childForms, resume, rerunFailed };
+	return {
+		entity: finalEntity,
+		formName: finalFormName,
+		outputDir,
+		skipSteps,
+		isSingleForm,
+		childForms,
+		resume,
+		rerunFailed,
+		generateTemplates,
+		generateTemplatesApi,
+		generateTemplatesUi,
+	};
 }
 
 function getFailedSteps(status: ConversionStatus): number[] {
@@ -471,7 +494,7 @@ async function runAgentStep(
 		outputPath,
 	];
 
-	if (options.formName) {
+	if (options.formName && options.isSingleForm) {
 		args.push("--form-name", options.formName);
 	}
 
@@ -528,6 +551,35 @@ async function runAgentStep(
 	return exitCode;
 }
 
+async function runTemplateGenerator(script: string, options: OrchestratorOptions, outputPath: string): Promise<number> {
+	const args = [
+		"run",
+		`${projectRoot}agents/${script}`,
+		"--entity",
+		options.entity,
+		"--output",
+		outputPath,
+	];
+
+	if (options.formName) {
+		args.push("--form-name", options.formName);
+	}
+
+	console.log(`\n▶️  Running template generator: bun ${args.join(" ")}`);
+	const child = spawn(["bun", ...args], {
+		stdin: "inherit",
+		stdout: "inherit",
+		stderr: "inherit",
+		env: {
+			...process.env,
+			CLAUDE_PROJECT_DIR: projectRoot,
+		},
+	});
+
+	await child.exited;
+	return child.exitCode ?? 0;
+}
+
 async function main() {
 	const options = await parseOptions();
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
@@ -571,8 +623,10 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		console.log(`   Skipping steps: ${skipStepsList}`);
 	}
 	console.log(`\nSteps 1-${totalSteps}: Automatic analysis and data extraction`);
-	console.log(`\nNote: Step ${totalSteps + 1} (Template Generation) should be run separately:`);
-	console.log(`   bun run generate-template --entity "${options.entity}"`);
+	console.log(`\nNote: Template generation can be run separately:`);
+	console.log(`   bun run generate-template-api --entity "${options.entity}"`);
+	console.log(`   bun run generate-template-ui --entity "${options.entity}"`);
+	console.log(`   bun run generate-templates --entity "${options.entity}"`);
 	console.log("   or: bun run agents/conversion-template-generator.ts --entity \"" + options.entity + "\"\n");
 
 	// Ensure output directory exists
@@ -748,6 +802,29 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		currentStep++;
 	}
 
+	// Optional template generation (API/UI split)
+	const runApiTemplates = options.generateTemplates || options.generateTemplatesApi;
+	const runUiTemplates = options.generateTemplates || options.generateTemplatesUi;
+	if (runApiTemplates || runUiTemplates) {
+		console.log("\nTemplate generation requested. Launching interactive template generators...");
+
+		if (runApiTemplates) {
+			const apiExit = await runTemplateGenerator("conversion-template-generator-api.ts", options, outputPath);
+			if (apiExit !== 0) {
+				console.error("\n❌ API template generation failed. Aborting.");
+				process.exit(apiExit);
+			}
+		}
+
+		if (runUiTemplates) {
+			const uiExit = await runTemplateGenerator("conversion-template-generator-ui.ts", options, outputPath);
+			if (uiExit !== 0) {
+				console.error("\n❌ UI template generation failed. Aborting.");
+				process.exit(uiExit);
+			}
+		}
+	}
+
 	// Check for failed steps before finalizing
 	const failedSteps = getFailedSteps(conversionStatus);
 	const endTime = new Date().toISOString();
@@ -810,7 +887,9 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 ${childFormsMessage}${failedStepsMessage}║  NEXT STEPS:                                                               ║
 ║                                                                            ║
 ║  1. Generate conversion templates (interactive):                           ║
-║     bun run generate-template --entity "${options.entity}"${" ".padEnd(Math.max(0, 33 - options.entity.length), " ")}║
+║     bun run generate-template-api --entity "${options.entity}"${" ".padEnd(Math.max(0, 27 - options.entity.length), " ")}║
+║     bun run generate-template-ui --entity "${options.entity}"${" ".padEnd(Math.max(0, 28 - options.entity.length), " ")}║
+║     bun run generate-templates --entity "${options.entity}"${" ".padEnd(Math.max(0, 30 - options.entity.length), " ")}║
 ║                                                                            ║
 ║  2. Use interactive agents for implementation help:                        ║
 ║     bun run plan-conversion --entity "${options.entity}"${" ".padEnd(Math.max(0, 32 - options.entity.length), " ")}║

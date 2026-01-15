@@ -20,7 +20,9 @@ This directory contains system prompt templates for specialized agents used in t
 | `form-workflow-analyzer-prompt.md` | `form-workflow-analyzer.ts` | Extract user workflows |
 | `detail-tab-analyzer-prompt.md` | `detail-tab-analyzer.ts` | Extract tab structures |
 | `ui-component-mapper-prompt.md` | `ui-component-mapper.ts` | Map legacy to modern controls |
-| `conversion-template-generator-prompt.md` | `conversion-template-generator.ts` | Generate conversion templates |
+| `conversion-template-generator-api-prompt.md` | `conversion-template-generator-api.ts` | Generate API + Shared templates |
+| `conversion-template-generator-ui-prompt.md` | `conversion-template-generator-ui.ts` | Generate UI templates (detail screens) |
+| `conversion-template-generator-prompt.md` | `conversion-template-generator.ts` | Wrapper to run both API/UI generators |
 | `orchestrator-prompt.md` | `orchestrator.ts` | Coordinate all analysis agents |
 
 ## Available Prompts
@@ -137,11 +139,25 @@ Maps legacy controls to modern web UI components.
 **Output**: `ui-mapping.json`
 **Agent**: `agents/ui-component-mapper.ts`
 
-#### conversion-template-generator-prompt.md
-Generates comprehensive conversion implementation plans.
+#### conversion-template-generator-api-prompt.md
+Generates API + Shared templates following Crewing API patterns.
 
-**Purpose**: Create detailed step-by-step conversion templates
-**Output**: `CONVERSION_TEMPLATE.md`
+**Purpose**: Create API controllers, services, repositories, and shared DTOs
+**Output**: `conversion-plan-api.md`
+**Agent**: `agents/conversion-template-generator-api.ts`
+
+#### conversion-template-generator-ui-prompt.md
+Generates UI templates with full detail-screen coverage.
+
+**Purpose**: Create UI controllers, views, ViewModels, JS, and detail screen breakdowns
+**Output**: `conversion-plan-ui.md`
+**Agent**: `agents/conversion-template-generator-ui.ts`
+
+#### conversion-template-generator-prompt.md
+Wrapper prompt for running both API and UI generators.
+
+**Purpose**: Orchestrate API + UI template generation
+**Output**: `conversion-plan-api.md` and `conversion-plan-ui.md`
 **Agent**: `agents/conversion-template-generator.ts`
 
 #### orchestrator-prompt.md

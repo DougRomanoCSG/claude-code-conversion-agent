@@ -3,7 +3,9 @@
 
 import SP_business_logic_extractor from '../system-prompts/business-logic-extractor-prompt.md' with { type: 'text' }
 import SP_conversion_orchestrator from '../system-prompts/conversion-orchestrator-prompt.md' with { type: 'text' }
+import SP_conversion_template_generator_api from '../system-prompts/conversion-template-generator-api-prompt.md' with { type: 'text' }
 import SP_conversion_template_generator from '../system-prompts/conversion-template-generator-prompt.md' with { type: 'text' }
+import SP_conversion_template_generator_ui from '../system-prompts/conversion-template-generator-ui-prompt.md' with { type: 'text' }
 import SP_data_access_analyzer from '../system-prompts/data-access-analyzer-prompt.md' with { type: 'text' }
 import SP_detail_tab_analyzer from '../system-prompts/detail-tab-analyzer-prompt.md' with { type: 'text' }
 import SP_entity_conversion from '../system-prompts/entity-conversion-prompt.md' with { type: 'text' }
@@ -43,6 +45,8 @@ export const SYSTEM_PROMPTS = {
   'business-logic-extractor': SP_business_logic_extractor,
   'conversion-orchestrator': SP_conversion_orchestrator,
   'conversion-template-generator': SP_conversion_template_generator,
+  'conversion-template-generator-api': SP_conversion_template_generator_api,
+  'conversion-template-generator-ui': SP_conversion_template_generator_ui,
   'data-access-analyzer': SP_data_access_analyzer,
   'detail-tab-analyzer': SP_detail_tab_analyzer,
   'entity-conversion': SP_entity_conversion,

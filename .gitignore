@@ -6,8 +6,7 @@ node_modules
 # Compiled binaries
 bin/
 
-# Output (conversion analysis results)
-#output/
+output/
 
 # OS
 .DS_Store

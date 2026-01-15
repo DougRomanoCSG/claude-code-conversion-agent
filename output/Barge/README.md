@@ -13,8 +13,11 @@ This directory contains complete conversion templates for the **Barge** entity f
 
 ```
 Barge/
-├── conversion-plan.md              # Comprehensive conversion plan
-├── README.md                        # This file
+├── conversion-plan.md              # Comprehensive conversion plan (START HERE!)
+├── README.md                       # This file
+├── GAP_ANALYSIS.md                 # Optional: gaps vs templates
+├── MASTER_BARGE_SCREENS.md         # Barge screen inventory
+├── TEMPLATES_GENERATED.md          # Template generation notes
 │
 ├── templates/
 │   ├── shared/                      # ⭐ BargeOps.Shared project (CREATE FIRST!)
@@ -50,13 +53,20 @@ Barge/
 │               ├── barge-search.js  # DataTables + search logic
 │               └── barge-edit.js    # Form logic + validations
 │
-└── analysis/                        # Source analysis files
-    ├── form-structure-detail.json
+└── *.json                           # Analysis outputs (in this folder)
+    ├── business-logic.json
     ├── data-access.json
+    ├── form-structure-search.json
+    ├── form-structure-detail.json
+    ├── security.json
     ├── ui-mapping.json
+    ├── workflow.json
+    ├── tabs.json
     ├── validation.json
-    └── ... (other analysis files)
+    └── related-entities.json
 ```
+
+**Note:** You may also see `Barge_*.json` files. Those are task-sync copies; prefer the non-prefixed `*.json` files listed above.
 
 ## Implementation Order
 
@@ -247,7 +257,7 @@ Barge/
 ## Support
 
 For questions about these templates:
-- Review analysis files in the analysis/ directory
+- Review the analysis JSON files in this folder (`*.json`)
 - Check conversion-plan.md for detailed specifications
 - Reference Facility and BoatLocation implementations in mono repo
 - Review Crewing examples for additional patterns

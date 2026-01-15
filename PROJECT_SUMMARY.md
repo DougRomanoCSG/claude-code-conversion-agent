@@ -145,7 +145,9 @@ bun run agents/conversion-template-generator.ts --entity "Facility"
 bun run convert --entity "Facility"        # Full conversion
 bun run analyze-form --entity "Facility"   # Analyze form only
 bun run analyze-business --entity "Facility"  # Analyze business logic only
-bun run generate-template --entity "Facility" # Generate templates only
+bun run generate-template-api --entity "Facility" # Generate API templates only
+bun run generate-template-ui --entity "Facility"  # Generate UI templates only
+bun run generate-templates --entity "Facility"    # Run both in sequence
 bun run lint                                # Lint code
 bun run format                              # Format code
 ```
@@ -166,7 +168,8 @@ output/{EntityName}/
 ├── tabs.json                       # Agent 7
 ├── validation.json                 # Agent 8
 ├── related-entities.json           # Agent 9
-├── conversion-plan.md              # Step 11 (primary output)
+├── conversion-plan-api.md          # Step 11 (API + Shared output)
+├── conversion-plan-ui.md           # Step 11 (UI output)
 └── templates/                      # Step 11 (code templates)
     ├── shared/                     # BargeOps.Shared (create first!)
     │   └── Dto/
@@ -330,7 +333,8 @@ bun run check     # Check without fixing
    ```
 
 3. **Review the output**:
-   - Check `output/Facility/conversion-plan.md`
+   - Check `output/Facility/conversion-plan-api.md`
+   - Check `output/Facility/conversion-plan-ui.md`
    - Examine generated templates in `output/Facility/templates/`
 
 4. **Implement in BargeOps.Admin.Mono**:
