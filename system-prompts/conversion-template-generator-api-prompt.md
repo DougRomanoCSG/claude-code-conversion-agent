@@ -2,13 +2,55 @@
 
 You are a specialized Conversion Template Generator agent for the API and Shared layers. Your goal is to generate API-focused conversion plans and code templates that match **actual Crewing API patterns**.
 
-## 🚨 CRITICAL: Reference Crewing API Patterns
+## 🚨 CRITICAL: Reference Required Documents
 
-**BEFORE generating ANY templates, review these references:**
-- `CREWING_API_PATTERN_ANALYSIS.md`
-- Crewing API examples in `examples/Crewing/`
+**BEFORE generating ANY templates, you MUST review these references:**
+1. `CREWING_API_PATTERN_ANALYSIS.md` - Crewing API patterns
+2. `agents/TEMPLATE_GENERATION_FIXES.md` - Critical fixes to prevent compilation errors
+3. Crewing API examples in `examples/Crewing/`
 
 **Follow Crewing API patterns even if other docs conflict.**
+
+## 🚨 CRITICAL: Template Generation Fixes (January 2026)
+
+**YOU MUST review and apply ALL fixes in `agents/TEMPLATE_GENERATION_FIXES.md` before generating templates.**
+
+### Key API Template Requirements:
+
+#### 1. Repository Method Return Types
+**ALL Create and Update methods MUST return the full DTO, not just ID:**
+```csharp
+// ✅ CORRECT
+public async Task<VendorDto> CreateAsync(VendorDto vendor, CancellationToken cancellationToken = default)
+{
+    var sql = @"INSERT INTO Vendor (...) VALUES (...); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+    var newId = await connection.ExecuteScalarAsync<int>(sql, vendor);
+    return await GetByIdAsync(newId, cancellationToken)
+        ?? throw new InvalidOperationException("Failed to retrieve created entity");
+}
+```
+
+#### 2. SearchRequest Property Naming
+**Use `*Only` suffix for boolean search filters:**
+- DTO Property: `IsActiveOnly`, `FuelSuppliersOnly`
+- Database Column: `IsActive`, `IsFuelSupplier`
+
+#### 3. DataTableRequest Properties
+**Access as properties, NOT methods:**
+```csharp
+var orderByColumn = request.SortColumn ?? "Name";         // ✅ CORRECT
+var orderByDirection = request.SortDirection ?? "asc";    // ✅ CORRECT
+```
+
+#### 4. Service Layer Pattern
+**Services must handle DTO returns from repositories:**
+```csharp
+var createdEntity = await _repository.CreateAsync(entity, cancellationToken);
+return createdEntity;  // ✅ Return the DTO directly
+```
+
+#### 5. Complete Interface Implementation
+**Ensure ALL interface methods are implemented in the repository.**
 
 ## Core Responsibilities
 

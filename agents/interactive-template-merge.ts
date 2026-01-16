@@ -58,6 +58,19 @@ interface ParsedProperty {
   startLine: number;
 }
 
+interface ParsedRazorSection {
+  name: string;
+  startLine: number;
+  endLine: number;
+  fullText: string;
+}
+
+interface ParsedRazorView {
+  modelDeclaration: string;
+  sections: ParsedRazorSection[];
+  rawContent: string;
+}
+
 interface MergeAnalysis {
   newMethods: ParsedMethod[];
   changedMethods: { generated: ParsedMethod; existing: ParsedMethod }[];
@@ -273,21 +286,26 @@ function extractProperties(content: string, lines: string[]): ParsedProperty[] {
 
 /**
  * Find matching closing brace for opening brace at given position
+ * Handles strings, verbatim strings (@"..."), interpolated strings ($"..."), chars, and comments
  */
 function findMatchingBrace(content: string, openPos: number): number | null {
   let depth = 1;
   let inString = false;
+  let inVerbatimString = false;
+  let inInterpolatedString = false;
   let inChar = false;
   let inComment = false;
   let inLineComment = false;
+  let interpolatedStringBraceDepth = 0;
 
   for (let i = openPos + 1; i < content.length; i++) {
     const char = content[i];
     const prev = content[i - 1];
+    const prev2 = i >= 2 ? content[i - 2] : '';
     const next = content[i + 1];
 
     // Handle line comments
-    if (char === '/' && next === '/' && !inString && !inChar && !inComment) {
+    if (char === '/' && next === '/' && !inString && !inVerbatimString && !inInterpolatedString && !inChar && !inComment) {
       inLineComment = true;
       continue;
     }
@@ -298,7 +316,7 @@ function findMatchingBrace(content: string, openPos: number): number | null {
     if (inLineComment) continue;
 
     // Handle block comments
-    if (char === '/' && next === '*' && !inString && !inChar) {
+    if (char === '/' && next === '*' && !inString && !inVerbatimString && !inInterpolatedString && !inChar) {
       inComment = true;
       continue;
     }
@@ -309,14 +327,49 @@ function findMatchingBrace(content: string, openPos: number): number | null {
     }
     if (inComment) continue;
 
-    // Handle strings
-    if (char === '"' && prev !== '\\' && !inChar) {
+    // Handle verbatim strings (@"...")
+    if (char === '"' && prev === '@' && !inString && !inInterpolatedString && !inChar) {
+      inVerbatimString = true;
+      continue;
+    }
+    if (inVerbatimString) {
+      // In verbatim strings, "" is an escaped quote
+      if (char === '"') {
+        if (next === '"') {
+          i++; // skip the second quote
+          continue;
+        } else {
+          inVerbatimString = false;
+        }
+      }
+      continue;
+    }
+
+    // Handle interpolated strings ($"...")
+    if (char === '"' && prev === '$' && !inString && !inVerbatimString && !inChar) {
+      inInterpolatedString = true;
+      interpolatedStringBraceDepth = 0;
+      continue;
+    }
+    if (inInterpolatedString) {
+      if (char === '{') {
+        interpolatedStringBraceDepth++;
+      } else if (char === '}') {
+        interpolatedStringBraceDepth--;
+      } else if (char === '"' && prev !== '\\' && interpolatedStringBraceDepth === 0) {
+        inInterpolatedString = false;
+      }
+      continue;
+    }
+
+    // Handle regular strings
+    if (char === '"' && prev !== '\\' && prev !== '@' && prev !== '$' && !inChar) {
       inString = !inString;
       continue;
     }
 
     // Handle chars
-    if (char === "'" && prev !== '\\' && !inString) {
+    if (char === "'" && prev !== '\\' && !inString && !inVerbatimString && !inInterpolatedString) {
       inChar = !inChar;
       continue;
     }
@@ -332,6 +385,188 @@ function findMatchingBrace(content: string, openPos: number): number | null {
   }
 
   return null;
+}
+
+// ============================================================================
+// Razor/View Parsing Functions
+// ============================================================================
+
+/**
+ * Parse Razor/.cshtml file to extract sections
+ */
+function parseRazorFile(filePath: string): ParsedRazorView | null {
+  if (!existsSync(filePath)) {
+    return null;
+  }
+
+  const content = readFileSync(filePath, 'utf-8');
+  const lines = content.split('\n');
+
+  // Extract @model declaration
+  const modelMatch = content.match(/@model\s+([\w.]+)/);
+  const modelDeclaration = modelMatch ? modelMatch[1] : '';
+
+  // Extract @section blocks
+  const sections = extractRazorSections(content, lines);
+
+  return {
+    modelDeclaration,
+    sections,
+    rawContent: content,
+  };
+}
+
+/**
+ * Extract @section blocks from Razor content
+ */
+function extractRazorSections(content: string, lines: string[]): ParsedRazorSection[] {
+  const sections: ParsedRazorSection[] = [];
+
+  // Regex to match @section Name {
+  const sectionRegex = /@section\s+(\w+)\s*{/g;
+
+  let match;
+  while ((match = sectionRegex.exec(content)) !== null) {
+    const startPos = match.index;
+    const startLine = content.substring(0, startPos).split('\n').length;
+    const sectionName = match[1];
+
+    // Find the closing brace for this section
+    const openBracePos = startPos + match[0].length - 1; // Position of the opening {
+    const closeBracePos = findMatchingBraceRazor(content, openBracePos);
+
+    if (closeBracePos !== null) {
+      const endLine = content.substring(0, closeBracePos).split('\n').length;
+      const fullText = content.substring(startPos, closeBracePos + 1);
+
+      sections.push({
+        name: sectionName,
+        startLine,
+        endLine,
+        fullText,
+      });
+    }
+  }
+
+  return sections;
+}
+
+/**
+ * Find matching closing brace for Razor sections
+ * Similar to findMatchingBrace but simplified for Razor
+ */
+function findMatchingBraceRazor(content: string, openPos: number): number | null {
+  let depth = 1;
+  let inString = false;
+  let inSingleQuote = false;
+
+  for (let i = openPos + 1; i < content.length; i++) {
+    const char = content[i];
+    const prev = content[i - 1];
+
+    // Handle strings (simplified for Razor)
+    if (char === '"' && prev !== '\\') {
+      inString = !inString;
+      continue;
+    }
+    if (char === "'" && prev !== '\\') {
+      inSingleQuote = !inSingleQuote;
+      continue;
+    }
+
+    if (inString || inSingleQuote) continue;
+
+    // Count braces
+    if (char === '{') depth++;
+    if (char === '}') {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Analyze differences between generated and existing Razor views
+ */
+function analyzeRazorMerge(generated: ParsedRazorView, existing: ParsedRazorView) {
+  const newSections: ParsedRazorSection[] = [];
+  const changedSections: { generated: ParsedRazorSection; existing: ParsedRazorSection }[] = [];
+  const unchangedSections: ParsedRazorSection[] = [];
+  const conflicts: string[] = [];
+
+  // Find new and changed sections
+  for (const genSection of generated.sections) {
+    const existingSection = existing.sections.find(s => s.name === genSection.name);
+
+    if (!existingSection) {
+      newSections.push(genSection);
+    } else {
+      // Compare content (normalize whitespace)
+      const genContent = genSection.fullText.replace(/\s+/g, ' ').trim();
+      const exContent = existingSection.fullText.replace(/\s+/g, ' ').trim();
+
+      if (genContent !== exContent) {
+        changedSections.push({ generated: genSection, existing: existingSection });
+        conflicts.push(`Section content changed: ${genSection.name}`);
+      } else {
+        unchangedSections.push(genSection);
+      }
+    }
+  }
+
+  return {
+    newSections,
+    changedSections,
+    unchangedSections,
+    conflicts,
+  };
+}
+
+/**
+ * Prompt user for Razor section merge decision
+ */
+async function promptRazorSectionMerge(section: ParsedRazorSection, context: string): Promise<'add' | 'skip' | 'view' | 'quit'> {
+  console.log('\n' + '─'.repeat(80));
+  console.log(`✨ NEW SECTION FOUND: @section ${section.name}`);
+  console.log('─'.repeat(80));
+  console.log(`Context: ${context}`);
+  console.log(`Lines: ${section.startLine} - ${section.endLine}`);
+
+  const response = await prompts({
+    type: 'select',
+    name: 'action',
+    message: 'What would you like to do?',
+    choices: [
+      { title: 'Add this section', value: 'add' },
+      { title: 'Skip (don\'t add)', value: 'skip' },
+      { title: 'View section code', value: 'view' },
+      { title: 'Quit merge process', value: 'quit' },
+    ],
+  });
+
+  if (response.action === 'view') {
+    console.log('\n' + '─'.repeat(80));
+    console.log('SECTION CODE:');
+    console.log('─'.repeat(80));
+    console.log(section.fullText);
+    console.log('─'.repeat(80));
+
+    // Ask again after showing code
+    return promptRazorSectionMerge(section, context);
+  }
+
+  return response.action || 'skip';
+}
+
+/**
+ * Insert new Razor section into existing content
+ * Sections are added at the end of the file (before closing tags)
+ */
+function insertRazorSection(existingContent: string, newSection: ParsedRazorSection): string {
+  // Insert section at the end of the file (simple strategy)
+  return existingContent + '\n\n' + newSection.fullText;
 }
 
 // ============================================================================
@@ -1145,6 +1380,107 @@ async function mergeFile(
   return result;
 }
 
+/**
+ * Execute merge for a Razor view file
+ */
+async function mergeRazorFile(
+  generatedPath: string,
+  existingPath: string,
+  options: MergeOptions
+): Promise<FileMergeResult> {
+  const result: FileMergeResult = {
+    filePath: existingPath,
+    status: 'skipped',
+    methodsAdded: 0,
+    methodsChanged: 0,
+    methodsPreserved: 0,
+    propertiesAdded: 0,
+    conflicts: [],
+  };
+
+  // Parse both files
+  const generated = parseRazorFile(generatedPath);
+  const existing = parseRazorFile(existingPath);
+
+  if (!generated || !existing) {
+    result.status = 'error';
+    result.error = 'Failed to parse Razor files';
+    return result;
+  }
+
+  // Analyze merge
+  const analysis = analyzeRazorMerge(generated, existing);
+
+  console.log(`\n${'═'.repeat(80)}`);
+  console.log(`📄 Merging Razor View: ${existingPath}`);
+  console.log(`${'═'.repeat(80)}`);
+  console.log(`   ✨ ${analysis.newSections.length} new section(s)`);
+  console.log(`   📝 ${analysis.changedSections.length} changed section(s)`);
+  console.log(`   ⚠️  ${analysis.conflicts.length} conflict(s)`);
+
+  // Handle dry-run mode
+  if (options.mode === 'dry-run') {
+    result.status = 'skipped';
+    result.methodsAdded = analysis.newSections.length;  // Reusing methodsAdded for sections count
+    result.conflicts = analysis.conflicts;
+    console.log(`\n  [DRY RUN] Would merge ${analysis.newSections.length} section(s)\n`);
+    return result;
+  }
+
+  // Create backup
+  if (!createBackup(existingPath)) {
+    result.status = 'error';
+    result.error = 'Failed to create backup';
+    return result;
+  }
+
+  let modifiedContent = existing.rawContent;
+  let sectionsAdded = 0;
+
+  // Process new sections
+  for (const section of analysis.newSections) {
+    let action: 'add' | 'skip' | 'view' | 'quit' = 'add';
+
+    if (options.mode === 'interactive') {
+      action = await promptRazorSectionMerge(section, existingPath);
+    }
+
+    if (action === 'quit') {
+      console.log('\n⏸️  Merge process cancelled by user');
+      result.status = 'skipped';
+      return result;
+    }
+
+    if (action === 'add') {
+      modifiedContent = insertRazorSection(modifiedContent, section);
+      sectionsAdded++;
+      console.log(`  ✅ Added section: @section ${section.name}`);
+    } else {
+      console.log(`  ⏭️  Skipped section: @section ${section.name}`);
+    }
+  }
+
+  // Handle changed sections (conflicts)
+  for (const { generated, existing: existingSection } of analysis.changedSections) {
+    console.log(`  ⚠️  Section conflict: @section ${generated.name} (keeping existing)`);
+    // For now, always keep existing sections (custom code preservation)
+    // Future: Add prompt for section replacement
+  }
+
+  // Write modified content
+  if (sectionsAdded > 0) {
+    writeFileSync(existingPath, modifiedContent, 'utf-8');
+    result.status = 'merged';
+    result.methodsAdded = sectionsAdded;  // Reusing methodsAdded for sections count
+    console.log(`\n  ✅ Merge complete: ${sectionsAdded} section(s) added`);
+  } else {
+    result.status = 'skipped';
+    console.log(`\n  ℹ️  No changes made`);
+  }
+
+  return result;
+}
+
 // ============================================================================
 // Main Entry Point
 // ============================================================================
@@ -1298,6 +1634,19 @@ async function main() {
       type: 'ui',
       exists: false,
     },
+    // UI Views (Razor)
+    {
+      generated: join(templateRoot, 'ui', 'Views', 'Index.cshtml'),
+      existing: join(uiPath, 'Views', options.entity, 'Index.cshtml'),
+      type: 'ui',
+      exists: false,
+    },
+    {
+      generated: join(templateRoot, 'ui', 'Views', 'Edit.cshtml'),
+      existing: join(uiPath, 'Views', options.entity, 'Edit.cshtml'),
+      type: 'ui',
+      exists: false,
+    },
   ];
 
   // Check which files exist and categorize them
@@ -1332,7 +1681,15 @@ async function main() {
 
   // First, merge existing files
   for (const file of filesToMerge) {
-    const result = await mergeFile(file.generated, file.existing, options);
+    // Dispatch based on file extension
+    const ext = file.generated.toLowerCase().endsWith('.cshtml') ? 'cshtml' : 'cs';
+
+    let result: FileMergeResult;
+    if (ext === 'cshtml') {
+      result = await mergeRazorFile(file.generated, file.existing, options);
+    } else {
+      result = await mergeFile(file.generated, file.existing, options);
+    }
     results.push(result);
   }
 

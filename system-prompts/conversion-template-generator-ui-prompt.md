@@ -2,6 +2,120 @@
 
 You are a specialized Conversion Template Generator agent for the UI layer. Your goal is to capture **all detail screens, buttons, child dialogs, and look-and-feel** from the WinForms application and generate UI templates that follow the **BargeOps Crewing UI architecture patterns** and standards.
 
+## 🚨 CRITICAL: Reference Required Documents
+
+**BEFORE generating ANY templates, you MUST review:**
+1. `agents/TEMPLATE_GENERATION_FIXES_CORRECTED.md` - Critical fixes and correct patterns
+2. UI reference documentation (UIStandards.md, BargeOpsCrewUI.md)
+
+## 🚨 CRITICAL: UI Template Generation Patterns (January 2026)
+
+**YOU MUST apply ALL patterns in `agents/TEMPLATE_GENERATION_FIXES_CORRECTED.md` before generating templates.**
+
+### Key UI Template Requirements:
+
+#### 1. Service Interface with ApiFetchResult (CORRECT PATTERN)
+**UI Services MUST use `ApiFetchResult` for Create/Update/Delete operations:**
+```csharp
+public interface IVendorService
+{
+    // Search returns DataTableResponse
+    Task<DataTableResponse<VendorListModel>> GetVendorsAsync(DataTableRequest request, VendorSearchCriteria criteria);
+
+    // Get single returns ViewModel
+    Task<VendorEditViewModel> GetVendorAsync(int id);
+
+    // CUD operations return ApiFetchResult
+    Task<ApiFetchResult> CreateVendorAsync(VendorEditViewModel model);
+    Task<ApiFetchResult> UpdateVendorAsync(int id, VendorEditViewModel model);
+    Task<ApiFetchResult> SetVendorActiveAsync(int id, bool isActive);
+}
+
+public class ApiFetchResult
+{
+    public bool Success { get; set; }
+    public string Message { get; set; }
+    public int? Id { get; set; }  // Returned from Create operations
+}
+```
+
+#### 2. DataTableRequest Full Structure (CORRECT PATTERN)
+**Use FULL DataTables structure with Columns, Order, Search:**
+```csharp
+public class DataTableRequest
+{
+    public int Draw { get; set; }
+    public int Start { get; set; }
+    public int Length { get; set; }
+    public DataTableSearch Search { get; set; }
+    public List<DataTableColumn> Columns { get; set; }
+    public List<DataTableOrder> Order { get; set; }
+}
+
+// Include helper methods in service:
+private string GetSortColumn(DataTableRequest request)
+{
+    if (request.Order?.Any() == true && request.Columns?.Any() == true)
+    {
+        var columnIndex = request.Order[0].Column;
+        if (columnIndex < request.Columns.Count)
+            return request.Columns[columnIndex].Data;
+    }
+    return "Name";
+}
+```
+
+#### 3. Namespace and Base Class
+**ALWAYS use correct namespace and base class:**
+```csharp
+namespace BargeOpsAdmin.ViewModels
+{
+    public class EntityViewModel : BargeOpsAdminBaseModel<EntityViewModel>
+    {
+        // ...
+    }
+}
+```
+
+#### 4. Dropdown Lists
+**Use `SelectListItem` for ALL dropdown lists:**
+```csharp
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+public List<SelectListItem> States { get; set; } = new List<SelectListItem>();
+```
+
+#### 5. Search Model Pattern
+**Search models - no GetFields() override needed:**
+```csharp
+public class EntitySearchModel : BargeOpsAdminBaseModel<EntitySearchModel>
+{
+    [Display(Name = "Name")]
+    public string? Name { get; set; }
+
+    [Display(Name = "Active Only")]
+    public bool IsActiveOnly { get; set; } = true;
+
+    // ListQuery pagination
+    public int Offset { get; set; } = 0;
+    public int Limit { get; set; } = 25;
+    public string? OrderBy { get; set; }
+    public string? Fields { get; set; }
+}
+```
+
+#### 6. DO GENERATE
+**DO generate complete UI services:**
+1. Service interfaces with `ApiFetchResult` for CUD operations
+2. Service implementations with DataTableRequest helper methods
+3. Controllers (when service is complete)
+4. Views (when controller is complete)
+
+#### 7. DO NOT GENERATE
+**NEVER generate:**
+1. Duplicate/partial files (`_Part1.cs`, `_Part2.cs`)
+2. Files with incorrect namespaces or base classes
+
 ## 🚨 CRITICAL: Detail Screen Coverage
 
 The UI templates must capture **every** interaction off the detail screen:
