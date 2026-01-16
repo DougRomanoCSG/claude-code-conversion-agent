@@ -19,6 +19,7 @@ async function main() {
 	const entity = parsedArgs.values.entity as string;
 	const interactive = parsedArgs.values.interactive === true;
 	const outputDir = parsedArgs.values.output as string;
+	const outputFile = parsedArgs.values["output-file"] as string;
 
 	if (!entity) {
 		console.error("Error: --entity parameter is required");
@@ -26,6 +27,7 @@ async function main() {
 	}
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
+	const outputFileName = outputFile || "data-access.json";
 
 	// Build context-specific prompt with entity details and paths
 	const contextPrompt = `
@@ -36,7 +38,7 @@ TARGET FILES:
 - Business object CRUD methods
 
 OUTPUT:
-Generate a JSON file at: ${outputPath}/data-access.json
+Generate a JSON file at: ${outputPath}/${outputFileName}
 
 ARCHITECTURE REFERENCES:
 - Shared DTOs: ${getSharedExamples().dtos}

@@ -23,6 +23,7 @@ async function main() {
 	const entity = parsedArgs.values.entity as string;
 	const interactive = parsedArgs.values.interactive === true;
 	const outputDir = parsedArgs.values.output as string;
+	const outputFile = parsedArgs.values["output-file"] as string;
 
 	if (!entity) {
 		console.error("Error: --entity parameter is required");
@@ -30,6 +31,7 @@ async function main() {
 	}
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
+	const outputFileName = outputFile || "related-entities.json";
 
 	// Build context-specific prompt with entity details and paths
 	const contextPrompt = `
@@ -42,7 +44,7 @@ ANALYSIS GOALS:
 4. Extract parent-child key relationships
 
 OUTPUT:
-Generate a JSON file at: ${outputPath}/related-entities.json
+Generate a JSON file at: ${outputPath}/${outputFileName}
 
 Begin analysis.
 `;

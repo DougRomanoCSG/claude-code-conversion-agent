@@ -43,6 +43,7 @@ interface AnalyzerOptions {
 	formName?: string;
 	interactive: boolean;
 	outputDir?: string;
+	outputFile?: string;
 }
 
 function parseOptions(): AnalyzerOptions {
@@ -51,19 +52,21 @@ function parseOptions(): AnalyzerOptions {
 	const formName = parsedArgs.values["form-name"] as string;
 	const interactive = parsedArgs.values.interactive === true;
 	const outputDir = parsedArgs.values.output as string;
+	const outputFile = parsedArgs.values["output-file"] as string;
 
 	if (!entity) {
 		console.error("Error: --entity parameter is required");
 		process.exit(1);
 	}
 
-	return { entity, formType, formName, interactive, outputDir };
+	return { entity, formType, formName, interactive, outputDir, outputFile };
 }
 
 async function runFormAnalyzer(options: AnalyzerOptions): Promise<number> {
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
 	const isSingleForm = !!options.formName;
-	const outputFileName = isSingleForm ? "form-structure.json" : `form-structure-${options.formType.toLowerCase()}.json`;
+	const defaultOutputFileName = isSingleForm ? "form-structure.json" : `form-structure-${options.formType.toLowerCase()}.json`;
+	const outputFileName = options.outputFile || defaultOutputFileName;
 
 	// Build context-specific prompt with entity details and paths
 	const formLabel = isSingleForm ? options.formName! : `frm${options.entity}${options.formType}`;

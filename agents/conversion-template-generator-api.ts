@@ -63,32 +63,51 @@ function getSkipStepsFromExistingFiles(outputPath: string, filesInStepOrder: str
 	return skipSteps;
 }
 
-function getAnalysisFilesForMode(mode: "search-detail" | "single-form"): string[] {
+function appendFormToFileName(fileName: string, formLabel?: string): string {
+	if (!formLabel) {
+		return fileName;
+	}
+	if (!fileName.endsWith(".json")) {
+		return `${fileName}.${formLabel}`;
+	}
+	const baseName = fileName.slice(0, -".json".length);
+	return `${baseName}.${formLabel}.json`;
+}
+
+function getAnalysisFilesForMode(
+	mode: "search-detail" | "single-form",
+	options: GeneratorOptions,
+): string[] {
+	const searchFormName = `frm${options.entity}Search`;
+	const detailFormName = `frm${options.entity}Detail`;
+	const primaryFormName = options.formName || searchFormName;
+	const singleFormName = options.formName || `frm${options.entity}`;
+
 	if (mode === "single-form") {
 		return [
-			"form-structure.json",
-			"business-logic.json",
-			"data-access.json",
-			"security.json",
-			"ui-mapping.json",
-			"workflow.json",
-			"tabs.json",
-			"validation.json",
-			"related-entities.json",
+			`${singleFormName}/${appendFormToFileName("form-structure.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("business-logic.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("data-access.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("security.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("ui-mapping.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("workflow.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("tabs.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("validation.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("related-entities.json", singleFormName)}`,
 		];
 	}
 
 	return [
-		"form-structure-search.json",
-		"form-structure-detail.json",
-		"business-logic.json",
-		"data-access.json",
-		"security.json",
-		"ui-mapping.json",
-		"workflow.json",
-		"tabs.json",
-		"validation.json",
-		"related-entities.json",
+		`${searchFormName}/${appendFormToFileName("form-structure-search.json", searchFormName)}`,
+		`${detailFormName}/${appendFormToFileName("form-structure-detail.json", detailFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("business-logic.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("data-access.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("security.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("ui-mapping.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("workflow.json", primaryFormName)}`,
+		`${detailFormName}/${appendFormToFileName("tabs.json", detailFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("validation.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("related-entities.json", primaryFormName)}`,
 	];
 }
 
@@ -100,10 +119,16 @@ function detectAnalysisMode(outputPath: string, options: GeneratorOptions): "sea
 	}
 
 	// Infer from output files already present.
-	if (existsSync(join(outputPath, "form-structure.json"))) return "single-form";
+	const searchFormName = `frm${options.entity}Search`;
+	const detailFormName = `frm${options.entity}Detail`;
+	const singleFormName = options.formName || `frm${options.entity}`;
+
+	if (existsSync(join(outputPath, singleFormName, appendFormToFileName("form-structure.json", singleFormName)))) {
+		return "single-form";
+	}
 	if (
-		existsSync(join(outputPath, "form-structure-search.json")) ||
-		existsSync(join(outputPath, "form-structure-detail.json"))
+		existsSync(join(outputPath, searchFormName, appendFormToFileName("form-structure-search.json", searchFormName))) ||
+		existsSync(join(outputPath, detailFormName, appendFormToFileName("form-structure-detail.json", detailFormName)))
 	) {
 		return "search-detail";
 	}
@@ -188,7 +213,7 @@ async function runTemplateGenerator(options: GeneratorOptions): Promise<number> 
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
 
 	const mode = detectAnalysisMode(outputPath, options);
-	const analysisFiles = getAnalysisFilesForMode(mode);
+	const analysisFiles = getAnalysisFilesForMode(mode, options);
 
 	// Ensure analysis outputs (steps 1-10) exist before starting template generation.
 	await ensureAnalysisOutputsExist(options, outputPath, analysisFiles, mode);
@@ -217,7 +242,7 @@ OUTPUT STRUCTURE:
 Primary file: ${outputPath}/conversion-plan-api.md
 
 Templates:
-${outputPath}/templates/
+${outputPath}/Templates/
 ├── shared/
 │   └── Dto/
 │       ├── {Entity}Dto.cs
@@ -248,7 +273,7 @@ TARGET PROJECTS:
 IMPORTANT:
 - Do NOT generate UI templates in this run.
 - Follow Crewing.API patterns for controller/service/repository structure.
-- Place repository interfaces under templates/api/Repositories (deploy script routes to Abstractions).
+- Place repository interfaces under Templates/api/Repositories (deploy script routes to Abstractions).
 
 Begin template generation now.
 `;
@@ -261,7 +286,7 @@ Begin template generation now.
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
 
-	const initialPrompt = `Generate API + Shared conversion templates for ${options.entity} using ${outputPath}. Output conversion-plan-api.md and templates/shared + templates/api.`;
+	const initialPrompt = `Generate API + Shared conversion templates for ${options.entity} using ${outputPath}. Output conversion-plan-api.md and Templates/shared + Templates/api.`;
 	const args = [...flags, initialPrompt];
 
 	console.log(`

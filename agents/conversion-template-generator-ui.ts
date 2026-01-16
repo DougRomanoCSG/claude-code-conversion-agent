@@ -62,32 +62,51 @@ function getSkipStepsFromExistingFiles(outputPath: string, filesInStepOrder: str
 	return skipSteps;
 }
 
-function getAnalysisFilesForMode(mode: "search-detail" | "single-form"): string[] {
+function appendFormToFileName(fileName: string, formLabel?: string): string {
+	if (!formLabel) {
+		return fileName;
+	}
+	if (!fileName.endsWith(".json")) {
+		return `${fileName}.${formLabel}`;
+	}
+	const baseName = fileName.slice(0, -".json".length);
+	return `${baseName}.${formLabel}.json`;
+}
+
+function getAnalysisFilesForMode(
+	mode: "search-detail" | "single-form",
+	options: GeneratorOptions,
+): string[] {
+	const searchFormName = `frm${options.entity}Search`;
+	const detailFormName = `frm${options.entity}Detail`;
+	const primaryFormName = options.formName || searchFormName;
+	const singleFormName = options.formName || `frm${options.entity}`;
+
 	if (mode === "single-form") {
 		return [
-			"form-structure.json",
-			"business-logic.json",
-			"data-access.json",
-			"security.json",
-			"ui-mapping.json",
-			"workflow.json",
-			"tabs.json",
-			"validation.json",
-			"related-entities.json",
+			`${singleFormName}/${appendFormToFileName("form-structure.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("business-logic.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("data-access.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("security.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("ui-mapping.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("workflow.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("tabs.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("validation.json", singleFormName)}`,
+			`${singleFormName}/${appendFormToFileName("related-entities.json", singleFormName)}`,
 		];
 	}
 
 	return [
-		"form-structure-search.json",
-		"form-structure-detail.json",
-		"business-logic.json",
-		"data-access.json",
-		"security.json",
-		"ui-mapping.json",
-		"workflow.json",
-		"tabs.json",
-		"validation.json",
-		"related-entities.json",
+		`${searchFormName}/${appendFormToFileName("form-structure-search.json", searchFormName)}`,
+		`${detailFormName}/${appendFormToFileName("form-structure-detail.json", detailFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("business-logic.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("data-access.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("security.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("ui-mapping.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("workflow.json", primaryFormName)}`,
+		`${detailFormName}/${appendFormToFileName("tabs.json", detailFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("validation.json", primaryFormName)}`,
+		`${primaryFormName}/${appendFormToFileName("related-entities.json", primaryFormName)}`,
 	];
 }
 
@@ -99,10 +118,16 @@ function detectAnalysisMode(outputPath: string, options: GeneratorOptions): "sea
 	}
 
 	// Infer from output files already present.
-	if (existsSync(join(outputPath, "form-structure.json"))) return "single-form";
+	const searchFormName = `frm${options.entity}Search`;
+	const detailFormName = `frm${options.entity}Detail`;
+	const singleFormName = options.formName || `frm${options.entity}`;
+
+	if (existsSync(join(outputPath, singleFormName, appendFormToFileName("form-structure.json", singleFormName)))) {
+		return "single-form";
+	}
 	if (
-		existsSync(join(outputPath, "form-structure-search.json")) ||
-		existsSync(join(outputPath, "form-structure-detail.json"))
+		existsSync(join(outputPath, searchFormName, appendFormToFileName("form-structure-search.json", searchFormName))) ||
+		existsSync(join(outputPath, detailFormName, appendFormToFileName("form-structure-detail.json", detailFormName)))
 	) {
 		return "search-detail";
 	}
@@ -186,7 +211,11 @@ async function ensureAnalysisOutputsExist(
 /**
  * Find image files in the output directory and match them to forms/tabs
  */
-async function findImageFiles(outputPath: string, entity: string, mode: "search-detail" | "single-form"): Promise<{
+async function findImageFiles(
+	outputPath: string,
+	options: GeneratorOptions,
+	mode: "search-detail" | "single-form",
+): Promise<{
 	images: string[];
 	imageMapping: Record<string, string[]>;
 	tabImageMapping: Record<string, string[]>;
@@ -200,9 +229,18 @@ async function findImageFiles(outputPath: string, entity: string, mode: "search-
 	}
 
 	const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp"];
+	const searchFormName = `frm${options.entity}Search`;
+	const detailFormName = `frm${options.entity}Detail`;
+	const primaryFormName = options.formName || searchFormName;
+	const singleFormName = options.formName || `frm${options.entity}`;
+	const formOutputDirs = mode === "single-form"
+		? [join(outputPath, singleFormName)]
+		: [join(outputPath, searchFormName), join(outputPath, detailFormName), join(outputPath, primaryFormName)];
 	
 	// Read tabs.json to get tab names for matching
-	const tabsPath = join(outputPath, "tabs.json");
+	const tabsPath = mode === "single-form"
+		? join(outputPath, singleFormName, appendFormToFileName("tabs.json", singleFormName))
+		: join(outputPath, detailFormName, appendFormToFileName("tabs.json", detailFormName));
 	let tabNames: string[] = [];
 	if (existsSync(tabsPath)) {
 		try {
@@ -220,32 +258,37 @@ async function findImageFiles(outputPath: string, entity: string, mode: "search-
 		}
 	}
 	
+	const imagePathSet = new Set<string>();
+	const searchDirs = [outputPath, ...formOutputDirs].filter(dir => existsSync(dir));
+
 	try {
-		const files = readdirSync(outputPath);
-		
-		// Find all image files
-		for (const file of files) {
-			const ext = extname(file).toLowerCase();
-			if (imageExtensions.includes(ext)) {
-				const imagePath = join(outputPath, file);
+		for (const dir of searchDirs) {
+			const files = readdirSync(dir);
+
+			for (const file of files) {
+				const ext = extname(file).toLowerCase();
+				if (!imageExtensions.includes(ext)) {
+					continue;
+				}
+
+				const imagePath = join(dir, file);
+				if (imagePathSet.has(imagePath)) {
+					continue;
+				}
+
+				imagePathSet.add(imagePath);
 				images.push(imagePath);
-				
-				// Try to match image name to form/tab names
+
 				const baseName = basename(file, ext).toLowerCase();
 				const baseNameClean = baseName.replace(/^frm/, "").replace(/^tab/, "");
-				
-				// Match to search form
+
 				if (baseName.includes("search") || baseName.includes("list") || baseName.includes("index")) {
 					if (!imageMapping["search"]) imageMapping["search"] = [];
 					imageMapping["search"].push(imagePath);
-				}
-				// Match to detail form
-				else if (baseName.includes("detail") || baseName.includes("edit") || baseName.includes("view")) {
+				} else if (baseName.includes("detail") || baseName.includes("edit") || baseName.includes("view")) {
 					if (!imageMapping["detail"]) imageMapping["detail"] = [];
 					imageMapping["detail"].push(imagePath);
-				}
-				// Try to match to tab names
-				else {
+				} else {
 					let matched = false;
 					for (const tabName of tabNames) {
 						if (baseNameClean.includes(tabName) || tabName.includes(baseNameClean)) {
@@ -255,9 +298,8 @@ async function findImageFiles(outputPath: string, entity: string, mode: "search-
 							break;
 						}
 					}
-					
+
 					if (!matched) {
-						// If no specific match, add to general images
 						if (!imageMapping["general"]) imageMapping["general"] = [];
 						imageMapping["general"].push(imagePath);
 					}
@@ -275,14 +317,14 @@ async function runTemplateGenerator(options: GeneratorOptions): Promise<number> 
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
 
 	const mode = detectAnalysisMode(outputPath, options);
-	const analysisFiles = getAnalysisFilesForMode(mode);
+	const analysisFiles = getAnalysisFilesForMode(mode, options);
 	const optionalFiles = ["child-forms.json"];
 
 	// Ensure analysis outputs (steps 1-10) exist before starting template generation.
 	await ensureAnalysisOutputsExist(options, outputPath, analysisFiles, mode);
 
 	// Find image files for look-and-feel reference
-	const { images, imageMapping, tabImageMapping } = await findImageFiles(outputPath, options.entity, mode);
+	const { images, imageMapping, tabImageMapping } = await findImageFiles(outputPath, options, mode);
 
 	// Build image references for the prompt
 	let imageReferences = "";
@@ -362,7 +404,7 @@ OUTPUT STRUCTURE:
 Primary file: ${outputPath}/conversion-plan-ui.md
 
 Templates:
-${outputPath}/templates/
+${outputPath}/Templates/
 └── ui/
     ├── Controllers/
     │   └── {Entity}Controller.cs
@@ -408,7 +450,7 @@ Begin template generation now.
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
 
-	const initialPrompt = `Generate UI conversion templates for ${options.entity} using ${outputPath}. Output conversion-plan-ui.md and templates/ui only.`;
+	const initialPrompt = `Generate UI conversion templates for ${options.entity} using ${outputPath}. Output conversion-plan-ui.md and Templates/ui only.`;
 	const args = [...flags, initialPrompt];
 
 	const imageCount = images.length;

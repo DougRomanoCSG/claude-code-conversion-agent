@@ -2,7 +2,7 @@
 /**
  * DEPLOY TEMPLATES: Copy generated templates to target MonoRepo projects
  *
- * This script copies templates from output/{Entity}/templates/ to the target projects
+ * This script copies templates from output/{Entity}/Templates/ to the target projects
  * in the MonoRepo, preserving directory structure and verifying paths.
  *
  * Usage:
@@ -132,7 +132,9 @@ function copyDirectory(
 
 async function deployTemplates(options: DeployOptions): Promise<number> {
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
-	const templatesPath = `${outputPath}/templates`;
+	const templatesPath = existsSync(`${outputPath}/Templates`)
+		? `${outputPath}/Templates`
+		: `${outputPath}/templates`;
 
 	if (!existsSync(templatesPath)) {
 		console.error(`\n❌ Error: Templates directory not found: ${templatesPath}`);

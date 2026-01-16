@@ -24,6 +24,7 @@ async function main() {
 	const formName = parsedArgs.values["form-name"] as string;
 	const interactive = parsedArgs.values.interactive === true;
 	const outputDir = parsedArgs.values.output as string;
+	const outputFile = parsedArgs.values["output-file"] as string;
 
 	if (!entity) {
 		console.error("Error: --entity parameter is required");
@@ -31,6 +32,7 @@ async function main() {
 	}
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
+	const outputFileName = outputFile || "tabs.json";
 
 	// Build context-specific prompt with entity details and paths
 	const targetFormLabel = formName || `frm${entity}Detail`;
@@ -45,7 +47,7 @@ EXTRACTION GOALS:
 5. Identify shared controls (submit/cancel)
 
 OUTPUT:
-Generate a JSON file at: ${outputPath}/tabs.json
+Generate a JSON file at: ${outputPath}/${outputFileName}
 
 IMPORTANT:
 - If the form has no tabs, still generate tabs.json with an empty tab list and note that it is a single-screen (no-tab) layout.

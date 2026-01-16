@@ -23,6 +23,7 @@ async function main() {
 	const entity = parsedArgs.values.entity as string;
 	const interactive = parsedArgs.values.interactive === true;
 	const outputDir = parsedArgs.values.output as string;
+	const outputFile = parsedArgs.values["output-file"] as string;
 
 	if (!entity) {
 		console.error("Error: --entity parameter is required");
@@ -30,6 +31,7 @@ async function main() {
 	}
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
+	const outputFileName = outputFile || "security.json";
 
 	// Build context-specific prompt with entity details and paths
 	const contextPrompt = `
@@ -44,7 +46,7 @@ EXTRACTION GOALS:
 6. Document API authentication (ApiKey) and UI authentication (OIDC)
 
 OUTPUT:
-Generate a JSON file at: ${outputPath}/security.json
+Generate a JSON file at: ${outputPath}/${outputFileName}
 
 MODERN AUTHENTICATION PATTERNS:
 - API: Use [ApiKey] attribute (NOT Windows Auth)

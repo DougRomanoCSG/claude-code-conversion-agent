@@ -31,23 +31,26 @@ interface ExtractorOptions {
 	entity: string;
 	interactive: boolean;
 	outputDir?: string;
+	outputFile?: string;
 }
 
 function parseOptions(): ExtractorOptions {
 	const entity = parsedArgs.values.entity as string;
 	const interactive = parsedArgs.values.interactive === true;
 	const outputDir = parsedArgs.values.output as string;
+	const outputFile = parsedArgs.values["output-file"] as string;
 
 	if (!entity) {
 		console.error("Error: --entity parameter is required");
 		process.exit(1);
 	}
 
-	return { entity, interactive, outputDir };
+	return { entity, interactive, outputDir, outputFile };
 }
 
 async function runBusinessLogicExtractor(options: ExtractorOptions): Promise<number> {
 	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
+	const outputFileName = options.outputFile || "business-logic.json";
 
 	// Build context-specific prompt with entity details and paths
 	const contextPrompt = `
@@ -59,7 +62,7 @@ TARGET FILES:
 - Location Base: ${getLocationBasePathForPrompt()}
 
 OUTPUT:
-Generate a JSON file at: ${outputPath}/business-logic.json
+Generate a JSON file at: ${outputPath}/${outputFileName}
 
 Expected business object structure:
 - Business Object: "${options.entity}Location"
@@ -115,7 +118,7 @@ Begin extraction now.
 		const exitCode = await child.exited;
 
 		if (exitCode === 0) {
-			console.log(`Business logic extraction complete. Output: ${outputPath}/business-logic.json`);
+			console.log(`Business logic extraction complete. Output: ${outputPath}/${outputFileName}`);
 		}
 
 		return exitCode;

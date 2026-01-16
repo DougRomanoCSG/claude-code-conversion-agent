@@ -19,6 +19,7 @@ async function main() {
 	const entity = parsedArgs.values.entity as string;
 	const interactive = parsedArgs.values.interactive === true;
 	const outputDir = parsedArgs.values.output as string;
+	const outputFile = parsedArgs.values["output-file"] as string;
 
 	if (!entity) {
 		console.error("Error: --entity parameter is required");
@@ -26,6 +27,7 @@ async function main() {
 	}
 
 	const outputPath = outputDir || `${projectRoot}output/${entity}`;
+	const outputFileName = outputFile || "ui-mapping.json";
 
 	// Build context-specific prompt with entity details and paths
 	const contextPrompt = `
@@ -40,7 +42,7 @@ MAPPING GOALS:
 6. Map CheckBox to Bootstrap Checkbox
 
 OUTPUT:
-Generate a JSON file at: ${outputPath}/ui-mapping.json
+Generate a JSON file at: ${outputPath}/${outputFileName}
 
 ARCHITECTURE REFERENCES:
 For UI component mapping patterns, reference BargeOps.Crewing.UI Admin screens:

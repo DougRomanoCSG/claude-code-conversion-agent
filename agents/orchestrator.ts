@@ -72,6 +72,7 @@ interface AgentStep {
 	outputFile: string;
 	interactive: boolean;
 	extraArgs?: string[];
+	outputDir?: string;
 }
 
 interface StepStatus {
@@ -86,6 +87,7 @@ interface StepStatus {
 	exitCode?: number;
 	error?: string;
 	outputFile?: string;
+	outputDir?: string;
 }
 
 interface ConversionStatus {
@@ -185,6 +187,14 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 				console.error("Expected format: frm{Entity}Search, frm{Entity}Detail, or frm{Entity}");
 				process.exit(1);
 			}
+		}
+	}
+
+	// If form name is provided and is not a Search/Detail pattern, treat as single form
+	if (finalFormName) {
+		const isSearchOrDetail = /^(frm)?\w+(Search|Detail)$/i.test(finalFormName);
+		if (!isSearchOrDetail) {
+			isSingleForm = true;
 		}
 	}
 
@@ -348,18 +358,33 @@ async function initializeConversionStatus(
 	return status;
 }
 
-function getAgentSteps(isSingleForm: boolean, formName?: string): AgentStep[] {
-	const steps: AgentStep[] = [];
+function appendFormToFileName(fileName: string, formLabel?: string): string {
+	if (!formLabel) {
+		return fileName;
+	}
+	if (!fileName.endsWith(".json")) {
+		return `${fileName}.${formLabel}`;
+	}
+	const baseName = fileName.slice(0, -".json".length);
+	return `${baseName}.${formLabel}.json`;
+}
 
-	if (isSingleForm && formName) {
+function getAgentSteps(options: OrchestratorOptions): AgentStep[] {
+	const steps: AgentStep[] = [];
+	const searchFormName = `frm${options.entity}Search`;
+	const detailFormName = `frm${options.entity}Detail`;
+	const primaryFormName = options.formName || searchFormName;
+
+	if (options.isSingleForm && options.formName) {
 		// For single forms, run the analyzer once with the specific form name
 		steps.push({
-			name: `Form Structure Analyzer (${formName})`,
+			name: `Form Structure Analyzer (${options.formName})`,
 			script: "form-structure-analyzer.ts",
-			description: `Extract ${formName} UI components`,
-			outputFile: "form-structure.json",
+			description: `Extract ${options.formName} UI components`,
+			outputFile: appendFormToFileName("form-structure.json", options.formName),
 			interactive: false,
-			extraArgs: ["--form-name", formName],
+			extraArgs: ["--form-name", options.formName],
+			outputDir: options.formName,
 		});
 	} else {
 		// For standard Search/Detail pairs
@@ -368,17 +393,19 @@ function getAgentSteps(isSingleForm: boolean, formName?: string): AgentStep[] {
 				name: "Form Structure Analyzer (Search)",
 				script: "form-structure-analyzer.ts",
 				description: "Extract search form UI components",
-				outputFile: "form-structure-search.json",
+				outputFile: appendFormToFileName("form-structure-search.json", searchFormName),
 				interactive: false,
 				extraArgs: ["--form-type", "Search"],
+				outputDir: searchFormName,
 			},
 			{
 				name: "Form Structure Analyzer (Detail)",
 				script: "form-structure-analyzer.ts",
 				description: "Extract detail form UI components",
-				outputFile: "form-structure-detail.json",
+				outputFile: appendFormToFileName("form-structure-detail.json", detailFormName),
 				interactive: false,
 				extraArgs: ["--form-type", "Detail"],
+				outputDir: detailFormName,
 			}
 		);
 	}
@@ -389,57 +416,65 @@ function getAgentSteps(isSingleForm: boolean, formName?: string): AgentStep[] {
 			name: "Business Logic Extractor",
 			script: "business-logic-extractor.ts",
 			description: "Extract business rules and validation",
-			outputFile: "business-logic.json",
+			outputFile: appendFormToFileName("business-logic.json", primaryFormName),
 			interactive: false,
+			outputDir: primaryFormName,
 		},
 		{
 			name: "Data Access Pattern Analyzer",
 			script: "data-access-analyzer.ts",
 			description: "Extract stored procedures and queries",
-			outputFile: "data-access.json",
+			outputFile: appendFormToFileName("data-access.json", primaryFormName),
 			interactive: false,
+			outputDir: primaryFormName,
 		},
 		{
 			name: "Security & Authorization Extractor",
 			script: "security-extractor.ts",
 			description: "Extract permissions and authorization",
-			outputFile: "security.json",
+			outputFile: appendFormToFileName("security.json", primaryFormName),
 			interactive: false,
+			outputDir: primaryFormName,
 		},
 		{
 			name: "UI Component Mapper",
 			script: "ui-component-mapper.ts",
 			description: "Map legacy controls to modern equivalents",
-			outputFile: "ui-mapping.json",
+			outputFile: appendFormToFileName("ui-mapping.json", primaryFormName),
 			interactive: false,
+			outputDir: primaryFormName,
 		},
 		{
 			name: "Form Workflow Analyzer",
 			script: "form-workflow-analyzer.ts",
 			description: "Extract user flows and state management",
-			outputFile: "workflow.json",
+			outputFile: appendFormToFileName("workflow.json", primaryFormName),
 			interactive: false,
+			outputDir: primaryFormName,
 		},
 		{
 			name: "Detail Form Tab Analyzer",
 			script: "detail-tab-analyzer.ts",
 			description: "Extract tab structure and related entities",
-			outputFile: "tabs.json",
+			outputFile: appendFormToFileName("tabs.json", options.isSingleForm ? primaryFormName : detailFormName),
 			interactive: false,
+			outputDir: options.isSingleForm ? primaryFormName : detailFormName,
 		},
 		{
 			name: "Validation Rule Extractor",
 			script: "validation-extractor.ts",
 			description: "Extract all validation logic",
-			outputFile: "validation.json",
+			outputFile: appendFormToFileName("validation.json", primaryFormName),
 			interactive: false,
+			outputDir: primaryFormName,
 		},
 		{
 			name: "Related Entity Analyzer",
 			script: "related-entity-analyzer.ts",
 			description: "Extract entity relationships",
-			outputFile: "related-entities.json",
+			outputFile: appendFormToFileName("related-entities.json", primaryFormName),
 			interactive: false,
+			outputDir: primaryFormName,
 		}
 	);
 
@@ -452,6 +487,7 @@ async function runAgentStep(
 	options: OrchestratorOptions,
 	totalSteps: number,
 	status: ConversionStatus,
+	outputRoot: string,
 ): Promise<number> {
 	const startTime = new Date().toISOString();
 	const stepStartTime = Date.now();
@@ -462,8 +498,14 @@ async function runAgentStep(
 	console.log(`Started at: ${startTime}`);
 	console.log(`${"=".repeat(80)}\n`);
 
-	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
+	const outputPath = step.outputDir ? `${outputRoot}/${step.outputDir}` : outputRoot;
 	const scriptPath = `${projectRoot}agents/${step.script}`;
+	const normalizedOutputPath = normalizePath(outputPath);
+
+	if (!existsSync(normalizedOutputPath)) {
+		await mkdir(normalizedOutputPath, { recursive: true });
+	}
+	await Bun.write(`${outputPath}/.gitkeep`, "");
 
 	// Update status to running
 	const stepStatus: StepStatus = {
@@ -474,6 +516,7 @@ async function runAgentStep(
 		status: "running",
 		startTime,
 		outputFile: step.outputFile,
+		outputDir: step.outputDir,
 	};
 
 	// Find existing step or add new one
@@ -483,7 +526,7 @@ async function runAgentStep(
 	} else {
 		status.steps.push(stepStatus);
 	}
-	await writeConversionStatus(outputPath, status);
+	await writeConversionStatus(outputRoot, status);
 
 	const args = [
 		"run",
@@ -500,6 +543,10 @@ async function runAgentStep(
 
 	if (step.extraArgs) {
 		args.push(...step.extraArgs);
+	}
+
+	if (step.outputFile) {
+		args.push("--output-file", step.outputFile);
 	}
 
 	if (step.interactive) {
@@ -546,7 +593,7 @@ async function runAgentStep(
 	} else {
 		status.steps.push(stepStatus);
 	}
-	await writeConversionStatus(outputPath, status);
+	await writeConversionStatus(outputRoot, status);
 
 	return exitCode;
 }
@@ -582,9 +629,7 @@ async function runTemplateGenerator(script: string, options: OrchestratorOptions
 
 async function main() {
 	const options = await parseOptions();
-	const outputPath = options.outputDir || `${projectRoot}output/${options.entity}`;
-	const agentSteps = getAgentSteps(options.isSingleForm || false, options.formName);
-	const totalSteps = agentSteps.length;
+	const outputRoot = options.outputDir || `${projectRoot}output/${options.entity}`;
 
 	const childFormsCount = options.childForms?.length || 0;
 	let childFormsList = "";
@@ -602,7 +647,7 @@ async function main() {
 ║                  CLAUDE ONSHORE CONVERSION ORCHESTRATOR                    ║
 ║                                                                            ║
 ║  Entity: ${options.entity.padEnd(68, " ")}║
-${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` : ""}${options.isSingleForm ? `║  Form Type: Single Form (non-Search/Detail)${" ".padEnd(30, " ")}║\n` : ""}${childFormsList}║  Output: ${outputPath.padEnd(67, " ")}║
+${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` : ""}${options.isSingleForm ? `║  Form Type: Single Form (non-Search/Detail)${" ".padEnd(30, " ")}║\n` : ""}${childFormsList}║  Output: ${outputRoot.padEnd(67, " ")}║
 ╚════════════════════════════════════════════════════════════════════════════╝
 	`);
 
@@ -612,30 +657,13 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		console.log();
 	}
 
-	// Calculate which steps will actually run
-	const stepsToExecute = totalSteps - (options.skipSteps?.length || 0);
-	const skipStepsList = options.skipSteps && options.skipSteps.length > 0 
-		? options.skipSteps.sort((a, b) => a - b).join(", ")
-		: "none";
-	
-	console.log(`This orchestrator will run ${stepsToExecute} of ${totalSteps} analysis agents:`);
-	if (options.skipSteps && options.skipSteps.length > 0) {
-		console.log(`   Skipping steps: ${skipStepsList}`);
-	}
-	console.log(`\nSteps 1-${totalSteps}: Automatic analysis and data extraction`);
-	console.log(`\nNote: Template generation can be run separately:`);
-	console.log(`   bun run generate-template-api --entity "${options.entity}"`);
-	console.log(`   bun run generate-template-ui --entity "${options.entity}"`);
-	console.log(`   bun run generate-templates --entity "${options.entity}"`);
-	console.log("   or: bun run agents/conversion-template-generator.ts --entity \"" + options.entity + "\"\n");
-
 	// Ensure output directory exists
 	try {
-		const normalizedOutputPath = normalizePath(outputPath);
+		const normalizedOutputPath = normalizePath(outputRoot);
 		if (!existsSync(normalizedOutputPath)) {
 			await mkdir(normalizedOutputPath, { recursive: true });
 		}
-		await Bun.write(`${outputPath}/.gitkeep`, "");
+		await Bun.write(`${outputRoot}/.gitkeep`, "");
 
 		// Write child forms list to output directory
 		if (options.childForms && options.childForms.length > 0) {
@@ -646,15 +674,15 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 				detectedAt: new Date().toISOString(),
 			};
 			await Bun.write(
-				`${outputPath}/child-forms.json`,
+				`${outputRoot}/child-forms.json`,
 				JSON.stringify(childFormsData, null, 2)
 			);
-			console.log(`✓ Child forms list written to: ${outputPath}/child-forms.json\n`);
+			console.log(`✓ Child forms list written to: ${outputRoot}/child-forms.json\n`);
 		}
 	} catch (error: any) {
 		console.error(`Error creating output directory: ${error.message}`);
-		console.error(`Path: ${outputPath}`);
-		console.error(`Normalized: ${normalizePath(outputPath)}`);
+		console.error(`Path: ${outputRoot}`);
+		console.error(`Normalized: ${normalizePath(outputRoot)}`);
 		throw error;
 	}
 
@@ -662,13 +690,15 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 	let conversionStatus: ConversionStatus;
 	let stepsToRun: Set<number> | null = null;
 	let mainStartTime: number;
+	let agentSteps = getAgentSteps(options);
+	let totalSteps = agentSteps.length;
 
 	if (options.resume || options.rerunFailed) {
 		// Try to load existing status
-		const existingStatus = await readConversionStatus(outputPath);
+		const existingStatus = await readConversionStatus(outputRoot);
 		
 		if (!existingStatus) {
-			console.error(`\n❌ Error: No existing conversion-status.json found at ${outputPath}/conversion-status.json`);
+			console.error(`\n❌ Error: No existing conversion-status.json found at ${outputRoot}/conversion-status.json`);
 			console.error("Cannot resume or rerun failed steps without existing status.");
 			console.error("Run the orchestrator normally first to create the status file.\n");
 			process.exit(1);
@@ -678,6 +708,14 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		if (existingStatus.entity !== options.entity) {
 			console.error(`\n❌ Error: Entity mismatch. Status file is for "${existingStatus.entity}", but you specified "${options.entity}"`);
 			process.exit(1);
+		}
+
+		if (!options.formName && existingStatus.formName) {
+			options.formName = existingStatus.formName;
+			const isSearchOrDetail = /^(frm)?\w+(Search|Detail)$/i.test(options.formName);
+			options.isSingleForm = !isSearchOrDetail;
+			agentSteps = getAgentSteps(options);
+			totalSteps = agentSteps.length;
 		}
 
 		conversionStatus = existingStatus;
@@ -727,19 +765,36 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		}
 
 		mainStartTime = Date.now();
-		await writeConversionStatus(outputPath, conversionStatus);
+		await writeConversionStatus(outputRoot, conversionStatus);
 	} else {
 		// Initialize new conversion status tracking
 		conversionStatus = await initializeConversionStatus(
-			outputPath,
+			outputRoot,
 			options.entity,
 			options.formName,
 			totalSteps,
 			options.childForms,
 		);
-		console.log(`✓ Conversion status tracking initialized: ${outputPath}/conversion-status.json\n`);
+		console.log(`✓ Conversion status tracking initialized: ${outputRoot}/conversion-status.json\n`);
 		mainStartTime = Date.now();
 	}
+
+	// Calculate which steps will actually run
+	const stepsToExecute = totalSteps - (options.skipSteps?.length || 0);
+	const skipStepsList = options.skipSteps && options.skipSteps.length > 0 
+		? options.skipSteps.sort((a, b) => a - b).join(", ")
+		: "none";
+	
+	console.log(`This orchestrator will run ${stepsToExecute} of ${totalSteps} analysis agents:`);
+	if (options.skipSteps && options.skipSteps.length > 0) {
+		console.log(`   Skipping steps: ${skipStepsList}`);
+	}
+	console.log(`\nSteps 1-${totalSteps}: Automatic analysis and data extraction`);
+	console.log(`\nNote: Template generation can be run separately:`);
+	console.log(`   bun run generate-template-api --entity "${options.entity}"`);
+	console.log(`   bun run generate-template-ui --entity "${options.entity}"`);
+	console.log(`   bun run generate-templates --entity "${options.entity}"`);
+	console.log("   or: bun run agents/conversion-template-generator.ts --entity \"" + options.entity + "\"\n");
 
 	let currentStep = 1;
 	for (const step of agentSteps) {
@@ -765,6 +820,7 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 				endTime: skipTime,
 				durationMs: 0,
 				outputFile: step.outputFile,
+				outputDir: step.outputDir,
 			};
 			
 			if (existingSkipIndex >= 0) {
@@ -773,13 +829,13 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 				conversionStatus.steps.push(skippedStepStatus);
 				conversionStatus.skippedSteps++;
 			}
-			await writeConversionStatus(outputPath, conversionStatus);
+			await writeConversionStatus(outputRoot, conversionStatus);
 			
 			currentStep++;
 			continue;
 		}
 
-		const exitCode = await runAgentStep(step, currentStep, options, totalSteps, conversionStatus);
+		const exitCode = await runAgentStep(step, currentStep, options, totalSteps, conversionStatus, outputRoot);
 		if (exitCode !== 0) {
 			const endTime = new Date().toISOString();
 			const durationMs = Date.now() - mainStartTime;
@@ -788,14 +844,14 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 			conversionStatus.endTime = endTime;
 			conversionStatus.durationMs = durationMs;
 			conversionStatus.failedStepNumbers = failedSteps;
-			await writeConversionStatus(outputPath, conversionStatus);
+			await writeConversionStatus(outputRoot, conversionStatus);
 			
 			console.error(`\n💥 Orchestrator stopped at step ${currentStep} due to error`);
 			console.error(`Total duration: ${(durationMs / 1000).toFixed(2)}s`);
 			console.error(`\nFailed steps: ${failedSteps.join(", ")}`);
 			console.error(`\nTo rerun failed steps:`);
 			console.error(`   bun run agents/orchestrator.ts --entity "${options.entity}" --rerun-failed`);
-			console.error(`\nStatus saved to: ${outputPath}/conversion-status.json\n`);
+			console.error(`\nStatus saved to: ${outputRoot}/conversion-status.json\n`);
 			process.exit(exitCode);
 		}
 
@@ -809,7 +865,7 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		console.log("\nTemplate generation requested. Launching interactive template generators...");
 
 		if (runApiTemplates) {
-			const apiExit = await runTemplateGenerator("conversion-template-generator-api.ts", options, outputPath);
+			const apiExit = await runTemplateGenerator("conversion-template-generator-api.ts", options, outputRoot);
 			if (apiExit !== 0) {
 				console.error("\n❌ API template generation failed. Aborting.");
 				process.exit(apiExit);
@@ -817,7 +873,7 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 		}
 
 		if (runUiTemplates) {
-			const uiExit = await runTemplateGenerator("conversion-template-generator-ui.ts", options, outputPath);
+			const uiExit = await runTemplateGenerator("conversion-template-generator-ui.ts", options, outputRoot);
 			if (uiExit !== 0) {
 				console.error("\n❌ UI template generation failed. Aborting.");
 				process.exit(uiExit);
@@ -840,7 +896,7 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 	
 	conversionStatus.endTime = endTime;
 	conversionStatus.durationMs = durationMs;
-	await writeConversionStatus(outputPath, conversionStatus);
+	await writeConversionStatus(outputRoot, conversionStatus);
 
 	let childFormsMessage = "";
 	if (childFormsCount > 0) {
@@ -882,8 +938,8 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 ║  ${completionText.padEnd(78, " ")}║
 ║  ${durationDisplay.padEnd(78, " ")}║
 ║                                                                            ║
-║  Output directory: ${outputPath.padEnd(55, " ")}║
-║  Status file: ${`${outputPath}/conversion-status.json`.padEnd(56, " ")}║
+║  Output directory: ${outputRoot.padEnd(55, " ")}║
+║  Status file: ${`${outputRoot}/conversion-status.json`.padEnd(56, " ")}║
 ${childFormsMessage}${failedStepsMessage}║  NEXT STEPS:                                                               ║
 ║                                                                            ║
 ║  1. Generate conversion templates (interactive):                           ║
