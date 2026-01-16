@@ -1,16 +1,15 @@
-using Microsoft.AspNetCore.Mvc;
+using Admin.Infrastructure.Services;
 using BargeOps.Shared.Dto;
-using BargeOps.Shared.Models;
-using Admin.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Admin.Api.Controllers;
+namespace BargeOps.Admin.Api.Controllers;
 
 /// <summary>
-/// Vendor API Controller
-/// Authentication: [ApiKey] attribute (NOT Windows Auth)
-/// Reference: FacilityController.cs, BoatLocationController.cs
+/// Vendor management API controller
+/// Provides CRUD operations for vendors and related entities
 /// </summary>
-[ApiKey]
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class VendorController : ControllerBase
@@ -18,7 +17,9 @@ public class VendorController : ControllerBase
     private readonly IVendorService _vendorService;
     private readonly ILogger<VendorController> _logger;
 
-    public VendorController(IVendorService vendorService, ILogger<VendorController> logger)
+    public VendorController(
+        IVendorService vendorService,
+        ILogger<VendorController> logger)
     {
         _vendorService = vendorService;
         _logger = logger;
@@ -27,486 +28,337 @@ public class VendorController : ControllerBase
     #region Vendor Endpoints
 
     /// <summary>
-    /// Search vendors with paging
+    /// Search vendors with DataTables server-side processing
     /// </summary>
-    /// <param name="request">Search criteria</param>
-    /// <param name="page">Page number (1-based)</param>
-    /// <param name="pageSize">Items per page</param>
-    /// <returns>Paged list of vendors</returns>
-    [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<VendorDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PagedResult<VendorDto>>> GetVendors(
-        [FromQuery] VendorSearchRequest request,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 25)
+    [HttpPost("search")]
+    public async Task<ActionResult<DataTableResponse<VendorDto>>> Search(
+        [FromBody] VendorSearchRequest request,
+        CancellationToken cancellationToken)
     {
         try
         {
-            var result = await _vendorService.SearchVendorsAsync(request, page, pageSize);
-            return Ok(result);
+            var result = await _vendorService.SearchAsync(request, cancellationToken);
+
+            return Ok(new DataTableResponse<VendorDto>
+            {
+                Draw = request.Draw,
+                RecordsTotal = result.TotalRecords,
+                RecordsFiltered = result.FilteredRecords,
+                Data = result.Data
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error searching vendors");
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while searching vendors");
+            return StatusCode(500, "An error occurred while searching vendors");
         }
     }
 
     /// <summary>
-    /// Get vendors for DataTables server-side processing
+    /// Get vendor by ID
     /// </summary>
-    /// <param name="request">DataTables request</param>
-    /// <param name="searchCriteria">Vendor search criteria</param>
-    /// <returns>DataTables response</returns>
-    [HttpPost("datatable")]
-    [ProducesResponseType(typeof(DataTableResponse<VendorDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<DataTableResponse<VendorDto>>> GetVendorDataTable(
-        [FromBody] DataTableRequest request,
-        [FromQuery] VendorSearchRequest searchCriteria)
-    {
-        try
-        {
-            var result = await _vendorService.GetVendorDataTableAsync(request, searchCriteria);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting vendor DataTable");
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting vendor data");
-        }
-    }
-
-    /// <summary>
-    /// Get vendor by ID with child collections
-    /// </summary>
-    /// <param name="id">Vendor ID</param>
-    /// <returns>Vendor DTO with contacts and business units</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(VendorDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<VendorDto>> GetVendor(int id)
+    public async Task<ActionResult<VendorDto>> GetById(int id, CancellationToken cancellationToken)
     {
         try
         {
-            var vendor = await _vendorService.GetVendorByIdAsync(id);
+            var vendor = await _vendorService.GetByIdAsync(id, cancellationToken);
 
             if (vendor == null)
+            {
                 return NotFound($"Vendor with ID {id} not found");
+            }
 
             return Ok(vendor);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting vendor {VendorID}", id);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting the vendor");
+            _logger.LogError(ex, "Error getting vendor {VendorId}", id);
+            return StatusCode(500, "An error occurred while retrieving the vendor");
         }
     }
 
     /// <summary>
     /// Create new vendor
     /// </summary>
-    /// <param name="vendor">Vendor DTO</param>
-    /// <returns>Created vendor with new ID</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(VendorDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<VendorDto>> CreateVendor([FromBody] VendorDto vendor)
+    public async Task<ActionResult<VendorDto>> Create(
+        [FromBody] VendorDto vendor,
+        CancellationToken cancellationToken)
     {
         try
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var newId = await _vendorService.CreateVendorAsync(vendor);
-            vendor.VendorID = newId;
-
-            return CreatedAtAction(nameof(GetVendor), new { id = newId }, vendor);
+            var created = await _vendorService.CreateAsync(vendor, cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = created.VendorID }, created);
         }
-        catch (InvalidOperationException ex)
+        catch (FluentValidation.ValidationException ex)
         {
-            _logger.LogWarning(ex, "Validation error creating vendor");
-            return BadRequest(ex.Message);
+            return BadRequest(new { errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating vendor");
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the vendor");
+            return StatusCode(500, "An error occurred while creating the vendor");
         }
     }
 
     /// <summary>
     /// Update existing vendor
     /// </summary>
-    /// <param name="id">Vendor ID</param>
-    /// <param name="vendor">Vendor DTO</param>
-    /// <returns>No content on success</returns>
     [HttpPut("{id}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateVendor(int id, [FromBody] VendorDto vendor)
+    public async Task<ActionResult<VendorDto>> Update(
+        int id,
+        [FromBody] VendorDto vendor,
+        CancellationToken cancellationToken)
     {
         try
         {
             if (id != vendor.VendorID)
-                return BadRequest("Vendor ID mismatch");
+            {
+                return BadRequest("ID mismatch");
+            }
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var existing = await _vendorService.GetVendorByIdAsync(id);
-            if (existing == null)
-                return NotFound($"Vendor with ID {id} not found");
-
-            await _vendorService.UpdateVendorAsync(vendor);
-
-            return NoContent();
+            var updated = await _vendorService.UpdateAsync(vendor, cancellationToken);
+            return Ok(updated);
         }
-        catch (InvalidOperationException ex)
+        catch (FluentValidation.ValidationException ex)
         {
-            _logger.LogWarning(ex, "Validation error updating vendor {VendorID}", id);
-            return BadRequest(ex.Message);
+            return BadRequest(new { errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating vendor {VendorID}", id);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the vendor");
+            _logger.LogError(ex, "Error updating vendor {VendorId}", id);
+            return StatusCode(500, "An error occurred while updating the vendor");
         }
     }
 
     /// <summary>
-    /// Set vendor active/inactive (soft delete)
+    /// Delete vendor
     /// </summary>
-    /// <param name="id">Vendor ID</param>
-    /// <param name="request">Active flag</param>
-    /// <returns>No content on success</returns>
-    [HttpPatch("{id}/active")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> SetActive(int id, [FromBody] SetActiveRequest request)
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         try
         {
-            var existing = await _vendorService.GetVendorByIdAsync(id);
-            if (existing == null)
-                return NotFound($"Vendor with ID {id} not found");
+            var deleted = await _vendorService.DeleteAsync(id, cancellationToken);
 
-            await _vendorService.SetVendorActiveAsync(id, request.IsActive);
+            if (!deleted)
+            {
+                return NotFound($"Vendor with ID {id} not found");
+            }
 
             return NoContent();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting vendor {VendorID} active status", id);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the vendor");
+            _logger.LogError(ex, "Error deleting vendor {VendorId}", id);
+            return StatusCode(500, "An error occurred while deleting the vendor");
         }
     }
 
     #endregion
 
-    #region VendorContact Endpoints
+    #region Vendor Contact Endpoints
 
     /// <summary>
-    /// Get all contacts for a vendor
+    /// Get vendor contacts
     /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <returns>List of vendor contacts</returns>
-    [HttpGet("{vendorId}/contacts")]
-    [ProducesResponseType(typeof(IEnumerable<VendorContactDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<VendorContactDto>>> GetContacts(int vendorId)
+    [HttpGet("{id}/contacts")]
+    public async Task<ActionResult<IEnumerable<VendorContactDto>>> GetContacts(
+        int id,
+        CancellationToken cancellationToken)
     {
         try
         {
-            var contacts = await _vendorService.GetContactsAsync(vendorId);
+            var contacts = await _vendorService.GetContactsAsync(id, cancellationToken);
             return Ok(contacts);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting contacts for vendor {VendorID}", vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting contacts");
+            _logger.LogError(ex, "Error getting contacts for vendor {VendorId}", id);
+            return StatusCode(500, "An error occurred while retrieving contacts");
         }
     }
 
     /// <summary>
-    /// Get contact by ID
+    /// Create vendor contact
     /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <param name="contactId">Contact ID</param>
-    /// <returns>Vendor contact</returns>
-    [HttpGet("{vendorId}/contacts/{contactId}")]
-    [ProducesResponseType(typeof(VendorContactDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<VendorContactDto>> GetContact(int vendorId, int contactId)
+    [HttpPost("contacts")]
+    public async Task<ActionResult<VendorContactDto>> CreateContact(
+        [FromBody] VendorContactDto contact,
+        CancellationToken cancellationToken)
     {
         try
         {
-            var contact = await _vendorService.GetContactByIdAsync(contactId);
-
-            if (contact == null || contact.VendorID != vendorId)
-                return NotFound($"Contact with ID {contactId} not found for vendor {vendorId}");
-
-            return Ok(contact);
+            var created = await _vendorService.CreateContactAsync(contact, cancellationToken);
+            return Ok(created);
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            return BadRequest(new { errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting contact {ContactID} for vendor {VendorID}", contactId, vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting the contact");
-        }
-    }
-
-    /// <summary>
-    /// Create new vendor contact
-    /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <param name="contact">Contact DTO</param>
-    /// <returns>Created contact with new ID</returns>
-    [HttpPost("{vendorId}/contacts")]
-    [ProducesResponseType(typeof(VendorContactDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<VendorContactDto>> CreateContact(int vendorId, [FromBody] VendorContactDto contact)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            contact.VendorID = vendorId;
-
-            var newId = await _vendorService.CreateContactAsync(contact);
-            contact.VendorContactID = newId;
-
-            return CreatedAtAction(nameof(GetContact), new { vendorId, contactId = newId }, contact);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating contact for vendor {VendorID}", vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the contact");
+            _logger.LogError(ex, "Error creating contact");
+            return StatusCode(500, "An error occurred while creating the contact");
         }
     }
 
     /// <summary>
     /// Update vendor contact
     /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <param name="contactId">Contact ID</param>
-    /// <param name="contact">Contact DTO</param>
-    /// <returns>No content on success</returns>
-    [HttpPut("{vendorId}/contacts/{contactId}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateContact(int vendorId, int contactId, [FromBody] VendorContactDto contact)
+    [HttpPut("contacts/{id}")]
+    public async Task<ActionResult<VendorContactDto>> UpdateContact(
+        int id,
+        [FromBody] VendorContactDto contact,
+        CancellationToken cancellationToken)
     {
         try
         {
-            if (contactId != contact.VendorContactID)
-                return BadRequest("Contact ID mismatch");
+            if (id != contact.VendorContactID)
+            {
+                return BadRequest("ID mismatch");
+            }
 
-            if (vendorId != contact.VendorID)
-                return BadRequest("Vendor ID mismatch");
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var existing = await _vendorService.GetContactByIdAsync(contactId);
-            if (existing == null)
-                return NotFound($"Contact with ID {contactId} not found");
-
-            await _vendorService.UpdateContactAsync(contact);
-
-            return NoContent();
+            var updated = await _vendorService.UpdateContactAsync(contact, cancellationToken);
+            return Ok(updated);
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            return BadRequest(new { errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating contact {ContactID} for vendor {VendorID}", contactId, vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the contact");
+            _logger.LogError(ex, "Error updating contact {ContactId}", id);
+            return StatusCode(500, "An error occurred while updating the contact");
         }
     }
 
     /// <summary>
     /// Delete vendor contact
     /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <param name="contactId">Contact ID</param>
-    /// <returns>No content on success</returns>
-    [HttpDelete("{vendorId}/contacts/{contactId}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteContact(int vendorId, int contactId)
+    [HttpDelete("contacts/{id}")]
+    public async Task<ActionResult> DeleteContact(int id, CancellationToken cancellationToken)
     {
         try
         {
-            var existing = await _vendorService.GetContactByIdAsync(contactId);
-            if (existing == null || existing.VendorID != vendorId)
-                return NotFound($"Contact with ID {contactId} not found for vendor {vendorId}");
+            var deleted = await _vendorService.DeleteContactAsync(id, cancellationToken);
 
-            await _vendorService.DeleteContactAsync(contactId);
+            if (!deleted)
+            {
+                return NotFound($"Contact with ID {id} not found");
+            }
 
             return NoContent();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting contact {ContactID} for vendor {VendorID}", contactId, vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the contact");
+            _logger.LogError(ex, "Error deleting contact {ContactId}", id);
+            return StatusCode(500, "An error occurred while deleting the contact");
         }
     }
 
     #endregion
 
-    #region VendorBusinessUnit Endpoints
+    #region Vendor Business Unit Endpoints
 
     /// <summary>
-    /// Get all business units for a vendor
+    /// Get vendor business units
     /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <returns>List of vendor business units</returns>
-    [HttpGet("{vendorId}/business-units")]
-    [ProducesResponseType(typeof(IEnumerable<VendorBusinessUnitDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<VendorBusinessUnitDto>>> GetBusinessUnits(int vendorId)
+    [HttpGet("{id}/business-units")]
+    public async Task<ActionResult<IEnumerable<VendorBusinessUnitDto>>> GetBusinessUnits(
+        int id,
+        CancellationToken cancellationToken)
     {
         try
         {
-            var businessUnits = await _vendorService.GetBusinessUnitsAsync(vendorId);
+            var businessUnits = await _vendorService.GetBusinessUnitsAsync(id, cancellationToken);
             return Ok(businessUnits);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting business units for vendor {VendorID}", vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting business units");
+            _logger.LogError(ex, "Error getting business units for vendor {VendorId}", id);
+            return StatusCode(500, "An error occurred while retrieving business units");
         }
     }
 
     /// <summary>
-    /// Get business unit by ID
+    /// Create vendor business unit
     /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <param name="businessUnitId">Business Unit ID</param>
-    /// <returns>Vendor business unit</returns>
-    [HttpGet("{vendorId}/business-units/{businessUnitId}")]
-    [ProducesResponseType(typeof(VendorBusinessUnitDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<VendorBusinessUnitDto>> GetBusinessUnit(int vendorId, int businessUnitId)
+    [HttpPost("business-units")]
+    public async Task<ActionResult<VendorBusinessUnitDto>> CreateBusinessUnit(
+        [FromBody] VendorBusinessUnitDto businessUnit,
+        CancellationToken cancellationToken)
     {
         try
         {
-            var businessUnit = await _vendorService.GetBusinessUnitByIdAsync(businessUnitId);
-
-            if (businessUnit == null || businessUnit.VendorID != vendorId)
-                return NotFound($"Business unit with ID {businessUnitId} not found for vendor {vendorId}");
-
-            return Ok(businessUnit);
+            var created = await _vendorService.CreateBusinessUnitAsync(businessUnit, cancellationToken);
+            return Ok(created);
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            return BadRequest(new { errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting business unit {BusinessUnitID} for vendor {VendorID}", businessUnitId, vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting the business unit");
-        }
-    }
-
-    /// <summary>
-    /// Create new vendor business unit
-    /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <param name="businessUnit">Business unit DTO</param>
-    /// <returns>Created business unit with new ID</returns>
-    [HttpPost("{vendorId}/business-units")]
-    [ProducesResponseType(typeof(VendorBusinessUnitDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<VendorBusinessUnitDto>> CreateBusinessUnit(int vendorId, [FromBody] VendorBusinessUnitDto businessUnit)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            businessUnit.VendorID = vendorId;
-
-            var newId = await _vendorService.CreateBusinessUnitAsync(businessUnit);
-            businessUnit.VendorBusinessUnitID = newId;
-
-            return CreatedAtAction(nameof(GetBusinessUnit), new { vendorId, businessUnitId = newId }, businessUnit);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating business unit for vendor {VendorID}", vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the business unit");
+            _logger.LogError(ex, "Error creating business unit");
+            return StatusCode(500, "An error occurred while creating the business unit");
         }
     }
 
     /// <summary>
     /// Update vendor business unit
     /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <param name="businessUnitId">Business Unit ID</param>
-    /// <param name="businessUnit">Business unit DTO</param>
-    /// <returns>No content on success</returns>
-    [HttpPut("{vendorId}/business-units/{businessUnitId}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateBusinessUnit(int vendorId, int businessUnitId, [FromBody] VendorBusinessUnitDto businessUnit)
+    [HttpPut("business-units/{id}")]
+    public async Task<ActionResult<VendorBusinessUnitDto>> UpdateBusinessUnit(
+        int id,
+        [FromBody] VendorBusinessUnitDto businessUnit,
+        CancellationToken cancellationToken)
     {
         try
         {
-            if (businessUnitId != businessUnit.VendorBusinessUnitID)
-                return BadRequest("Business unit ID mismatch");
+            if (id != businessUnit.VendorBusinessUnitID)
+            {
+                return BadRequest("ID mismatch");
+            }
 
-            if (vendorId != businessUnit.VendorID)
-                return BadRequest("Vendor ID mismatch");
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var existing = await _vendorService.GetBusinessUnitByIdAsync(businessUnitId);
-            if (existing == null)
-                return NotFound($"Business unit with ID {businessUnitId} not found");
-
-            await _vendorService.UpdateBusinessUnitAsync(businessUnit);
-
-            return NoContent();
+            var updated = await _vendorService.UpdateBusinessUnitAsync(businessUnit, cancellationToken);
+            return Ok(updated);
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            return BadRequest(new { errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating business unit {BusinessUnitID} for vendor {VendorID}", businessUnitId, vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the business unit");
+            _logger.LogError(ex, "Error updating business unit {BusinessUnitId}", id);
+            return StatusCode(500, "An error occurred while updating the business unit");
         }
     }
 
     /// <summary>
     /// Delete vendor business unit
     /// </summary>
-    /// <param name="vendorId">Vendor ID</param>
-    /// <param name="businessUnitId">Business Unit ID</param>
-    /// <returns>No content on success</returns>
-    [HttpDelete("{vendorId}/business-units/{businessUnitId}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteBusinessUnit(int vendorId, int businessUnitId)
+    [HttpDelete("business-units/{id}")]
+    public async Task<ActionResult> DeleteBusinessUnit(int id, CancellationToken cancellationToken)
     {
         try
         {
-            var existing = await _vendorService.GetBusinessUnitByIdAsync(businessUnitId);
-            if (existing == null || existing.VendorID != vendorId)
-                return NotFound($"Business unit with ID {businessUnitId} not found for vendor {vendorId}");
+            var deleted = await _vendorService.DeleteBusinessUnitAsync(id, cancellationToken);
 
-            await _vendorService.DeleteBusinessUnitAsync(businessUnitId);
+            if (!deleted)
+            {
+                return NotFound($"Business unit with ID {id} not found");
+            }
 
             return NoContent();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting business unit {BusinessUnitID} for vendor {VendorID}", businessUnitId, vendorId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the business unit");
+            _logger.LogError(ex, "Error deleting business unit {BusinessUnitId}", id);
+            return StatusCode(500, "An error occurred while deleting the business unit");
         }
     }
 
     #endregion
-}
-
-/// <summary>
-/// Request model for SetActive endpoint
-/// </summary>
-public class SetActiveRequest
-{
-    public bool IsActive { get; set; }
 }

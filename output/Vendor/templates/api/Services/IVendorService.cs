@@ -1,42 +1,28 @@
 using BargeOps.Shared.Dto;
-using BargeOps.Shared.Models;
 
-namespace Admin.Domain.Services;
+namespace Admin.Infrastructure.Services;
 
 /// <summary>
 /// Service interface for Vendor business logic
-/// Uses DTOs from Shared project
 /// </summary>
 public interface IVendorService
 {
-    #region Vendor Operations
+    // Vendor operations
+    Task<PagedResult<VendorDto>> SearchAsync(VendorSearchRequest request, CancellationToken cancellationToken = default);
+    Task<VendorDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<VendorDto> CreateAsync(VendorDto vendor, CancellationToken cancellationToken = default);
+    Task<VendorDto> UpdateAsync(VendorDto vendor, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
 
-    Task<PagedResult<VendorDto>> SearchVendorsAsync(VendorSearchRequest request, int page, int pageSize);
-    Task<DataTableResponse<VendorDto>> GetVendorDataTableAsync(DataTableRequest request, VendorSearchRequest searchCriteria);
-    Task<VendorDto?> GetVendorByIdAsync(int vendorID);
-    Task<int> CreateVendorAsync(VendorDto vendor);
-    Task UpdateVendorAsync(VendorDto vendor);
-    Task SetVendorActiveAsync(int vendorID, bool isActive);
+    // Vendor Contact operations
+    Task<IEnumerable<VendorContactDto>> GetContactsAsync(int vendorId, CancellationToken cancellationToken = default);
+    Task<VendorContactDto> CreateContactAsync(VendorContactDto contact, CancellationToken cancellationToken = default);
+    Task<VendorContactDto> UpdateContactAsync(VendorContactDto contact, CancellationToken cancellationToken = default);
+    Task<bool> DeleteContactAsync(int contactId, CancellationToken cancellationToken = default);
 
-    #endregion
-
-    #region VendorContact Operations
-
-    Task<IEnumerable<VendorContactDto>> GetContactsAsync(int vendorID);
-    Task<VendorContactDto?> GetContactByIdAsync(int vendorContactID);
-    Task<int> CreateContactAsync(VendorContactDto contact);
-    Task UpdateContactAsync(VendorContactDto contact);
-    Task DeleteContactAsync(int vendorContactID);
-
-    #endregion
-
-    #region VendorBusinessUnit Operations
-
-    Task<IEnumerable<VendorBusinessUnitDto>> GetBusinessUnitsAsync(int vendorID);
-    Task<VendorBusinessUnitDto?> GetBusinessUnitByIdAsync(int vendorBusinessUnitID);
-    Task<int> CreateBusinessUnitAsync(VendorBusinessUnitDto businessUnit);
-    Task UpdateBusinessUnitAsync(VendorBusinessUnitDto businessUnit);
-    Task DeleteBusinessUnitAsync(int vendorBusinessUnitID);
-
-    #endregion
+    // Vendor Business Unit operations
+    Task<IEnumerable<VendorBusinessUnitDto>> GetBusinessUnitsAsync(int vendorId, CancellationToken cancellationToken = default);
+    Task<VendorBusinessUnitDto> CreateBusinessUnitAsync(VendorBusinessUnitDto businessUnit, CancellationToken cancellationToken = default);
+    Task<VendorBusinessUnitDto> UpdateBusinessUnitAsync(VendorBusinessUnitDto businessUnit, CancellationToken cancellationToken = default);
+    Task<bool> DeleteBusinessUnitAsync(int businessUnitId, CancellationToken cancellationToken = default);
 }

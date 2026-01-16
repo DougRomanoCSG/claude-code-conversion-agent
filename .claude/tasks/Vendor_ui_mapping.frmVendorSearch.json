@@ -1,0 +1,624 @@
+{
+  "entity": "Vendor",
+  "formName": "frmVendorSearch",
+  "generatedDate": "2026-01-15",
+  "targetArchitecture": {
+    "framework": "ASP.NET Core 8 MVC",
+    "uiFramework": "Bootstrap 5",
+    "gridLibrary": "DataTables (server-side processing)",
+    "dropdownLibrary": "Select2",
+    "validationLibrary": "jQuery Validate + Unobtrusive Validation"
+  },
+  "controlMappings": [
+    {
+      "legacyControl": "UltraTextEditor",
+      "modernEquivalent": "Bootstrap Text Input",
+      "category": "Input Control",
+      "html": "<input type=\"text\" class=\"form-control\" />",
+      "bootstrapClasses": ["form-control"],
+      "accessibility": {
+        "label": "Use asp-for tag helper with associated input",
+        "required": "Add aria-required if field is required",
+        "validation": "jQuery validate handles aria-invalid"
+      },
+      "example": "<label asp-for=\"Name\" class=\"form-label\"></label>\n<input asp-for=\"Name\" class=\"form-control\" placeholder=\"Enter vendor name...\" />"
+    },
+    {
+      "legacyControl": "UltraCheckEditor",
+      "modernEquivalent": "Bootstrap Checkbox (form-check-inline for horizontal layout)",
+      "category": "Input Control",
+      "html": "<div class=\"form-check form-check-inline\">\n  <input type=\"checkbox\" class=\"form-check-input\" id=\"checkboxId\" />\n  <label class=\"form-check-label\" for=\"checkboxId\">Label Text</label>\n</div>",
+      "bootstrapClasses": ["form-check", "form-check-inline", "form-check-input", "form-check-label"],
+      "accessibility": {
+        "label": "Use asp-for tag helper with form-check-label",
+        "checked": "Use asp-for binding for checked state"
+      },
+      "example": "<div class=\"form-check form-check-inline\">\n  <input asp-for=\"IsActiveOnly\" class=\"form-check-input\" />\n  <label asp-for=\"IsActiveOnly\" class=\"form-check-label\"></label>\n</div>"
+    },
+    {
+      "legacyControl": "UltraComboEditor",
+      "modernEquivalent": "Select2 Dropdown",
+      "category": "Input Control",
+      "html": "<select class=\"form-select\" data-select2=\"true\"></select>",
+      "bootstrapClasses": ["form-select"],
+      "javascript": {
+        "initialization": "$('#selector').select2({ placeholder: 'Select...', allowClear: true });",
+        "library": "Select2",
+        "features": ["Search", "Clear option", "Placeholder", "AJAX loading (optional)"]
+      },
+      "accessibility": {
+        "label": "Use asp-for tag helper",
+        "placeholder": "Add default option with empty value"
+      },
+      "example": "<label asp-for=\"OwnerId\" class=\"form-label\"></label>\n<select asp-for=\"OwnerId\" asp-items=\"Model.Owners\" class=\"form-select\">\n  <option value=\"\">-- All --</option>\n</select>",
+      "note": "Select2 can be initialized globally or per-control as needed"
+    },
+    {
+      "legacyControl": "UltraGrid",
+      "modernEquivalent": "DataTables with Server-Side Processing",
+      "category": "Grid Control",
+      "html": "<div class=\"table-responsive\">\n  <table id=\"vendorTable\" class=\"table table-striped table-bordered dt-responsive nowrap\" style=\"width:100%\">\n    <thead>\n      <tr>\n        <th>Actions</th>\n        <th>Name</th>\n        <th>Long Name</th>\n        <!-- Additional columns -->\n      </tr>\n    </thead>\n    <tbody></tbody>\n  </table>\n</div>",
+      "bootstrapClasses": ["table", "table-striped", "table-bordered", "table-responsive", "dt-responsive"],
+      "javascript": {
+        "initialization": "See vendorSearch.js pattern below",
+        "library": "DataTables",
+        "features": [
+          "Server-side processing",
+          "Sorting",
+          "Pagination",
+          "State saving (localStorage)",
+          "Responsive design",
+          "Custom column rendering",
+          "Action buttons column"
+        ],
+        "dataTableConfig": {
+          "processing": true,
+          "serverSide": true,
+          "stateSave": true,
+          "stateKey": "vendorTable_v1",
+          "responsive": true,
+          "autoWidth": false,
+          "ajax": {
+            "url": "/VendorSearch/VendorTable",
+            "type": "POST",
+            "data": "Function that includes search criteria from form fields"
+          },
+          "columns": "Array of column definitions with data, name, orderable, searchable, render",
+          "order": "[[1, 'asc']]",
+          "pageLength": 25,
+          "lengthMenu": "[[10, 25, 50, 100], [10, 25, 50, 100]]"
+        }
+      },
+      "events": {
+        "doubleClick": "Navigate to edit page: window.location.href = '/VendorSearch/Edit/' + vendorId",
+        "editButton": "Button click handler to navigate to edit page",
+        "actionsButton": "Shows modal with Activate/Deactivate/Delete options"
+      },
+      "checkboxRendering": {
+        "pattern": "render: function(data) { return '<input type=\"checkbox\" ' + (data ? 'checked' : '') + ' disabled />'; }",
+        "note": "Checkboxes in grid are display-only (disabled)"
+      }
+    },
+    {
+      "legacyControl": "UltraButton",
+      "modernEquivalent": "Bootstrap Button",
+      "category": "Button",
+      "html": "<button type=\"button\" class=\"btn btn-primary\">Button Text</button>",
+      "bootstrapClasses": ["btn", "btn-primary", "btn-outline-secondary", "btn-success", "btn-sm"],
+      "variants": {
+        "primary": "btn btn-primary (Find/Search buttons)",
+        "secondary": "btn btn-outline-secondary (Reset/Clear buttons)",
+        "success": "btn btn-success (Add/New buttons)",
+        "small": "btn btn-sm (Grid action buttons)",
+        "withIcon": "<button class=\"btn btn-primary\"><i class=\"fas fa-search\"></i> Search</button>"
+      },
+      "example": "<button type=\"button\" id=\"btnSearch\" class=\"btn btn-primary me-2\">\n  <i class=\"fas fa-search\"></i> Search\n</button>"
+    },
+    {
+      "legacyControl": "UltraPanel",
+      "modernEquivalent": "Bootstrap Card",
+      "category": "Container",
+      "html": "<div class=\"card mb-3\">\n  <div class=\"card-body\">\n    <!-- Content -->\n  </div>\n</div>",
+      "bootstrapClasses": ["card", "card-body", "card-header", "mb-3"],
+      "usage": {
+        "searchCriteria": "Wrap search form in card for visual grouping",
+        "searchResults": "Wrap DataTable in card for consistent styling",
+        "spacing": "Use mb-3 or mb-4 for margin between cards"
+      },
+      "example": "<div class=\"card mb-3\">\n  <div class=\"card-body\">\n    <form id=\"searchForm\">\n      <!-- Search controls -->\n    </form>\n  </div>\n</div>"
+    },
+    {
+      "legacyControl": "UltraLabel (Context Title)",
+      "modernEquivalent": "H2 Heading with Horizontal Rule",
+      "category": "Header",
+      "html": "<h2>Vendor Search</h2>\n<hr />",
+      "styling": "Standard Bootstrap heading with separator",
+      "example": "@{\n  ViewData[\"Title\"] = \"Vendor Search\";\n}\n<h2>@ViewData[\"Title\"]</h2>\n<hr />"
+    },
+    {
+      "legacyControl": "UltraLabel (Field Label)",
+      "modernEquivalent": "Label with form-label class",
+      "category": "Label",
+      "html": "<label for=\"inputId\" class=\"form-label\">Label Text</label>",
+      "bootstrapClasses": ["form-label"],
+      "accessibility": {
+        "for": "Use asp-for tag helper to automatically generate for attribute",
+        "required": "Add visually if field is required"
+      },
+      "example": "<label asp-for=\"Name\" class=\"form-label\"></label>"
+    }
+  ],
+  "layoutPatterns": {
+    "mainLayout": {
+      "structure": "Container-fluid > Row > Col-12",
+      "example": "<div class=\"container-fluid\">\n  <div class=\"row\">\n    <div class=\"col-12\">\n      <h2>@ViewData[\"Title\"]</h2>\n      <hr />\n      <partial name=\"_Search\" model=\"Model\" />\n      <partial name=\"_SearchResults\" />\n    </div>\n  </div>\n</div>"
+    },
+    "searchCriteriaCard": {
+      "structure": "Card with card-body containing form with multiple rows",
+      "buttonPlacement": "First row contains action buttons (Search, Clear, Add)",
+      "fieldRows": "Subsequent rows contain search fields using Bootstrap grid (col-12 col-md-3, col-md-6, etc.)",
+      "checkboxRow": "Horizontal checkboxes using form-check-inline",
+      "example": "See _Search.cshtml pattern below"
+    },
+    "searchResultsCard": {
+      "structure": "Card with card-body containing table-responsive div with DataTable",
+      "example": "See _SearchResults.cshtml pattern below"
+    },
+    "gridLayout": {
+      "responsiveWrapper": "table-responsive class ensures horizontal scrolling on small screens",
+      "tableClasses": "table table-striped table-bordered dt-responsive nowrap",
+      "width": "style=\"width:100%\" ensures full-width rendering"
+    },
+    "formGrid": {
+      "responsive": "Use col-12 col-md-* for mobile-first responsive layout",
+      "spacing": "mb-3 for margin-bottom between rows",
+      "alignment": "Use Bootstrap flexbox utilities (me-2, float-end, etc.)"
+    }
+  },
+  "formPatterns": {
+    "searchForm": {
+      "layout": "Bootstrap card with form inside card-body",
+      "formId": "searchForm",
+      "buttonRow": {
+        "buttons": ["Search (btn-primary)", "Clear (btn-outline-secondary)", "Add (btn-success)"],
+        "spacing": "me-2 class for right margin between buttons"
+      },
+      "fieldLayout": {
+        "textInputs": "Bootstrap row with col-12 col-md-3 or col-md-6 columns",
+        "dropdowns": "Same responsive grid pattern as text inputs",
+        "checkboxes": "form-check-inline for horizontal layout",
+        "conditionalVisibility": "Use Razor @if conditions based on Model properties"
+      },
+      "example": "See Index.cshtml and _Search.cshtml templates"
+    },
+    "gridPattern": {
+      "library": "DataTables",
+      "serverSide": true,
+      "ajaxEndpoint": "/VendorSearch/VendorTable",
+      "stateManagement": {
+        "stateSave": true,
+        "stateKey": "vendorTable_v1",
+        "storage": "localStorage",
+        "versionStrategy": "Increment version key when columns change to clear old state"
+      },
+      "actionColumn": {
+        "position": "First column (index 0)",
+        "width": "220px",
+        "buttons": [
+          "Edit (btn-outline-primary, fa-pencil-alt)",
+          "Additional action buttons as needed",
+          "Actions menu (btn-outline-secondary, fa-ban) for Activate/Deactivate"
+        ],
+        "orderable": false,
+        "searchable": false
+      },
+      "columnDefinition": {
+        "data": "Property name from server response",
+        "name": "Column name for server-side processing",
+        "defaultContent": "Empty string to prevent errors",
+        "render": "Function for custom rendering (dates, booleans, combined columns)"
+      },
+      "booleanColumns": {
+        "render": "function(data) { return '<input type=\"checkbox\" ' + (data ? 'checked' : '') + ' disabled />'; }"
+      },
+      "events": {
+        "doubleClick": "$('#vendorTable tbody').on('dblclick', 'tr', function() { /* navigate to edit */ });",
+        "buttonClick": "$(document).on('click', '.btn-edit', function() { /* handle action */ });"
+      }
+    }
+  },
+  "javascriptPatterns": {
+    "fileStructure": {
+      "location": "wwwroot/js/vendorSearch.js",
+      "pattern": "Wrap all code in $(document).ready() function"
+    },
+    "dataTableInitialization": {
+      "stateManagement": {
+        "currentStateKey": "vendorTable_v1",
+        "legacyKeyCleaning": "Clear old localStorage keys on version change",
+        "actionsFirstPreference": "Store preference for actions column position",
+        "viewButtonPreference": "Store preference for view button visibility"
+      },
+      "destructExisting": "Destroy existing DataTable instance before reinitializing",
+      "configuration": {
+        "processing": true,
+        "serverSide": true,
+        "stateSave": true,
+        "responsive": true,
+        "autoWidth": false,
+        "ajax": {
+          "url": "Controller action endpoint",
+          "type": "POST",
+          "data": "Function that returns search criteria from form"
+        },
+        "columns": "Array of column definitions",
+        "order": "Default sort order (typically column 1 ascending to skip Actions column)",
+        "pageLength": 25,
+        "lengthMenu": "[[10, 25, 50, 100], [10, 25, 50, 100]]",
+        "language": {
+          "processing": "'<i class=\"fas fa-spinner fa-spin\"></i> Loading...'"
+        },
+        "drawCallback": "Initialize tooltips and other UI enhancements after redraw"
+      }
+    },
+    "searchButtonHandler": {
+      "pattern": "$('#btnSearch').click(function() { dataTable.ajax.reload(); });",
+      "description": "Reload DataTable with current search criteria"
+    },
+    "resetButtonHandler": {
+      "pattern": "$('#btnReset').click(function() { $('#searchForm')[0].reset(); /* Reset Select2 */ dataTable.ajax.reload(); });",
+      "description": "Clear form and reload table"
+    },
+    "enterKeyHandler": {
+      "pattern": "$('#searchForm input[type=\"text\"]').keypress(function(e) { if (e.which == 13) { e.preventDefault(); $('#btnSearch').click(); } });",
+      "description": "Trigger search on Enter key in text fields"
+    },
+    "autoSearchOnChange": {
+      "dropdowns": "$('#OwnerId, #OperatorId').on('change', function() { dataTable.ajax.reload(); });",
+      "checkboxes": "$('#IsActiveOnly, #FuelSuppliersOnly').on('change', function() { dataTable.ajax.reload(); });",
+      "description": "Optional: Automatically trigger search when filters change"
+    },
+    "editButtonHandler": {
+      "pattern": "$(document).on('click', '.btn-edit', function(e) { var id = $(this).data('id'); window.location.href = '/VendorSearch/Edit/' + id; });",
+      "description": "Navigate to edit page on button click"
+    },
+    "rowDoubleClickHandler": {
+      "pattern": "$('#vendorTable tbody').on('dblclick', 'tr', function() { var row = dataTable.row(this).data(); window.location.href = '/VendorSearch/Edit/' + row.vendorId; });",
+      "description": "Navigate to edit page on row double-click"
+    },
+    "actionsButtonHandler": {
+      "pattern": "Show modal with options for Activate/Deactivate/Delete",
+      "implementation": "Use shared modal function (showRecordActions) for consistency",
+      "ajax": {
+        "activateEndpoint": "/VendorSearch/SetActive",
+        "deleteEndpoint": "/VendorSearch/Delete",
+        "successCallback": "Reload table and show success message",
+        "errorCallback": "Show error message"
+      }
+    }
+  },
+  "viewModelStructure": {
+    "searchViewModel": {
+      "name": "VendorSearchViewModel",
+      "location": "src/BargeOps.UI/Models/VendorSearchViewModel.cs",
+      "namespace": "BargeOpsAdmin.ViewModels",
+      "properties": [
+        "string Name { get; set; }",
+        "string AccountingCode { get; set; }",
+        "bool IsActiveOnly { get; set; } = true;",
+        "bool FuelSuppliersOnly { get; set; }",
+        "bool InternalVendorOnly { get; set; }",
+        "bool IsBargeExEnabledOnly { get; set; }",
+        "bool EnablePortalOnly { get; set; }",
+        "bool LiquidBrokerOnly { get; set; }",
+        "bool TankermanOnly { get; set; }",
+        "bool HasBargeExLicense { get; set; }",
+        "bool HasPortalLicense { get; set; }",
+        "bool HasUnitTowLicense { get; set; }"
+      ],
+      "displayAttributes": "Use [Display(Name = \"...\")] for label text"
+    }
+  },
+  "controllerStructure": {
+    "name": "VendorSearchController",
+    "location": "src/BargeOps.UI/Controllers/VendorSearchController.cs",
+    "namespace": "BargeOpsAdmin.Controllers",
+    "inheritsFrom": "AppController",
+    "actions": [
+      {
+        "name": "Index",
+        "httpMethod": "GET",
+        "returns": "View with VendorSearchViewModel",
+        "description": "Main search page"
+      },
+      {
+        "name": "VendorTable",
+        "httpMethod": "POST",
+        "parameters": "DataTableRequest with search criteria",
+        "returns": "JsonResult with DataTableResponse",
+        "description": "Server-side DataTable endpoint"
+      },
+      {
+        "name": "Create",
+        "httpMethod": "GET",
+        "returns": "View with VendorEditViewModel",
+        "description": "New vendor form"
+      },
+      {
+        "name": "Edit",
+        "httpMethod": "GET",
+        "parameters": "int id",
+        "returns": "View with VendorEditViewModel",
+        "description": "Edit vendor form"
+      },
+      {
+        "name": "Edit",
+        "httpMethod": "POST",
+        "parameters": "VendorEditViewModel",
+        "returns": "RedirectToAction or View with validation errors",
+        "description": "Save vendor changes"
+      },
+      {
+        "name": "SetActive",
+        "httpMethod": "POST",
+        "parameters": "int vendorId, bool value",
+        "returns": "JsonResult with success/error",
+        "description": "Activate/deactivate vendor"
+      },
+      {
+        "name": "Delete",
+        "httpMethod": "POST",
+        "parameters": "int id",
+        "returns": "JsonResult with success/error",
+        "description": "Delete vendor"
+      }
+    ]
+  },
+  "viewStructure": {
+    "indexView": {
+      "location": "src/BargeOps.UI/Views/VendorSearch/Index.cshtml",
+      "model": "@model BargeOpsAdmin.ViewModels.VendorSearchViewModel",
+      "structure": [
+        "Container-fluid wrapper",
+        "Page title (H2) and horizontal rule",
+        "Success message display (TempData)",
+        "Partial view _Search for search criteria",
+        "Partial view _SearchResults for grid"
+      ],
+      "scriptsSection": "Include vendorSearch.js and any global settings"
+    },
+    "searchPartial": {
+      "location": "src/BargeOps.UI/Views/VendorSearch/_Search.cshtml",
+      "model": "@model BargeOpsAdmin.ViewModels.VendorSearchViewModel",
+      "structure": [
+        "Card wrapper",
+        "Form with id='searchForm'",
+        "Button row (Search, Clear, Add)",
+        "Field rows using Bootstrap grid",
+        "Checkbox row with form-check-inline",
+        "Conditional rendering based on license properties"
+      ]
+    },
+    "searchResultsPartial": {
+      "location": "src/BargeOps.UI/Views/VendorSearch/_SearchResults.cshtml",
+      "structure": [
+        "Card wrapper",
+        "table-responsive div",
+        "Table with thead containing column headers",
+        "Empty tbody (populated by DataTables)"
+      ]
+    }
+  },
+  "conditionalVisibility": {
+    "bargeExCheckbox": {
+      "condition": "Model.HasBargeExLicense",
+      "razorSyntax": "@if (Model.HasBargeExLicense) { <div class=\"form-check form-check-inline\">...</div> }",
+      "gridColumn": "Conditionally include BargeEx column in table header"
+    },
+    "portalCheckbox": {
+      "condition": "Model.HasPortalLicense",
+      "razorSyntax": "@if (Model.HasPortalLicense) { <div class=\"form-check form-check-inline\">...</div> }",
+      "gridColumn": "Conditionally include Portal column in table header"
+    },
+    "unitTowCheckboxes": {
+      "condition": "Model.HasUnitTowLicense",
+      "controls": ["LiquidBrokerOnly", "TankermanOnly"],
+      "razorSyntax": "@if (Model.HasUnitTowLicense) { /* render checkboxes */ }",
+      "gridColumns": "Conditionally include Liquid Broker and Tankerman columns"
+    },
+    "javascriptHandling": {
+      "dataTableColumns": "Only include column definitions for visible columns based on server-side flags",
+      "searchData": "Only include search criteria that are visible"
+    }
+  },
+  "stylingGuidance": {
+    "bootstrapVersion": "Bootstrap 5",
+    "colorScheme": {
+      "primary": "btn-primary for main actions (Search)",
+      "secondary": "btn-outline-secondary for secondary actions (Reset)",
+      "success": "btn-success for create actions (Add)"
+    },
+    "spacing": {
+      "cardMargin": "mb-3 or mb-4 between cards",
+      "buttonMargin": "me-2 for horizontal button spacing",
+      "rowMargin": "mb-3 between form rows"
+    },
+    "responsiveDesign": {
+      "mobileFirst": "Use col-12 as base, then col-md-* for tablet/desktop",
+      "tableResponsive": "table-responsive ensures horizontal scroll on mobile",
+      "buttonStacking": "Buttons may wrap on mobile devices"
+    },
+    "customCSS": {
+      "minimal": "Avoid custom CSS; use Bootstrap classes",
+      "exceptions": "Only create custom styles for truly unique requirements",
+      "location": "wwwroot/css/vendorSearch.css (if absolutely necessary)"
+    }
+  },
+  "accessibilityRequirements": {
+    "labels": {
+      "required": "All form controls must have associated labels",
+      "implementation": "Use asp-for tag helper to automatically generate for attribute",
+      "visuallyHidden": "Use visually-hidden class for screen-reader-only labels if needed"
+    },
+    "ariaAttributes": {
+      "ariaLabel": "Add aria-label to buttons with only icons",
+      "ariaRequired": "Add aria-required=\"true\" to required fields",
+      "ariaInvalid": "Handled automatically by jQuery validate"
+    },
+    "keyboardNavigation": {
+      "tabIndex": "Ensure logical tab order through form",
+      "enterKey": "Support Enter key to submit search",
+      "escapeKey": "Consider Escape key to close modals"
+    },
+    "colorContrast": {
+      "buttons": "Bootstrap default colors meet WCAG AA standards",
+      "text": "Ensure sufficient contrast for all text elements"
+    }
+  },
+  "validationPatterns": {
+    "clientSide": {
+      "library": "jQuery Validate + Unobtrusive Validation",
+      "implementation": "Add data-val-* attributes via DataAnnotations",
+      "display": "Use validation-summary-errors and field-validation-error classes"
+    },
+    "serverSide": {
+      "modelState": "Check ModelState.IsValid in controller",
+      "errorDisplay": "Return view with ModelState errors, validation summary displays them"
+    }
+  },
+  "dataTableServerSidePattern": {
+    "requestDto": {
+      "name": "DataTableRequest",
+      "location": "Shared/Dto/DataTableRequest.cs",
+      "properties": [
+        "int Draw { get; set; }",
+        "int Start { get; set; }",
+        "int Length { get; set; }",
+        "List<DataTableColumn> Columns { get; set; }",
+        "List<DataTableOrder> Order { get; set; }",
+        "DataTableSearch Search { get; set; }",
+        "// Search criteria properties",
+        "string Name { get; set; }",
+        "string AccountingCode { get; set; }",
+        "bool IsActiveOnly { get; set; }",
+        "bool FuelSuppliersOnly { get; set; }",
+        "// ... other criteria"
+      ]
+    },
+    "responseDto": {
+      "name": "DataTableResponse<VendorDto>",
+      "location": "Shared/Dto/DataTableResponse.cs",
+      "properties": [
+        "int Draw { get; set; }",
+        "int RecordsTotal { get; set; }",
+        "int RecordsFiltered { get; set; }",
+        "List<VendorDto> Data { get; set; }"
+      ]
+    },
+    "vendorDto": {
+      "name": "VendorDto",
+      "properties": [
+        "int VendorId { get; set; }",
+        "string Name { get; set; }",
+        "string LongName { get; set; }",
+        "string AccountingCode { get; set; }",
+        "bool IsActive { get; set; }",
+        "bool IsFuelSupplier { get; set; }",
+        "bool IsBoatAssistSupplier { get; set; }",
+        "bool IsInternalVendor { get; set; }",
+        "bool IsBargeExEnabled { get; set; }",
+        "bool EnablePortal { get; set; }",
+        "bool IsLiquidBroker { get; set; }",
+        "bool IsTankerman { get; set; }"
+      ]
+    },
+    "controllerImplementation": {
+      "pattern": "Call service layer with DataTableRequest, return DataTableResponse",
+      "filtering": "Apply search criteria filters",
+      "sorting": "Apply column sorting based on Order property",
+      "paging": "Apply Skip and Take based on Start and Length",
+      "totalCounts": "Return RecordsTotal (total without filters) and RecordsFiltered (total with filters)"
+    }
+  },
+  "commonMistakes": {
+    "dateTimeControls": {
+      "error": "Using single datetime-local input instead of split date + time",
+      "correct": "MUST split into separate date (type=\"date\") and time (type=\"time\") inputs",
+      "note": "NOT APPLICABLE TO VENDOR SEARCH (no datetime fields)"
+    },
+    "dropdowns": {
+      "error": "Not using Select2 for enhanced dropdowns",
+      "correct": "Always use Select2 for dropdowns with search/clear functionality"
+    },
+    "grids": {
+      "error": "Using custom jQuery tables instead of DataTables",
+      "correct": "MUST use DataTables for all grids with server-side processing"
+    },
+    "styling": {
+      "error": "Using inline styles or custom CSS unnecessarily",
+      "correct": "Use Bootstrap 5 classes exclusively"
+    },
+    "accessibility": {
+      "error": "Missing labels or for attributes",
+      "correct": "Use asp-for tag helper to automatically generate proper labels and for attributes"
+    }
+  },
+  "implementationChecklist": [
+    "Create VendorSearchViewModel with all search criteria properties and license flags",
+    "Create VendorDto with all grid column properties",
+    "Create DataTableRequest extension with Vendor search criteria",
+    "Create VendorSearchController inheriting from AppController",
+    "Implement Index action to return VendorSearchViewModel",
+    "Implement VendorTable action for server-side DataTable processing",
+    "Implement Create/Edit/SetActive/Delete actions",
+    "Create Index.cshtml with page structure",
+    "Create _Search.cshtml partial with search form and buttons",
+    "Create _SearchResults.cshtml partial with DataTable HTML",
+    "Create vendorSearch.js with DataTable initialization and event handlers",
+    "Add conditional visibility for license-based features (BargeEx, Portal, UnitTow)",
+    "Implement server-side filtering, sorting, and paging logic",
+    "Add validation for edit forms (if applicable)",
+    "Test responsive behavior on mobile/tablet/desktop",
+    "Test keyboard navigation and accessibility",
+    "Test state saving/restoration in localStorage",
+    "Test all search criteria combinations",
+    "Test Activate/Deactivate/Delete actions",
+    "Verify proper error handling and user feedback"
+  ],
+  "referenceFiles": {
+    "boatLocationSearch": {
+      "javascript": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js",
+      "indexView": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\Index.cshtml",
+      "searchPartial": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\_Search.cshtml",
+      "resultsPartial": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\_SearchResults.cshtml",
+      "description": "Complete working example of search form with DataTables and conditional visibility"
+    }
+  },
+  "notes": [
+    "Vendor search form has NO datetime fields, so no date/time splitting required",
+    "Multiple conditional visibility requirements based on licenses (BargeEx, Portal, UnitTow)",
+    "Search form has 8 checkbox filters plus 2 text inputs",
+    "Grid has 11 columns with 4 conditional columns based on licenses",
+    "Follow exact pattern from boatLocationSearch.js for DataTable initialization",
+    "Use form-check-inline for horizontal checkbox layout",
+    "Actions column should be first column with Edit and Actions buttons",
+    "Boolean columns render as disabled checkboxes in grid",
+    "Support double-click on row to navigate to edit page",
+    "Implement state saving with versioned localStorage key",
+    "Clear legacy localStorage keys on version change to prevent column mismatch",
+    "Use Bootstrap 5 responsive grid (col-12 col-md-*) for mobile-first design",
+    "All form controls must have proper labels and accessibility attributes",
+    "Use asp-for tag helper throughout for automatic label/input association",
+    "Implement server-side processing with proper filtering, sorting, and paging",
+    "Return DataTableResponse with Draw, RecordsTotal, RecordsFiltered, and Data",
+    "Add TempData success message support in Index view",
+    "Use partial views for clean separation of search criteria and results",
+    "Include Font Awesome icons for all buttons (fa-search, fa-undo, fa-plus, fa-pencil-alt, fa-ban)",
+    "Implement showRecordActions modal pattern for Activate/Deactivate/Delete actions",
+    "Use jQuery for all client-side interactions (search, reset, double-click, etc.)",
+    "Ensure Enter key in text fields triggers search",
+    "Optional: Auto-search on dropdown/checkbox change for better UX",
+    "Test all conditional visibility scenarios based on license flags",
+    "Verify grid columns match conditional visibility of checkboxes"
+  ]
+}

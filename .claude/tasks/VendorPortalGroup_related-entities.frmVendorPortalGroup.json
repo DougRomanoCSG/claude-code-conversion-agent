@@ -1,0 +1,648 @@
+{
+  "parentEntity": "VendorPortalGroup",
+  "parentKey": "VendorPortalGroupID",
+  "softDelete": true,
+  "hasIsActive": true,
+  "parentRelationships": [
+    {
+      "property": "VendorID",
+      "relatedEntity": "Vendor",
+      "relationshipType": "ManyToOne",
+      "foreignKey": "VendorID",
+      "required": true,
+      "displayProperty": "VendorName",
+      "description": "Parent vendor that owns this portal group"
+    }
+  ],
+  "relationships": [
+    {
+      "relatedEntity": "VendorPortalGroupCustomer",
+      "relationshipType": "OneToMany",
+      "parentProperty": "VendorPortalGroupCustomers",
+      "childProperty": "VendorPortalGroup",
+      "foreignKey": "VendorPortalGroupID",
+      "cascadeDelete": true,
+      "hardDelete": true,
+      "gridName": "grdCustomers",
+      "tabName": "Customers",
+      "tabIndex": 5,
+      "gridColumns": [
+        {
+          "key": "IncludeCustomer",
+          "header": "Include",
+          "type": "Boolean",
+          "editable": true,
+          "width": 25
+        },
+        {
+          "key": "Name",
+          "header": "Customer #",
+          "type": "String",
+          "editable": false,
+          "width": 100
+        },
+        {
+          "key": "CustomerID",
+          "header": "CustomerID",
+          "type": "Int32",
+          "hidden": true
+        }
+      ],
+      "operations": {
+        "add": "NewVendorPortalGroupCustomer",
+        "remove": "Remove from collection",
+        "update": "Not applicable - checkbox selection only",
+        "pattern": "Checkbox-based inclusion/exclusion"
+      },
+      "childEntityProperties": [
+        {
+          "name": "VendorPortalGroupCustomerID",
+          "type": "Int32",
+          "isPrimaryKey": true
+        },
+        {
+          "name": "VendorPortalGroupID",
+          "type": "Int32",
+          "isForeignKey": true
+        },
+        {
+          "name": "CustomerID",
+          "type": "Int32",
+          "isForeignKey": true,
+          "lookupEntity": "Customer"
+        },
+        {
+          "name": "Name",
+          "type": "String",
+          "isCalculated": true,
+          "description": "Customer name loaded for display"
+        },
+        {
+          "name": "IncludeCustomer",
+          "type": "Boolean",
+          "description": "Flag for inclusion in portal group"
+        }
+      ],
+      "conditionalBehavior": {
+        "enabledWhen": "VendorPortalGroup.LimitCustomers = true",
+        "clearWhen": "VendorPortalGroup.LimitCustomers = false",
+        "description": "Collection cleared on save if limiting is disabled"
+      },
+      "dataSource": "CustomerList.ActiveList",
+      "loadMethod": "VendorPortalGroupCustomersSelect (SP)",
+      "tabCountLogic": "Count of items or 'All' if not limited"
+    },
+    {
+      "relatedEntity": "VendorPortalGroupCriteria",
+      "relationshipType": "OneToMany",
+      "parentProperty": "VendorPortalGroupCriterias",
+      "childProperty": "VendorPortalGroup",
+      "foreignKey": "VendorPortalGroupID",
+      "cascadeDelete": true,
+      "hardDelete": true,
+      "gridName": "grdCriteria",
+      "tabName": "SearchCriteria",
+      "tabIndex": 1,
+      "gridColumns": [
+        {
+          "key": "IncludeCriteria",
+          "header": "Include",
+          "type": "Boolean",
+          "editable": true,
+          "width": 25
+        },
+        {
+          "key": "Name",
+          "header": "Criteria",
+          "type": "String",
+          "editable": false,
+          "width": 100
+        },
+        {
+          "key": "Ordinal",
+          "header": "Ordinal",
+          "type": "Int32",
+          "hidden": true
+        }
+      ],
+      "operations": {
+        "add": "AddAllCriteria (initializes all criteria items)",
+        "update": "Toggle IncludeCriteria property",
+        "reorder": "MoveUp/MoveDown methods",
+        "pattern": "Checkbox-based inclusion with ordinal sequencing"
+      },
+      "childEntityProperties": [
+        {
+          "name": "VendorPortalGroupCriteriaID",
+          "type": "Int32",
+          "isPrimaryKey": true
+        },
+        {
+          "name": "VendorPortalGroupID",
+          "type": "Int32",
+          "isForeignKey": true
+        },
+        {
+          "name": "Name",
+          "type": "String",
+          "maxLength": 50,
+          "description": "Search criteria name"
+        },
+        {
+          "name": "Ordinal",
+          "type": "Int32",
+          "description": "Display order of criteria"
+        },
+        {
+          "name": "IncludeCriteria",
+          "type": "Boolean",
+          "description": "Flag indicating whether this criteria is included"
+        }
+      ],
+      "constants": {
+        "SearchCriteriaList": [
+          "Barge number",
+          "Load status",
+          "Origin facility",
+          "Destination area",
+          "Destination facility",
+          "Location status",
+          "Barge size",
+          "Hull type",
+          "Current location",
+          "Commodity"
+        ]
+      },
+      "specialFeatures": [
+        "All criteria items always present in collection",
+        "Reorderable via Move Up/Down buttons",
+        "Ordinal determines display sequence in portal search"
+      ],
+      "dataSource": "VendorPortalGroupCriterias collection",
+      "loadMethod": "VendorPortalGroupCriteriasSelect (SP)",
+      "tabCountLogic": "Count of criteria where IncludeCriteria = true"
+    },
+    {
+      "relatedEntity": "VendorPortalGroupDestArea",
+      "relationshipType": "OneToMany",
+      "parentProperty": "VendorPortalGroupDestAreas",
+      "childProperty": "VendorPortalGroup",
+      "foreignKey": "VendorPortalGroupID",
+      "cascadeDelete": true,
+      "hardDelete": true,
+      "gridName": "grdDestAreas",
+      "tabName": "DestRiverAreas",
+      "tabIndex": 4,
+      "gridColumns": [
+        {
+          "key": "IncludeDestArea",
+          "header": "Include",
+          "type": "Boolean",
+          "editable": true,
+          "width": 25
+        },
+        {
+          "key": "RiverAreaName",
+          "header": "River Area",
+          "type": "String",
+          "editable": false,
+          "width": 100
+        },
+        {
+          "key": "RiverAreaID",
+          "header": "RiverAreaID",
+          "type": "Int32",
+          "hidden": true
+        }
+      ],
+      "operations": {
+        "add": "NewVendorPortalGroupDestArea",
+        "remove": "Remove from collection",
+        "update": "Not applicable - checkbox selection only",
+        "pattern": "Checkbox-based inclusion/exclusion"
+      },
+      "childEntityProperties": [
+        {
+          "name": "VendorPortalGroupDestAreaID",
+          "type": "Int32",
+          "isPrimaryKey": true
+        },
+        {
+          "name": "VendorPortalGroupID",
+          "type": "Int32",
+          "isForeignKey": true
+        },
+        {
+          "name": "RiverAreaID",
+          "type": "Int32",
+          "isForeignKey": true,
+          "lookupEntity": "RiverArea"
+        },
+        {
+          "name": "IncludeDestArea",
+          "type": "Boolean",
+          "description": "Flag for inclusion/exclusion in portal"
+        }
+      ],
+      "conditionalBehavior": {
+        "enabledWhen": "VendorPortalGroup.LimitDestinationAreas = true",
+        "clearWhen": "VendorPortalGroup.LimitDestinationAreas = false",
+        "description": "Collection cleared on save if limiting is disabled"
+      },
+      "dataSource": "RiverAreaList.ActivePortalAreaList",
+      "loadMethod": "VendorPortalGroupDestAreasSelect (SP)",
+      "tabCountLogic": "Count of items or 'All' if not limited"
+    },
+    {
+      "relatedEntity": "VendorPortalGroupEvent",
+      "relationshipType": "OneToMany",
+      "parentProperty": "VendorPortalGroupEvents",
+      "childProperty": "VendorPortalGroup",
+      "foreignKey": "VendorPortalGroupID",
+      "cascadeDelete": true,
+      "hardDelete": true,
+      "gridName": "grdEvents",
+      "tabName": "BargeEvents",
+      "tabIndex": 2,
+      "gridColumns": [
+        {
+          "key": "IncludeEvent",
+          "header": "Include",
+          "type": "Boolean",
+          "editable": true,
+          "width": 25
+        },
+        {
+          "key": "EventName",
+          "header": "Event",
+          "type": "String",
+          "editable": false,
+          "width": 100
+        }
+      ],
+      "operations": {
+        "add": "NewVendorPortalGroupEvent",
+        "remove": "Remove from collection",
+        "update": "Not applicable - checkbox selection only",
+        "pattern": "Checkbox-based inclusion/exclusion"
+      },
+      "childEntityProperties": [
+        {
+          "name": "VendorPortalGroupEventID",
+          "type": "Int32",
+          "isPrimaryKey": true
+        },
+        {
+          "name": "VendorPortalGroupID",
+          "type": "Int32",
+          "isForeignKey": true
+        },
+        {
+          "name": "EventName",
+          "type": "String",
+          "description": "Name of the barge event"
+        },
+        {
+          "name": "IncludeEvent",
+          "type": "Boolean",
+          "description": "Flag for inclusion/exclusion in portal"
+        }
+      ],
+      "conditionalBehavior": {
+        "enabledWhen": "VendorPortalGroup.LimitBargeEvents = true",
+        "clearWhen": "VendorPortalGroup.LimitBargeEvents = false",
+        "description": "Collection cleared on save if limiting is disabled"
+      },
+      "dataSource": "EventTypeList",
+      "loadMethod": "VendorPortalGroupEventsSelect (SP)",
+      "tabCountLogic": "Count of items or 'All' if not limited"
+    },
+    {
+      "relatedEntity": "VendorPortalGroupUser",
+      "relationshipType": "OneToMany",
+      "parentProperty": "VendorPortalGroupUsers",
+      "childProperty": "VendorPortalGroup",
+      "foreignKey": "VendorPortalGroupID",
+      "cascadeDelete": true,
+      "hardDelete": true,
+      "gridName": "grdUsers",
+      "tabName": "Contacts",
+      "tabIndex": 0,
+      "gridColumns": [
+        {
+          "key": "IncludeContact",
+          "header": "Include",
+          "type": "Boolean",
+          "editable": true,
+          "width": 25
+        },
+        {
+          "key": "ContactName",
+          "header": "Contact",
+          "type": "String",
+          "editable": false,
+          "width": 100
+        },
+        {
+          "key": "ContactEmailAddress",
+          "header": "Email Address",
+          "type": "String",
+          "editable": false,
+          "width": 100,
+          "hidden": true
+        },
+        {
+          "key": "VendorContactID",
+          "header": "VendorContactID",
+          "type": "Int32",
+          "hidden": true
+        }
+      ],
+      "operations": {
+        "add": "NewVendorPortalGroupUser",
+        "remove": "Remove from collection",
+        "update": "Not applicable - checkbox selection only",
+        "pattern": "Checkbox-based inclusion/exclusion",
+        "specialAction": "Email Portal Info to selected contact"
+      },
+      "childEntityProperties": [
+        {
+          "name": "VendorPortalGroupUserID",
+          "type": "Int32",
+          "isPrimaryKey": true
+        },
+        {
+          "name": "VendorPortalGroupID",
+          "type": "Int32",
+          "isForeignKey": true
+        },
+        {
+          "name": "VendorContactID",
+          "type": "Int32",
+          "isForeignKey": true,
+          "lookupEntity": "VendorContact"
+        },
+        {
+          "name": "ContactName",
+          "type": "String",
+          "isCalculated": true,
+          "description": "Vendor contact name loaded for display"
+        },
+        {
+          "name": "ContactEmailAddress",
+          "type": "String",
+          "isCalculated": true,
+          "description": "Vendor contact email loaded for display"
+        },
+        {
+          "name": "IncludeContact",
+          "type": "Boolean",
+          "description": "Flag for inclusion in portal group"
+        }
+      ],
+      "conditionalBehavior": {
+        "enabledWhen": "Always enabled",
+        "description": "Users are NOT cleared when portal group is saved"
+      },
+      "dataSource": "Vendor.VendorContacts",
+      "loadMethod": "VendorPortalGroupUsersSelect (SP)",
+      "tabCountLogic": "Count of users in group or 'All'",
+      "specialFeatures": [
+        "Users removed when copying portal group (CopyVendorPortalGroup)",
+        "Email Portal Info button available for selected user"
+      ]
+    },
+    {
+      "relatedEntity": "VendorPortalGroupDestFacility",
+      "relationshipType": "OneToMany",
+      "parentProperty": "VendorPortalGroupDestFacilities",
+      "childProperty": "VendorPortalGroup",
+      "foreignKey": "VendorPortalGroupID",
+      "cascadeDelete": true,
+      "hardDelete": true,
+      "gridName": "grdDestFacilities",
+      "tabName": "DestFacilities",
+      "tabIndex": 3,
+      "gridColumns": [
+        {
+          "key": "IncludeDestFacility",
+          "header": "Include",
+          "type": "Boolean",
+          "editable": true,
+          "width": 25
+        },
+        {
+          "key": "FacilityName",
+          "header": "Facility",
+          "type": "String",
+          "editable": false,
+          "width": 100
+        },
+        {
+          "key": "FacilityID",
+          "header": "FacilityID",
+          "type": "Int32",
+          "hidden": true
+        }
+      ],
+      "operations": {
+        "add": "NewVendorPortalGroupDestFacility",
+        "remove": "Remove from collection",
+        "update": "Not applicable - checkbox selection only",
+        "pattern": "Checkbox-based inclusion/exclusion"
+      },
+      "childEntityProperties": [
+        {
+          "name": "VendorPortalGroupDestFacilityID",
+          "type": "Int32",
+          "isPrimaryKey": true
+        },
+        {
+          "name": "VendorPortalGroupID",
+          "type": "Int32",
+          "isForeignKey": true
+        },
+        {
+          "name": "FacilityID",
+          "type": "Int32",
+          "isForeignKey": true,
+          "lookupEntity": "FacilityLocation"
+        },
+        {
+          "name": "IncludeDestFacility",
+          "type": "Boolean",
+          "description": "Flag for inclusion/exclusion in portal"
+        }
+      ],
+      "conditionalBehavior": {
+        "enabledWhen": "VendorPortalGroup.LimitDestinationFacilities = true",
+        "clearWhen": "VendorPortalGroup.LimitDestinationFacilities = false",
+        "description": "Collection cleared on save if limiting is disabled"
+      },
+      "dataSource": "FacilityLocationList.ActiveList",
+      "loadMethod": "VendorPortalGroupDestFacilitiesSelect (SP)",
+      "tabCountLogic": "Count of items or 'All' if not limited"
+    },
+    {
+      "relatedEntity": "VendorPortalGroupReport",
+      "relationshipType": "OneToMany",
+      "parentProperty": "VendorPortalGroupReports",
+      "childProperty": "VendorPortalGroup",
+      "foreignKey": "VendorPortalGroupID",
+      "cascadeDelete": true,
+      "hardDelete": true,
+      "gridName": "grdReports",
+      "tabName": "Reports",
+      "tabIndex": 6,
+      "gridColumns": [
+        {
+          "key": "IncludeReport",
+          "header": "Include",
+          "type": "Boolean",
+          "editable": true,
+          "width": 25
+        },
+        {
+          "key": "ReportName",
+          "header": "Report",
+          "type": "String",
+          "editable": false,
+          "width": 100
+        },
+        {
+          "key": "ReportID",
+          "header": "ReportID",
+          "type": "Int32",
+          "hidden": true
+        }
+      ],
+      "operations": {
+        "add": "NewVendorPortalGroupReport",
+        "remove": "Remove from collection",
+        "update": "Not applicable - checkbox selection only",
+        "pattern": "Checkbox-based inclusion/exclusion"
+      },
+      "childEntityProperties": [
+        {
+          "name": "VendorPortalGroupReportID",
+          "type": "Int32",
+          "isPrimaryKey": true
+        },
+        {
+          "name": "VendorPortalGroupID",
+          "type": "Int32",
+          "isForeignKey": true
+        },
+        {
+          "name": "ReportID",
+          "type": "Int32",
+          "isForeignKey": true,
+          "lookupEntity": "PortalReport"
+        },
+        {
+          "name": "IncludeReport",
+          "type": "Boolean",
+          "description": "Flag for report accessibility in portal"
+        }
+      ],
+      "conditionalBehavior": {
+        "enabledWhen": "Always enabled",
+        "description": "Reports are NOT cleared when portal group is saved"
+      },
+      "dataSource": "PortalReportList.ActiveList",
+      "loadMethod": "VendorPortalGroupReportsSelect (SP)",
+      "tabCountLogic": "Count of selected reports"
+    }
+  ],
+  "lookupRelationships": [],
+  "gridManagementPattern": {
+    "description": "All child entity grids use checkbox-based selection pattern",
+    "commonFeatures": [
+      "Inline checkbox editing (only checkbox column is editable)",
+      "Show Checked Only filter for all grids",
+      "Dynamic tab count display",
+      "CellChange events trigger immediate collection updates",
+      "No column headers visible",
+      "Checkbox selection adds/removes items from collections"
+    ],
+    "conditionalEnabling": [
+      "BargeEvents: enabled when LimitBargeEvents = true",
+      "DestFacilities: enabled when LimitDestinationFacilities = true",
+      "DestRiverAreas: enabled when LimitDestinationAreas = true",
+      "Customers: enabled when LimitCustomers = true"
+    ],
+    "collectionClearingLogic": "When limit checkbox is false, collection is cleared on save via ClearUnusedFields method"
+  },
+  "specialBusinessLogic": {
+    "copyVendorPortalGroup": {
+      "description": "Creates deep copy of portal group with all child collections except users",
+      "preservedCollections": [
+        "VendorPortalGroupCustomers",
+        "VendorPortalGroupCriterias",
+        "VendorPortalGroupDestAreas",
+        "VendorPortalGroupEvents",
+        "VendorPortalGroupDestFacilities",
+        "VendorPortalGroupReports"
+      ],
+      "clearedCollections": [
+        "VendorPortalGroupUsers"
+      ],
+      "modifications": "Appends ' - Copy' to Name property"
+    },
+    "emailPortalInfo": {
+      "description": "Sends portal login credentials to selected vendor contact",
+      "validation": [
+        "User must be selected in grdUsers",
+        "User must be checked (included in group)",
+        "User must have valid email address"
+      ],
+      "action": "Calls Main.EmailPortalInfo with contact email"
+    },
+    "searchCriteriaOrdering": {
+      "description": "Search criteria can be reordered to control display sequence in vendor portal",
+      "methods": [
+        "VendorPortalGroupCriterias.MoveUp",
+        "VendorPortalGroupCriterias.MoveDown"
+      ],
+      "ordinalField": "Ordinal property controls display sequence"
+    }
+  },
+  "modernDapperPattern": {
+    "entityClass": "VendorPortalGroup",
+    "childCollectionsLoadedSeparately": true,
+    "repositoryMethods": [
+      "Task<VendorPortalGroup> GetByIdAsync(int id)",
+      "Task<IEnumerable<VendorPortalGroupCustomer>> GetCustomersAsync(int vendorPortalGroupId)",
+      "Task<IEnumerable<VendorPortalGroupCriteria>> GetCriteriasAsync(int vendorPortalGroupId)",
+      "Task<IEnumerable<VendorPortalGroupDestArea>> GetDestAreasAsync(int vendorPortalGroupId)",
+      "Task<IEnumerable<VendorPortalGroupEvent>> GetEventsAsync(int vendorPortalGroupId)",
+      "Task<IEnumerable<VendorPortalGroupUser>> GetUsersAsync(int vendorPortalGroupId)",
+      "Task<IEnumerable<VendorPortalGroupDestFacility>> GetDestFacilitiesAsync(int vendorPortalGroupId)",
+      "Task<IEnumerable<VendorPortalGroupReport>> GetReportsAsync(int vendorPortalGroupId)"
+    ],
+    "serviceLayerComposition": "Service layer loads parent entity and composes with child collections as needed",
+    "dtoPattern": "Separate DTOs for parent and each child entity type",
+    "childCrudPattern": "Separate repository methods for each child entity CRUD operations"
+  },
+  "validationRules": {
+    "parent": [
+      {
+        "field": "Name",
+        "rules": ["Required", "MaxLength: 50"]
+      },
+      {
+        "field": "EventHistoryDays",
+        "rules": ["Required", "Must be >= 0"]
+      }
+    ],
+    "childEntities": "No specific validation rules documented for child entities"
+  },
+  "architecturalNotes": {
+    "deferredLoading": "All child collections use deferred loading - only loaded when accessed",
+    "transactionalIntegrity": "All child collection updates occur within single transaction",
+    "cascadeDelete": "All child entities use hard delete (not soft delete) with cascade from parent",
+    "checkboxPattern": "Unique checkbox-based selection pattern used across all 7 child entity grids",
+    "tabCountDisplay": "Real-time tab count updates driven by CellChange events",
+    "conditionalCollections": "Four collections (Events, DestAreas, DestFacilities, Customers) are conditionally managed based on limit flags"
+  }
+}

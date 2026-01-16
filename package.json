@@ -22,8 +22,7 @@
 		"gen-assets": "bun scripts/gen-assets.ts",
 		"lint": "biome check --write ./agents",
 		"format": "biome format --write ./agents",
-		"check": "biome check ./agents"
-		,
+		"check": "biome check ./agents",
 		"barge-master-plan": "bun run scripts/generate-barge-master-plan.ts"
 	},
 	"keywords": [
@@ -40,7 +39,10 @@
 	"license": "UNLICENSED",
 	"dependencies": {
 		"@anthropic-ai/claude-code": "latest",
-		"@anthropic-ai/sdk": "latest"
+		"@anthropic-ai/sdk": "latest",
+		"@types/prompts": "^2.4.9",
+		"diff": "^8.0.3",
+		"prompts": "^2.4.2"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "latest",

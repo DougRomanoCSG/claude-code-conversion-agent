@@ -326,126 +326,28 @@ async function runTemplateGenerator(options: GeneratorOptions): Promise<number> 
 	// Find image files for look-and-feel reference
 	const { images, imageMapping, tabImageMapping } = await findImageFiles(outputPath, options, mode);
 
-	// Build image references for the prompt
-	let imageReferences = "";
-	if (images.length > 0) {
-		imageReferences = `\n\n🚨 CRITICAL: WINFORMS SCREEN IMAGES AVAILABLE\n`;
-		imageReferences += `The following images show the original WinForms screens you are converting from.\n`;
-		imageReferences += `You MUST examine these images to ensure complete field coverage and accurate look-and-feel.\n\n`;
-		
-		if (imageMapping["search"] && imageMapping["search"].length > 0) {
-			imageReferences += `SEARCH SCREEN IMAGES:\n`;
-			imageMapping["search"].forEach(img => {
-				imageReferences += `- ${img}\n`;
-			});
-			imageReferences += `\n`;
-		}
-		
-		if (imageMapping["detail"] && imageMapping["detail"].length > 0) {
-			imageReferences += `DETAIL SCREEN IMAGES:\n`;
-			imageMapping["detail"].forEach(img => {
-				imageReferences += `- ${img}\n`;
-			});
-			imageReferences += `\n`;
-		}
-		
-		if (Object.keys(tabImageMapping).length > 0) {
-			imageReferences += `TAB-SPECIFIC IMAGES (matched to tab names):\n`;
-			for (const [tabName, tabImages] of Object.entries(tabImageMapping)) {
-				imageReferences += `  Tab: ${tabName}\n`;
-				tabImages.forEach(img => {
-					imageReferences += `    - ${img}\n`;
-				});
-			}
-			imageReferences += `\n`;
-		}
-		
-		if (imageMapping["general"] && imageMapping["general"].length > 0) {
-			imageReferences += `ADDITIONAL SCREEN IMAGES:\n`;
-			imageMapping["general"].forEach(img => {
-				imageReferences += `- ${img}\n`;
-			});
-			imageReferences += `\n`;
-		}
-		
-		imageReferences += `\nINSTRUCTIONS FOR USING IMAGES:\n`;
-		imageReferences += `1. Read and examine ALL images to understand the complete UI structure\n`;
-		imageReferences += `2. Verify that ALL fields visible in images are captured in your templates\n`;
-		imageReferences += `3. Match image file names to tab names/form names for child screens\n`;
-		imageReferences += `4. Document look-and-feel details: field grouping, label placement, spacing, visual hierarchy\n`;
-		imageReferences += `5. Ensure button placement, icons, and actions match what's shown in images\n`;
-		imageReferences += `6. Capture any child dialogs or popups visible in the images\n`;
-		imageReferences += `7. Note any visual patterns, colors, or styling shown in the images\n\n`;
-	}
+	const imageInfo = images.length > 0 ? `\n\nIMAGES: ${images.length} WinForms screenshots in ${outputPath}/ - Review all images for complete field coverage.` : "";
 
-	const systemPrompt = `
-${uiSystemPromptBase}
+	const systemPrompt = `You are a WinForms to ASP.NET Core MVC conversion specialist.
 
 TASK: Generate UI conversion templates for ${options.entity}.
+Input: Analysis JSON files in ${outputPath}/
+Output: ${outputPath}/conversion-plan-ui.md and Templates/ui/ (Controllers, Services, ViewModels, Views, JS)${imageInfo}
 
-INPUT DATA:
-You have access to analysis files in: ${outputPath}/
-${analysisFiles.map((f) => `- ${f}`).join("\n")}
-${optionalFiles.map((f) => `- ${f} (optional)`).join("\n")}
-${imageReferences}
+CRITICAL REQUIREMENTS:
+1. Include ALL detail screen buttons, dialogs, and child forms
+2. Follow BargeOps Crewing UI patterns from reference docs (UIStandards.md, DataTables.md, BargeOpsCrewUI.md)
+3. Use AppController base class, CrewingBaseService pattern, DataTables for grids
+4. Document look-and-feel: layout, grouping, spacing, visual hierarchy
+5. Reference: ${getCrewingUiPath()}
+6. Target: ${getAdminUiPath()}
 
-CREWING UI REFERENCE:
-- Crewing UI project: ${getCrewingUiPath()}
-
-GENERATION GOALS:
-1. Capture ALL detail-screen actions, buttons, dialogs, and child screens (CRITICAL).
-2. Follow BargeOps Crewing UI patterns EXACTLY (AppController, CrewingBaseService, DataTables).
-3. Document look-and-feel: layout groups, label placement, spacing, visual hierarchy.
-4. Generate UI templates only (Controllers, ViewModels, Views, JS).
-5. Include DataTables configuration following Crewing UI standards.
-6. Output comprehensive plan in conversion-plan-ui.md with all detail screen documentation.
-
-OUTPUT STRUCTURE:
-Primary file: ${outputPath}/conversion-plan-ui.md
-
-Templates:
-${outputPath}/Templates/
-└── ui/
-    ├── Controllers/
-    │   └── {Entity}Controller.cs
-    ├── Services/
-    │   ├── I{Entity}Service.cs
-    │   └── {Entity}Service.cs
-    ├── ViewModels/
-    │   ├── {Entity}SearchViewModel.cs
-    │   ├── {Entity}EditViewModel.cs
-    │   ├── {Entity}DetailsViewModel.cs
-    │   └── {Entity}ListItemViewModel.cs
-    ├── Views/
-    │   └── {Entity}/
-    │       ├── Index.cshtml
-    │       ├── Edit.cshtml
-    │       └── Details.cshtml
-    └── wwwroot/
-        └── js/
-            ├── {entity}-search.js
-            └── {entity}-detail.js
-
-${getDetailedReferenceExamples()}
-
-TARGET PROJECTS:
-⭐ UI: ${getAdminUiPath()}
-
-IMPORTANT:
-- Do NOT generate Shared or API templates in this run.
-- Include ALL detail screen buttons, dialogs, and child forms (CRITICAL).
-- Follow BargeOps Crewing UI architecture patterns from UIStandards.md.
-- Use DataTables pattern from DataTables.md.
-- Follow button and form patterns from BargeOpsCrewUI.md.
-- Document look-and-feel for all UI elements.
-
-Begin template generation now.
-`;
+Generate conversion plan and templates now.`;
 
 	const baseFlags = {
 		settings: settingsJson,
 		"mcp-config": mcpConfigPath,
-		"append-system-prompt": systemPrompt,
+		"system-prompt": systemPrompt,
 	} as const;
 
 	const flags = buildClaudeFlags({ ...baseFlags }, parsedArgs.values as ClaudeFlags);
@@ -454,7 +356,7 @@ Begin template generation now.
 	const args = [...flags, initialPrompt];
 
 	const imageCount = images.length;
-	const imageInfo = imageCount > 0 
+	const imageDisplayInfo = imageCount > 0
 		? `║  Images: ${imageCount} WinForms screen image(s) found for look-and-feel${" ".padEnd(25, " ")}║\n`
 		: "";
 
@@ -464,7 +366,7 @@ Begin template generation now.
 ║                                                                            ║
 ║  Entity: ${options.entity.padEnd(68, " ")}║
 ║  Output: ${outputPath.padEnd(67, " ")}║
-${imageInfo}╚════════════════════════════════════════════════════════════════════════════╝
+${imageDisplayInfo}╚════════════════════════════════════════════════════════════════════════════╝
 	`);
 	
 	if (imageCount > 0) {

@@ -1,0 +1,611 @@
+{
+  "entity": "Vendor",
+  "legacy": {
+    "formName": "frmVendorSearch",
+    "subsystem": "frmVendorSearch",
+    "securityInitialization": {
+      "method": "Initialize",
+      "call": "InitializeBase(SubSystem.frmVendorSearch)",
+      "description": "IBaseSearch implementation - Initialize form subsystem and security via ControlAuthorization"
+    },
+    "securityButtons": [
+      {
+        "button": "btnFind",
+        "type": "Open",
+        "legacyPermission": "View",
+        "description": "Execute search with current criteria",
+        "action": "RefreshList",
+        "requiresAuthentication": true
+      },
+      {
+        "button": "btnReset",
+        "type": "Open",
+        "legacyPermission": "View",
+        "description": "Reset search criteria to defaults",
+        "action": "ResetControls",
+        "requiresAuthentication": true
+      },
+      {
+        "button": "Main Form Add Button",
+        "type": "New",
+        "legacyPermission": "CanCreate",
+        "description": "Open frmVendorDetail to create new vendor",
+        "action": "ItemAdd",
+        "childForm": "frmVendorDetail",
+        "requiresAuthentication": true
+      },
+      {
+        "button": "Main Form Edit Button",
+        "type": "Open",
+        "legacyPermission": "CanModify",
+        "description": "Open frmVendorDetail to edit selected vendor",
+        "action": "ItemModify",
+        "childForm": "frmVendorDetail",
+        "requiresAuthentication": true
+      },
+      {
+        "button": "Main Form Delete Button",
+        "type": "Remove",
+        "legacyPermission": "CanDelete",
+        "description": "Delete selected vendor",
+        "action": "ItemRemove",
+        "requiresAuthentication": true
+      },
+      {
+        "button": "Grid Double-Click",
+        "type": "Open",
+        "legacyPermission": "CanModify",
+        "description": "Open frmVendorDetail to edit selected vendor on grid double-click",
+        "action": "ItemModify",
+        "childForm": "frmVendorDetail",
+        "requiresAuthentication": true
+      }
+    ],
+    "detailFormSecurity": {
+      "formName": "frmVendorDetail",
+      "securityButtons": [
+        {
+          "button": "btnSubmit",
+          "type": "Submit",
+          "legacyPermission": "CanCreate or CanModify",
+          "description": "Save vendor and all child collections",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "btnCancel",
+          "type": "Cancel",
+          "legacyPermission": "View",
+          "description": "Cancel changes and close form",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "ContactsToolbar.Add",
+          "type": "Add",
+          "legacyPermission": "CanModifyChildren",
+          "description": "Add new contact to vendor",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "ContactsToolbar.Modify",
+          "type": "Open",
+          "legacyPermission": "CanModifyChildren",
+          "description": "Edit selected contact",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "ContactsToolbar.Remove",
+          "type": "Remove",
+          "legacyPermission": "CanDeleteChildren",
+          "description": "Remove selected contact",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "ContactsToolbar.Export",
+          "type": "Export",
+          "legacyPermission": "CanExport",
+          "description": "Export contacts to Excel",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "PortalToolbar.AddPortalGroup",
+          "type": "Add",
+          "legacyPermission": "CanModifyChildren",
+          "description": "Add new portal group",
+          "childForm": "frmVendorPortalGroup",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "PortalToolbar.ModifyPortalGroup",
+          "type": "Open",
+          "legacyPermission": "CanModifyChildren",
+          "description": "Edit selected portal group",
+          "childForm": "frmVendorPortalGroup",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "PortalToolbar.RemovePortalGroup",
+          "type": "Remove",
+          "legacyPermission": "CanDeleteChildren",
+          "description": "Delete selected portal group",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "PortalToolbar.CopyPortalGroup",
+          "type": "Add",
+          "legacyPermission": "CanModifyChildren",
+          "description": "Copy selected portal group",
+          "childForm": "frmVendorPortalGroup",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "PortalToolbar.Export",
+          "type": "Export",
+          "legacyPermission": "CanExport",
+          "description": "Export portal groups to Excel",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "VendorBusinessUnitsToolbar.AddVbu",
+          "type": "Add",
+          "legacyPermission": "CanModifyChildren",
+          "description": "Add new vendor business unit",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "VendorBusinessUnitsToolbar.ModifyVbu",
+          "type": "Open",
+          "legacyPermission": "CanModifyChildren",
+          "description": "Edit selected vendor business unit",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "VendorBusinessUnitsToolbar.RemoveVbu",
+          "type": "Remove",
+          "legacyPermission": "CanDeleteChildren",
+          "description": "Remove selected vendor business unit",
+          "requiresAuthentication": true
+        },
+        {
+          "button": "VendorBusinessUnitsToolbar.Export",
+          "type": "Export",
+          "legacyPermission": "CanExport",
+          "description": "Export vendor business units to Excel",
+          "requiresAuthentication": true
+        }
+      ]
+    },
+    "licenseBasedFeatures": [
+      {
+        "feature": "Portal",
+        "license": "Licenses.LicenseComponent.Portal",
+        "affectedControls": [
+          "chkEnablePortalOnly (search filter)",
+          "EnablePortal column (search grid)",
+          "Portal tab (detail form)",
+          "chkEnablePortal (detail form)",
+          "Portal Groups section (detail form)"
+        ],
+        "description": "Portal functionality requires Portal license"
+      },
+      {
+        "feature": "UnitTow (Liquid Broker/Tankerman)",
+        "license": "Licenses.LicenseComponent.UnitTow",
+        "affectedControls": [
+          "chkLiquidBrokerOnly (search filter)",
+          "chkTankermanOnly (search filter)",
+          "IsLiquidBroker column (search grid)",
+          "IsTankerman column (search grid)",
+          "chkIsLiquidBroker (detail form)",
+          "chkIsTankerman (detail form)",
+          "chkContactIsLiquidBroker (contact detail)",
+          "IsLiquidBroker column (contacts grid)"
+        ],
+        "description": "Liquid broker and tankerman features require UnitTow license"
+      },
+      {
+        "feature": "BargeEx",
+        "globalSetting": "Lists.GlobalSettingList.EnableBargeExBargeLineSupport",
+        "affectedControls": [
+          "chkIsBargeExEnabledOnly (search filter)",
+          "IsBargeExEnabled column (search grid)",
+          "BargeEx Settings tab (detail form)",
+          "chkIsBargeExEnabled (detail form)",
+          "txtBargeExTradingPartnerNum (detail form)",
+          "cboBargeExConfigID (detail form)"
+        ],
+        "description": "BargeEx functionality requires global setting enabled"
+      }
+    ]
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "description": "All API endpoints require API Key authentication. API keys configured in appsettings.json.",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/vendor/search",
+          "action": "Search",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorView",
+          "description": "Search vendors with filters"
+        },
+        {
+          "method": "GET",
+          "route": "api/vendor/{id}",
+          "action": "GetById",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorView",
+          "description": "Get vendor by ID with child collections"
+        },
+        {
+          "method": "POST",
+          "route": "api/vendor",
+          "action": "Create",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Create new vendor"
+        },
+        {
+          "method": "PUT",
+          "route": "api/vendor/{id}",
+          "action": "Update",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Update existing vendor"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/vendor/{id}",
+          "action": "Delete",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Delete vendor (soft delete via IsActive)"
+        },
+        {
+          "method": "PATCH",
+          "route": "api/vendor/{id}/active",
+          "action": "SetActive",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Activate or deactivate vendor"
+        },
+        {
+          "method": "GET",
+          "route": "api/vendor/{vendorId}/contacts",
+          "action": "GetContacts",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorView",
+          "description": "Get contacts for vendor"
+        },
+        {
+          "method": "POST",
+          "route": "api/vendor/{vendorId}/contacts",
+          "action": "CreateContact",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Add contact to vendor"
+        },
+        {
+          "method": "PUT",
+          "route": "api/vendor/{vendorId}/contacts/{contactId}",
+          "action": "UpdateContact",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Update vendor contact"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/vendor/{vendorId}/contacts/{contactId}",
+          "action": "DeleteContact",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Delete vendor contact"
+        },
+        {
+          "method": "GET",
+          "route": "api/vendor/{vendorId}/business-units",
+          "action": "GetBusinessUnits",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorView",
+          "description": "Get business units for vendor"
+        },
+        {
+          "method": "POST",
+          "route": "api/vendor/{vendorId}/business-units",
+          "action": "CreateBusinessUnit",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Add business unit to vendor"
+        },
+        {
+          "method": "PUT",
+          "route": "api/vendor/{vendorId}/business-units/{businessUnitId}",
+          "action": "UpdateBusinessUnit",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Update vendor business unit"
+        },
+        {
+          "method": "DELETE",
+          "route": "api/vendor/{vendorId}/business-units/{businessUnitId}",
+          "action": "DeleteBusinessUnit",
+          "controller": "VendorController",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorModify",
+          "description": "Delete vendor business unit"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "description": "UI uses OIDC (Azure AD) in production, DevelopmentAutoSignInMiddleware in development. All controllers require [Authorize] attribute.",
+      "permissions": [
+        {
+          "name": "VendorView",
+          "enumValue": "AuthPermissions.VendorView",
+          "description": "View vendor information, search vendors, and view vendor details",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "VendorSearchController.Index",
+            "VendorSearchController.Search",
+            "VendorSearchController.Details"
+          ],
+          "uiElements": [
+            "Search page access",
+            "Search grid display",
+            "Detail page view access",
+            "Export to Excel"
+          ]
+        },
+        {
+          "name": "VendorModify",
+          "enumValue": "AuthPermissions.VendorModify",
+          "description": "Create, update, and deactivate vendors and their child entities (contacts, business units, portal groups)",
+          "granularity": "Modify",
+          "requiredFor": [
+            "VendorSearchController.Create",
+            "VendorSearchController.Edit",
+            "VendorSearchController.SetActive",
+            "Contact management (Add/Edit/Delete)",
+            "Business Unit management (Add/Edit/Delete)",
+            "Portal Group management (Add/Edit/Delete/Copy)"
+          ],
+          "uiElements": [
+            "New button (search page)",
+            "Edit button (search page)",
+            "Delete button (search page)",
+            "Submit button (detail page)",
+            "Add/Modify/Remove toolbar buttons (Contacts)",
+            "Add/Modify/Remove toolbar buttons (Business Units)",
+            "Add/Modify/Remove/Copy toolbar buttons (Portal Groups)",
+            "All form inputs enabled for editing"
+          ]
+        }
+      ],
+      "permissionPatterns": {
+        "search": {
+          "viewOnly": {
+            "permission": "VendorView",
+            "allowedActions": ["Search", "View details", "Export to Excel"],
+            "hiddenElements": ["New button", "Edit button", "Delete button"],
+            "readOnlyElements": ["All form inputs"]
+          },
+          "modify": {
+            "permission": "VendorModify",
+            "allowedActions": ["All VendorView actions", "Create", "Edit", "Delete", "Manage child entities"],
+            "visibleElements": ["New button", "Edit button", "Delete button"],
+            "enabledElements": ["All form inputs", "All toolbar buttons"]
+          }
+        },
+        "detail": {
+          "viewOnly": {
+            "permission": "VendorView",
+            "allowedActions": ["View all tabs", "View all data"],
+            "hiddenElements": ["Submit button", "All toolbar buttons", "All edit controls"],
+            "readOnlyElements": ["All form inputs"]
+          },
+          "modify": {
+            "permission": "VendorModify",
+            "allowedActions": ["All VendorView actions", "Edit vendor", "Manage contacts", "Manage business units", "Manage portal groups"],
+            "visibleElements": ["Submit button", "All toolbar buttons", "All edit controls"],
+            "enabledElements": ["All form inputs"]
+          }
+        }
+      }
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "VendorView",
+          "description": "View vendor information"
+        },
+        {
+          "name": "VendorModify",
+          "description": "Create, update, and deactivate vendors"
+        }
+      ]
+    },
+    "authorizationImplementation": {
+      "apiController": {
+        "namespace": "BargeOps.Vendor.API.Controllers",
+        "className": "VendorController",
+        "baseClass": "ApiControllerBase",
+        "attributes": ["[ApiController]", "[Route(\"api/[controller]\")]", "[ApiKey]"],
+        "example": "[ApiController]\n[Route(\"api/[controller]\")]\n[ApiKey]\npublic class VendorController : ApiControllerBase\n{\n    [HttpGet(\"search\")]\n    public async Task<IActionResult> Search([FromQuery] VendorSearchRequest request)\n    {\n        // API Key authentication enforced by [ApiKey] attribute\n        // Future: Add CSG Authorization checks\n    }\n}"
+      },
+      "uiController": {
+        "namespace": "BargeOps.Vendor.UI.Controllers",
+        "className": "VendorSearchController",
+        "baseClass": "AppController",
+        "attributes": ["[Authorize]"],
+        "permissionChecks": [
+          {
+            "action": "Index",
+            "attribute": "[Authorize]",
+            "futureAttribute": "[Authorize(Policy = \"VendorView\")]"
+          },
+          {
+            "action": "Create",
+            "attribute": "[Authorize]",
+            "futureAttribute": "[Authorize(Policy = \"VendorModify\")]"
+          },
+          {
+            "action": "Edit",
+            "attribute": "[Authorize]",
+            "futureAttribute": "[Authorize(Policy = \"VendorModify\")]"
+          },
+          {
+            "action": "SetActive",
+            "attribute": "[Authorize]",
+            "futureAttribute": "[Authorize(Policy = \"VendorModify\")]"
+          }
+        ],
+        "example": "[Authorize]\npublic class VendorSearchController : AppController\n{\n    [Authorize(Policy = \"VendorView\")]\n    public async Task<IActionResult> Index()\n    {\n        // OIDC authentication + CSG Authorization\n    }\n\n    [Authorize(Policy = \"VendorModify\")]\n    public async Task<IActionResult> Create()\n    {\n        // Requires VendorModify permission\n    }\n}"
+      },
+      "viewPermissions": {
+        "search": {
+          "viewPath": "Views/VendorSearch/Index.cshtml",
+          "permissionChecks": [
+            {
+              "element": "New button",
+              "razorCheck": "@if (User.HasPermission(AuthPermissions.VendorModify))",
+              "description": "Show New button only if user has VendorModify permission"
+            },
+            {
+              "element": "Edit button",
+              "razorCheck": "@if (User.HasPermission(AuthPermissions.VendorModify))",
+              "description": "Show Edit button only if user has VendorModify permission"
+            },
+            {
+              "element": "Delete button",
+              "razorCheck": "@if (User.HasPermission(AuthPermissions.VendorModify))",
+              "description": "Show Delete button only if user has VendorModify permission"
+            }
+          ]
+        },
+        "detail": {
+          "viewPath": "Views/VendorSearch/Edit.cshtml",
+          "permissionChecks": [
+            {
+              "element": "Submit button",
+              "razorCheck": "@if (User.HasPermission(AuthPermissions.VendorModify))",
+              "description": "Show Submit button only if user has VendorModify permission"
+            },
+            {
+              "element": "All toolbar buttons",
+              "razorCheck": "@if (User.HasPermission(AuthPermissions.VendorModify))",
+              "description": "Show Add/Modify/Remove/Copy buttons only if user has VendorModify permission"
+            },
+            {
+              "element": "Form inputs",
+              "razorCheck": "@if (User.HasPermission(AuthPermissions.VendorModify)) { enabled } else { disabled }",
+              "description": "Enable form inputs only if user has VendorModify permission"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "conversionNotes": {
+    "authentication": [
+      "Legacy uses Windows Authentication with SubSystem-based security",
+      "Modern API uses API Key authentication ([ApiKey] attribute)",
+      "Modern UI uses OIDC (Azure AD) authentication in production",
+      "Development uses DevelopmentAutoSignInMiddleware for automatic sign-in",
+      "All controllers require [Authorize] attribute"
+    ],
+    "authorization": [
+      "Legacy uses ControlAuthorization.SetButtonType for button-level security",
+      "Legacy permissions: CanCreate, CanModify, CanDelete, CanModifyChildren, CanDeleteChildren, CanExport",
+      "Modern uses CSG Authorization framework (future implementation)",
+      "Modern permissions: VendorView (ReadOnly), VendorModify (Modify)",
+      "Permission granularity follows pattern: View for read-only, Modify for create/update/delete",
+      "No separate Delete permission - soft delete handled by VendorModify"
+    ],
+    "permissionMapping": {
+      "legacy": {
+        "View": {
+          "modernEquivalent": "VendorView",
+          "description": "Search and view vendor information"
+        },
+        "CanCreate": {
+          "modernEquivalent": "VendorModify",
+          "description": "Create new vendors"
+        },
+        "CanModify": {
+          "modernEquivalent": "VendorModify",
+          "description": "Edit existing vendors"
+        },
+        "CanDelete": {
+          "modernEquivalent": "VendorModify",
+          "description": "Delete vendors (soft delete)"
+        },
+        "CanModifyChildren": {
+          "modernEquivalent": "VendorModify",
+          "description": "Manage contacts, business units, portal groups"
+        },
+        "CanDeleteChildren": {
+          "modernEquivalent": "VendorModify",
+          "description": "Delete child entities"
+        },
+        "CanExport": {
+          "modernEquivalent": "VendorView",
+          "description": "Export to Excel"
+        }
+      }
+    },
+    "securityConfiguration": {
+      "apiKeys": {
+        "location": "appsettings.json",
+        "structure": "ApiKeys section with key-value pairs",
+        "validation": "ApiKeyAuthenticationHandler validates incoming requests"
+      },
+      "oidcSettings": {
+        "location": "appsettings.json",
+        "provider": "Azure AD",
+        "settings": ["ClientId", "TenantId", "Instance", "CallbackPath"]
+      },
+      "developmentSettings": {
+        "middleware": "DevelopmentAutoSignInMiddleware",
+        "behavior": "Automatically signs in user in development environment",
+        "configuration": "Conditional registration based on IsDevelopment()"
+      }
+    },
+    "implementationDetails": [
+      "CSG Authorization framework provides centralized permission management",
+      "Permissions defined in AuthPermissions enum",
+      "UI elements hidden/disabled based on user permissions",
+      "API endpoints validate API key before processing requests",
+      "UI controllers validate OIDC authentication + permissions",
+      "License-based features remain separate from permission system",
+      "Global settings control feature availability independent of permissions"
+    ],
+    "migrationStrategy": [
+      "Phase 1: Implement API Key authentication for API endpoints",
+      "Phase 2: Implement OIDC authentication for UI",
+      "Phase 3: Add [Authorize] attributes to all UI controllers and actions",
+      "Phase 4: Implement CSG Authorization with VendorView and VendorModify permissions",
+      "Phase 5: Add permission checks in views to hide/disable UI elements",
+      "Phase 6: Test with different permission combinations",
+      "Phase 7: Document permission requirements for administrators"
+    ]
+  }
+}

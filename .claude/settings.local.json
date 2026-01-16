@@ -11,7 +11,11 @@
       "Bash(\"C:/source/agents/ClaudeOnshoreConversionAgent/output/BoatFuelPrices/README.md\")",
       "Bash(xargs basename:*)",
       "Bash(ls:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(timeout /t 10 bun run:*)",
+      "Bash(bun add prompts @types/prompts diff)",
+      "Bash(dotnet build:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": [],
@@ -21,4 +25,3 @@
     ]
   }
 }
-

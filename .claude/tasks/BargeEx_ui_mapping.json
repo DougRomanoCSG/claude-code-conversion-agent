@@ -1,0 +1,158 @@
+{
+  "entity": "BargeEx",
+  "formName": "frmBargeEx",
+  "formTitle": "BargeEx Configurations - Legacy Control to Modern Web UI Mapping",
+  "description": "Comprehensive mapping for converting frmBargeEx from Windows Forms (Infragistics controls) to modern ASP.NET Core MVC with Bootstrap 5, DataTables, and Select2.",
+  "formType": "SearchAndEdit (List-Detail Pattern)",
+  "subsystem": "frmBargeEx",
+
+  "modernArchitecture": {
+    "viewModels": "src/BargeOps.UI/Models/",
+    "namespace": "BargeOpsAdmin.ViewModels",
+    "controllers": "src/BargeOps.UI/Controllers/",
+    "controllerNamespace": "BargeOpsAdmin.Controllers",
+    "baseController": "AppController",
+    "views": "src/BargeOps.UI/Views/BargeExSearch/",
+    "javascript": "src/BargeOps.UI/wwwroot/js/bargeExSearch.js",
+    "targetFiles": {
+      "searchViewModel": "src/BargeOps.UI/Models/BargeExSearchViewModel.cs",
+      "editViewModel": "src/BargeOps.UI/Models/BargeExEditViewModel.cs",
+      "controller": "src/BargeOps.UI/Controllers/BargeExSearchController.cs",
+      "indexView": "src/BargeOps.UI/Views/BargeExSearch/Index.cshtml",
+      "editModalPartial": "src/BargeOps.UI/Views/BargeExSearch/_EditModal.cshtml",
+      "javascript": "src/BargeOps.UI/wwwroot/js/bargeExSearch.js"
+    }
+  },
+
+  "technologyStack": {
+    "framework": "ASP.NET Core 8 MVC",
+    "ui": "Bootstrap 5",
+    "grid": "DataTables (server-side processing)",
+    "dropdowns": "Select2 (if needed for future enhancements)",
+    "validation": "jQuery Validate + Unobtrusive Validation",
+    "modals": "Bootstrap 5 Modals",
+    "ajax": "jQuery AJAX",
+    "authentication": "IdentityConstants.ApplicationScheme"
+  },
+
+  "controlMappings": [
+    {
+      "category": "Title Bar",
+      "legacyControl": "pnlContextTitle + lblContextTitle",
+      "modernEquivalent": "Bootstrap Page Header",
+      "html": "<div class=\"container-fluid\">\n    <h2 class=\"mb-3\">BargeEx Configurations</h2>\n    <hr />\n</div>",
+      "notes": "Replace colored panel with standard Bootstrap page header"
+    },
+    {
+      "category": "Data Grid",
+      "legacyControl": "UltraGrid (grdConfigurations)",
+      "modernEquivalent": "DataTables with Server-Side Processing",
+      "html": "<table id=\"bargeExTable\" class=\"table table-striped table-hover w-100\">\n    <thead>\n        <tr>\n            <th>Actions</th>\n            <th>Configuration</th>\n            <th>BargeEx URI</th>\n            <th>Retrieve</th>\n            <th>Active</th>\n        </tr>\n    </thead>\n</table>",
+      "javascript": "var dataTable = $('#bargeExTable').DataTable({\n    processing: true,\n    serverSide: true,\n    stateSave: true,\n    stateKey: 'bargeExTable_v1',\n    responsive: true,\n    autoWidth: false,\n    ajax: {\n        url: '/BargeExSearch/GetConfigurations',\n        type: 'POST'\n    },\n    columns: [\n        {\n            data: null,\n            name: 'actions',\n            orderable: false,\n            searchable: false,\n            className: 'text-center',\n            width: '120px',\n            render: function(data, type, row) {\n                var id = row.bargeExConfigId || 0;\n                return '<button class=\"btn btn-sm btn-outline-primary btn-edit me-1\" data-id=\"' + id + '\"><i class=\"fas fa-pencil-alt\"></i></button>' +\n                       '<button class=\"btn btn-sm btn-outline-danger btn-delete\" data-id=\"' + id + '\" data-name=\"' + (row.name || '') + '\"><i class=\"fas fa-trash\"></i></button>';\n            }\n        },\n        { data: 'name', name: 'name' },\n        { data: 'uri', name: 'uri' },\n        {\n            data: 'retrieveTransactions',\n            name: 'retrieveTransactions',\n            className: 'text-center',\n            render: function(data) {\n                return data ? '<span class=\"badge bg-success\"><i class=\"fas fa-check\"></i></span>' : '<span class=\"badge bg-secondary\"><i class=\"fas fa-times\"></i></span>';\n            }\n        },\n        {\n            data: 'isActive',\n            name: 'isActive',\n            className: 'text-center',\n            render: function(data) {\n                return data ? '<span class=\"badge bg-success\">Active</span>' : '<span class=\"badge bg-danger\">Inactive</span>';\n            }\n        }\n    ],\n    order: [[1, 'asc']],\n    pageLength: 25\n});",
+      "notes": "CRITICAL: Use DataTables with server-side processing. Actions column first with Edit/Delete buttons. Boolean columns as badges."
+    },
+    {
+      "category": "Edit Panel",
+      "legacyControl": "UltraGroupBox (grpDetail)",
+      "modernEquivalent": "Bootstrap Modal Dialog",
+      "html": "<div class=\"modal fade\" id=\"editModal\" tabindex=\"-1\">\n    <div class=\"modal-dialog modal-lg\">\n        <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                <h5 class=\"modal-title\" id=\"editModalLabel\">Edit Configuration</h5>\n                <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\"></button>\n            </div>\n            <form id=\"editForm\">\n                <div class=\"modal-body\">\n                    <div class=\"mb-3\">\n                        <label asp-for=\"Name\" class=\"form-label\">Configuration:</label>\n                        <input asp-for=\"Name\" class=\"form-control\" />\n                    </div>\n                    <div class=\"mb-3\">\n                        <label asp-for=\"Uri\" class=\"form-label\">BargeEx URI:</label>\n                        <input asp-for=\"Uri\" class=\"form-control\" />\n                    </div>\n                    <div class=\"form-check mb-3\">\n                        <input asp-for=\"RetrieveTransactions\" class=\"form-check-input\" type=\"checkbox\" />\n                        <label asp-for=\"RetrieveTransactions\" class=\"form-check-label\">Retrieve transactions</label>\n                    </div>\n                    <div class=\"form-check mb-3\">\n                        <input asp-for=\"IsActive\" class=\"form-check-input\" type=\"checkbox\" />\n                        <label asp-for=\"IsActive\" class=\"form-check-label\">Active</label>\n                    </div>\n                </div>\n                <div class=\"modal-footer\">\n                    <button type=\"button\" class=\"btn btn-secondary\" data-bs-dismiss=\"modal\">Cancel</button>\n                    <button type=\"submit\" class=\"btn btn-primary\">Save</button>\n                </div>\n            </form>\n        </div>\n    </div>\n</div>",
+      "notes": "Replace inline detail panel with Bootstrap modal for better UX"
+    },
+    {
+      "category": "Text Input",
+      "legacyControl": "UltraTextEditor (txtName, txtUri)",
+      "modernEquivalent": "Bootstrap Text Input",
+      "html": "<input type=\"text\" class=\"form-control\" />",
+      "notes": "Use form-control class"
+    },
+    {
+      "category": "Checkbox",
+      "legacyControl": "UltraCheckEditor (chkRetrieveTransactions, chkIsActive)",
+      "modernEquivalent": "Bootstrap Checkbox",
+      "html": "<div class=\"form-check\">\n    <input class=\"form-check-input\" type=\"checkbox\" />\n    <label class=\"form-check-label\">Label</label>\n</div>",
+      "notes": "Use form-check wrapper"
+    },
+    {
+      "category": "Buttons",
+      "legacyControl": "btnAdd (Toolbar)",
+      "modernEquivalent": "Bootstrap Primary Button",
+      "html": "<button type=\"button\" id=\"btnAdd\" class=\"btn btn-primary mb-3\">\n    <i class=\"fas fa-plus\"></i> Add Configuration\n</button>",
+      "notes": "Opens modal with blank form"
+    },
+    {
+      "category": "Buttons",
+      "legacyControl": "btnModify (Toolbar)",
+      "modernEquivalent": "Inline Edit Button",
+      "html": "<button class=\"btn btn-sm btn-outline-primary btn-edit\" data-id=\"{id}\"><i class=\"fas fa-pencil-alt\"></i></button>",
+      "notes": "Part of Actions column in grid"
+    },
+    {
+      "category": "Buttons",
+      "legacyControl": "btnRemove (Toolbar)",
+      "modernEquivalent": "Inline Delete Button",
+      "html": "<button class=\"btn btn-sm btn-outline-danger btn-delete\" data-id=\"{id}\"><i class=\"fas fa-trash\"></i></button>",
+      "notes": "Part of Actions column in grid"
+    }
+  ],
+
+  "apiEndpoints": [
+    {
+      "route": "POST /BargeExSearch/GetConfigurations",
+      "description": "DataTables server-side endpoint",
+      "returns": "{ draw, recordsTotal, recordsFiltered, data: BargeExConfigDto[] }"
+    },
+    {
+      "route": "GET /BargeExSearch/Edit/{id?}",
+      "description": "Get configuration for editing",
+      "returns": "BargeExConfigDto or null"
+    },
+    {
+      "route": "POST /BargeExSearch/Save",
+      "description": "Save configuration (insert/update)",
+      "returns": "{ success, message, id }"
+    },
+    {
+      "route": "DELETE /BargeExSearch/Delete/{id}",
+      "description": "Delete configuration",
+      "returns": "{ success, message }"
+    }
+  ],
+
+  "criticalRules": [
+    "❌ NEVER use inline detail panel - ALWAYS use Bootstrap modal",
+    "✅ DataTables MUST use server-side processing",
+    "✅ Actions column MUST be first with Edit/Delete buttons",
+    "✅ Boolean columns MUST render as badges",
+    "✅ Use form-control for inputs, form-check for checkboxes",
+    "✅ Labels MUST use asp-for tag helper",
+    "✅ Delete MUST confirm with dialog",
+    "✅ Use IdentityConstants.ApplicationScheme (NOT 'Cookies')",
+    "✅ Use ViewModels, avoid ViewBag/ViewData",
+    "✅ NO inline styles"
+  ],
+
+  "viewModelExample": {
+    "BargeExEditViewModel": {
+      "properties": [
+        "public int? BargeExConfigId { get; set; }",
+        "[StringLength(100)] public string Name { get; set; }",
+        "[StringLength(500)][Url] public string Uri { get; set; }",
+        "public bool RetrieveTransactions { get; set; }",
+        "public bool IsActive { get; set; }"
+      ]
+    }
+  },
+
+  "referenceImplementation": "BoatLocationSearch",
+  "referencePaths": {
+    "javascript": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\wwwroot\\js\\boatLocationSearch.js",
+    "view": "C:\\Dev\\BargeOps.Admin.Mono\\src\\BargeOps.UI\\Views\\BoatLocationSearch\\Index.cshtml"
+  },
+
+  "metadata": {
+    "generatedBy": "Claude Code - UI Component Mapper Agent",
+    "generatedAt": "2026-01-15",
+    "version": "2.0",
+    "outputPath": ".claude/tasks/BargeEx_ui_mapping.json"
+  }
+}

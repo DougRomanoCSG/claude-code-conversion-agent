@@ -1,274 +1,238 @@
-using Dapper;
+using Admin.Infrastructure.Abstractions;
 using BargeOps.Shared.Dto;
-using BargeOps.Shared.Models;
-using Admin.Domain.Repositories;
+using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using System.Data;
-using System.Text;
 
 namespace Admin.Infrastructure.Repositories;
 
 /// <summary>
-/// Vendor repository using Dapper with DIRECT SQL QUERIES (NOT stored procedures)
-/// Returns DTOs directly - NO mapping needed!
-///
-/// Reference: FacilityRepository.cs, BoatLocationRepository.cs for patterns
+/// Repository for Vendor operations using Dapper
+/// Uses DIRECT SQL QUERIES (not stored procedures)
+/// Returns DTOs directly (no mapping needed)
 /// </summary>
 public class VendorRepository : IVendorRepository
 {
     private readonly string _connectionString;
+    private const string ConnectionStringName = "ServiceData";
 
     public VendorRepository(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found");
+        if (configuration == null)
+            throw new ArgumentNullException(nameof(configuration));
+
+        _connectionString = configuration.GetConnectionString(ConnectionStringName)
+            ?? throw new InvalidOperationException($"Missing connection string '{ConnectionStringName}' for VendorRepository.");
     }
 
     #region Vendor CRUD
 
-    public async Task<PagedResult<VendorDto>> SearchAsync(VendorSearchRequest request, int page, int pageSize)
+    public async Task<PagedResult<VendorDto>> SearchAsync(
+        VendorSearchRequest request,
+        CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
-        var sql = new StringBuilder(@"
-            SELECT v.*,
-                   CAST(CASE WHEN EXISTS(SELECT 1 FROM VendorBusinessUnit vbu WHERE vbu.VendorID = v.VendorID AND vbu.IsFuelSupplier = 1) THEN 1 ELSE 0 END AS BIT) AS IsFuelSupplier,
-                   CAST(CASE WHEN EXISTS(SELECT 1 FROM VendorBusinessUnit vbu WHERE vbu.VendorID = v.VendorID AND vbu.IsBoatAssistSupplier = 1) THEN 1 ELSE 0 END AS BIT) AS IsBoatAssistSupplier
-            FROM Vendor v
-            WHERE 1=1");
-
+        var whereConditions = new List<string>();
         var parameters = new DynamicParameters();
 
-        // Apply search filters
+        // Build WHERE clause based on search criteria
         if (!string.IsNullOrWhiteSpace(request.Name))
         {
-            sql.Append(" AND v.Name LIKE @Name");
-            parameters.Add("Name", $"%{request.Name}%");
+            whereConditions.Add("Name LIKE @Name");
+            parameters.Add("Name", $"%{EscapeSqlLikeWildcards(request.Name)}%");
         }
 
         if (!string.IsNullOrWhiteSpace(request.AccountingCode))
         {
-            sql.Append(" AND v.AccountingCode LIKE @AccountingCode");
-            parameters.Add("AccountingCode", $"%{request.AccountingCode}%");
+            whereConditions.Add("AccountingCode LIKE @AccountingCode");
+            parameters.Add("AccountingCode", $"%{EscapeSqlLikeWildcards(request.AccountingCode)}%");
         }
 
-        if (request.ActiveOnly)
+        if (request.IsActive.HasValue)
         {
-            sql.Append(" AND v.IsActive = 1");
+            whereConditions.Add("IsActive = @IsActive");
+            parameters.Add("IsActive", request.IsActive.Value);
         }
 
-        if (request.FuelSuppliersOnly)
+        if (request.IsFuelSupplier.HasValue && request.IsFuelSupplier.Value)
         {
-            sql.Append(" AND EXISTS(SELECT 1 FROM VendorBusinessUnit vbu WHERE vbu.VendorID = v.VendorID AND vbu.IsFuelSupplier = 1)");
+            whereConditions.Add("IsFuelSupplier = 1");
         }
 
-        if (request.InternalVendorOnly)
+        if (request.IsInternalVendor.HasValue && request.IsInternalVendor.Value)
         {
-            sql.Append(" AND v.IsInternalVendor = 1");
+            whereConditions.Add("IsInternalVendor = 1");
         }
 
-        if (request.IsBargeExEnabledOnly)
+        if (request.IsBargeExEnabled.HasValue && request.IsBargeExEnabled.Value)
         {
-            sql.Append(" AND v.IsBargeExEnabled = 1");
+            whereConditions.Add("IsBargeExEnabled = 1");
         }
 
-        if (request.EnablePortalOnly)
+        if (request.EnablePortal.HasValue && request.EnablePortal.Value)
         {
-            sql.Append(" AND v.EnablePortal = 1");
+            whereConditions.Add("EnablePortal = 1");
         }
 
-        if (request.LiquidBrokerOnly)
+        if (request.IsLiquidBroker.HasValue && request.IsLiquidBroker.Value)
         {
-            sql.Append(" AND v.IsLiquidBroker = 1");
+            whereConditions.Add("IsLiquidBroker = 1");
         }
 
-        if (request.TankermanOnly)
+        if (request.IsTankerman.HasValue && request.IsTankerman.Value)
         {
-            sql.Append(" AND v.IsTankerman = 1");
+            whereConditions.Add("IsTankerman = 1");
         }
 
-        // Get total count
-        var countSql = $"SELECT COUNT(*) FROM ({sql}) AS CountQuery";
-        var totalCount = await connection.ExecuteScalarAsync<int>(countSql, parameters);
+        var whereClause = whereConditions.Any()
+            ? "WHERE " + string.Join(" AND ", whereConditions)
+            : "";
 
-        // Add paging
-        sql.Append(" ORDER BY v.Name OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
-        parameters.Add("Offset", (page - 1) * pageSize);
-        parameters.Add("PageSize", pageSize);
+        // Get total count (all records)
+        var totalCountSql = "SELECT COUNT(*) FROM Vendor";
+        var totalCount = await connection.ExecuteScalarAsync<int>(totalCountSql);
 
-        var vendors = await connection.QueryAsync<VendorDto>(sql.ToString(), parameters);
+        // Get filtered count
+        var filteredCountSql = $"SELECT COUNT(*) FROM Vendor {whereClause}";
+        var filteredCount = await connection.ExecuteScalarAsync<int>(filteredCountSql, parameters);
+
+        // Get paged data
+        parameters.Add("Skip", request.Start);
+        parameters.Add("Take", request.Length);
+
+        var orderByColumn = request.GetSortColumn() ?? "Name";
+        var orderByDirection = request.GetSortDirection();
+
+        var dataSql = $@"
+            SELECT
+                VendorID,
+                Name,
+                LongName,
+                AccountingCode,
+                IsActive,
+                IsFuelSupplier,
+                IsBoatAssistSupplier,
+                IsInternalVendor,
+                IsBargeExEnabled,
+                EnablePortal,
+                IsLiquidBroker,
+                IsTankerman,
+                Address,
+                City,
+                State,
+                Zip,
+                PhoneNumber,
+                FaxNumber,
+                EmailAddress,
+                TermsCode,
+                BargeExTradingPartnerNum,
+                BargeExConfigID,
+                CreateDateTime,
+                CreateUser,
+                ModifyDateTime,
+                ModifyUser
+            FROM Vendor
+            {whereClause}
+            ORDER BY {orderByColumn} {orderByDirection}
+            OFFSET @Skip ROWS
+            FETCH NEXT @Take ROWS ONLY";
+
+        var data = await connection.QueryAsync<VendorDto>(dataSql, parameters);
 
         return new PagedResult<VendorDto>
         {
-            Items = vendors.ToList(),
-            TotalCount = totalCount,
-            Page = page,
-            PageSize = pageSize
+            Data = data.ToList(),
+            TotalRecords = totalCount,
+            FilteredRecords = filteredCount
         };
     }
 
-    public async Task<DataTableResponse<VendorDto>> GetDataTableAsync(DataTableRequest request, VendorSearchRequest searchCriteria)
+    public async Task<VendorDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
-        // Base query
-        var sql = new StringBuilder(@"
-            SELECT v.VendorID, v.Name, v.LongName, v.AccountingCode, v.IsActive, v.EnablePortal,
-                   v.IsBargeExEnabled, v.IsLiquidBroker, v.IsInternalVendor, v.IsTankerman,
-                   CAST(CASE WHEN EXISTS(SELECT 1 FROM VendorBusinessUnit vbu WHERE vbu.VendorID = v.VendorID AND vbu.IsFuelSupplier = 1) THEN 1 ELSE 0 END AS BIT) AS IsFuelSupplier,
-                   CAST(CASE WHEN EXISTS(SELECT 1 FROM VendorBusinessUnit vbu WHERE vbu.VendorID = v.VendorID AND vbu.IsBoatAssistSupplier = 1) THEN 1 ELSE 0 END AS BIT) AS IsBoatAssistSupplier
-            FROM Vendor v
-            WHERE 1=1");
-
-        var parameters = new DynamicParameters();
-
-        // Apply search criteria filters (same as SearchAsync)
-        if (!string.IsNullOrWhiteSpace(searchCriteria.Name))
-        {
-            sql.Append(" AND v.Name LIKE @Name");
-            parameters.Add("Name", $"%{searchCriteria.Name}%");
-        }
-
-        if (!string.IsNullOrWhiteSpace(searchCriteria.AccountingCode))
-        {
-            sql.Append(" AND v.AccountingCode LIKE @AccountingCode");
-            parameters.Add("AccountingCode", $"%{searchCriteria.AccountingCode}%");
-        }
-
-        if (searchCriteria.ActiveOnly)
-        {
-            sql.Append(" AND v.IsActive = 1");
-        }
-
-        if (searchCriteria.FuelSuppliersOnly)
-        {
-            sql.Append(" AND EXISTS(SELECT 1 FROM VendorBusinessUnit vbu WHERE vbu.VendorID = v.VendorID AND vbu.IsFuelSupplier = 1)");
-        }
-
-        if (searchCriteria.InternalVendorOnly)
-        {
-            sql.Append(" AND v.IsInternalVendor = 1");
-        }
-
-        if (searchCriteria.IsBargeExEnabledOnly)
-        {
-            sql.Append(" AND v.IsBargeExEnabled = 1");
-        }
-
-        if (searchCriteria.EnablePortalOnly)
-        {
-            sql.Append(" AND v.EnablePortal = 1");
-        }
-
-        if (searchCriteria.LiquidBrokerOnly)
-        {
-            sql.Append(" AND v.IsLiquidBroker = 1");
-        }
-
-        if (searchCriteria.TankermanOnly)
-        {
-            sql.Append(" AND v.IsTankerman = 1");
-        }
-
-        // Apply DataTables search
-        if (!string.IsNullOrWhiteSpace(request.Search?.Value))
-        {
-            sql.Append(@" AND (v.Name LIKE @Search
-                             OR v.LongName LIKE @Search
-                             OR v.AccountingCode LIKE @Search)");
-            parameters.Add("Search", $"%{request.Search.Value}%");
-        }
-
-        // Get total count before filtering
-        var countSql = $"SELECT COUNT(*) FROM ({sql}) AS CountQuery";
-        var recordsFiltered = await connection.ExecuteScalarAsync<int>(countSql, parameters);
-
-        // Apply sorting
-        if (request.Order?.Any() == true)
-        {
-            var orderColumn = request.Order[0];
-            var columnName = request.Columns[orderColumn.Column].Data;
-            var direction = orderColumn.Dir == "asc" ? "ASC" : "DESC";
-            sql.Append($" ORDER BY v.{columnName} {direction}");
-        }
-        else
-        {
-            sql.Append(" ORDER BY v.Name ASC");
-        }
-
-        // Apply paging
-        sql.Append(" OFFSET @Offset ROWS FETCH NEXT @Length ROWS ONLY");
-        parameters.Add("Offset", request.Start);
-        parameters.Add("Length", request.Length);
-
-        var vendors = await connection.QueryAsync<VendorDto>(sql.ToString(), parameters);
-
-        return new DataTableResponse<VendorDto>
-        {
-            Draw = request.Draw,
-            RecordsTotal = recordsFiltered,
-            RecordsFiltered = recordsFiltered,
-            Data = vendors.ToList()
-        };
-    }
-
-    public async Task<VendorDto?> GetByIdAsync(int vendorID)
-    {
-        using var connection = new SqlConnection(_connectionString);
-
-        // Get main vendor record
         var sql = @"
-            SELECT v.*,
-                   CAST(CASE WHEN EXISTS(SELECT 1 FROM VendorBusinessUnit vbu WHERE vbu.VendorID = v.VendorID AND vbu.IsFuelSupplier = 1) THEN 1 ELSE 0 END AS BIT) AS IsFuelSupplier,
-                   CAST(CASE WHEN EXISTS(SELECT 1 FROM VendorBusinessUnit vbu WHERE vbu.VendorID = v.VendorID AND vbu.IsBoatAssistSupplier = 1) THEN 1 ELSE 0 END AS BIT) AS IsBoatAssistSupplier
-            FROM Vendor v
-            WHERE v.VendorID = @VendorID";
+            SELECT
+                VendorID,
+                Name,
+                LongName,
+                AccountingCode,
+                IsActive,
+                IsFuelSupplier,
+                IsBoatAssistSupplier,
+                IsInternalVendor,
+                IsBargeExEnabled,
+                EnablePortal,
+                IsLiquidBroker,
+                IsTankerman,
+                Address,
+                City,
+                State,
+                Zip,
+                PhoneNumber,
+                FaxNumber,
+                EmailAddress,
+                TermsCode,
+                BargeExTradingPartnerNum,
+                BargeExConfigID,
+                CreateDateTime,
+                CreateUser,
+                ModifyDateTime,
+                ModifyUser
+            FROM Vendor
+            WHERE VendorID = @VendorID";
 
-        var vendor = await connection.QueryFirstOrDefaultAsync<VendorDto>(sql, new { VendorID = vendorID });
-
-        if (vendor == null)
-            return null;
-
-        // Load child collections
-        vendor.VendorContacts = (await GetContactsAsync(vendorID)).ToList();
-        vendor.VendorBusinessUnits = (await GetBusinessUnitsAsync(vendorID)).ToList();
-
-        return vendor;
+        return await connection.QuerySingleOrDefaultAsync<VendorDto>(sql, new { VendorID = id });
     }
 
-    public async Task<int> CreateAsync(VendorDto vendor)
+    public async Task<int> CreateAsync(VendorDto vendor, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = @"
             INSERT INTO Vendor (
-                Name, LongName, AccountingCode, IsActive, EnablePortal,
-                Address, City, State, Zip, PhoneNumber, FaxNumber, EmailAddress,
-                IsBargeExEnabled, BargeExTradingPartnerNum, BargeExConfigID,
-                IsLiquidBroker, TermsCode, IsInternalVendor, IsTankerman
+                Name, LongName, AccountingCode, IsActive,
+                IsFuelSupplier, IsBoatAssistSupplier, IsInternalVendor,
+                IsBargeExEnabled, EnablePortal, IsLiquidBroker, IsTankerman,
+                Address, City, State, Zip,
+                PhoneNumber, FaxNumber, EmailAddress, TermsCode,
+                BargeExTradingPartnerNum, BargeExConfigID,
+                CreateDateTime, CreateUser
             )
             VALUES (
-                @Name, @LongName, @AccountingCode, @IsActive, @EnablePortal,
-                @Address, @City, @State, @Zip, @PhoneNumber, @FaxNumber, @EmailAddress,
-                @IsBargeExEnabled, @BargeExTradingPartnerNum, @BargeExConfigID,
-                @IsLiquidBroker, @TermsCode, @IsInternalVendor, @IsTankerman
+                @Name, @LongName, @AccountingCode, @IsActive,
+                @IsFuelSupplier, @IsBoatAssistSupplier, @IsInternalVendor,
+                @IsBargeExEnabled, @EnablePortal, @IsLiquidBroker, @IsTankerman,
+                @Address, @City, @State, @Zip,
+                @PhoneNumber, @FaxNumber, @EmailAddress, @TermsCode,
+                @BargeExTradingPartnerNum, @BargeExConfigID,
+                GETDATE(), @CreateUser
             );
             SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         return await connection.ExecuteScalarAsync<int>(sql, vendor);
     }
 
-    public async Task UpdateAsync(VendorDto vendor)
+    public async Task UpdateAsync(VendorDto vendor, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = @"
             UPDATE Vendor
-            SET Name = @Name,
+            SET
+                Name = @Name,
                 LongName = @LongName,
                 AccountingCode = @AccountingCode,
                 IsActive = @IsActive,
+                IsFuelSupplier = @IsFuelSupplier,
+                IsBoatAssistSupplier = @IsBoatAssistSupplier,
+                IsInternalVendor = @IsInternalVendor,
+                IsBargeExEnabled = @IsBargeExEnabled,
                 EnablePortal = @EnablePortal,
+                IsLiquidBroker = @IsLiquidBroker,
+                IsTankerman = @IsTankerman,
                 Address = @Address,
                 City = @City,
                 State = @State,
@@ -276,164 +240,177 @@ public class VendorRepository : IVendorRepository
                 PhoneNumber = @PhoneNumber,
                 FaxNumber = @FaxNumber,
                 EmailAddress = @EmailAddress,
-                IsBargeExEnabled = @IsBargeExEnabled,
+                TermsCode = @TermsCode,
                 BargeExTradingPartnerNum = @BargeExTradingPartnerNum,
                 BargeExConfigID = @BargeExConfigID,
-                IsLiquidBroker = @IsLiquidBroker,
-                TermsCode = @TermsCode,
-                IsInternalVendor = @IsInternalVendor,
-                IsTankerman = @IsTankerman
+                ModifyDateTime = GETDATE(),
+                ModifyUser = @ModifyUser
             WHERE VendorID = @VendorID";
 
         await connection.ExecuteAsync(sql, vendor);
     }
 
-    public async Task SetActiveAsync(int vendorID, bool isActive)
+    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
-        var sql = "UPDATE Vendor SET IsActive = @IsActive WHERE VendorID = @VendorID";
+        var sql = "DELETE FROM Vendor WHERE VendorID = @VendorID";
+        var rowsAffected = await connection.ExecuteAsync(sql, new { VendorID = id });
 
-        await connection.ExecuteAsync(sql, new { VendorID = vendorID, IsActive = isActive });
+        return rowsAffected > 0;
     }
 
     #endregion
 
-    #region VendorContact CRUD
+    #region Vendor Contacts
 
-    public async Task<IEnumerable<VendorContactDto>> GetContactsAsync(int vendorID)
+    public async Task<IEnumerable<VendorContactDto>> GetContactsAsync(int vendorId, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = @"
-            SELECT *
+            SELECT
+                VendorContactID,
+                VendorID,
+                Name,
+                PhoneNumber,
+                PhoneExt,
+                EmailAddress,
+                FaxNumber,
+                IsPrimary,
+                IsDispatcher,
+                IsLiquidBroker,
+                PortalUserID,
+                CreateDateTime,
+                CreateUser,
+                ModifyDateTime,
+                ModifyUser
             FROM VendorContact
             WHERE VendorID = @VendorID
             ORDER BY Name";
 
-        return await connection.QueryAsync<VendorContactDto>(sql, new { VendorID = vendorID });
+        return await connection.QueryAsync<VendorContactDto>(sql, new { VendorID = vendorId });
     }
 
-    public async Task<VendorContactDto?> GetContactByIdAsync(int vendorContactID)
-    {
-        using var connection = new SqlConnection(_connectionString);
-
-        var sql = "SELECT * FROM VendorContact WHERE VendorContactID = @VendorContactID";
-
-        return await connection.QueryFirstOrDefaultAsync<VendorContactDto>(sql, new { VendorContactID = vendorContactID });
-    }
-
-    public async Task<int> CreateContactAsync(VendorContactDto contact)
+    public async Task<int> CreateContactAsync(VendorContactDto contact, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = @"
             INSERT INTO VendorContact (
-                VendorID, Name, PhoneNumber, PhoneExt, FaxNumber, EmailAddress,
-                IsPrimary, IsDispatcher, IsLiquidBroker, PortalUserID
+                VendorID, Name, PhoneNumber, PhoneExt, EmailAddress, FaxNumber,
+                IsPrimary, IsDispatcher, IsLiquidBroker, PortalUserID,
+                CreateDateTime, CreateUser
             )
             VALUES (
-                @VendorID, @Name, @PhoneNumber, @PhoneExt, @FaxNumber, @EmailAddress,
-                @IsPrimary, @IsDispatcher, @IsLiquidBroker, @PortalUserID
+                @VendorID, @Name, @PhoneNumber, @PhoneExt, @EmailAddress, @FaxNumber,
+                @IsPrimary, @IsDispatcher, @IsLiquidBroker, @PortalUserID,
+                GETDATE(), @CreateUser
             );
             SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         return await connection.ExecuteScalarAsync<int>(sql, contact);
     }
 
-    public async Task UpdateContactAsync(VendorContactDto contact)
+    public async Task UpdateContactAsync(VendorContactDto contact, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = @"
             UPDATE VendorContact
-            SET Name = @Name,
+            SET
+                Name = @Name,
                 PhoneNumber = @PhoneNumber,
                 PhoneExt = @PhoneExt,
-                FaxNumber = @FaxNumber,
                 EmailAddress = @EmailAddress,
+                FaxNumber = @FaxNumber,
                 IsPrimary = @IsPrimary,
                 IsDispatcher = @IsDispatcher,
                 IsLiquidBroker = @IsLiquidBroker,
-                PortalUserID = @PortalUserID
+                PortalUserID = @PortalUserID,
+                ModifyDateTime = GETDATE(),
+                ModifyUser = @ModifyUser
             WHERE VendorContactID = @VendorContactID";
 
         await connection.ExecuteAsync(sql, contact);
     }
 
-    public async Task DeleteContactAsync(int vendorContactID)
+    public async Task<bool> DeleteContactAsync(int contactId, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = "DELETE FROM VendorContact WHERE VendorContactID = @VendorContactID";
+        var rowsAffected = await connection.ExecuteAsync(sql, new { VendorContactID = contactId });
 
-        await connection.ExecuteAsync(sql, new { VendorContactID = vendorContactID });
-    }
-
-    public async Task ClearPrimaryContactAsync(int vendorID, int? excludeVendorContactID = null)
-    {
-        using var connection = new SqlConnection(_connectionString);
-
-        var sql = excludeVendorContactID.HasValue
-            ? "UPDATE VendorContact SET IsPrimary = 0 WHERE VendorID = @VendorID AND VendorContactID <> @ExcludeVendorContactID"
-            : "UPDATE VendorContact SET IsPrimary = 0 WHERE VendorID = @VendorID";
-
-        await connection.ExecuteAsync(sql, new { VendorID = vendorID, ExcludeVendorContactID = excludeVendorContactID });
+        return rowsAffected > 0;
     }
 
     #endregion
 
-    #region VendorBusinessUnit CRUD
+    #region Vendor Business Units
 
-    public async Task<IEnumerable<VendorBusinessUnitDto>> GetBusinessUnitsAsync(int vendorID)
+    public async Task<IEnumerable<VendorBusinessUnitDto>> GetBusinessUnitsAsync(int vendorId, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = @"
-            SELECT *
+            SELECT
+                VendorBusinessUnitID,
+                VendorID,
+                Name,
+                AccountingCode,
+                IsActive,
+                River,
+                Mile,
+                Bank,
+                IsFuelSupplier,
+                IsDefaultFuelSupplier,
+                IsBoatAssistSupplier,
+                MinDiscountQty,
+                MinDiscountFrequency,
+                CreateDateTime,
+                CreateUser,
+                ModifyDateTime,
+                ModifyUser
             FROM VendorBusinessUnit
             WHERE VendorID = @VendorID
             ORDER BY Name";
 
-        return await connection.QueryAsync<VendorBusinessUnitDto>(sql, new { VendorID = vendorID });
+        return await connection.QueryAsync<VendorBusinessUnitDto>(sql, new { VendorID = vendorId });
     }
 
-    public async Task<VendorBusinessUnitDto?> GetBusinessUnitByIdAsync(int vendorBusinessUnitID)
-    {
-        using var connection = new SqlConnection(_connectionString);
-
-        var sql = "SELECT * FROM VendorBusinessUnit WHERE VendorBusinessUnitID = @VendorBusinessUnitID";
-
-        return await connection.QueryFirstOrDefaultAsync<VendorBusinessUnitDto>(sql, new { VendorBusinessUnitID = vendorBusinessUnitID });
-    }
-
-    public async Task<int> CreateBusinessUnitAsync(VendorBusinessUnitDto businessUnit)
+    public async Task<int> CreateBusinessUnitAsync(VendorBusinessUnitDto businessUnit, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = @"
             INSERT INTO VendorBusinessUnit (
-                VendorID, Name, AccountingCode, IsActive, River, Mile, Bank,
-                IsFuelSupplier, IsDefaultFuelSupplier, MinDiscountQty, MinDiscountFrequency,
-                IsBoatAssistSupplier
+                VendorID, Name, AccountingCode, IsActive,
+                River, Mile, Bank,
+                IsFuelSupplier, IsDefaultFuelSupplier, IsBoatAssistSupplier,
+                MinDiscountQty, MinDiscountFrequency,
+                CreateDateTime, CreateUser
             )
             VALUES (
-                @VendorID, @Name, @AccountingCode, @IsActive, @River, @Mile, @Bank,
-                @IsFuelSupplier, @IsDefaultFuelSupplier, @MinDiscountQty, @MinDiscountFrequency,
-                @IsBoatAssistSupplier
+                @VendorID, @Name, @AccountingCode, @IsActive,
+                @River, @Mile, @Bank,
+                @IsFuelSupplier, @IsDefaultFuelSupplier, @IsBoatAssistSupplier,
+                @MinDiscountQty, @MinDiscountFrequency,
+                GETDATE(), @CreateUser
             );
             SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         return await connection.ExecuteScalarAsync<int>(sql, businessUnit);
     }
 
-    public async Task UpdateBusinessUnitAsync(VendorBusinessUnitDto businessUnit)
+    public async Task UpdateBusinessUnitAsync(VendorBusinessUnitDto businessUnit, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = @"
             UPDATE VendorBusinessUnit
-            SET Name = @Name,
+            SET
+                Name = @Name,
                 AccountingCode = @AccountingCode,
                 IsActive = @IsActive,
                 River = @River,
@@ -441,32 +418,36 @@ public class VendorRepository : IVendorRepository
                 Bank = @Bank,
                 IsFuelSupplier = @IsFuelSupplier,
                 IsDefaultFuelSupplier = @IsDefaultFuelSupplier,
+                IsBoatAssistSupplier = @IsBoatAssistSupplier,
                 MinDiscountQty = @MinDiscountQty,
                 MinDiscountFrequency = @MinDiscountFrequency,
-                IsBoatAssistSupplier = @IsBoatAssistSupplier
+                ModifyDateTime = GETDATE(),
+                ModifyUser = @ModifyUser
             WHERE VendorBusinessUnitID = @VendorBusinessUnitID";
 
         await connection.ExecuteAsync(sql, businessUnit);
     }
 
-    public async Task DeleteBusinessUnitAsync(int vendorBusinessUnitID)
+    public async Task<bool> DeleteBusinessUnitAsync(int businessUnitId, CancellationToken cancellationToken = default)
     {
         using var connection = new SqlConnection(_connectionString);
 
         var sql = "DELETE FROM VendorBusinessUnit WHERE VendorBusinessUnitID = @VendorBusinessUnitID";
+        var rowsAffected = await connection.ExecuteAsync(sql, new { VendorBusinessUnitID = businessUnitId });
 
-        await connection.ExecuteAsync(sql, new { VendorBusinessUnitID = vendorBusinessUnitID });
+        return rowsAffected > 0;
     }
 
-    public async Task ClearDefaultFuelSupplierAsync(int vendorID, int? excludeVendorBusinessUnitID = null)
+    #endregion
+
+    #region Helper Methods
+
+    private static string EscapeSqlLikeWildcards(string value)
     {
-        using var connection = new SqlConnection(_connectionString);
-
-        var sql = excludeVendorBusinessUnitID.HasValue
-            ? "UPDATE VendorBusinessUnit SET IsDefaultFuelSupplier = 0 WHERE VendorID = @VendorID AND VendorBusinessUnitID <> @ExcludeVendorBusinessUnitID"
-            : "UPDATE VendorBusinessUnit SET IsDefaultFuelSupplier = 0 WHERE VendorID = @VendorID";
-
-        await connection.ExecuteAsync(sql, new { VendorID = vendorID, ExcludeVendorBusinessUnitID = excludeVendorBusinessUnitID });
+        return value
+            .Replace("[", "[[]")
+            .Replace("%", "[%]")
+            .Replace("_", "[_]");
     }
 
     #endregion

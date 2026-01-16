@@ -1,0 +1,419 @@
+{
+  "entity": "VendorPortalGroup",
+  "formName": "frmVendorPortalGroup",
+  "formType": "DetailEdit",
+  "extractionDate": "2026-01-15",
+  "legacy": {
+    "formName": "frmVendorPortalGroup",
+    "formPath": "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore\\Forms\\frmVendorPortalGroup.vb",
+    "subsystem": "frmVendorSearch",
+    "subsystemSource": "InitializeBase(businessObject, SubSystem.frmVendorSearch)",
+    "baseClass": "frmBaseDetailEdit",
+    "implements": [
+      "IBaseDetailEdit"
+    ],
+    "securityButtons": [
+      {
+        "button": "btnSubmit",
+        "type": "Submit",
+        "legacyPermission": "CanModify",
+        "description": "Save vendor portal group changes",
+        "codeReference": "frmVendorPortalGroup.vb:59"
+      },
+      {
+        "button": "btnCancel",
+        "type": "Cancel",
+        "legacyPermission": "None",
+        "description": "Cancel changes and close form",
+        "codeReference": "frmVendorPortalGroup.vb:60"
+      },
+      {
+        "button": "btnEmailPortalInfo",
+        "type": "Action",
+        "legacyPermission": "CanExecute",
+        "description": "Email portal login information to selected contact",
+        "codeReference": "frmVendorPortalGroup.vb:61",
+        "dynamicState": "Initially disabled until user selects a contact (line 155)"
+      },
+      {
+        "button": "btnMoveDown",
+        "type": "Modify",
+        "legacyPermission": "CanModify",
+        "description": "Move search criteria down in display order",
+        "codeReference": "frmVendorPortalGroup.vb:62"
+      },
+      {
+        "button": "btnMoveUp",
+        "type": "Modify",
+        "legacyPermission": "CanModify",
+        "description": "Move search criteria up in display order",
+        "codeReference": "frmVendorPortalGroup.vb:63"
+      }
+    ],
+    "formCapabilities": {
+      "canCreate": true,
+      "canEdit": true,
+      "canDelete": false,
+      "canDeactivate": true,
+      "hasStatusToggle": true,
+      "statusField": "IsActive",
+      "supportsCopy": true
+    },
+    "dataOperations": [
+      {
+        "operation": "Create",
+        "method": "VendorPortalGroup.NewVendorPortalGroup()",
+        "requiredPermission": "CanModify",
+        "codeReference": "frmVendorPortalGroup.vb:832"
+      },
+      {
+        "operation": "Edit",
+        "method": "VendorPortalGroup.GetVendorPortalGroup(VendorPortalGroupID)",
+        "requiredPermission": "CanModify",
+        "codeReference": "frmVendorPortalGroup.vb:838"
+      },
+      {
+        "operation": "Copy",
+        "method": "VendorPortalGroup.CopyVendorPortalGroup(VendorPortalGroupID)",
+        "requiredPermission": "CanModify",
+        "codeReference": "frmVendorPortalGroup.vb:835"
+      },
+      {
+        "operation": "EmailPortalInfo",
+        "method": "Main.EmailPortalInfo(emailAddress, name)",
+        "requiredPermission": "CanExecute",
+        "codeReference": "frmVendorPortalGroup.vb:241"
+      }
+    ],
+    "childCollections": [
+      {
+        "name": "VendorPortalGroupUsers",
+        "description": "Contacts in this portal group",
+        "gridControl": "grdUsers",
+        "canModify": true
+      },
+      {
+        "name": "VendorPortalGroupCriterias",
+        "description": "Search criteria displayed to portal users",
+        "gridControl": "grdCriteria",
+        "canModify": true,
+        "canReorder": true
+      },
+      {
+        "name": "VendorPortalGroupEvents",
+        "description": "Limited barge events for portal",
+        "gridControl": "grdEvents",
+        "canModify": true,
+        "conditional": "Only when LimitBargeEvents is checked"
+      },
+      {
+        "name": "VendorPortalGroupDestFacilities",
+        "description": "Limited destination facilities",
+        "gridControl": "grdDestFacilities",
+        "canModify": true,
+        "conditional": "Only when LimitDestinationFacilities is checked"
+      },
+      {
+        "name": "VendorPortalGroupDestAreas",
+        "description": "Limited destination river areas",
+        "gridControl": "grdDestAreas",
+        "canModify": true,
+        "conditional": "Only when LimitDestinationAreas is checked"
+      },
+      {
+        "name": "VendorPortalGroupCustomers",
+        "description": "Limited customers",
+        "gridControl": "grdCustomers",
+        "canModify": true,
+        "conditional": "Only when LimitCustomers is checked"
+      },
+      {
+        "name": "VendorPortalGroupReports",
+        "description": "Reports available to portal users",
+        "gridControl": "grdReports",
+        "canModify": true
+      }
+    ]
+  },
+  "modern": {
+    "api": {
+      "authentication": "ApiKey",
+      "attributePattern": "[ApiKey]",
+      "endpoints": [
+        {
+          "method": "GET",
+          "route": "api/VendorPortalGroup/{id}",
+          "action": "GetById",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorPortalGroupView",
+          "description": "Get vendor portal group by ID"
+        },
+        {
+          "method": "GET",
+          "route": "api/VendorPortalGroup",
+          "action": "GetList",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorPortalGroupView",
+          "description": "Get list of vendor portal groups"
+        },
+        {
+          "method": "POST",
+          "route": "api/VendorPortalGroup",
+          "action": "Create",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorPortalGroupModify",
+          "description": "Create new vendor portal group"
+        },
+        {
+          "method": "PUT",
+          "route": "api/VendorPortalGroup/{id}",
+          "action": "Update",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorPortalGroupModify",
+          "description": "Update vendor portal group"
+        },
+        {
+          "method": "PUT",
+          "route": "api/VendorPortalGroup/{id}/active",
+          "action": "SetActive",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorPortalGroupModify",
+          "description": "Activate or deactivate vendor portal group"
+        },
+        {
+          "method": "POST",
+          "route": "api/VendorPortalGroup/{id}/copy",
+          "action": "Copy",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorPortalGroupModify",
+          "description": "Create a copy of vendor portal group"
+        },
+        {
+          "method": "POST",
+          "route": "api/VendorPortalGroup/email-portal-info",
+          "action": "EmailPortalInfo",
+          "requiredAuth": "ApiKey",
+          "futurePermission": "VendorPortalGroupModify",
+          "description": "Send portal login information to contact"
+        }
+      ]
+    },
+    "ui": {
+      "authentication": "OIDC",
+      "developmentAuth": "DevelopmentAutoSignInMiddleware",
+      "attributePattern": "[Authorize]",
+      "permissions": [
+        {
+          "name": "VendorPortalGroupView",
+          "enumValue": "AuthPermissions.VendorPortalGroupView",
+          "description": "View vendor portal groups",
+          "granularity": "ReadOnly",
+          "requiredFor": [
+            "Index",
+            "Search",
+            "Details"
+          ]
+        },
+        {
+          "name": "VendorPortalGroupModify",
+          "enumValue": "AuthPermissions.VendorPortalGroupModify",
+          "description": "Create, update, copy, and deactivate vendor portal groups",
+          "granularity": "Modify",
+          "requiredFor": [
+            "Create",
+            "Edit",
+            "Copy",
+            "SetActive",
+            "EmailPortalInfo",
+            "ReorderCriteria"
+          ]
+        }
+      ],
+      "controllerActions": [
+        {
+          "controller": "VendorPortalGroupSearchController",
+          "action": "Index",
+          "permission": "VendorPortalGroupView",
+          "description": "Display vendor portal group search page"
+        },
+        {
+          "controller": "VendorPortalGroupSearchController",
+          "action": "Create",
+          "permission": "VendorPortalGroupModify",
+          "description": "Display create vendor portal group form"
+        },
+        {
+          "controller": "VendorPortalGroupSearchController",
+          "action": "Edit",
+          "permission": "VendorPortalGroupModify",
+          "description": "Display edit vendor portal group form"
+        },
+        {
+          "controller": "VendorPortalGroupSearchController",
+          "action": "Copy",
+          "permission": "VendorPortalGroupModify",
+          "description": "Display copy vendor portal group form"
+        },
+        {
+          "controller": "VendorPortalGroupSearchController",
+          "action": "SetActive",
+          "permission": "VendorPortalGroupModify",
+          "description": "Toggle active status of vendor portal group"
+        },
+        {
+          "controller": "VendorPortalGroupSearchController",
+          "action": "EmailPortalInfo",
+          "permission": "VendorPortalGroupModify",
+          "description": "Send portal information email to contact"
+        }
+      ],
+      "uiElementSecurity": [
+        {
+          "element": "Create button",
+          "visibleWhen": "User has VendorPortalGroupModify permission",
+          "enabledWhen": "Always (when visible)"
+        },
+        {
+          "element": "Edit button",
+          "visibleWhen": "User has VendorPortalGroupModify permission",
+          "enabledWhen": "Portal group is selected"
+        },
+        {
+          "element": "Copy button",
+          "visibleWhen": "User has VendorPortalGroupModify permission",
+          "enabledWhen": "Portal group is selected"
+        },
+        {
+          "element": "Active/Inactive toggle",
+          "visibleWhen": "User has VendorPortalGroupModify permission",
+          "enabledWhen": "Portal group is selected"
+        },
+        {
+          "element": "Email Portal Info button",
+          "visibleWhen": "User has VendorPortalGroupModify permission",
+          "enabledWhen": "Contact is selected and is included in portal group"
+        },
+        {
+          "element": "Move Up/Down buttons",
+          "visibleWhen": "User has VendorPortalGroupModify permission",
+          "enabledWhen": "Search criteria item is selected"
+        },
+        {
+          "element": "Submit button",
+          "visibleWhen": "User has VendorPortalGroupModify permission",
+          "enabledWhen": "Form is valid"
+        }
+      ]
+    },
+    "permissionEnum": {
+      "file": "Enums/AuthPermissions.cs",
+      "entries": [
+        {
+          "name": "VendorPortalGroupView",
+          "value": "auto-assigned",
+          "description": "View vendor portal groups"
+        },
+        {
+          "name": "VendorPortalGroupModify",
+          "value": "auto-assigned",
+          "description": "Create, update, copy, and deactivate vendor portal groups"
+        }
+      ]
+    }
+  },
+  "securityNotes": {
+    "noDeletePermission": "This entity uses soft delete (IsActive flag) rather than hard delete, so no separate Delete permission is needed",
+    "childCollectionSecurity": "All child collections (Users, Criteria, Events, etc.) inherit the parent VendorPortalGroup's modify permission",
+    "emailAction": "EmailPortalInfo action requires VendorPortalGroupModify permission as it can only be performed during edit",
+    "reorderAction": "Move Up/Down for criteria reordering requires VendorPortalGroupModify permission",
+    "dynamicVisibility": "Several child grids are conditionally visible based on 'Limit' checkboxes but still require modify permission to change",
+    "portalUserContext": "This form manages vendor portal group configuration, which controls what vendor portal users can see and do",
+    "noSearchForm": "This entity appears to be managed through the Vendor detail form rather than having its own search form",
+    "parentContext": "VendorPortalGroup is a child of Vendor and is accessed through the Vendor detail form (SubSystem.frmVendorSearch)"
+  },
+  "implementationGuidance": {
+    "apiKeyConfiguration": "Configure API keys in appsettings.json for external API access",
+    "oidcConfiguration": "Configure OIDC settings for Azure AD authentication in production",
+    "developmentAuth": "Use DevelopmentAutoSignInMiddleware for local development environment",
+    "permissionChecks": [
+      "Use [Authorize] attribute on all UI controllers",
+      "Use [ApiKey] attribute on all API controllers",
+      "Add permission policies for VendorPortalGroupView and VendorPortalGroupModify",
+      "Hide/disable UI elements based on user permissions using ViewModels",
+      "Return 403 Forbidden when user lacks required permissions"
+    ],
+    "specialConsiderations": [
+      "Email functionality requires SMTP configuration",
+      "Child collection management should be atomic with parent save",
+      "Criteria reordering affects portal user experience",
+      "Active/Inactive toggle affects vendor portal access immediately"
+    ]
+  },
+  "relatedEntities": {
+    "parent": {
+      "entity": "Vendor",
+      "relationship": "One-to-Many",
+      "description": "Each vendor can have multiple portal groups"
+    },
+    "children": [
+      {
+        "entity": "VendorPortalGroupUser",
+        "relationship": "One-to-Many",
+        "description": "Contacts assigned to this portal group"
+      },
+      {
+        "entity": "VendorPortalGroupCriteria",
+        "relationship": "One-to-Many",
+        "description": "Search criteria for this portal group",
+        "hasOrdering": true
+      },
+      {
+        "entity": "VendorPortalGroupEvent",
+        "relationship": "One-to-Many",
+        "description": "Barge events visible to this portal group"
+      },
+      {
+        "entity": "VendorPortalGroupDestFacility",
+        "relationship": "One-to-Many",
+        "description": "Destination facilities visible to this portal group"
+      },
+      {
+        "entity": "VendorPortalGroupDestArea",
+        "relationship": "One-to-Many",
+        "description": "Destination river areas visible to this portal group"
+      },
+      {
+        "entity": "VendorPortalGroupCustomer",
+        "relationship": "One-to-Many",
+        "description": "Customers visible to this portal group"
+      },
+      {
+        "entity": "VendorPortalGroupReport",
+        "relationship": "One-to-Many",
+        "description": "Reports available to this portal group"
+      }
+    ],
+    "references": [
+      {
+        "entity": "VendorContact",
+        "description": "Portal users are selected from vendor contacts"
+      },
+      {
+        "entity": "RiverArea",
+        "description": "Referenced for destination area filtering"
+      },
+      {
+        "entity": "Facility",
+        "description": "Referenced for destination facility filtering"
+      },
+      {
+        "entity": "Customer",
+        "description": "Referenced for customer filtering"
+      },
+      {
+        "entity": "EventType",
+        "description": "Referenced for event filtering"
+      }
+    ]
+  }
+}

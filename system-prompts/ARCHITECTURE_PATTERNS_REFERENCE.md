@@ -10,39 +10,58 @@
 
 ## 🚨 CRITICAL API PATTERNS
 
-### API Controller Pattern (CORRECT - Based on Crewing.API)
+### ✅ CORRECT Architecture Layering
 
-**Pattern Choice**: Controllers may use IUnitOfWork for list operations AND inject services for create/update operations
+**RULE**: Controllers → Services → Repositories → IUnitOfWork/IDbHelper
+
+```
+┌─────────────┐
+│ Controller  │  ← Handles HTTP, routing, authorization
+└─────┬───────┘
+      │ injects I{Entity}Service
+      ▼
+┌─────────────┐
+│  Service    │  ← Business logic, validation, orchestration
+└─────┬───────┘
+      │ injects I{Entity}Repository
+      ▼
+┌─────────────┐
+│ Repository  │  ← Data access, SQL queries
+└─────┬───────┘
+      │ injects IUnitOfWork or IDbHelper
+      ▼
+┌─────────────┐
+│  Database   │
+└─────────────┘
+```
+
+**❌ WRONG**: Controllers inject IUnitOfWork or repositories directly
+**✅ CORRECT**: Controllers inject Services ONLY
+
+### API Controller Pattern (CORRECT)
 
 ```csharp
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Admin.Api.Interfaces;
-using BargeOps.Shared.Dto.Admin;
-using Admin.Infrastructure.Mapping;
-using Admin.Infrastructure.Models;
-using Csg.ListQuery.AspNetCore;
-using Csg.ListQuery.Server;
+using Admin.Infrastructure.Services;  // Service namespace
+using BargeOps.Shared.Dto;
 
 namespace Admin.Api.Controllers
 {
     [Authorize]
-    [ProducesResponseType(401)]
-    [Route("api/[controller]")]
     [ApiController]
-    public class {EntityName}Controller : ApiControllerBase
+    [Route("api/[controller]")]
+    public class {EntityName}Controller : ControllerBase
     {
         private readonly I{EntityName}Service _{entityName}Service;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<{EntityName}Controller> _logger;
 
         public {EntityName}Controller(
-            IListRequestValidator validator,
-            IObjectMapper mapper,
-            IUnitOfWork unitOfWork,
-            I{EntityName}Service {entityName}Service) : base(validator, mapper)
+            I{EntityName}Service {entityName}Service,
+            ILogger<{EntityName}Controller> logger)
         {
-            _unitOfWork = unitOfWork;
             _{entityName}Service = {entityName}Service;
+            _logger = logger;
         }
 
         [ProducesResponseType(200)]
