@@ -13,15 +13,15 @@ public class VendorDto
     [Filterable]
     public int VendorID { get; set; }
 
-    // Basic Vendor Information
+    // Core Vendor Properties
     [Required(ErrorMessage = "Vendor name is required")]
-    [StringLength(80, ErrorMessage = "Name cannot exceed 80 characters")]
+    [StringLength(50, ErrorMessage = "Name cannot exceed 50 characters")]
     [Display(Name = "Name")]
     [Sortable]
     [Filterable]
     public string Name { get; set; } = string.Empty;
 
-    [StringLength(100, ErrorMessage = "Long name cannot exceed 100 characters")]
+    [StringLength(50, ErrorMessage = "Long name cannot exceed 50 characters")]
     [Display(Name = "Long Name")]
     [Sortable]
     [Filterable]
@@ -39,15 +39,15 @@ public class VendorDto
     public bool IsActive { get; set; } = true;
 
     // Contact Information
-    [StringLength(100, ErrorMessage = "Address cannot exceed 100 characters")]
+    [StringLength(255, ErrorMessage = "Address cannot exceed 255 characters")]
     [Display(Name = "Address")]
     public string? Address { get; set; }
 
-    [StringLength(30, ErrorMessage = "City cannot exceed 30 characters")]
+    [StringLength(50, ErrorMessage = "City cannot exceed 50 characters")]
     [Display(Name = "City")]
     public string? City { get; set; }
 
-    [StringLength(2, ErrorMessage = "State must be 2 characters")]
+    [StringLength(2, ErrorMessage = "State code must be 2 characters")]
     [Display(Name = "State")]
     public string? State { get; set; }
 
@@ -58,15 +58,15 @@ public class VendorDto
 
     [StringLength(10, ErrorMessage = "Phone number cannot exceed 10 characters")]
     [Display(Name = "Phone")]
-    [RegularExpression(@"^\d{10}$", ErrorMessage = "Phone must be 10 digits")]
+    [Phone(ErrorMessage = "Invalid phone number format")]
     public string? PhoneNumber { get; set; }
 
     [StringLength(10, ErrorMessage = "Fax number cannot exceed 10 characters")]
     [Display(Name = "Fax")]
-    [RegularExpression(@"^\d{10}$", ErrorMessage = "Fax must be 10 digits")]
+    [Phone(ErrorMessage = "Invalid fax number format")]
     public string? FaxNumber { get; set; }
 
-    [StringLength(100, ErrorMessage = "Email address cannot exceed 100 characters")]
+    [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
     [Display(Name = "Email")]
     [EmailAddress(ErrorMessage = "Invalid email address")]
     public string? EmailAddress { get; set; }
@@ -75,7 +75,7 @@ public class VendorDto
     [Display(Name = "Payment Terms")]
     public string? TermsCode { get; set; }
 
-    // Vendor Flags
+    // Vendor Type Flags
     [Display(Name = "Internal Vendor")]
     [Sortable]
     [Filterable]
@@ -117,12 +117,12 @@ public class VendorDto
     [Display(Name = "BargeEx Trading Partner #")]
     public string? BargeExTradingPartnerNum { get; set; }
 
-    [Display(Name = "BargeEx Config")]
     public int? BargeExConfigID { get; set; }
 
-    // Child Collections (populated separately via API endpoints)
+    // Child Collections (populated separately)
     public List<VendorContactDto> Contacts { get; set; } = new();
     public List<VendorBusinessUnitDto> BusinessUnits { get; set; } = new();
+    public List<VendorPortalGroupDto> PortalGroups { get; set; } = new();
 
     // Audit Fields
     public DateTime? CreateDateTime { get; set; }

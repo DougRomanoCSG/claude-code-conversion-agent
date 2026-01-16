@@ -15,7 +15,8 @@
       "Bash(timeout /t 10 bun run:*)",
       "Bash(bun add prompts @types/prompts diff)",
       "Bash(dotnet build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(touch:*)"
     ],
     "deny": [],
     "ask": [],

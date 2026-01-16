@@ -3,8 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace BargeOps.Shared.Dto;
 
 /// <summary>
-/// Vendor Business Unit DTO - child entity of Vendor
-/// Represents physical locations and fuel supplier settings for a vendor
+/// Vendor Business Unit child entity DTO
 /// </summary>
 public class VendorBusinessUnitDto
 {
@@ -14,7 +13,7 @@ public class VendorBusinessUnitDto
     // Foreign Key
     public int VendorID { get; set; }
 
-    // Basic Information
+    // Business Unit Properties
     [Required(ErrorMessage = "Business unit name is required")]
     [StringLength(50, ErrorMessage = "Name cannot exceed 50 characters")]
     [Display(Name = "Name")]
@@ -27,7 +26,7 @@ public class VendorBusinessUnitDto
     [Display(Name = "Active")]
     public bool IsActive { get; set; } = true;
 
-    // Location Information
+    // Location Properties
     [StringLength(3, ErrorMessage = "River code cannot exceed 3 characters")]
     [Display(Name = "River")]
     public string? River { get; set; }
@@ -40,7 +39,7 @@ public class VendorBusinessUnitDto
     [Display(Name = "Bank")]
     public string? Bank { get; set; }
 
-    // Supplier Flags
+    // Supplier Type Flags
     [Display(Name = "Fuel Supplier")]
     public bool IsFuelSupplier { get; set; }
 
@@ -50,12 +49,12 @@ public class VendorBusinessUnitDto
     [Display(Name = "Boat Assist Supplier")]
     public bool IsBoatAssistSupplier { get; set; }
 
-    // Fuel Supplier Discount Settings (only applicable when IsFuelSupplier = true)
-    [Display(Name = "Min Discount Qty")]
+    // Fuel Supplier Settings (only when IsFuelSupplier = true)
+    [Display(Name = "Minimum Discount Quantity")]
     public decimal? MinDiscountQty { get; set; }
 
-    [StringLength(20, ErrorMessage = "Min discount frequency cannot exceed 20 characters")]
-    [Display(Name = "Min Discount Frequency")]
+    [StringLength(20, ErrorMessage = "Discount frequency cannot exceed 20 characters")]
+    [Display(Name = "Minimum Discount Frequency")]
     public string? MinDiscountFrequency { get; set; }
 
     // Audit Fields

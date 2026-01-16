@@ -80,13 +80,20 @@ interface MergeOptions {
 
 interface FileMergeResult {
   filePath: string;
-  status: 'merged' | 'skipped' | 'conflict' | 'error';
+  status: 'merged' | 'skipped' | 'conflict' | 'error' | 'copied';
   methodsAdded: number;
   methodsChanged: number;
   methodsPreserved: number;
   propertiesAdded: number;
   conflicts: string[];
   error?: string;
+}
+
+interface FileOperation {
+  generated: string;
+  existing: string;
+  type: 'ui' | 'api' | 'shared';
+  exists: boolean;
 }
 
 // ============================================================================
@@ -844,6 +851,106 @@ function updateUsingStatements(content: string, newUsings: string[]): string {
 }
 
 // ============================================================================
+// File Copy Operations
+// ============================================================================
+
+/**
+ * Prompt user to copy a new file
+ */
+async function promptFileCopy(filePath: string, fileType: string): Promise<'copy' | 'skip' | 'quit'> {
+  console.log('\n' + '─'.repeat(80));
+  console.log(`📄 NEW FILE FOUND: ${filePath}`);
+  console.log('─'.repeat(80));
+  console.log(`Type: ${fileType}`);
+  console.log(`This file doesn't exist in the target project yet.`);
+
+  const response = await prompts({
+    type: 'select',
+    name: 'action',
+    message: 'What would you like to do?',
+    choices: [
+      { title: 'Copy this file to target', value: 'copy' },
+      { title: 'Skip (don\'t copy)', value: 'skip' },
+      { title: 'Quit process', value: 'quit' },
+    ],
+  });
+
+  return response.action || 'skip';
+}
+
+/**
+ * Copy a new file to target location
+ */
+async function copyNewFile(
+  generatedPath: string,
+  targetPath: string,
+  options: MergeOptions
+): Promise<FileMergeResult> {
+  const result: FileMergeResult = {
+    filePath: targetPath,
+    status: 'skipped',
+    methodsAdded: 0,
+    methodsChanged: 0,
+    methodsPreserved: 0,
+    propertiesAdded: 0,
+    conflicts: [],
+  };
+
+  if (!existsSync(generatedPath)) {
+    result.status = 'error';
+    result.error = 'Generated file not found';
+    return result;
+  }
+
+  console.log(`\n${'═'.repeat(80)}`);
+  console.log(`📄 New File: ${targetPath}`);
+  console.log(`${'═'.repeat(80)}`);
+
+  // Handle dry-run mode
+  if (options.mode === 'dry-run') {
+    result.status = 'skipped';
+    console.log(`\n  [DRY RUN] Would copy new file\n`);
+    return result;
+  }
+
+  let action: 'copy' | 'skip' | 'quit' = 'copy';
+
+  if (options.mode === 'interactive') {
+    action = await promptFileCopy(targetPath, targetPath.includes('Controllers') ? 'Controller' : 'Other');
+  }
+
+  if (action === 'quit') {
+    console.log('\n⏸️  Copy process cancelled by user');
+    result.status = 'skipped';
+    return result;
+  }
+
+  if (action === 'copy') {
+    try {
+      // Create target directory if it doesn't exist
+      const targetDir = dirname(targetPath);
+      if (!existsSync(targetDir)) {
+        mkdirSync(targetDir, { recursive: true });
+        console.log(`  📁 Created directory: ${targetDir}`);
+      }
+
+      // Copy the file
+      copyFileSync(generatedPath, targetPath);
+      result.status = 'copied';
+      console.log(`  ✅ Copied file: ${targetPath}`);
+    } catch (error) {
+      result.status = 'error';
+      result.error = `Failed to copy file: ${error}`;
+      console.error(`  ❌ ${result.error}`);
+    }
+  } else {
+    console.log(`  ⏭️  Skipped file: ${targetPath}`);
+  }
+
+  return result;
+}
+
+// ============================================================================
 // Merge Execution
 // ============================================================================
 
@@ -1101,6 +1208,7 @@ async function main() {
   const templateRoot = join(projectRoot, 'output', options.entity, 'Templates');
   const uiPath = getAdminUiPath();
   const apiPath = getAdminApiPath();
+  const sharedPath = getSharedProjectPath();
 
   // Handle rollback
   if (options.rollback) {
@@ -1109,46 +1217,138 @@ async function main() {
     return;
   }
 
-  const filesToMerge = [
-    // UI Controller (primary implementation)
-    {
-      generated: join(templateRoot, 'ui', 'Controllers', `${options.entity}Controller.cs`),
-      existing: join(uiPath, 'Controllers', `${options.entity}Controller.cs`),
-      type: 'ui',
-    },
-    // API Controller (if it exists and is valid)
+  // Define all possible file operations (including shared project)
+  const fileOperations: FileOperation[] = [
+    // API Controllers
     {
       generated: join(templateRoot, 'api', 'Controllers', `${options.entity}Controller.cs`),
       existing: join(apiPath, 'src', 'Admin.Api', 'Controllers', `${options.entity}Controller.cs`),
       type: 'api',
+      exists: false,
+    },
+    // API Services
+    {
+      generated: join(templateRoot, 'api', 'Services', `${options.entity}Service.cs`),
+      existing: join(apiPath, 'src', 'Admin.Api', 'Services', `${options.entity}Service.cs`),
+      type: 'api',
+      exists: false,
+    },
+    {
+      generated: join(templateRoot, 'api', 'Services', `I${options.entity}Service.cs`),
+      existing: join(apiPath, 'src', 'Admin.Api', 'Services', `I${options.entity}Service.cs`),
+      type: 'api',
+      exists: false,
+    },
+    // API Repositories
+    {
+      generated: join(templateRoot, 'api', 'Repositories', `${options.entity}Repository.cs`),
+      existing: join(apiPath, 'src', 'Admin.Api', 'Repositories', `${options.entity}Repository.cs`),
+      type: 'api',
+      exists: false,
+    },
+    {
+      generated: join(templateRoot, 'api', 'Repositories', `I${options.entity}Repository.cs`),
+      existing: join(apiPath, 'src', 'Admin.Api', 'Repositories', `I${options.entity}Repository.cs`),
+      type: 'api',
+      exists: false,
+    },
+    // Shared DTOs
+    {
+      generated: join(templateRoot, 'shared', 'Dto', `${options.entity}Dto.cs`),
+      existing: join(sharedPath, 'Dto', `${options.entity}Dto.cs`),
+      type: 'shared',
+      exists: false,
+    },
+    {
+      generated: join(templateRoot, 'shared', 'Dto', `${options.entity}SearchRequest.cs`),
+      existing: join(sharedPath, 'Dto', `${options.entity}SearchRequest.cs`),
+      type: 'shared',
+      exists: false,
+    },
+    // UI Controllers
+    {
+      generated: join(templateRoot, 'ui', 'Controllers', `${options.entity}Controller.cs`),
+      existing: join(uiPath, 'Controllers', `${options.entity}Controller.cs`),
+      type: 'ui',
+      exists: false,
+    },
+    // UI Services
+    {
+      generated: join(templateRoot, 'ui', 'Services', `${options.entity}Service.cs`),
+      existing: join(uiPath, 'Services', `${options.entity}Service.cs`),
+      type: 'ui',
+      exists: false,
+    },
+    {
+      generated: join(templateRoot, 'ui', 'Services', `I${options.entity}Service.cs`),
+      existing: join(uiPath, 'Services', `I${options.entity}Service.cs`),
+      type: 'ui',
+      exists: false,
+    },
+    // UI ViewModels
+    {
+      generated: join(templateRoot, 'ui', 'ViewModels', `${options.entity}EditViewModel.cs`),
+      existing: join(uiPath, 'ViewModels', `${options.entity}EditViewModel.cs`),
+      type: 'ui',
+      exists: false,
+    },
+    {
+      generated: join(templateRoot, 'ui', 'ViewModels', `${options.entity}SearchViewModel.cs`),
+      existing: join(uiPath, 'ViewModels', `${options.entity}SearchViewModel.cs`),
+      type: 'ui',
+      exists: false,
     },
   ];
 
-  // Filter to files that exist
-  const validFiles = filesToMerge.filter(f => existsSync(f.generated) && existsSync(f.existing));
+  // Check which files exist and categorize them
+  const filesToMerge: FileOperation[] = [];
+  const filesToCopy: FileOperation[] = [];
 
-  if (validFiles.length === 0) {
-    console.error('\n❌ No files to merge found');
+  for (const op of fileOperations) {
+    if (existsSync(op.generated)) {
+      if (existsSync(op.existing)) {
+        // File exists in both - merge it
+        op.exists = true;
+        filesToMerge.push(op);
+      } else {
+        // File only in generated - copy it
+        op.exists = false;
+        filesToCopy.push(op);
+      }
+    }
+  }
+
+  if (filesToMerge.length === 0 && filesToCopy.length === 0) {
+    console.error('\n❌ No files found to merge or copy');
     console.error(`   Checked: ${templateRoot}`);
-    console.error(`   Target: ${apiPath}`);
+    console.error(`   Targets: ${apiPath}, ${uiPath}, ${sharedPath}`);
     return;
   }
 
-  console.log(`\n📦 Found ${validFiles.length} file(s) to merge\n`);
+  console.log(`\n📦 Found ${filesToMerge.length} file(s) to merge and ${filesToCopy.length} new file(s) to copy\n`);
 
-  // Merge each file
+  // Process all operations
   const results: FileMergeResult[] = [];
-  for (const file of validFiles) {
+
+  // First, merge existing files
+  for (const file of filesToMerge) {
     const result = await mergeFile(file.generated, file.existing, options);
+    results.push(result);
+  }
+
+  // Then, copy new files
+  for (const file of filesToCopy) {
+    const result = await copyNewFile(file.generated, file.existing, options);
     results.push(result);
   }
 
   // Summary
   console.log(`\n${'═'.repeat(80)}`);
-  console.log('📊 MERGE SUMMARY');
+  console.log('📊 MERGE & COPY SUMMARY');
   console.log(`${'═'.repeat(80)}`);
 
   const merged = results.filter(r => r.status === 'merged').length;
+  const copied = results.filter(r => r.status === 'copied').length;
   const skipped = results.filter(r => r.status === 'skipped').length;
   const errors = results.filter(r => r.status === 'error').length;
   const totalMethodsAdded = results.reduce((sum, r) => sum + r.methodsAdded, 0);
@@ -1156,6 +1356,7 @@ async function main() {
   const totalConflicts = results.reduce((sum, r) => sum + r.conflicts.length, 0);
 
   console.log(`   ✅ Merged: ${merged} file(s)`);
+  console.log(`   📄 Copied: ${copied} new file(s)`);
   console.log(`   ⏭️  Skipped: ${skipped} file(s)`);
   console.log(`   ❌ Errors: ${errors} file(s)`);
   console.log(`   ✨ Methods added: ${totalMethodsAdded}`);
@@ -1163,12 +1364,12 @@ async function main() {
   console.log(`   ⚠️  Conflicts: ${totalConflicts}`);
   console.log(`${'═'.repeat(80)}\n`);
 
-  if (merged > 0) {
-    console.log('✅ Merge complete!');
+  if (merged > 0 || copied > 0) {
+    console.log('✅ Operation complete!');
     console.log('\n📝 Next steps:');
-    console.log('   1. Review merged files');
+    console.log('   1. Review merged/copied files');
     console.log('   2. Compile and test');
-    console.log('   3. If issues, rollback with: --rollback');
+    console.log('   3. If issues with merged files, rollback with: --rollback');
     console.log('   4. Commit changes when satisfied\n');
   }
 }
