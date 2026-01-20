@@ -5,10 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BargeOps.Admin.Api.Controllers;
 
-/// <summary>
-/// Vendor management API controller
-/// Provides CRUD operations for vendors and related entities
-/// </summary>
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
@@ -24,8 +20,6 @@ public class VendorController : ControllerBase
         _vendorService = vendorService;
         _logger = logger;
     }
-
-    #region Vendor Endpoints
 
     /// <summary>
     /// Search vendors with DataTables server-side processing
@@ -156,10 +150,6 @@ public class VendorController : ControllerBase
         }
     }
 
-    #endregion
-
-    #region Vendor Contact Endpoints
-
     /// <summary>
     /// Get vendor contacts
     /// </summary>
@@ -258,14 +248,10 @@ public class VendorController : ControllerBase
         }
     }
 
-    #endregion
-
-    #region Vendor Business Unit Endpoints
-
     /// <summary>
     /// Get vendor business units
     /// </summary>
-    [HttpGet("{id}/business-units")]
+    [HttpGet("{id}/businessunits")]
     public async Task<ActionResult<IEnumerable<VendorBusinessUnitDto>>> GetBusinessUnits(
         int id,
         CancellationToken cancellationToken)
@@ -285,7 +271,7 @@ public class VendorController : ControllerBase
     /// <summary>
     /// Create vendor business unit
     /// </summary>
-    [HttpPost("business-units")]
+    [HttpPost("businessunits")]
     public async Task<ActionResult<VendorBusinessUnitDto>> CreateBusinessUnit(
         [FromBody] VendorBusinessUnitDto businessUnit,
         CancellationToken cancellationToken)
@@ -309,7 +295,7 @@ public class VendorController : ControllerBase
     /// <summary>
     /// Update vendor business unit
     /// </summary>
-    [HttpPut("business-units/{id}")]
+    [HttpPut("businessunits/{id}")]
     public async Task<ActionResult<VendorBusinessUnitDto>> UpdateBusinessUnit(
         int id,
         [FromBody] VendorBusinessUnitDto businessUnit,
@@ -339,7 +325,7 @@ public class VendorController : ControllerBase
     /// <summary>
     /// Delete vendor business unit
     /// </summary>
-    [HttpDelete("business-units/{id}")]
+    [HttpDelete("businessunits/{id}")]
     public async Task<ActionResult> DeleteBusinessUnit(int id, CancellationToken cancellationToken)
     {
         try
@@ -360,5 +346,101 @@ public class VendorController : ControllerBase
         }
     }
 
-    #endregion
+    /// <summary>
+    /// Get vendor portal groups
+    /// </summary>
+    [HttpGet("{id}/portalgroups")]
+    public async Task<ActionResult<IEnumerable<VendorPortalGroupDto>>> GetPortalGroups(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var portalGroups = await _vendorService.GetPortalGroupsAsync(id, cancellationToken);
+            return Ok(portalGroups);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting portal groups for vendor {VendorId}", id);
+            return StatusCode(500, "An error occurred while retrieving portal groups");
+        }
+    }
+
+    /// <summary>
+    /// Create vendor portal group
+    /// </summary>
+    [HttpPost("portalgroups")]
+    public async Task<ActionResult<VendorPortalGroupDto>> CreatePortalGroup(
+        [FromBody] VendorPortalGroupDto portalGroup,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var created = await _vendorService.CreatePortalGroupAsync(portalGroup, cancellationToken);
+            return Ok(created);
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            return BadRequest(new { errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating portal group");
+            return StatusCode(500, "An error occurred while creating the portal group");
+        }
+    }
+
+    /// <summary>
+    /// Update vendor portal group
+    /// </summary>
+    [HttpPut("portalgroups/{id}")]
+    public async Task<ActionResult<VendorPortalGroupDto>> UpdatePortalGroup(
+        int id,
+        [FromBody] VendorPortalGroupDto portalGroup,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (id != portalGroup.VendorPortalGroupID)
+            {
+                return BadRequest("ID mismatch");
+            }
+
+            var updated = await _vendorService.UpdatePortalGroupAsync(portalGroup, cancellationToken);
+            return Ok(updated);
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            return BadRequest(new { errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating portal group {PortalGroupId}", id);
+            return StatusCode(500, "An error occurred while updating the portal group");
+        }
+    }
+
+    /// <summary>
+    /// Delete vendor portal group
+    /// </summary>
+    [HttpDelete("portalgroups/{id}")]
+    public async Task<ActionResult> DeletePortalGroup(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var deleted = await _vendorService.DeletePortalGroupAsync(id, cancellationToken);
+
+            if (!deleted)
+            {
+                return NotFound($"Portal group with ID {id} not found");
+            }
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting portal group {PortalGroupId}", id);
+            return StatusCode(500, "An error occurred while deleting the portal group");
+        }
+    }
 }

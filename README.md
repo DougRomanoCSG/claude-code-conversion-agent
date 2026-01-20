@@ -119,6 +119,7 @@ bun run generate-templates --entity "Facility"
 ```
 
 This will launch the interactive template generators in Claude Code to generate conversion plans and code templates.
+You can rerun template generation without re-running analysis steps 1-10.
 
 #### Option 2: Run Individual Agents
 
@@ -315,6 +316,11 @@ bun run generate-templates --entity "Facility"
 - This step **ALWAYS** runs interactively in Claude Code
 - Can be rerun multiple times without re-running analysis steps 1-10
 - Reads analysis data from `output/{Entity}/` directory
+
+**Template generation fixes**:
+If you need the corrected patterns and checklists from recent Vendor generation fixes, see:
+- `agents/FIXES_README.md`
+- `agents/TEMPLATE_GENERATION_FIXES_CORRECTED.md`
 
 ## Project Structure
 

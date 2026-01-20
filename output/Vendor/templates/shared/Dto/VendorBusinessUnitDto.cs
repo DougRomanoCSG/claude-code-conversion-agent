@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace BargeOps.Shared.Dto;
 
 /// <summary>
-/// Vendor Business Unit child entity DTO
+/// Vendor Business Unit DTO
 /// </summary>
 public class VendorBusinessUnitDto
 {
@@ -13,9 +13,8 @@ public class VendorBusinessUnitDto
     // Foreign Key
     public int VendorID { get; set; }
 
-    // Business Unit Properties
+    // Core Fields
     [Required(ErrorMessage = "Business unit name is required")]
-    [StringLength(50, ErrorMessage = "Name cannot exceed 50 characters")]
     [Display(Name = "Name")]
     public string Name { get; set; } = string.Empty;
 
@@ -26,20 +25,19 @@ public class VendorBusinessUnitDto
     [Display(Name = "Active")]
     public bool IsActive { get; set; } = true;
 
-    // Location Properties
+    // Location Fields
     [StringLength(3, ErrorMessage = "River code cannot exceed 3 characters")]
     [Display(Name = "River")]
     public string? River { get; set; }
 
     [Display(Name = "Mile")]
-    [Range(0, 2000, ErrorMessage = "Mile must be between 0 and 2000")]
     public decimal? Mile { get; set; }
 
-    [StringLength(20, ErrorMessage = "Bank cannot exceed 20 characters")]
+    [StringLength(50, ErrorMessage = "Bank cannot exceed 50 characters")]
     [Display(Name = "Bank")]
     public string? Bank { get; set; }
 
-    // Supplier Type Flags
+    // Supplier Type Fields
     [Display(Name = "Fuel Supplier")]
     public bool IsFuelSupplier { get; set; }
 
@@ -49,12 +47,12 @@ public class VendorBusinessUnitDto
     [Display(Name = "Boat Assist Supplier")]
     public bool IsBoatAssistSupplier { get; set; }
 
-    // Fuel Supplier Settings (only when IsFuelSupplier = true)
-    [Display(Name = "Minimum Discount Quantity")]
+    // Fuel Discount Fields (enabled when IsFuelSupplier = true)
+    [Display(Name = "Min. Discount Qty")]
     public decimal? MinDiscountQty { get; set; }
 
-    [StringLength(20, ErrorMessage = "Discount frequency cannot exceed 20 characters")]
-    [Display(Name = "Minimum Discount Frequency")]
+    [StringLength(50, ErrorMessage = "Min discount frequency cannot exceed 50 characters")]
+    [Display(Name = "Min. Discount Frequency")]
     public string? MinDiscountFrequency { get; set; }
 
     // Audit Fields

@@ -5,8 +5,7 @@ using FluentValidation;
 namespace Admin.Infrastructure.Services;
 
 /// <summary>
-/// Service for Vendor business logic
-/// Validates DTOs using FluentValidation before repository operations
+/// Service for Vendor business logic and validation
 /// </summary>
 public class VendorService : IVendorService
 {
@@ -14,20 +13,21 @@ public class VendorService : IVendorService
     private readonly IValidator<VendorDto> _vendorValidator;
     private readonly IValidator<VendorContactDto> _contactValidator;
     private readonly IValidator<VendorBusinessUnitDto> _businessUnitValidator;
+    private readonly IValidator<VendorPortalGroupDto> _portalGroupValidator;
 
     public VendorService(
         IVendorRepository vendorRepository,
         IValidator<VendorDto> vendorValidator,
         IValidator<VendorContactDto> contactValidator,
-        IValidator<VendorBusinessUnitDto> businessUnitValidator)
+        IValidator<VendorBusinessUnitDto> businessUnitValidator,
+        IValidator<VendorPortalGroupDto> portalGroupValidator)
     {
         _vendorRepository = vendorRepository;
         _vendorValidator = vendorValidator;
         _contactValidator = contactValidator;
         _businessUnitValidator = businessUnitValidator;
+        _portalGroupValidator = portalGroupValidator;
     }
-
-    #region Vendor Operations
 
     public async Task<PagedResult<VendorDto>> SearchAsync(VendorSearchRequest request, CancellationToken cancellationToken = default)
     {
@@ -43,35 +43,26 @@ public class VendorService : IVendorService
     {
         await _vendorValidator.ValidateAndThrowAsync(vendor, cancellationToken);
 
-        // Apply business rules
         ApplyBusinessRules(vendor);
 
-        var vendorId = await _vendorRepository.CreateAsync(vendor, cancellationToken);
-        vendor.VendorID = vendorId;
-
-        return vendor;
+        var createdVendor = await _vendorRepository.CreateAsync(vendor, cancellationToken);
+        return createdVendor;
     }
 
     public async Task<VendorDto> UpdateAsync(VendorDto vendor, CancellationToken cancellationToken = default)
     {
         await _vendorValidator.ValidateAndThrowAsync(vendor, cancellationToken);
 
-        // Apply business rules
         ApplyBusinessRules(vendor);
 
-        await _vendorRepository.UpdateAsync(vendor, cancellationToken);
-
-        return vendor;
+        var updatedVendor = await _vendorRepository.UpdateAsync(vendor, cancellationToken);
+        return updatedVendor;
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _vendorRepository.DeleteAsync(id, cancellationToken);
     }
-
-    #endregion
-
-    #region Vendor Contact Operations
 
     public async Task<IEnumerable<VendorContactDto>> GetContactsAsync(int vendorId, CancellationToken cancellationToken = default)
     {
@@ -82,41 +73,22 @@ public class VendorService : IVendorService
     {
         await _contactValidator.ValidateAndThrowAsync(contact, cancellationToken);
 
-        // Business rule: Ensure only one primary contact per vendor
-        if (contact.IsPrimary)
-        {
-            await ClearPrimaryContactAsync(contact.VendorID, cancellationToken);
-        }
-
-        var contactId = await _vendorRepository.CreateContactAsync(contact, cancellationToken);
-        contact.VendorContactID = contactId;
-
-        return contact;
+        var createdContact = await _vendorRepository.CreateContactAsync(contact, cancellationToken);
+        return createdContact;
     }
 
     public async Task<VendorContactDto> UpdateContactAsync(VendorContactDto contact, CancellationToken cancellationToken = default)
     {
         await _contactValidator.ValidateAndThrowAsync(contact, cancellationToken);
 
-        // Business rule: Ensure only one primary contact per vendor
-        if (contact.IsPrimary)
-        {
-            await ClearPrimaryContactAsync(contact.VendorID, cancellationToken, contact.VendorContactID);
-        }
-
-        await _vendorRepository.UpdateContactAsync(contact, cancellationToken);
-
-        return contact;
+        var updatedContact = await _vendorRepository.UpdateContactAsync(contact, cancellationToken);
+        return updatedContact;
     }
 
     public async Task<bool> DeleteContactAsync(int contactId, CancellationToken cancellationToken = default)
     {
         return await _vendorRepository.DeleteContactAsync(contactId, cancellationToken);
     }
-
-    #endregion
-
-    #region Vendor Business Unit Operations
 
     public async Task<IEnumerable<VendorBusinessUnitDto>> GetBusinessUnitsAsync(int vendorId, CancellationToken cancellationToken = default)
     {
@@ -127,37 +99,20 @@ public class VendorService : IVendorService
     {
         await _businessUnitValidator.ValidateAndThrowAsync(businessUnit, cancellationToken);
 
-        // Apply business rules for fuel supplier settings
-        ApplyBusinessUnitBusinessRules(businessUnit);
+        ApplyBusinessUnitRules(businessUnit);
 
-        // Business rule: Ensure only one default fuel supplier per vendor
-        if (businessUnit.IsDefaultFuelSupplier)
-        {
-            await ClearDefaultFuelSupplierAsync(businessUnit.VendorID, cancellationToken);
-        }
-
-        var businessUnitId = await _vendorRepository.CreateBusinessUnitAsync(businessUnit, cancellationToken);
-        businessUnit.VendorBusinessUnitID = businessUnitId;
-
-        return businessUnit;
+        var createdBusinessUnit = await _vendorRepository.CreateBusinessUnitAsync(businessUnit, cancellationToken);
+        return createdBusinessUnit;
     }
 
     public async Task<VendorBusinessUnitDto> UpdateBusinessUnitAsync(VendorBusinessUnitDto businessUnit, CancellationToken cancellationToken = default)
     {
         await _businessUnitValidator.ValidateAndThrowAsync(businessUnit, cancellationToken);
 
-        // Apply business rules for fuel supplier settings
-        ApplyBusinessUnitBusinessRules(businessUnit);
+        ApplyBusinessUnitRules(businessUnit);
 
-        // Business rule: Ensure only one default fuel supplier per vendor
-        if (businessUnit.IsDefaultFuelSupplier)
-        {
-            await ClearDefaultFuelSupplierAsync(businessUnit.VendorID, cancellationToken, businessUnit.VendorBusinessUnitID);
-        }
-
-        await _vendorRepository.UpdateBusinessUnitAsync(businessUnit, cancellationToken);
-
-        return businessUnit;
+        var updatedBusinessUnit = await _vendorRepository.UpdateBusinessUnitAsync(businessUnit, cancellationToken);
+        return updatedBusinessUnit;
     }
 
     public async Task<bool> DeleteBusinessUnitAsync(int businessUnitId, CancellationToken cancellationToken = default)
@@ -165,29 +120,47 @@ public class VendorService : IVendorService
         return await _vendorRepository.DeleteBusinessUnitAsync(businessUnitId, cancellationToken);
     }
 
-    #endregion
+    public async Task<IEnumerable<VendorPortalGroupDto>> GetPortalGroupsAsync(int vendorId, CancellationToken cancellationToken = default)
+    {
+        return await _vendorRepository.GetPortalGroupsAsync(vendorId, cancellationToken);
+    }
 
-    #region Business Rules
+    public async Task<VendorPortalGroupDto> CreatePortalGroupAsync(VendorPortalGroupDto portalGroup, CancellationToken cancellationToken = default)
+    {
+        await _portalGroupValidator.ValidateAndThrowAsync(portalGroup, cancellationToken);
+
+        var createdPortalGroup = await _vendorRepository.CreatePortalGroupAsync(portalGroup, cancellationToken);
+        return createdPortalGroup;
+    }
+
+    public async Task<VendorPortalGroupDto> UpdatePortalGroupAsync(VendorPortalGroupDto portalGroup, CancellationToken cancellationToken = default)
+    {
+        await _portalGroupValidator.ValidateAndThrowAsync(portalGroup, cancellationToken);
+
+        var updatedPortalGroup = await _vendorRepository.UpdatePortalGroupAsync(portalGroup, cancellationToken);
+        return updatedPortalGroup;
+    }
+
+    public async Task<bool> DeletePortalGroupAsync(int portalGroupId, CancellationToken cancellationToken = default)
+    {
+        return await _vendorRepository.DeletePortalGroupAsync(portalGroupId, cancellationToken);
+    }
 
     private void ApplyBusinessRules(VendorDto vendor)
     {
-        // Business rule: Clear BargeEx fields if BargeEx is disabled
         if (!vendor.IsBargeExEnabled)
         {
             vendor.BargeExTradingPartnerNum = null;
             vendor.BargeExConfigID = null;
         }
-
-        // Business rule: Pad BargeEx trading partner number to 8 characters
-        if (!string.IsNullOrWhiteSpace(vendor.BargeExTradingPartnerNum))
+        else if (!string.IsNullOrWhiteSpace(vendor.BargeExTradingPartnerNum))
         {
-            vendor.BargeExTradingPartnerNum = vendor.BargeExTradingPartnerNum.PadRight(8);
+            vendor.BargeExTradingPartnerNum = vendor.BargeExTradingPartnerNum.PadLeft(8, '0');
         }
     }
 
-    private void ApplyBusinessUnitBusinessRules(VendorBusinessUnitDto businessUnit)
+    private void ApplyBusinessUnitRules(VendorBusinessUnitDto businessUnit)
     {
-        // Business rule: Clear fuel supplier discount fields if not a fuel supplier
         if (!businessUnit.IsFuelSupplier)
         {
             businessUnit.IsDefaultFuelSupplier = false;
@@ -195,22 +168,4 @@ public class VendorService : IVendorService
             businessUnit.MinDiscountFrequency = null;
         }
     }
-
-    private async Task ClearPrimaryContactAsync(int vendorId, CancellationToken cancellationToken, int? exceptContactId = null)
-    {
-        // This would require a custom SQL update to clear IsPrimary for all other contacts
-        // For now, this is a placeholder - implementation would need to be added to repository
-        // TODO: Implement ClearPrimaryContact in repository
-        await Task.CompletedTask;
-    }
-
-    private async Task ClearDefaultFuelSupplierAsync(int vendorId, CancellationToken cancellationToken, int? exceptBusinessUnitId = null)
-    {
-        // This would require a custom SQL update to clear IsDefaultFuelSupplier for all other business units
-        // For now, this is a placeholder - implementation would need to be added to repository
-        // TODO: Implement ClearDefaultFuelSupplier in repository
-        await Task.CompletedTask;
-    }
-
-    #endregion
 }

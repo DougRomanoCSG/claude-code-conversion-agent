@@ -8,7 +8,7 @@ This directory contains specialized agents for converting legacy VB.NET Windows 
 
 These are the extraction agents that analyze legacy forms and generate templates:
 
-- **orchestrator.ts** - Master agent that coordinates all analysis steps (1-9/10)
+- **orchestrator.ts** - Master agent that coordinates all analysis steps (1-10 for search/detail, 1-9 for single forms)
 - **form-structure-analyzer.ts** - Step 1: Extracts UI components and controls from forms
 - **business-logic-extractor.ts** - Step 2: Extracts business rules and validation logic
 - **data-access-analyzer.ts** - Step 3: Analyzes queries and stored procedures
@@ -54,6 +54,10 @@ bun run generate-templates --entity "Facility"
 # Or direct invocation
 bun run agents/conversion-template-generator.ts --entity "Facility"
 ```
+Notes:
+- Template generation is interactive and runs in Claude Code
+- You can rerun templates without re-running analysis steps 1-10
+- For corrected patterns and checklists, see `agents/FIXES_README.md` and `agents/TEMPLATE_GENERATION_FIXES_CORRECTED.md`
 
 ### 🚀 System Prompt Agents (New)
 

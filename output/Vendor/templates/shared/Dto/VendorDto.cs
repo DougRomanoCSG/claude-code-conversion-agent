@@ -13,19 +13,20 @@ public class VendorDto
     [Filterable]
     public int VendorID { get; set; }
 
-    // Core Vendor Properties
-    [Required(ErrorMessage = "Vendor name is required")]
-    [StringLength(50, ErrorMessage = "Name cannot exceed 50 characters")]
+    // Core Fields
+    [Required(ErrorMessage = "Name is required")]
+    [StringLength(20, ErrorMessage = "Name cannot exceed 20 characters")]
     [Display(Name = "Name")]
     [Sortable]
     [Filterable]
     public string Name { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Long name is required")]
     [StringLength(50, ErrorMessage = "Long name cannot exceed 50 characters")]
     [Display(Name = "Long Name")]
     [Sortable]
     [Filterable]
-    public string? LongName { get; set; }
+    public string LongName { get; set; } = string.Empty;
 
     [StringLength(20, ErrorMessage = "Accounting code cannot exceed 20 characters")]
     [Display(Name = "Accounting #")]
@@ -38,58 +39,46 @@ public class VendorDto
     [Filterable]
     public bool IsActive { get; set; } = true;
 
-    // Contact Information
-    [StringLength(255, ErrorMessage = "Address cannot exceed 255 characters")]
+    // Address Fields
+    [StringLength(80, ErrorMessage = "Address cannot exceed 80 characters")]
     [Display(Name = "Address")]
     public string? Address { get; set; }
 
-    [StringLength(50, ErrorMessage = "City cannot exceed 50 characters")]
+    [StringLength(30, ErrorMessage = "City cannot exceed 30 characters")]
     [Display(Name = "City")]
     public string? City { get; set; }
 
-    [StringLength(2, ErrorMessage = "State code must be 2 characters")]
+    [StringLength(2, ErrorMessage = "State cannot exceed 2 characters")]
     [Display(Name = "State")]
     public string? State { get; set; }
 
     [StringLength(10, ErrorMessage = "Zip cannot exceed 10 characters")]
     [Display(Name = "Zip")]
-    [RegularExpression(@"^\d{5}(-\d{4})?$", ErrorMessage = "Zip must be in format 12345 or 12345-6789")]
     public string? Zip { get; set; }
 
+    // Contact Fields
     [StringLength(10, ErrorMessage = "Phone number cannot exceed 10 characters")]
     [Display(Name = "Phone")]
-    [Phone(ErrorMessage = "Invalid phone number format")]
     public string? PhoneNumber { get; set; }
 
     [StringLength(10, ErrorMessage = "Fax number cannot exceed 10 characters")]
     [Display(Name = "Fax")]
-    [Phone(ErrorMessage = "Invalid fax number format")]
     public string? FaxNumber { get; set; }
 
-    [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
+    [StringLength(100, ErrorMessage = "Email address cannot exceed 100 characters")]
     [Display(Name = "Email")]
     [EmailAddress(ErrorMessage = "Invalid email address")]
     public string? EmailAddress { get; set; }
 
-    [StringLength(20, ErrorMessage = "Terms code cannot exceed 20 characters")]
+    // Business Fields
+    [StringLength(8, ErrorMessage = "Terms code cannot exceed 8 characters")]
     [Display(Name = "Payment Terms")]
     public string? TermsCode { get; set; }
 
-    // Vendor Type Flags
     [Display(Name = "Internal Vendor")]
     [Sortable]
     [Filterable]
     public bool IsInternalVendor { get; set; }
-
-    [Display(Name = "Fuel Supplier")]
-    [Sortable]
-    [Filterable]
-    public bool IsFuelSupplier { get; set; }
-
-    [Display(Name = "Boat Assist Supplier")]
-    [Sortable]
-    [Filterable]
-    public bool IsBoatAssistSupplier { get; set; }
 
     [Display(Name = "Liquid Broker")]
     [Sortable]
@@ -101,13 +90,13 @@ public class VendorDto
     [Filterable]
     public bool IsTankerman { get; set; }
 
-    // Portal Settings
+    // Portal Fields
     [Display(Name = "Portal Enabled")]
     [Sortable]
     [Filterable]
     public bool EnablePortal { get; set; }
 
-    // BargeEx Settings
+    // BargeEx Fields
     [Display(Name = "BargeEx Enabled")]
     [Sortable]
     [Filterable]
@@ -117,12 +106,12 @@ public class VendorDto
     [Display(Name = "BargeEx Trading Partner #")]
     public string? BargeExTradingPartnerNum { get; set; }
 
+    [Display(Name = "BargeEx Config")]
     public int? BargeExConfigID { get; set; }
 
     // Child Collections (populated separately)
     public List<VendorContactDto> Contacts { get; set; } = new();
     public List<VendorBusinessUnitDto> BusinessUnits { get; set; } = new();
-    public List<VendorPortalGroupDto> PortalGroups { get; set; } = new();
 
     // Audit Fields
     public DateTime? CreateDateTime { get; set; }
