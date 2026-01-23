@@ -121,7 +121,42 @@ bun run generate-templates --entity "Facility"
 This will launch the interactive template generators in Claude Code to generate conversion plans and code templates.
 You can rerun template generation without re-running analysis steps 1-10.
 
-#### Option 2: Run Individual Agents
+#### Option 2: Use SpecKit Spec-Driven Development (NEW!)
+
+Generate a specification in the main repo that drives implementation directly, eliminating template sync issues:
+
+```bash
+# Run analysis and generate SpecKit spec in main repo
+bun run agents/orchestrator.ts --entity "Vendor" --create-spec
+
+# Or generate spec from existing analysis data
+bun run agents/orchestrator.ts --entity "Vendor" --create-spec --skip-steps "1,2,3,4,5,6,7,8,9,10"
+```
+
+This will:
+1. Run analysis steps (or skip if data exists)
+2. Generate spec in `C:\Dev\BargeOps.Admin.Mono\.speckit\entities\{Entity}\`
+   - `spec.md` - Complete specification with all requirements
+   - `quality-checklist.md` - Quality gates and verification checklist
+   - `tasks/` - Step-by-step implementation tasks (7 files)
+
+**Then implement directly in main repo:**
+```bash
+cd C:\Dev\BargeOps.Admin.Mono
+# Implement following the spec and tasks
+# No template copying needed!
+```
+
+**Benefits:**
+- ✅ Single source of truth in main repo
+- ✅ No template synchronization issues
+- ✅ Clear definition of "done"
+- ✅ Quality checklist built-in
+- ✅ Scales to 20+ entities
+
+See `.speckit/README.md` in main repo for full workflow.
+
+#### Option 3: Run Individual Agents
 
 ```bash
 # Analyze search form

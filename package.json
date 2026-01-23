@@ -23,7 +23,8 @@
 		"lint": "biome check --write ./agents",
 		"format": "biome format --write ./agents",
 		"check": "biome check ./agents",
-		"barge-master-plan": "bun run scripts/generate-barge-master-plan.ts"
+		"barge-master-plan": "bun run scripts/generate-barge-master-plan.ts",
+		"regenerate-spec": "bun run agents/spec-regenerator.ts"
 	},
 	"keywords": [
 		"conversion",

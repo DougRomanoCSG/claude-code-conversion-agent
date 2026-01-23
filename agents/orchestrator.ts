@@ -33,8 +33,9 @@ import { spawn } from "bun";
 import { parsedArgs } from "../lib/flags";
 import { getProjectRoot, parseEntityFromFormName, getAvailableForms, getFormsDirectory, detectChildForms } from "../lib/paths";
 import { mkdir } from "fs/promises";
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { createInterface } from "readline";
+import { generateSpec } from "../lib/spec-generator";
 
 function normalizePath(path: string): string {
 	// Normalize Windows paths for file system operations
@@ -63,6 +64,7 @@ interface OrchestratorOptions {
 	generateTemplates?: boolean;
 	generateTemplatesApi?: boolean;
 	generateTemplatesUi?: boolean;
+	createSpec?: boolean;
 }
 
 interface AgentStep {
@@ -161,6 +163,7 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 	const generateTemplates = parsedArgs.values["generate-templates"] as boolean;
 	const generateTemplatesApi = parsedArgs.values["generate-templates-api"] as boolean;
 	const generateTemplatesUi = parsedArgs.values["generate-templates-ui"] as boolean;
+	const createSpec = parsedArgs.values["create-spec"] as boolean;
 
 	// Node's parseArgs can return string[] if an option is repeated; normalize to a single string.
 	const entity = Array.isArray(rawEntity) ? rawEntity[0] : rawEntity;
@@ -287,6 +290,7 @@ async function parseOptions(): Promise<OrchestratorOptions> {
 		generateTemplates,
 		generateTemplatesApi,
 		generateTemplatesUi,
+		createSpec,
 	};
 }
 
@@ -878,6 +882,91 @@ ${options.formName ? `║  Form Name: ${options.formName.padEnd(65, " ")}║\n` 
 				console.error("\n❌ UI template generation failed. Aborting.");
 				process.exit(uiExit);
 			}
+		}
+	}
+
+	// Optional spec generation
+	if (options.createSpec) {
+		console.log("\n📝 SpecKit spec generation requested. Generating specification...");
+
+		try {
+			// Read config to get monorepo path
+			const configPath = `${projectRoot}config.json`;
+			const config = JSON.parse(readFileSync(configPath, "utf-8"));
+			const monorepoPath = config.targetProjects?.monorepo || "C:\\Dev\\BargeOps.Admin.Mono";
+
+			// Load analysis data
+			const analysisData: any = {
+				entity: options.entity,
+			};
+
+			// Construct form names dynamically
+			const searchFormName = `frm${options.entity}Search`;
+			const detailFormName = `frm${options.entity}Detail`;
+			const primaryFormName = options.formName || searchFormName;
+
+			// Load business logic
+			const businessLogicPath = options.isSingleForm
+				? `${outputRoot}/${options.formName}/business-logic.${options.formName}.json`
+				: `${outputRoot}/${searchFormName}/business-logic.${searchFormName}.json`;
+			if (existsSync(businessLogicPath)) {
+				analysisData.businessLogic = JSON.parse(readFileSync(businessLogicPath, "utf-8"));
+			}
+
+			// Load tabs (detail form)
+			const tabsPath = options.isSingleForm
+				? `${outputRoot}/${options.formName}/tabs.${options.formName}.json`
+				: `${outputRoot}/${detailFormName}/tabs.${detailFormName}.json`;
+			if (existsSync(tabsPath)) {
+				analysisData.tabs = JSON.parse(readFileSync(tabsPath, "utf-8"));
+			}
+
+			// Load validation
+			const validationPath = options.isSingleForm
+				? `${outputRoot}/${options.formName}/validation.${options.formName}.json`
+				: `${outputRoot}/${searchFormName}/validation.${searchFormName}.json`;
+			if (existsSync(validationPath)) {
+				analysisData.validation = JSON.parse(readFileSync(validationPath, "utf-8"));
+			}
+
+			// Load security
+			const securityPath = options.isSingleForm
+				? `${outputRoot}/${options.formName}/security.${options.formName}.json`
+				: `${outputRoot}/${searchFormName}/security.${searchFormName}.json`;
+			if (existsSync(securityPath)) {
+				analysisData.security = JSON.parse(readFileSync(securityPath, "utf-8"));
+			}
+
+			// Load data access
+			const dataAccessPath = options.isSingleForm
+				? `${outputRoot}/${options.formName}/data-access.${options.formName}.json`
+				: `${outputRoot}/${searchFormName}/data-access.${searchFormName}.json`;
+			if (existsSync(dataAccessPath)) {
+				analysisData.dataAccess = JSON.parse(readFileSync(dataAccessPath, "utf-8"));
+			}
+
+			// Load form structure (search)
+			const formStructureSearchPath = options.isSingleForm
+				? `${outputRoot}/${options.formName}/form-structure.${options.formName}.json`
+				: `${outputRoot}/${searchFormName}/form-structure-search.${searchFormName}.json`;
+			if (existsSync(formStructureSearchPath)) {
+				analysisData.formStructureSearch = JSON.parse(readFileSync(formStructureSearchPath, "utf-8"));
+			}
+
+			await generateSpec(analysisData, {
+				outputPath: outputRoot, // Pass the analysis output directory so master plan can be found
+				monorepoPath,
+			});
+
+			console.log(`\n✅ SpecKit spec generated successfully!`);
+			console.log(`   Location: ${monorepoPath}/.speckit/entities/${options.entity}/`);
+			console.log(`\nNext steps:`);
+			console.log(`   1. Review spec: ${monorepoPath}/.speckit/entities/${options.entity}/spec.md`);
+			console.log(`   2. Implement against tasks in: ${monorepoPath}/.speckit/entities/${options.entity}/tasks/`);
+			console.log(`   3. Track quality with: ${monorepoPath}/.speckit/entities/${options.entity}/quality-checklist.md\n`);
+		} catch (error: any) {
+			console.error(`\n❌ SpecKit spec generation failed: ${error.message}`);
+			console.error(`   Make sure analysis data exists in ${outputRoot}`);
 		}
 	}
 

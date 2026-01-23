@@ -1,0 +1,686 @@
+{
+  "businessObject": "Customer",
+  "baseClass": "CustomerBase",
+  "namespace": "BargeOps.BusinessLogic",
+  "properties": [
+    {
+      "name": "CustomerID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "description": "Unique identifier for customer"
+    },
+    {
+      "name": "Name",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isRequired": true,
+      "isNullable": false,
+      "description": "Customer name"
+    },
+    {
+      "name": "BillingName",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "isRequired": true,
+      "isNullable": false,
+      "displayName": "Billing name",
+      "description": "Name used for billing purposes"
+    },
+    {
+      "name": "AccountingCode",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isRequired": false,
+      "isNullable": true,
+      "displayName": "Accounting number",
+      "description": "Accounting system code"
+    },
+    {
+      "name": "AccountingSyncId",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 32,
+      "isRequired": false,
+      "isNullable": true,
+      "description": "Accounting synchronization identifier"
+    },
+    {
+      "name": "TermsCode",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 8,
+      "isRequired": false,
+      "isNullable": true,
+      "displayName": "Terms code",
+      "defaultValue": "GetDefaultValue from ValidationList.InvoiceTermsCode",
+      "description": "Invoice payment terms code"
+    },
+    {
+      "name": "EmailAddress",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 100,
+      "isRequired": false,
+      "isNullable": true,
+      "displayName": "Email address",
+      "description": "Customer email address"
+    },
+    {
+      "name": "Address",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 80,
+      "isRequired": false,
+      "isNullable": true,
+      "description": "Street address"
+    },
+    {
+      "name": "City",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 30,
+      "isRequired": false,
+      "isNullable": true,
+      "description": "City"
+    },
+    {
+      "name": "State",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 2,
+      "isRequired": false,
+      "isNullable": true,
+      "validationType": "CharProp",
+      "description": "State (2-character code)"
+    },
+    {
+      "name": "Zip",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 10,
+      "isRequired": false,
+      "isNullable": true,
+      "validationType": "ZipCodeOptionalExtension",
+      "description": "Zip code with optional extension"
+    },
+    {
+      "name": "PhoneNumber",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 10,
+      "isRequired": false,
+      "isNullable": true,
+      "displayName": "Phone number",
+      "validationType": "Phone10Prop",
+      "description": "10-digit phone number"
+    },
+    {
+      "name": "FaxNumber",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 10,
+      "isRequired": false,
+      "isNullable": true,
+      "displayName": "Fax number",
+      "validationType": "Phone10Prop",
+      "description": "10-digit fax number"
+    },
+    {
+      "name": "IsBargeExEnabled",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": false,
+      "displayName": "BargeEx enabled",
+      "description": "Whether BargeEx integration is enabled"
+    },
+    {
+      "name": "BargeExTradingPartnerNum",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 8,
+      "isRequired": false,
+      "isNullable": true,
+      "displayName": "Trading partner number",
+      "validationType": "CharProp",
+      "description": "BargeEx trading partner number"
+    },
+    {
+      "name": "BargeExConfigID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": true,
+      "displayName": "Configuration",
+      "validationType": "Int32Prop",
+      "description": "BargeEx configuration ID"
+    },
+    {
+      "name": "IsActive",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": true,
+      "description": "Whether customer is active"
+    },
+    {
+      "name": "ConvFmsCustomerID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": true,
+      "validationType": "Int32Prop",
+      "description": "Legacy FMS customer ID for conversion"
+    },
+    {
+      "name": "ExcludeEstimatedCost",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": false,
+      "description": "Whether to exclude estimated costs"
+    },
+    {
+      "name": "ExcludeFleetBoatForShift",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": false,
+      "description": "Whether to exclude fleet boat for shift"
+    },
+    {
+      "name": "FreightCode",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 3,
+      "isRequired": false,
+      "isNullable": true,
+      "validationType": "CharProp",
+      "description": "Freight classification code"
+    },
+    {
+      "name": "EnablePortal",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": false,
+      "description": "Whether customer portal is enabled"
+    },
+    {
+      "name": "ExternalCode",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isRequired": false,
+      "isNullable": true,
+      "description": "External system code"
+    },
+    {
+      "name": "SendInvoiceOptions",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 15,
+      "isRequired": true,
+      "isNullable": false,
+      "defaultValue": "Print",
+      "displayName": "Send invoice options",
+      "validValues": ["", "Print", "Email", "Print and Email"],
+      "description": "How to send invoices to customer"
+    },
+    {
+      "name": "CustomerType",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isRequired": false,
+      "isNullable": true,
+      "displayName": "Customer type",
+      "description": "Classification type of customer"
+    },
+    {
+      "name": "SendSingleInvoicePerEmail",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": false,
+      "description": "Whether to send single invoice per email"
+    },
+    {
+      "name": "GenerateSeparateBillFuelTaxLube",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": false,
+      "description": "Whether to generate separate bills for fuel, tax, and lube"
+    },
+    {
+      "name": "UseSixLineBillingHeader",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "isRequired": false,
+      "isNullable": false,
+      "defaultValue": false,
+      "description": "Whether to use six-line billing header format"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "NameRequired",
+      "property": "Name",
+      "condition": "String.IsNullOrEmpty(p_Name)",
+      "message": "Name is required",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "NameMaxLength",
+      "property": "Name",
+      "condition": "p_Name.Length > MaxLength.Name (20)",
+      "message": "Name cannot exceed maximum length of 20.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "BillingNameRequired",
+      "property": "BillingName",
+      "condition": "String.IsNullOrEmpty(p_BillingName)",
+      "message": "Billing name is required",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "BillingNameMaxLength",
+      "property": "BillingName",
+      "condition": "p_BillingName.Length > MaxLength.BillingName (50)",
+      "message": "Billing name cannot exceed maximum length of 50.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "AccountingCodeMaxLength",
+      "property": "AccountingCode",
+      "condition": "p_AccountingCode.Length > MaxLength.AccountingCode (20)",
+      "message": "Accounting number cannot exceed maximum length of 20.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "AccountingSyncIdMaxLength",
+      "property": "AccountingSyncId",
+      "condition": "p_AccountingSyncId.Length > MaxLength.AccountingSyncId (32)",
+      "message": "AccountingSyncId cannot exceed maximum length of 32.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "TermsCodeMaxLength",
+      "property": "TermsCode",
+      "condition": "p_TermsCode.Length > MaxLength.TermsCode (8)",
+      "message": "Terms code cannot exceed maximum length of 8.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "EmailAddressMaxLength",
+      "property": "EmailAddress",
+      "condition": "p_EmailAddress.Length > MaxLength.EmailAddress (100)",
+      "message": "Email address cannot exceed maximum length of 100.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "AddressMaxLength",
+      "property": "Address",
+      "condition": "p_Address.Length > MaxLength.Address (80)",
+      "message": "Address cannot exceed maximum length of 80.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "CityMaxLength",
+      "property": "City",
+      "condition": "p_City.Length > MaxLength.City (30)",
+      "message": "City cannot exceed maximum length of 30.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "StateMaxLength",
+      "property": "State",
+      "condition": "p_State.Length > MaxLength.State (2)",
+      "message": "State cannot exceed maximum length of 2.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "ZipMaxLength",
+      "property": "Zip",
+      "condition": "p_Zip.Length > MaxLength.Zip (10)",
+      "message": "Zip cannot exceed maximum length of 10.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "PhoneNumberMaxLength",
+      "property": "PhoneNumber",
+      "condition": "p_PhoneNumber.Length > MaxLength.PhoneNumber (10)",
+      "message": "Phone number cannot exceed maximum length of 10.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "FaxNumberMaxLength",
+      "property": "FaxNumber",
+      "condition": "p_FaxNumber.Length > MaxLength.FaxNumber (10)",
+      "message": "Fax number cannot exceed maximum length of 10.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "BargeExTradingPartnerNumMaxLength",
+      "property": "BargeExTradingPartnerNum",
+      "condition": "p_BargeExTradingPartnerNum.Length > MaxLength.BargeExTradingPartnerNum (8)",
+      "message": "Trading partner number cannot exceed maximum length of 8.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "FreightCodeMaxLength",
+      "property": "FreightCode",
+      "condition": "p_FreightCode.Length > MaxLength.FreightCode (3)",
+      "message": "FreightCode cannot exceed maximum length of 3.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "ExternalCodeMaxLength",
+      "property": "ExternalCode",
+      "condition": "p_ExternalCode.Length > MaxLength.ExternalCode (20)",
+      "message": "ExternalCode cannot exceed maximum length of 20.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "SendInvoiceOptionsRequired",
+      "property": "SendInvoiceOptions",
+      "condition": "String.IsNullOrEmpty(p_SendInvoiceOptions)",
+      "message": "Send invoice options is required",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "SendInvoiceOptionsMaxLength",
+      "property": "SendInvoiceOptions",
+      "condition": "p_SendInvoiceOptions.Length > MaxLength.SendInvoiceOptions (15)",
+      "message": "Send invoice options cannot exceed maximum length of 15.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "CustomerTypeMaxLength",
+      "property": "CustomerType",
+      "condition": "p_CustomerType.Length > MaxLength.CustomerType (20)",
+      "message": "Customer type cannot exceed maximum length of 20.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "BargeExEnabled",
+      "property": "IsBargeExEnabled",
+      "condition": "p_IsBargeExEnabled AND (String.IsNullOrEmpty(p_BargeExTradingPartnerNum.Trim) OR String.IsNullOrEmpty(p_BargeExConfigID.Trim))",
+      "message": "Both Trading Partner # & Configuration required for BargeEx enabled.",
+      "severity": "Error",
+      "context": "When BargeEx is enabled",
+      "relatedProperties": ["BargeExTradingPartnerNum", "BargeExConfigID"]
+    },
+    {
+      "ruleName": "OneContactInvoiceViaEmail",
+      "property": "SendInvoiceOptions",
+      "condition": "(SendInvoiceOptions == 'Email' OR SendInvoiceOptions == 'Print and Email') AND HasContactsButNoneWithSendInvoiceViaEmailChecked",
+      "message": "At least one contact must have 'Send Invoice Via Email' checked if 'Send invoice options' is either 'Email' or 'Print and Email'.",
+      "severity": "Error",
+      "context": "When SendInvoiceOptions is Email or Print and Email",
+      "customLogic": "Checked in IsValid property override - validates that at least one CustomerContact has SendInvoiceViaEmail = true when invoice options require email delivery"
+    }
+  ],
+  "relationships": [
+    {
+      "property": "CustomerContacts",
+      "relatedEntity": "CustomerContact",
+      "type": "OneToMany",
+      "cascadeDelete": true,
+      "description": "Collection of customer contacts"
+    },
+    {
+      "property": "CustomerBargeExTransactions",
+      "relatedEntity": "CustomerBargeExTransaction",
+      "type": "OneToMany",
+      "cascadeDelete": true,
+      "description": "Collection of BargeEx transactions"
+    },
+    {
+      "property": "CustomerPortalGroups",
+      "relatedEntity": "CustomerPortalGroup",
+      "type": "OneToMany",
+      "cascadeDelete": true,
+      "loadingStrategy": "Deferred",
+      "description": "Collection of customer portal groups"
+    }
+  ],
+  "methods": {
+    "factory": [
+      {
+        "name": "NewCustomer",
+        "returnType": "Customer",
+        "parameters": [],
+        "description": "Creates new customer instance with defaults"
+      },
+      {
+        "name": "GetCustomer",
+        "returnType": "Customer",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Loads existing customer by ID"
+      },
+      {
+        "name": "GetCustomer",
+        "returnType": "Customer",
+        "parameters": [
+          {
+            "name": "accountingSynchId",
+            "type": "String"
+          }
+        ],
+        "description": "Loads existing customer by accounting sync ID"
+      }
+    ],
+    "crud": [
+      {
+        "name": "Save",
+        "returnType": "Customer",
+        "description": "Persists customer to database and marks CustomerList and CustomerFreightCodeList caches dirty"
+      },
+      {
+        "name": "SaveNoRefresh",
+        "returnType": "void",
+        "description": "Persists customer to database without refresh and marks CustomerList and CustomerFreightCodeList caches dirty"
+      },
+      {
+        "name": "DeleteCustomer",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Deletes customer by ID and marks CustomerList and CustomerFreightCodeList caches dirty"
+      }
+    ],
+    "validation": [
+      {
+        "name": "IsValid",
+        "returnType": "Boolean",
+        "description": "Validates customer and all child collections, includes custom rule checking for OneContactInvoiceViaEmail"
+      },
+      {
+        "name": "CheckBusinessRules",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "PropertyName",
+            "type": "String"
+          }
+        ],
+        "description": "Validates business rules for specified property or all properties if empty string"
+      }
+    ]
+  },
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "IsActive",
+        "value": "true"
+      },
+      {
+        "property": "TermsCode",
+        "value": "ValidationList.GetDefaultValue(ValidationList.ValidationTypes.InvoiceTermsCode)",
+        "note": "Initialized from validation list default"
+      },
+      {
+        "property": "SendInvoiceOptions",
+        "value": "Print",
+        "note": "Defaults to Print (same as database default)"
+      }
+    ]
+  },
+  "enumerations": [
+    {
+      "name": "SendInvoiceOption",
+      "values": [
+        {
+          "name": "NotSetEmptyString",
+          "value": 0,
+          "stringValue": ""
+        },
+        {
+          "name": "Print",
+          "value": 1,
+          "stringValue": "Print"
+        },
+        {
+          "name": "Email",
+          "value": 2,
+          "stringValue": "Email"
+        },
+        {
+          "name": "PrintAndEmail",
+          "value": 3,
+          "stringValue": "Print and Email"
+        }
+      ]
+    }
+  ],
+  "customLogic": [
+    {
+      "name": "HasContactsButNoneWithSendInvoiceViaEmailChecked",
+      "type": "Property",
+      "returnType": "Boolean",
+      "description": "Private read-only property that identifies if there is at least one customer contact in the collection but none have SendInvoiceViaEmail property checked. Returns true if collection has contacts but none with SendInvoiceViaEmail = true. Returns false if collection is empty or at least one contact has SendInvoiceViaEmail = true.",
+      "usedBy": "OneContactInvoiceViaEmail business rule"
+    }
+  ],
+  "cacheInvalidation": [
+    {
+      "operation": "Save",
+      "cachesInvalidated": [
+        "CustomerList",
+        "CustomerFreightCodeList"
+      ]
+    },
+    {
+      "operation": "SaveNoRefresh",
+      "cachesInvalidated": [
+        "CustomerList",
+        "CustomerFreightCodeList"
+      ]
+    },
+    {
+      "operation": "DeleteCustomer",
+      "cachesInvalidated": [
+        "CustomerList",
+        "CustomerFreightCodeList"
+      ]
+    }
+  ],
+  "databaseMapping": {
+    "selectProcedure": "CustomerSelect",
+    "selectAllProcedure": "CustomersSelect",
+    "insertProcedure": "CustomerInsert",
+    "updateProcedure": "CustomerUpdate",
+    "deleteProcedure": "CustomerDelete"
+  },
+  "modernValidationEquivalents": {
+    "dataAnnotations": [
+      "[Required(ErrorMessage = \"Name is required\")]",
+      "[MaxLength(20, ErrorMessage = \"Name cannot exceed maximum length of 20.\")]",
+      "[Required(ErrorMessage = \"Billing name is required\")]",
+      "[MaxLength(50, ErrorMessage = \"Billing name cannot exceed maximum length of 50.\")]",
+      "[MaxLength(20)]",
+      "[MaxLength(32)]",
+      "[MaxLength(8)]",
+      "[MaxLength(100)]",
+      "[MaxLength(80)]",
+      "[MaxLength(30)]",
+      "[StringLength(2)]",
+      "[MaxLength(10)]",
+      "[Phone]",
+      "[MaxLength(8)]",
+      "[MaxLength(3)]",
+      "[MaxLength(20)]",
+      "[Required(ErrorMessage = \"Send invoice options is required\")]",
+      "[MaxLength(15)]",
+      "[MaxLength(20)]"
+    ],
+    "fluentValidation": [
+      "RuleFor(x => x.Name).NotEmpty().WithMessage(\"Name is required\").MaximumLength(20).WithMessage(\"Name cannot exceed maximum length of 20.\")",
+      "RuleFor(x => x.BillingName).NotEmpty().WithMessage(\"Billing name is required\").MaximumLength(50).WithMessage(\"Billing name cannot exceed maximum length of 50.\")",
+      "RuleFor(x => x.AccountingCode).MaximumLength(20).When(x => !string.IsNullOrEmpty(x.AccountingCode))",
+      "RuleFor(x => x.BargeExTradingPartnerNum).NotEmpty().When(x => x.IsBargeExEnabled).WithMessage(\"Both Trading Partner # & Configuration required for BargeEx enabled.\")",
+      "RuleFor(x => x.BargeExConfigID).NotEmpty().When(x => x.IsBargeExEnabled).WithMessage(\"Both Trading Partner # & Configuration required for BargeEx enabled.\")",
+      "RuleFor(x => x.SendInvoiceOptions).NotEmpty().WithMessage(\"Send invoice options is required\").Must(BeValidSendInvoiceOption).WithMessage(\"Invalid send invoice option\")",
+      "RuleFor(x => x).Must(HaveAtLeastOneContactWithEmailWhenRequired).When(x => x.SendInvoiceOptions == \"Email\" || x.SendInvoiceOptions == \"Print and Email\").WithMessage(\"At least one contact must have 'Send Invoice Via Email' checked if 'Send invoice options' is either 'Email' or 'Print and Email'.\")"
+    ]
+  },
+  "notes": [
+    "IsValid property is overridden to perform custom validation for OneContactInvoiceViaEmail rule",
+    "Custom criteria class allows fetching by AccountingSyncId in addition to primary key",
+    "Phone and Fax numbers use Phone10Prop validation for 10-digit formatting",
+    "Zip code uses ZipCodeOptionalExtension validation to support extended format",
+    "State field is limited to 2 characters using CharProp validation",
+    "BargeEx configuration requires both TradingPartnerNum and ConfigID when enabled",
+    "SendInvoiceOptions defaults to 'Print' matching database default",
+    "TermsCode is initialized from ValidationList default value for InvoiceTermsCode",
+    "All child collections (CustomerContacts, CustomerBargeExTransactions, CustomerPortalGroups) are validated in IsValid",
+    "CustomerPortalGroups uses deferred loading pattern",
+    "Save operations invalidate both CustomerList and CustomerFreightCodeList caches",
+    "Auditing is enabled for all non-collection properties with field-level audit tracking"
+  ]
+}

@@ -1,0 +1,916 @@
+{
+  "businessObject": "FacilityLocation",
+  "baseClass": "FacilityLocationBase",
+  "namespace": "BargeOps.Onshore.BusinessLogic",
+  "inheritanceChain": [
+    "FacilityLocation",
+    "FacilityLocationBase",
+    "BusinessLogicBase"
+  ],
+  "description": "Manages facility locations including locks, gauge locations, and other facility types with NDC (National Data Center) integration and lock-specific water level tracking",
+  "properties": [
+    {
+      "name": "LocationID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "dbType": "Int",
+      "description": "Primary key - unique identifier for the facility location"
+    },
+    {
+      "name": "BargeExCode",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 10,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "BargeEx location code identifier"
+    },
+    {
+      "name": "Bank",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "River bank designation",
+      "defaultValue": "ValidationList.RiverBank default",
+      "isValidationList": true,
+      "validationListType": "RiverBank"
+    },
+    {
+      "name": "BargeExLocationType",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 20,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "displayName": "Facility type",
+      "description": "Type of facility (Lock, Gauge Location, etc.)",
+      "defaultValue": "ValidationList.BargeExLocationType default",
+      "isValidationList": true,
+      "validationListType": "BargeExLocationType"
+    },
+    {
+      "name": "NdcName",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 200,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center facility name"
+    },
+    {
+      "name": "NdcLocationDescription",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 200,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center location description"
+    },
+    {
+      "name": "NdcAddress",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center facility address"
+    },
+    {
+      "name": "NdcCounty",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 30,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center county"
+    },
+    {
+      "name": "NdcCountyFips",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 3,
+      "isNullable": true,
+      "dbType": "Char",
+      "description": "National Data Center county FIPS code"
+    },
+    {
+      "name": "NdcTown",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 30,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center town/city"
+    },
+    {
+      "name": "NdcState",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 2,
+      "isNullable": true,
+      "dbType": "Char",
+      "description": "National Data Center state (2-character code)"
+    },
+    {
+      "name": "NdcWaterway",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center waterway designation"
+    },
+    {
+      "name": "NdcPort",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 25,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center port designation"
+    },
+    {
+      "name": "NdcLatitude",
+      "type": "Double",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Float",
+      "description": "National Data Center latitude coordinate (stored as string, exposed as double)"
+    },
+    {
+      "name": "NdcLongitude",
+      "type": "Double",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Float",
+      "description": "National Data Center longitude coordinate (stored as string, exposed as double)"
+    },
+    {
+      "name": "NdcOperator",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 150,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center facility operator"
+    },
+    {
+      "name": "NdcOwner",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 150,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center facility owner"
+    },
+    {
+      "name": "NdcPurpose",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 255,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center facility purpose"
+    },
+    {
+      "name": "NdcRemark",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 1200,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "description": "National Data Center remarks/notes"
+    },
+    {
+      "name": "ConvFmsLocationMasterID",
+      "type": "Int32",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Int",
+      "description": "Conversion field - FMS Location Master ID (stored as string, exposed as Int32)"
+    },
+    {
+      "name": "LockUsaceName",
+      "type": "String",
+      "access": "ReadWrite",
+      "maxLength": 50,
+      "isNullable": true,
+      "dbType": "VarChar",
+      "displayName": "USACE name",
+      "description": "USACE (US Army Corps of Engineers) facility name - required for Lock and Gauge Location types"
+    },
+    {
+      "name": "LockFloodStage",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Decimal",
+      "displayName": "Flood stage",
+      "description": "Water level at flood stage - applicable to Lock and Gauge Location types (stored as string, exposed as decimal)"
+    },
+    {
+      "name": "LockPoolStage",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Decimal",
+      "displayName": "Pool stage",
+      "description": "Normal pool stage water level - applicable to Lock and Gauge Location types (stored as string, exposed as decimal)"
+    },
+    {
+      "name": "LockLowWater",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Decimal",
+      "displayName": "Low water",
+      "description": "Low water level - applicable to Lock and Gauge Location types (stored as string, exposed as decimal)"
+    },
+    {
+      "name": "LockNormalCurrent",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Decimal",
+      "displayName": "Normal current",
+      "description": "Normal current measurement - applicable to Lock and Gauge Location types (stored as string, exposed as decimal)"
+    },
+    {
+      "name": "LockHighFlow",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Decimal",
+      "displayName": "High flow",
+      "description": "High flow water level - applicable to Lock and Gauge Location types (stored as string, exposed as decimal)"
+    },
+    {
+      "name": "LockHighWater",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Decimal",
+      "displayName": "High water",
+      "description": "High water level - applicable to Lock and Gauge Location types (stored as string, exposed as decimal)"
+    },
+    {
+      "name": "LockCatastrophicLevel",
+      "type": "Decimal",
+      "access": "ReadWrite",
+      "isNullable": true,
+      "dbType": "Decimal",
+      "displayName": "Catastrophic level",
+      "description": "Catastrophic water level - applicable to Lock and Gauge Location types (stored as string, exposed as decimal)"
+    },
+    {
+      "name": "FacilityBerths",
+      "type": "FacilityBerths",
+      "access": "ReadWrite",
+      "isCollection": true,
+      "description": "Collection of berths associated with this facility",
+      "cascadeDelete": false,
+      "lazyLoad": false,
+      "relationship": "OneToMany"
+    },
+    {
+      "name": "Alert",
+      "type": "Alert",
+      "access": "ReadWrite",
+      "isPropertyObject": true,
+      "description": "Alert information for this facility",
+      "cascadeDelete": false,
+      "lazyLoad": true,
+      "relationship": "OneToOne"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "BargeExCodeMaxLength",
+      "property": "BargeExCode",
+      "condition": "p_BargeExCode.Length > MaxLength.BargeExCode",
+      "message": "BargeExCode cannot be longer than 10.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 10
+    },
+    {
+      "ruleName": "BankMaxLength",
+      "property": "Bank",
+      "condition": "p_Bank.Length > MaxLength.Bank",
+      "message": "Bank cannot be longer than 50.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 50
+    },
+    {
+      "ruleName": "BargeExLocationTypeMaxLength",
+      "property": "BargeExLocationType",
+      "condition": "p_BargeExLocationType.Length > MaxLength.BargeExLocationType",
+      "message": "Facility type cannot be longer than 20.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 20
+    },
+    {
+      "ruleName": "LockUsaceNameMustBeBlank",
+      "property": "LockUsaceName",
+      "condition": "((Not isLockOrGauge) AndAlso (Not String.IsNullOrEmpty(p_LockUsaceName)))",
+      "message": "USACE name must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "severity": "Error",
+      "context": "When BargeExLocationType is not 'Lock' or 'Gauge Location'",
+      "validationType": "ConditionalRequired",
+      "conditionalOn": "BargeExLocationType",
+      "conditionalValues": ["Lock", "Gauge Location"],
+      "mustBeBlankWhenNotIn": true
+    },
+    {
+      "ruleName": "LockFloodStageMustBeBlank",
+      "property": "LockFloodStage",
+      "condition": "((Not isLockOrGauge) AndAlso (Not String.IsNullOrEmpty(p_LockFloodStage)))",
+      "message": "Flood stage must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "severity": "Error",
+      "context": "When BargeExLocationType is not 'Lock' or 'Gauge Location'",
+      "validationType": "ConditionalRequired",
+      "conditionalOn": "BargeExLocationType",
+      "conditionalValues": ["Lock", "Gauge Location"],
+      "mustBeBlankWhenNotIn": true
+    },
+    {
+      "ruleName": "LockPoolStageMustBeBlank",
+      "property": "LockPoolStage",
+      "condition": "((Not isLockOrGauge) AndAlso (Not String.IsNullOrEmpty(p_LockPoolStage)))",
+      "message": "Pool stage must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "severity": "Error",
+      "context": "When BargeExLocationType is not 'Lock' or 'Gauge Location'",
+      "validationType": "ConditionalRequired",
+      "conditionalOn": "BargeExLocationType",
+      "conditionalValues": ["Lock", "Gauge Location"],
+      "mustBeBlankWhenNotIn": true
+    },
+    {
+      "ruleName": "LockLowWaterMustBeBlank",
+      "property": "LockLowWater",
+      "condition": "((Not isLockOrGauge) AndAlso (Not String.IsNullOrEmpty(p_LockLowWater)))",
+      "message": "Low water must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "severity": "Error",
+      "context": "When BargeExLocationType is not 'Lock' or 'Gauge Location'",
+      "validationType": "ConditionalRequired",
+      "conditionalOn": "BargeExLocationType",
+      "conditionalValues": ["Lock", "Gauge Location"],
+      "mustBeBlankWhenNotIn": true
+    },
+    {
+      "ruleName": "LockNormalCurrentMustBeBlank",
+      "property": "LockNormalCurrent",
+      "condition": "((Not isLockOrGauge) AndAlso (Not String.IsNullOrEmpty(p_LockNormalCurrent)))",
+      "message": "Normal current must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "severity": "Error",
+      "context": "When BargeExLocationType is not 'Lock' or 'Gauge Location'",
+      "validationType": "ConditionalRequired",
+      "conditionalOn": "BargeExLocationType",
+      "conditionalValues": ["Lock", "Gauge Location"],
+      "mustBeBlankWhenNotIn": true
+    },
+    {
+      "ruleName": "LockHighFlowMustBeBlank",
+      "property": "LockHighFlow",
+      "condition": "((Not isLockOrGauge) AndAlso (Not String.IsNullOrEmpty(p_LockHighFlow)))",
+      "message": "High flow must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "severity": "Error",
+      "context": "When BargeExLocationType is not 'Lock' or 'Gauge Location'",
+      "validationType": "ConditionalRequired",
+      "conditionalOn": "BargeExLocationType",
+      "conditionalValues": ["Lock", "Gauge Location"],
+      "mustBeBlankWhenNotIn": true
+    },
+    {
+      "ruleName": "LockHighWaterMustBeBlank",
+      "property": "LockHighWater",
+      "condition": "((Not isLockOrGauge) AndAlso (Not String.IsNullOrEmpty(p_LockHighWater)))",
+      "message": "High water must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "severity": "Error",
+      "context": "When BargeExLocationType is not 'Lock' or 'Gauge Location'",
+      "validationType": "ConditionalRequired",
+      "conditionalOn": "BargeExLocationType",
+      "conditionalValues": ["Lock", "Gauge Location"],
+      "mustBeBlankWhenNotIn": true
+    },
+    {
+      "ruleName": "LockCatastrophicLevelMustBeBlank",
+      "property": "LockCatastrophicLevel",
+      "condition": "((Not isLockOrGauge) AndAlso (Not String.IsNullOrEmpty(p_LockCatastrophicLevel)))",
+      "message": "Catastrophic level must be blank if Facility type is not 'Lock' or 'Gauge Location'.",
+      "severity": "Error",
+      "context": "When BargeExLocationType is not 'Lock' or 'Gauge Location'",
+      "validationType": "ConditionalRequired",
+      "conditionalOn": "BargeExLocationType",
+      "conditionalValues": ["Lock", "Gauge Location"],
+      "mustBeBlankWhenNotIn": true
+    },
+    {
+      "ruleName": "LockUsaceNameMaxLength",
+      "property": "LockUsaceName",
+      "condition": "p_LockUsaceName.Length > MaxLength.LockUsaceName",
+      "message": "USACE name cannot be longer than 50.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 50
+    },
+    {
+      "ruleName": "NdcNameMaxLength",
+      "property": "NdcName",
+      "condition": "p_NdcName.Length > MaxLength.NdcName",
+      "message": "NdcName cannot be longer than 200.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 200
+    },
+    {
+      "ruleName": "NdcLocationDescriptionMaxLength",
+      "property": "NdcLocationDescription",
+      "condition": "p_NdcLocationDescription.Length > MaxLength.NdcLocationDescription",
+      "message": "NdcLocationDescription cannot be longer than 200.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 200
+    },
+    {
+      "ruleName": "NdcAddressMaxLength",
+      "property": "NdcAddress",
+      "condition": "p_NdcAddress.Length > MaxLength.NdcAddress",
+      "message": "NdcAddress cannot be longer than 50.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 50
+    },
+    {
+      "ruleName": "NdcCountyMaxLength",
+      "property": "NdcCounty",
+      "condition": "p_NdcCounty.Length > MaxLength.NdcCounty",
+      "message": "NdcCounty cannot be longer than 30.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 30
+    },
+    {
+      "ruleName": "NdcCountyFipsMaxLength",
+      "property": "NdcCountyFips",
+      "condition": "p_NdcCountyFips.Length > MaxLength.NdcCountyFips",
+      "message": "NdcCountyFips cannot be longer than 3.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 3
+    },
+    {
+      "ruleName": "NdcTownMaxLength",
+      "property": "NdcTown",
+      "condition": "p_NdcTown.Length > MaxLength.NdcTown",
+      "message": "NdcTown cannot be longer than 30.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 30
+    },
+    {
+      "ruleName": "NdcStateMaxLength",
+      "property": "NdcState",
+      "condition": "p_NdcState.Length > MaxLength.NdcState",
+      "message": "NdcState cannot be longer than 2.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 2
+    },
+    {
+      "ruleName": "NdcWaterwayMaxLength",
+      "property": "NdcWaterway",
+      "condition": "p_NdcWaterway.Length > MaxLength.NdcWaterway",
+      "message": "NdcWaterway cannot be longer than 50.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 50
+    },
+    {
+      "ruleName": "NdcPortMaxLength",
+      "property": "NdcPort",
+      "condition": "p_NdcPort.Length > MaxLength.NdcPort",
+      "message": "NdcPort cannot be longer than 25.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 25
+    },
+    {
+      "ruleName": "NdcOperatorMaxLength",
+      "property": "NdcOperator",
+      "condition": "p_NdcOperator.Length > MaxLength.NdcOperator",
+      "message": "NdcOperator cannot be longer than 150.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 150
+    },
+    {
+      "ruleName": "NdcOwnerMaxLength",
+      "property": "NdcOwner",
+      "condition": "p_NdcOwner.Length > MaxLength.NdcOwner",
+      "message": "NdcOwner cannot be longer than 150.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 150
+    },
+    {
+      "ruleName": "NdcPurposeMaxLength",
+      "property": "NdcPurpose",
+      "condition": "p_NdcPurpose.Length > MaxLength.NdcPurpose",
+      "message": "NdcPurpose cannot be longer than 255.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 255
+    },
+    {
+      "ruleName": "NdcRemarkMaxLength",
+      "property": "NdcRemark",
+      "condition": "p_NdcRemark.Length > MaxLength.NdcRemark",
+      "message": "NdcRemark cannot be longer than 1200.",
+      "severity": "Error",
+      "context": "Always",
+      "validationType": "MaxLength",
+      "maxLength": 1200
+    }
+  ],
+  "methods": {
+    "factory": [
+      {
+        "name": "NewFacilityLocation",
+        "scope": "Public Shared",
+        "returnType": "FacilityLocation",
+        "parameters": [],
+        "description": "Creates a new parent FacilityLocation instance with default values"
+      },
+      {
+        "name": "NewFacilityLocationAsChild",
+        "scope": "Friend Shared",
+        "returnType": "FacilityLocation",
+        "parameters": [],
+        "description": "Creates a new child FacilityLocation instance"
+      }
+    ],
+    "crud": [
+      {
+        "name": "GetFacilityLocation",
+        "scope": "Public Shared",
+        "returnType": "FacilityLocation",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Loads an existing parent FacilityLocation by LocationID"
+      },
+      {
+        "name": "GetFacilityLocationChild",
+        "scope": "Friend Shared",
+        "returnType": "FacilityLocation",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Loads an existing child FacilityLocation by LocationID"
+      },
+      {
+        "name": "GetFacilityLocationChild",
+        "scope": "Friend Shared",
+        "returnType": "FacilityLocation",
+        "parameters": [
+          {
+            "name": "dr",
+            "type": "SafeDataReader"
+          }
+        ],
+        "description": "Loads an existing child FacilityLocation from a DataReader"
+      },
+      {
+        "name": "DeleteFacilityLocation",
+        "scope": "Public Shared Shadows",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": "Int32"
+          }
+        ],
+        "description": "Throws ApplicationException - method not supported, use Location.DeleteLocation instead",
+        "throws": "ApplicationException('Method not supported; use the Location.DeleteLocation method.')"
+      }
+    ],
+    "businessLogic": [
+      {
+        "name": "Initialize",
+        "scope": "Public Overrides",
+        "returnType": "void",
+        "description": "Initializes all properties to default values, sets display names for BrokenRules, initializes validation list fields to defaults"
+      },
+      {
+        "name": "CheckBusinessRules",
+        "scope": "Public Overrides",
+        "returnType": "void",
+        "parameters": [
+          {
+            "name": "PropertyName",
+            "type": "String"
+          }
+        ],
+        "description": "Validates business rules for conditional Lock/Gauge fields based on BargeExLocationType"
+      },
+      {
+        "name": "MarkFacilityLocationDirty",
+        "scope": "Friend",
+        "returnType": "void",
+        "description": "Marks the FacilityLocation as dirty to ensure database insert/update occurs for new locations"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "property": "FacilityBerths",
+      "relatedEntity": "FacilityBerth",
+      "relatedCollection": "FacilityBerths",
+      "type": "OneToMany",
+      "cascadeDelete": false,
+      "lazyLoad": false,
+      "description": "Collection of berths at this facility"
+    },
+    {
+      "property": "Alert",
+      "relatedEntity": "Alert",
+      "type": "OneToOne",
+      "cascadeDelete": false,
+      "lazyLoad": true,
+      "description": "Alert information associated with this facility"
+    },
+    {
+      "property": "Location",
+      "relatedEntity": "Location",
+      "type": "ParentChild",
+      "description": "FacilityLocation is a child property object of Location parent"
+    }
+  ],
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "LocationID",
+        "value": "0"
+      },
+      {
+        "property": "BargeExCode",
+        "value": "String.Empty"
+      },
+      {
+        "property": "Bank",
+        "value": "ValidationList default for RiverBank"
+      },
+      {
+        "property": "BargeExLocationType",
+        "value": "ValidationList default for BargeExLocationType"
+      },
+      {
+        "property": "NdcName",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcLocationDescription",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcAddress",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcCounty",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcCountyFips",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcTown",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcState",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcWaterway",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcPort",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcLatitude",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcLongitude",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcOperator",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcOwner",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcPurpose",
+        "value": "String.Empty"
+      },
+      {
+        "property": "NdcRemark",
+        "value": "String.Empty"
+      },
+      {
+        "property": "ConvFmsLocationMasterID",
+        "value": "String.Empty"
+      },
+      {
+        "property": "LockUsaceName",
+        "value": "String.Empty"
+      },
+      {
+        "property": "LockFloodStage",
+        "value": "String.Empty"
+      },
+      {
+        "property": "LockPoolStage",
+        "value": "String.Empty"
+      },
+      {
+        "property": "LockLowWater",
+        "value": "String.Empty"
+      },
+      {
+        "property": "LockNormalCurrent",
+        "value": "String.Empty"
+      },
+      {
+        "property": "LockHighFlow",
+        "value": "String.Empty"
+      },
+      {
+        "property": "LockHighWater",
+        "value": "String.Empty"
+      },
+      {
+        "property": "LockCatastrophicLevel",
+        "value": "String.Empty"
+      },
+      {
+        "property": "FacilityBerths",
+        "value": "NewFacilityBerthsAsChild"
+      },
+      {
+        "property": "Alert",
+        "value": "Nothing (lazy load)"
+      }
+    ],
+    "storedProcedures": {
+      "fetch": "FacilityLocationSelect",
+      "fetchAll": "FacilityLocationsSelect",
+      "insert": "FacilityLocationInsert",
+      "update": "FacilityLocationUpdate",
+      "delete": "FacilityLocationDelete"
+    }
+  },
+  "modernEquivalents": {
+    "dataAnnotations": [
+      "[Key]",
+      "[StringLength(maxLength)]",
+      "[Required]",
+      "[Range]"
+    ],
+    "fluentValidation": [
+      "RuleFor(x => x.LockUsaceName).Empty().When(x => x.BargeExLocationType != \"Lock\" && x.BargeExLocationType != \"Gauge Location\").WithMessage(\"USACE name must be blank if Facility type is not 'Lock' or 'Gauge Location'.\")",
+      "RuleFor(x => x.LockFloodStage).Empty().When(x => x.BargeExLocationType != \"Lock\" && x.BargeExLocationType != \"Gauge Location\").WithMessage(\"Flood stage must be blank if Facility type is not 'Lock' or 'Gauge Location'.\")",
+      "RuleFor(x => x.LockPoolStage).Empty().When(x => x.BargeExLocationType != \"Lock\" && x.BargeExLocationType != \"Gauge Location\").WithMessage(\"Pool stage must be blank if Facility type is not 'Lock' or 'Gauge Location'.\")",
+      "RuleFor(x => x.LockLowWater).Empty().When(x => x.BargeExLocationType != \"Lock\" && x.BargeExLocationType != \"Gauge Location\").WithMessage(\"Low water must be blank if Facility type is not 'Lock' or 'Gauge Location'.\")",
+      "RuleFor(x => x.LockNormalCurrent).Empty().When(x => x.BargeExLocationType != \"Lock\" && x.BargeExLocationType != \"Gauge Location\").WithMessage(\"Normal current must be blank if Facility type is not 'Lock' or 'Gauge Location'.\")",
+      "RuleFor(x => x.LockHighFlow).Empty().When(x => x.BargeExLocationType != \"Lock\" && x.BargeExLocationType != \"Gauge Location\").WithMessage(\"High flow must be blank if Facility type is not 'Lock' or 'Gauge Location'.\")",
+      "RuleFor(x => x.LockHighWater).Empty().When(x => x.BargeExLocationType != \"Lock\" && x.BargeExLocationType != \"Gauge Location\").WithMessage(\"High water must be blank if Facility type is not 'Lock' or 'Gauge Location'.\")",
+      "RuleFor(x => x.LockCatastrophicLevel).Empty().When(x => x.BargeExLocationType != \"Lock\" && x.BargeExLocationType != \"Gauge Location\").WithMessage(\"Catastrophic level must be blank if Facility type is not 'Lock' or 'Gauge Location'.\")"
+    ]
+  },
+  "validationPatterns": {
+    "conditionalValidation": {
+      "pattern": "Lock/Gauge-specific fields must be blank for other facility types",
+      "affectedFields": [
+        "LockUsaceName",
+        "LockFloodStage",
+        "LockPoolStage",
+        "LockLowWater",
+        "LockNormalCurrent",
+        "LockHighFlow",
+        "LockHighWater",
+        "LockCatastrophicLevel"
+      ],
+      "condition": "BargeExLocationType must equal 'Lock' or 'Gauge Location'",
+      "implementation": "Static variables cache the validation list values for Lock and Gauge Location types, then check isLockOrGauge boolean for each field"
+    }
+  },
+  "dataAccess": {
+    "parentEntity": "Location",
+    "updateParentKeys": {
+      "method": "UpdateParentKeys",
+      "description": "Sets LocationID from parent Location object"
+    },
+    "childObjectUpdates": {
+      "method": "UpdateChildObjects",
+      "updateSequence": [
+        "FacilityBerths.Update(tr, FacilityLocation)",
+        "Alert.Update(tr, FacilityLocation)",
+        "AuditFieldEvents (if exists and not deleted)"
+      ]
+    },
+    "isValid": {
+      "checks": [
+        "MyBase.IsValid",
+        "p_FacilityBerths.IsValid",
+        "p_Alert.IsValid (if not Nothing)"
+      ]
+    },
+    "isDirty": {
+      "checks": [
+        "MyBase.IsDirty",
+        "p_FacilityBerths.IsDirty",
+        "p_Alert.IsDirty (if not Nothing)"
+      ]
+    }
+  },
+  "auditing": {
+    "enabled": true,
+    "auditedFields": [
+      "LocationID",
+      "BargeExCode",
+      "Bank",
+      "BargeExLocationType",
+      "NdcName",
+      "NdcLocationDescription",
+      "NdcAddress",
+      "NdcCounty",
+      "NdcCountyFips",
+      "NdcTown",
+      "NdcState",
+      "NdcWaterway",
+      "NdcPort",
+      "NdcLatitude",
+      "NdcLongitude",
+      "NdcOperator",
+      "NdcOwner",
+      "NdcPurpose",
+      "NdcRemark",
+      "LockUsaceName",
+      "LockFloodStage",
+      "LockPoolStage",
+      "LockLowWater",
+      "LockNormalCurrent",
+      "LockHighFlow",
+      "LockHighWater",
+      "LockCatastrophicLevel"
+    ],
+    "description": "Field-level auditing tracks original values and changes using AuditFieldEvent objects"
+  },
+  "conversionNotes": {
+    "stringStorage": "Legacy code stores numeric values (decimal, double, int32) as strings internally but exposes them through typed getters/setters. Modern implementation should use proper nullable numeric types.",
+    "validationLists": "BargeExLocationType and Bank use validation lists - need to map to enums or lookup tables in modern implementation",
+    "conditionalLogic": "Complex conditional validation based on facility type - excellent candidate for FluentValidation's When() clauses",
+    "deleteRestriction": "DeleteFacilityLocation throws exception - all deletes must go through Location.DeleteLocation parent method",
+    "propertyObjects": "Alert is a 1:1 property object with lazy loading; FacilityBerths is a 1:many collection with eager loading",
+    "ndcIntegration": "Extensive National Data Center (NDC) fields suggest integration with external system or data import",
+    "lockGaugeFields": "Eight lock/gauge-specific water level fields with conditional validation - core domain logic for lock management"
+  }
+}
