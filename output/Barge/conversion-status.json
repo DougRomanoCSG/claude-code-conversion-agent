@@ -1,10 +1,10 @@
 {
   "entity": "Barge",
-  "overallStatus": "running",
-  "startTime": "2026-01-23T20:58:12.552Z",
+  "overallStatus": "failed",
+  "startTime": "2026-01-23T21:20:40.061Z",
   "totalSteps": 10,
   "completedSteps": 0,
-  "failedSteps": 0,
+  "failedSteps": 1,
   "skippedSteps": 0,
   "steps": [
     {
@@ -12,11 +12,20 @@
       "name": "Form Structure Analyzer (Search)",
       "script": "form-structure-analyzer.ts",
       "description": "Extract search form UI components",
-      "status": "running",
-      "startTime": "2026-01-23T20:58:12.556Z",
+      "status": "failed",
+      "startTime": "2026-01-23T21:20:40.062Z",
       "outputFile": "form-structure-search.frmBargeSearch.json",
-      "outputDir": "frmBargeSearch"
+      "outputDir": "frmBargeSearch",
+      "endTime": "2026-01-26T16:11:34.433Z",
+      "durationMs": 240654371,
+      "exitCode": 134,
+      "error": "Step failed with exit code 134"
     }
   ],
-  "childForms": []
+  "childForms": [],
+  "endTime": "2026-01-26T16:11:34.440Z",
+  "durationMs": 240654378,
+  "failedStepNumbers": [
+    1
+  ]
 }

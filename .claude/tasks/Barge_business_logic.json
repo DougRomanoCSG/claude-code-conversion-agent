@@ -1,0 +1,1153 @@
+{
+  "businessObject": "Barge",
+  "baseClass": "BargeBase",
+  "namespace": "BargeOps.Onshore.BusinessLogic",
+  "extractionDate": "2026-01-23",
+  "sourceFiles": [
+    "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\Barge.vb",
+    "C:\\Dev\\BargeOps.Admin.Mono\\OnShore\\apps\\Onshore.BusinessLogic\\Business Objects\\Base Classes\\BargeBase.vb"
+  ],
+  "properties": [
+    {
+      "name": "BargeID",
+      "type": "Int32",
+      "access": "ReadOnly",
+      "isPrimaryKey": true,
+      "isNullable": false,
+      "description": "Primary key identifier for the barge"
+    },
+    {
+      "name": "BargeNum",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": true,
+      "description": "Barge number identifier"
+    },
+    {
+      "name": "UscgNum",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "US Coast Guard number"
+    },
+    {
+      "name": "IsActive",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "defaultValue": true,
+      "description": "Indicates if the barge is active"
+    },
+    {
+      "name": "CustomerID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": "Conditional",
+      "description": "Customer identifier - required if not Fleet-owned and not Terminal Mode"
+    },
+    {
+      "name": "OwnerID",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Owner identifier"
+    },
+    {
+      "name": "HullType",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Type of hull (validation list)"
+    },
+    {
+      "name": "ExternalLength",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0.0 to 50000.0",
+      "description": "External length of barge in feet"
+    },
+    {
+      "name": "ExternalWidth",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0.0 to 20000.0",
+      "description": "External width of barge in feet"
+    },
+    {
+      "name": "ExternalDepth",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0.0 to 10000.0",
+      "description": "External depth of barge in feet"
+    },
+    {
+      "name": "Draft",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0.0 to 99.999",
+      "description": "Overall draft of barge in feet"
+    },
+    {
+      "name": "DraftFeet",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Draft in feet component (calculated from Draft)"
+    },
+    {
+      "name": "DraftInches",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0 to 11",
+      "description": "Draft in inches component (calculated from Draft)"
+    },
+    {
+      "name": "DraftPortBow",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0.0 to 99.999",
+      "description": "Draft at port bow in feet"
+    },
+    {
+      "name": "DraftStarboardBow",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0.0 to 99.999",
+      "description": "Draft at starboard bow in feet"
+    },
+    {
+      "name": "DraftPortStern",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0.0 to 99.999",
+      "description": "Draft at port stern in feet"
+    },
+    {
+      "name": "DraftStarboardStern",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0.0 to 99.999",
+      "description": "Draft at starboard stern in feet"
+    },
+    {
+      "name": "DraftCalculated",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0.0 to 99.999",
+      "description": "Calculated draft in feet"
+    },
+    {
+      "name": "DraftCalculatedFeet",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Calculated draft feet component"
+    },
+    {
+      "name": "DraftCalculatedInches",
+      "type": "String",
+      "access": "ReadWrite",
+      "validationRange": "0 to 11",
+      "description": "Calculated draft inches component"
+    },
+    {
+      "name": "CoverType",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": "Conditional",
+      "description": "Type of cover on barge - required if RequireBargeCoverType is True or commodity requires cover"
+    },
+    {
+      "name": "CoverConfig",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": "Conditional",
+      "description": "Cover configuration - required if company-operated and cover type is not OT"
+    },
+    {
+      "name": "CoverSubTypeID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": "Conditional",
+      "description": "Cover sub-type identifier - required if commodity requires cover"
+    },
+    {
+      "name": "SizeCategory",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": "Conditional",
+      "description": "Size category - required if not Fleet-owned and not Terminal Mode"
+    },
+    {
+      "name": "CommodityID",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Commodity identifier"
+    },
+    {
+      "name": "LocationID",
+      "type": "String",
+      "access": "ReadWrite (special signature)",
+      "description": "Current location of barge - must be set with date/time and optional tier/berth info"
+    },
+    {
+      "name": "LocationDateTime",
+      "type": "SmartDate",
+      "access": "ReadWrite (private setter)",
+      "description": "Date/time of last position update"
+    },
+    {
+      "name": "LoadStatus",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Load status of barge (validation list)"
+    },
+    {
+      "name": "CleanStatus",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Clean status of barge (validation list)"
+    },
+    {
+      "name": "RepairStatus",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Repair status of barge (validation list)"
+    },
+    {
+      "name": "DamageLevel",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Damage level of barge (validation list)"
+    },
+    {
+      "name": "DamageNote",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": "Conditional",
+      "description": "Damage note - must be blank if IsDamaged is false"
+    },
+    {
+      "name": "IsCargoDamaged",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "description": "Indicates if cargo is damaged"
+    },
+    {
+      "name": "IsLeaker",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "description": "Indicates if barge is leaking"
+    },
+    {
+      "name": "IsDamaged",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "description": "Indicates if barge is damaged"
+    },
+    {
+      "name": "IsDryDocked",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "description": "Indicates if barge is dry docked"
+    },
+    {
+      "name": "IsRepairScheduled",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "description": "Indicates if repair is scheduled"
+    },
+    {
+      "name": "HasInsufficientFreeboard",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "description": "Indicates if barge has insufficient freeboard"
+    },
+    {
+      "name": "FreeboardRange",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": "Conditional",
+      "description": "Freeboard range - required if HasInsufficientFreeboard is true, must be blank otherwise"
+    },
+    {
+      "name": "FleetID",
+      "type": "String",
+      "access": "ReadWrite",
+      "isRequired": "Conditional",
+      "description": "Fleet identifier - required if equipment type is Fleet-owned"
+    },
+    {
+      "name": "TierID",
+      "type": "String",
+      "access": "ReadWrite (private setter)",
+      "description": "Tier identifier where barge is located"
+    },
+    {
+      "name": "TierX",
+      "type": "String",
+      "access": "ReadWrite (private setter)",
+      "description": "X coordinate in tier"
+    },
+    {
+      "name": "TierY",
+      "type": "String",
+      "access": "ReadWrite (private setter)",
+      "description": "Y coordinate in tier"
+    },
+    {
+      "name": "FacilityBerthID",
+      "type": "String",
+      "access": "ReadWrite (private setter)",
+      "description": "Facility berth identifier - must match barge location"
+    },
+    {
+      "name": "FacilityBerthX",
+      "type": "String",
+      "access": "ReadWrite (private setter)",
+      "description": "X coordinate in berth"
+    },
+    {
+      "name": "FacilityBerthY",
+      "type": "String",
+      "access": "ReadWrite (private setter)",
+      "description": "Y coordinate in berth"
+    },
+    {
+      "name": "FleetBoatID",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Fleet boat identifier"
+    },
+    {
+      "name": "FleetBoatActivityDateTime",
+      "type": "SmartDate",
+      "access": "ReadWrite",
+      "description": "Date/time of fleet boat activity - auto-set when FleetBoatID changes"
+    },
+    {
+      "name": "EquipmentType",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Equipment type (e.g., Fleet-owned)"
+    },
+    {
+      "name": "ColorPairID",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Color pair identifier"
+    },
+    {
+      "name": "RakeDirection",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Rake direction (None, Left, Right, Up, Down)"
+    },
+    {
+      "name": "TowString",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Tow string position"
+    },
+    {
+      "name": "TowCut",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Tow cut position"
+    },
+    {
+      "name": "BargeSyncIdentifier",
+      "type": "Guid",
+      "access": "ReadWrite",
+      "description": "Sync identifier for barge"
+    },
+    {
+      "name": "HasAnchorWire",
+      "type": "Boolean",
+      "access": "ReadWrite",
+      "description": "Indicates if barge has anchor wire"
+    },
+    {
+      "name": "InServiceDate",
+      "type": "SmartDate",
+      "access": "ReadWrite",
+      "description": "Date barge was put in service"
+    },
+    {
+      "name": "OutOfServiceDate",
+      "type": "SmartDate",
+      "access": "ReadWrite",
+      "description": "Date barge was taken out of service - must be later than InServiceDate"
+    },
+    {
+      "name": "HullNumber",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Hull number"
+    },
+    {
+      "name": "BargeSeriesID",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Barge series identifier - auto-populates Owner, Customer, Hull Type, Cover Type, and dimensions"
+    },
+    {
+      "name": "GlAccountNum",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "GL account number"
+    },
+    {
+      "name": "BargeType",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Type of barge"
+    },
+    {
+      "name": "ConvFesBargeID",
+      "type": "String",
+      "access": "ReadWrite",
+      "description": "Conversion/FES barge identifier"
+    },
+    {
+      "name": "Status",
+      "type": "String",
+      "access": "ReadOnly",
+      "isCalculated": true,
+      "description": "Current status of barge (calculated)"
+    },
+    {
+      "name": "InspectionStatus",
+      "type": "String",
+      "access": "ReadOnly",
+      "isCalculated": true,
+      "description": "Inspection status (calculated)"
+    },
+    {
+      "name": "IsOnHold",
+      "type": "Boolean",
+      "access": "ReadOnly",
+      "isCalculated": true,
+      "description": "Indicates if barge is on hold (calculated)"
+    },
+    {
+      "name": "OriginalLoadStatus",
+      "type": "String",
+      "access": "ReadOnly",
+      "description": "Original load status when object was loaded"
+    },
+    {
+      "name": "LatestModifyUser",
+      "type": "String",
+      "access": "ReadOnly",
+      "description": "Last user who modified the barge record"
+    },
+    {
+      "name": "IsCompanyOperatedBargeCoverTypeSpecialLogic",
+      "type": "Boolean",
+      "access": "ReadOnly",
+      "isCalculated": true,
+      "description": "True if EnableCoverTypeSpecialLogic is enabled and barge is company-operated"
+    },
+    {
+      "name": "IsNotNullAndNotOTCoverType",
+      "type": "Boolean",
+      "access": "ReadOnly",
+      "isCalculated": true,
+      "description": "True when Cover Type is not null and not OT"
+    },
+    {
+      "name": "IsRequiredCoverForCommodity",
+      "type": "Boolean",
+      "access": "ReadOnly",
+      "isCalculated": true,
+      "description": "True when commodity requires a cover and barge is company-operated"
+    }
+  ],
+  "businessRules": [
+    {
+      "ruleName": "ExternalLengthReasonable",
+      "property": "ExternalLength",
+      "condition": "p_ExternalLength <> String.Empty AndAlso (CType(p_ExternalLength, Decimal) > 50000.0 OrElse CType(p_ExternalLength, Decimal) < 0.0)",
+      "message": "{ExternalLength} is not a reasonable value for ExternalLength",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "ExternalWidthReasonable",
+      "property": "ExternalWidth",
+      "condition": "p_ExternalWidth <> String.Empty AndAlso (CType(p_ExternalWidth, Decimal) > 20000.0 OrElse CType(p_ExternalWidth, Decimal) < 0.0)",
+      "message": "{ExternalWidth} is not a reasonable value for ExternalWidth",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "ExternalDepthReasonable",
+      "property": "ExternalDepth",
+      "condition": "p_ExternalDepth <> String.Empty AndAlso (CType(p_ExternalDepth, Decimal) > 10000.0 OrElse CType(p_ExternalDepth, Decimal) < 0.0)",
+      "message": "{ExternalDepth} is not a reasonable value for ExternalDepth",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftMAX",
+      "property": "Draft",
+      "condition": "(p_Draft <> String.Empty) AndAlso (((p_DraftPortBow <> String.Empty) AndAlso (CDec(p_DraftPortBow) > CDec(p_Draft))) OrElse ((p_DraftPortStern <> String.Empty) AndAlso (CDec(p_DraftPortStern) > CDec(p_Draft))) OrElse ((p_DraftStarboardBow <> String.Empty) AndAlso (CDec(p_DraftStarboardBow) > CDec(p_Draft))) OrElse ((p_DraftStarboardStern <> String.Empty) AndAlso (CDec(p_DraftStarboardStern) > CDec(p_Draft))))",
+      "message": "Overall draft must be >= the highest corner draft.",
+      "severity": "Error",
+      "context": "When draft and corner drafts have values"
+    },
+    {
+      "ruleName": "DraftRange",
+      "property": "Draft",
+      "condition": "p_Draft <> String.Empty AndAlso (CType(p_Draft, Decimal) > 99.999 OrElse CType(p_Draft, Decimal) < 0.0)",
+      "message": "Draft must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftInchesRange",
+      "property": "DraftInches",
+      "condition": "_DraftInches <> String.Empty AndAlso (CInt(_DraftInches) < 0 OrElse CInt(_DraftInches) > 11)",
+      "message": "DraftInches must be between 0 and 11.",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftPortBowRange",
+      "property": "DraftPortBow",
+      "condition": "p_DraftPortBow <> String.Empty AndAlso (CType(p_DraftPortBow, Decimal) > 99.999 OrElse CType(p_DraftPortBow, Decimal) < 0.0)",
+      "message": "DraftPortBow must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftStarboardBowRange",
+      "property": "DraftStarboardBow",
+      "condition": "p_DraftStarboardBow <> String.Empty AndAlso (CType(p_DraftStarboardBow, Decimal) > 99.999 OrElse CType(p_DraftStarboardBow, Decimal) < 0.0)",
+      "message": "DraftStarboardBow must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftPortSternRange",
+      "property": "DraftPortStern",
+      "condition": "p_DraftPortStern <> String.Empty AndAlso (CType(p_DraftPortStern, Decimal) > 99.999 OrElse CType(p_DraftPortStern, Decimal) < 0.0)",
+      "message": "DraftPortStern must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftStarboardSternRange",
+      "property": "DraftStarboardStern",
+      "condition": "p_DraftStarboardStern <> String.Empty AndAlso (CType(p_DraftStarboardStern, Decimal) > 99.999 OrElse CType(p_DraftStarboardStern, Decimal) < 0.0)",
+      "message": "DraftStarboardStern must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "DraftCalculatedRange",
+      "property": "DraftCalculated",
+      "condition": "p_DraftCalculated <> String.Empty AndAlso (CType(p_DraftCalculated, Decimal) > 99.999 OrElse CType(p_DraftCalculated, Decimal) < 0.0)",
+      "message": "DraftCalculated must be between 0 and 99 ft 11 in",
+      "severity": "Error",
+      "context": "Always"
+    },
+    {
+      "ruleName": "CustomerIDBargeIsRequiredFleetOwned",
+      "property": "CustomerID",
+      "condition": "((Not _IsTerminalActive) AndAlso (p_EquipmentType.ToLower() <> \"fleet-owned\") AndAlso (p_CustomerID = String.Empty))",
+      "message": "CustomerID is required",
+      "severity": "Error",
+      "context": "When not Fleet-owned and not Terminal Mode"
+    },
+    {
+      "ruleName": "SizeCategoryIsRequiredFleetOwned",
+      "property": "SizeCategory",
+      "condition": "((Not _IsTerminalActive) AndAlso (p_EquipmentType.ToLower() <> \"fleet-owned\") AndAlso (p_SizeCategory = String.Empty))",
+      "message": "SizeCategory is required",
+      "severity": "Error",
+      "context": "When not Fleet-owned and not Terminal Mode"
+    },
+    {
+      "ruleName": "FleetIDIsRequiredFleetOwned",
+      "property": "FleetID",
+      "condition": "(p_EquipmentType.ToLower() = \"fleet-owned\" AndAlso (p_FleetID = String.Empty))",
+      "message": "FleetID is required",
+      "severity": "Error",
+      "context": "When equipment type is Fleet-owned"
+    },
+    {
+      "ruleName": "FacilityBerthIDMustBeBlank",
+      "property": "FacilityBerthID",
+      "condition": "(((Not String.IsNullOrEmpty(p_FacilityBerthID)) OrElse (Not String.IsNullOrEmpty(p_FacilityBerthX)) OrElse (Not String.IsNullOrEmpty(p_FacilityBerthY))) AndAlso (p_LocationID <> Lists.FacilityBerthList.GetLocationID(p_FacilityBerthID)))",
+      "message": "Facility Berth ID, Facility Berth X, and Facility Berth Y must be blank when the barge location does not match the berth location.",
+      "severity": "Error",
+      "context": "When berth is specified but doesn't match location"
+    },
+    {
+      "ruleName": "DamageNoteIsDamagedIsRequired",
+      "property": "DamageNote",
+      "condition": "((Not p_IsDamaged) AndAlso (Not String.IsNullOrEmpty(p_DamageNote)))",
+      "message": "DamageNote must be blank if IsDamaged is not checked.",
+      "severity": "Error",
+      "context": "When IsDamaged is false"
+    },
+    {
+      "ruleName": "FreeboardRangeIsRequired",
+      "property": "FreeboardRange",
+      "condition": "(p_HasInsufficientFreeboard AndAlso String.IsNullOrEmpty(p_FreeboardRange)) OrElse ((Not p_HasInsufficientFreeboard) AndAlso (Not String.IsNullOrEmpty(p_FreeboardRange)))",
+      "message": "FreeboardRange is required if HasInsufficientFreeboard is checked.",
+      "severity": "Error",
+      "context": "Conditional based on HasInsufficientFreeboard"
+    },
+    {
+      "ruleName": "InServiceDateOutOfServiceDate",
+      "property": "InServiceDate/OutOfServiceDate",
+      "condition": "((Not String.IsNullOrEmpty(Me.InServiceDate)) AndAlso (Not String.IsNullOrEmpty(Me.OutOfServiceDate)) AndAlso (CType(Me.InServiceDate, Date) >= CType(Me.OutOfServiceDate, Date)))",
+      "message": "The OutOfServiceDate must be later than the InServiceDate.",
+      "severity": "Error",
+      "context": "When both dates have values"
+    },
+    {
+      "ruleName": "BargeChartersUniqueDateRanges",
+      "property": "BargeCharters",
+      "condition": "Charter date ranges overlap",
+      "message": "The date ranges of two charters may not overlap.",
+      "severity": "Error",
+      "context": "When charter date ranges overlap"
+    },
+    {
+      "ruleName": "CoverConfigBlankOrRequiredCoverConfigName",
+      "property": "CoverConfig",
+      "condition": "IsCompanyOperatedBargeCoverTypeSpecialLogic = True AND IsNotNullAndNotOTCoverType = True AND (CoverConfig is empty OR CoverConfig = 'Open')",
+      "message": "Cover config is required and must have a value other than 'Open' when Cover type has a value and is not 'OT'.",
+      "severity": "Error",
+      "context": "When EnableCoverTypeSpecialLogic is True, barge is company-operated, and Cover Type is not null/OT"
+    },
+    {
+      "ruleName": "CoverConfigMustBeBlank",
+      "property": "CoverConfig",
+      "condition": "IsCompanyOperatedBargeCoverTypeSpecialLogic = True AND IsNotNullAndNotOTCoverType = False AND CoverConfig is not empty",
+      "message": "Cover config must be blank.",
+      "severity": "Error",
+      "context": "When Cover Type is null or OT for company-operated barge with special logic enabled"
+    },
+    {
+      "ruleName": "CoverTypeCommodityIDIsRequired",
+      "property": "CoverType",
+      "condition": "((String.IsNullOrEmpty(p_CoverType) OrElse (p_CoverType.ToLower = 'ot')) AndAlso Me.IsRequiredCoverForCommodity())",
+      "message": "The selected Commodity requires a cover, therefore a Cover type other than 'OT' is required.",
+      "severity": "Error",
+      "context": "When commodity requires cover and barge is company-operated"
+    },
+    {
+      "ruleName": "CoverSubTypeIDCommodityIDIsRequired",
+      "property": "CoverSubTypeID",
+      "condition": "((String.IsNullOrEmpty(p_CoverSubTypeID) OrElse (CInt(p_CoverSubTypeID) <= 0)) AndAlso Me.IsRequiredCoverForCommodity())",
+      "message": "The selected Commodity requires a cover, therefore CoverSubTypeID is required.",
+      "severity": "Error",
+      "context": "When commodity requires cover and barge is company-operated"
+    },
+    {
+      "ruleName": "CoverSubTypeIDCoverTypeIsRequired",
+      "property": "CoverSubTypeID",
+      "condition": "(((Not String.IsNullOrEmpty(p_CoverSubTypeID)) AndAlso (CInt(p_CoverSubTypeID) > 0))) AndAlso (String.IsNullOrEmpty(p_CoverType) OrElse (p_CoverType.ToLower = 'ot'))",
+      "message": "CoverSubTypeID must be blank when Cover type is 'OT' or has no value.",
+      "severity": "Error",
+      "context": "When Cover Type is OT or blank"
+    },
+    {
+      "ruleName": "CoverTypeIsRequired",
+      "property": "CoverType",
+      "condition": "(String.IsNullOrEmpty(p_CoverType) AndAlso GlobalSettingList.RequireBargeCoverType)",
+      "message": "CoverType is required",
+      "severity": "Error",
+      "context": "When RequireBargeCoverType global setting is True"
+    }
+  ],
+  "methods": {
+    "factory": [
+      {
+        "name": "NewBarge",
+        "returnType": "Barge",
+        "parameters": [],
+        "description": "Creates a new instance with defaults",
+        "scope": "Public Shared"
+      },
+      {
+        "name": "GetBarge",
+        "returnType": "Barge",
+        "parameters": [
+          {"name": "bargeNum", "type": "String"},
+          {"name": "fleetID", "type": "Int32"}
+        ],
+        "description": "Retrieves existing barge by barge number and fleet ID",
+        "scope": "Public Shared"
+      },
+      {
+        "name": "GetBarge",
+        "returnType": "Barge",
+        "parameters": [
+          {"name": "bargeID", "type": "Int32"}
+        ],
+        "description": "Retrieves existing barge by barge ID",
+        "scope": "Public Shared"
+      }
+    ],
+    "crud": [
+      {
+        "name": "Save",
+        "returnType": "BusinessLogicBase",
+        "description": "Saves the barge and related objects",
+        "scope": "Public Override"
+      },
+      {
+        "name": "SaveNoRefresh",
+        "returnType": "void",
+        "description": "Saves the barge without refreshing",
+        "scope": "Public Override"
+      },
+      {
+        "name": "DeleteBarge",
+        "returnType": "void",
+        "parameters": [
+          {"name": "ID", "type": "Int32"}
+        ],
+        "description": "Deletes a barge",
+        "scope": "Public Shared"
+      }
+    ],
+    "businessLogic": [
+      {
+        "name": "GetOpenTicketID",
+        "returnType": "Int32",
+        "parameters": [],
+        "description": "Gets the open ticket ID for the current barge in selected fleet",
+        "scope": "Public"
+      },
+      {
+        "name": "GetOpenTicketID",
+        "returnType": "Int32",
+        "parameters": [
+          {"name": "myBargeID", "type": "Int32"},
+          {"name": "myFleetID", "type": "Int32"}
+        ],
+        "description": "Gets the open ticket ID for a specific barge and fleet",
+        "scope": "Public Shared"
+      },
+      {
+        "name": "GetBargeID",
+        "returnType": "Int32",
+        "parameters": [
+          {"name": "bargeNum", "type": "String"}
+        ],
+        "description": "Gets barge ID from barge number",
+        "scope": "Public Shared"
+      },
+      {
+        "name": "GetBargeNum",
+        "returnType": "String",
+        "parameters": [
+          {"name": "bargeNum", "type": "String"}
+        ],
+        "description": "Looks up BargeOps barge number from external barge number format",
+        "scope": "Public Shared"
+      },
+      {
+        "name": "CloseTicketAndSave",
+        "returnType": "BrokenRules.RulesCollection",
+        "parameters": [
+          {"name": "bargeNum", "type": "String"},
+          {"name": "ticketID", "type": "Int32"},
+          {"name": "fleetID", "type": "Int32"},
+          {"name": "preserveBargeState", "type": "Boolean"}
+        ],
+        "description": "Closes ticket and saves barge, optionally preserving barge state",
+        "scope": "Public Shared"
+      },
+      {
+        "name": "CloseTicket",
+        "returnType": "void",
+        "parameters": [
+          {"name": "brg", "type": "Barge", "byRef": true},
+          {"name": "ticketID", "type": "Int32"},
+          {"name": "endDateTime", "type": "String"},
+          {"name": "preserveBargeState", "type": "Boolean"}
+        ],
+        "description": "Closes ticket for a barge without saving",
+        "scope": "Friend Shared"
+      },
+      {
+        "name": "VoidTicketAndSave",
+        "returnType": "Barge",
+        "parameters": [
+          {"name": "bargeNum", "type": "String"},
+          {"name": "ticketID", "type": "Int32"},
+          {"name": "fleetID", "type": "Int32"},
+          {"name": "voidNote", "type": "String"}
+        ],
+        "description": "Voids ticket and saves barge",
+        "scope": "Public Shared"
+      },
+      {
+        "name": "VoidTicket",
+        "returnType": "void",
+        "parameters": [
+          {"name": "brg", "type": "Barge"},
+          {"name": "ticketID", "type": "Int32"},
+          {"name": "voidNote", "type": "String"}
+        ],
+        "description": "Voids ticket for a barge without saving",
+        "scope": "Friend Shared"
+      },
+      {
+        "name": "VoidTicketEvent",
+        "returnType": "BrokenRules.RulesCollection",
+        "parameters": [
+          {"name": "brg", "type": "Barge", "byRef": true},
+          {"name": "tckt", "type": "Ticket", "byRef": true},
+          {"name": "tcktEvent", "type": "TicketEvent"},
+          {"name": "voidNote", "type": "String"},
+          {"name": "commitSave", "type": "Boolean"}
+        ],
+        "description": "Voids a ticket event and potentially the entire ticket",
+        "scope": "Public Shared"
+      },
+      {
+        "name": "ClearLocationAndTier",
+        "returnType": "void",
+        "parameters": [
+          {"name": "brg", "type": "Barge", "byRef": true}
+        ],
+        "description": "Clears location and tier information for barge",
+        "scope": "Friend Shared"
+      },
+      {
+        "name": "ClearTowCutAndString",
+        "returnType": "void",
+        "parameters": [
+          {"name": "brg", "type": "Barge", "byRef": true}
+        ],
+        "description": "Clears tow cut and string positions",
+        "scope": "Friend Shared"
+      },
+      {
+        "name": "ClearDraftFields",
+        "returnType": "void",
+        "parameters": [
+          {"name": "brg", "type": "Barge", "byRef": true}
+        ],
+        "description": "Clears all draft fields",
+        "scope": "Friend Shared"
+      },
+      {
+        "name": "ClearStatusFields",
+        "returnType": "void",
+        "parameters": [
+          {"name": "brg", "type": "Barge", "byRef": true}
+        ],
+        "description": "Clears status fields",
+        "scope": "Friend Shared"
+      },
+      {
+        "name": "ClearTier",
+        "returnType": "void",
+        "parameters": [
+          {"name": "brg", "type": "Barge"}
+        ],
+        "description": "Clears tier information",
+        "scope": "Friend Shared"
+      },
+      {
+        "name": "ClearBerth",
+        "returnType": "void",
+        "parameters": [
+          {"name": "brg", "type": "Barge"}
+        ],
+        "description": "Clears berth information",
+        "scope": "Friend Shared"
+      },
+      {
+        "name": "UpdateStatus",
+        "returnType": "void",
+        "parameters": [],
+        "description": "Updates the status of the barge",
+        "scope": "Private"
+      },
+      {
+        "name": "SetInitialSizeCategory",
+        "returnType": "void",
+        "parameters": [],
+        "description": "Sets size category based on external length and width",
+        "scope": "Private"
+      },
+      {
+        "name": "ConvertToFeetAndInches",
+        "returnType": "void",
+        "parameters": [
+          {"name": "value", "type": "String"},
+          {"name": "feet", "type": "String", "byRef": true},
+          {"name": "inches", "type": "String", "byRef": true}
+        ],
+        "description": "Converts decimal value to feet and inches",
+        "scope": "Private"
+      },
+      {
+        "name": "ConvertFromFeetAndInches",
+        "returnType": "String",
+        "parameters": [
+          {"name": "feet", "type": "String"},
+          {"name": "inches", "type": "String"}
+        ],
+        "description": "Converts feet and inches to decimal value",
+        "scope": "Private"
+      },
+      {
+        "name": "IsModifyBargeDetailsProperty",
+        "returnType": "Boolean",
+        "parameters": [
+          {"name": "ruleName", "type": "String"}
+        ],
+        "description": "Determines if a property is part of ModifyBargeDetails",
+        "scope": "Public Shared"
+      }
+    ],
+    "validation": [
+      {
+        "name": "CheckBusinessRules",
+        "returnType": "void",
+        "parameters": [
+          {"name": "PropertyName", "type": "String"}
+        ],
+        "description": "Validates business rules for the specified property or all properties",
+        "scope": "Public Overrides"
+      },
+      {
+        "name": "Initialize",
+        "returnType": "void",
+        "parameters": [],
+        "description": "Initializes the object with default values",
+        "scope": "Public Overrides"
+      }
+    ]
+  },
+  "relationships": [
+    {
+      "property": "Ticket",
+      "relatedEntity": "Ticket",
+      "type": "OneToOne",
+      "cascadeDelete": false,
+      "description": "Ticket associated with barge - deferred loading"
+    },
+    {
+      "property": "BargeEventTicket",
+      "relatedEntity": "Ticket",
+      "type": "OneToOne",
+      "cascadeDelete": false,
+      "description": "Specific ticket for current barge event - accessed via BargeEventTicketID"
+    },
+    {
+      "property": "Alert",
+      "relatedEntity": "Alert",
+      "type": "OneToOne",
+      "cascadeDelete": false,
+      "description": "Alert associated with barge - deferred loading"
+    },
+    {
+      "property": "BargeCharters",
+      "relatedEntity": "BargeCharter",
+      "type": "OneToMany",
+      "cascadeDelete": false,
+      "description": "Collection of charters for this barge - deferred loading"
+    },
+    {
+      "property": "LocationID",
+      "relatedEntity": "Location",
+      "type": "ManyToOne",
+      "description": "Current location of barge"
+    },
+    {
+      "property": "TierID",
+      "relatedEntity": "Tier",
+      "type": "ManyToOne",
+      "description": "Tier where barge is located"
+    },
+    {
+      "property": "FacilityBerthID",
+      "relatedEntity": "FacilityBerth",
+      "type": "ManyToOne",
+      "description": "Facility berth where barge is located"
+    },
+    {
+      "property": "FleetBoatID",
+      "relatedEntity": "Location (Boat)",
+      "type": "ManyToOne",
+      "description": "Fleet boat associated with barge"
+    },
+    {
+      "property": "CustomerID",
+      "relatedEntity": "Customer",
+      "type": "ManyToOne",
+      "description": "Customer who owns/operates the barge"
+    },
+    {
+      "property": "OwnerID",
+      "relatedEntity": "Customer",
+      "type": "ManyToOne",
+      "description": "Owner of the barge"
+    },
+    {
+      "property": "FleetID",
+      "relatedEntity": "Fleet",
+      "type": "ManyToOne",
+      "description": "Fleet that owns the barge (when Fleet-owned)"
+    },
+    {
+      "property": "BargeSeriesID",
+      "relatedEntity": "BargeSeries",
+      "type": "ManyToOne",
+      "description": "Series this barge belongs to"
+    },
+    {
+      "property": "CommodityID",
+      "relatedEntity": "Commodity",
+      "type": "ManyToOne",
+      "description": "Commodity barge is configured for"
+    },
+    {
+      "property": "ColorPairID",
+      "relatedEntity": "ColorPair",
+      "type": "ManyToOne",
+      "description": "Color pair for visual identification"
+    },
+    {
+      "property": "CoverSubTypeID",
+      "relatedEntity": "CoverSubType",
+      "type": "ManyToOne",
+      "description": "Sub-type of cover on barge"
+    }
+  ],
+  "initialization": {
+    "method": "Initialize",
+    "defaults": [
+      {
+        "property": "IsActive",
+        "value": "true"
+      },
+      {
+        "property": "HullType",
+        "value": "ValidationList.GetDefaultValue(HullType)"
+      },
+      {
+        "property": "EquipmentType",
+        "value": "ValidationList.GetDefaultValue(BargeEquipmentType)"
+      },
+      {
+        "property": "SizeCategory",
+        "value": "ValidationList.GetDefaultValue(BargeSizeCategory)"
+      },
+      {
+        "property": "CoverConfig",
+        "value": "ValidationList.GetDefaultValue(CoverConfiguration)"
+      },
+      {
+        "property": "LoadStatus",
+        "value": "ValidationList.GetDefaultValue(LoadStatus)"
+      },
+      {
+        "property": "RepairStatus",
+        "value": "ValidationList.GetDefaultValue(RepairStatus)"
+      },
+      {
+        "property": "DamageLevel",
+        "value": "ValidationList.GetDefaultValue(BargeDamageLevel)"
+      }
+    ]
+  },
+  "enumerations": [
+    {
+      "name": "RakeDirectionTypes",
+      "values": ["None", "Left", "Right", "Up", "Down"],
+      "description": "Enumeration for rake direction types"
+    }
+  ],
+  "modernValidationMapping": {
+    "fluentValidation": {
+      "examples": [
+        {
+          "legacy": "BrokenRules.Assert(p_dispExternalLength, message, p_ExternalLength > 50000.0 OrElse p_ExternalLength < 0.0)",
+          "modern": "RuleFor(x => x.ExternalLength).InclusiveBetween(0.0m, 50000.0m).WithMessage(\"{ExternalLength} is not a reasonable value for ExternalLength\");"
+        },
+        {
+          "legacy": "BrokenRules.Assert(p_dispCustomerID & \"Barge\" & cIsRequiredName & \"FleetOwned\", message, (Not _IsTerminalActive) AndAlso (p_EquipmentType <> \"fleet-owned\") AndAlso (p_CustomerID = String.Empty))",
+          "modern": "RuleFor(x => x.CustomerID).NotEmpty().When(x => !x.IsTerminalActive && x.EquipmentType.ToLower() != \"fleet-owned\").WithMessage(\"CustomerID is required\");"
+        },
+        {
+          "legacy": "BrokenRules.Assert(p_dispDamageNote & p_dispIsDamaged & cIsRequiredName, message, (Not p_IsDamaged) AndAlso (Not String.IsNullOrEmpty(p_DamageNote)))",
+          "modern": "RuleFor(x => x.DamageNote).Empty().When(x => !x.IsDamaged).WithMessage(\"DamageNote must be blank if IsDamaged is not checked.\");"
+        },
+        {
+          "legacy": "Charter date range overlap check",
+          "modern": "RuleFor(x => x.BargeCharters).Must(HaveNonOverlappingDateRanges).WithMessage(\"The date ranges of two charters may not overlap.\");"
+        }
+      ]
+    },
+    "dataAnnotations": {
+      "examples": [
+        {
+          "property": "BargeNum",
+          "annotations": ["[Required]", "[StringLength(50)]"]
+        },
+        {
+          "property": "ExternalLength",
+          "annotations": ["[Range(0.0, 50000.0, ErrorMessage = \"ExternalLength is not a reasonable value\")]"]
+        },
+        {
+          "property": "Draft",
+          "annotations": ["[Range(0.0, 99.999, ErrorMessage = \"Draft must be between 0 and 99 ft 11 in\")]"]
+        }
+      ]
+    }
+  },
+  "specialBehaviors": [
+    {
+      "behavior": "LocationID Property Signature",
+      "description": "LocationID has a special property signature that requires date/time and optional tier/berth coordinates. The simple setter is deprecated and throws an exception."
+    },
+    {
+      "behavior": "Auto-Population from BargeSeriesID",
+      "description": "When BargeSeriesID is set, it automatically populates OwnerID, CustomerID, HullType, CoverType, ExternalDepth, ExternalLength, and ExternalWidth from the series."
+    },
+    {
+      "behavior": "Draft Feet/Inches Conversion",
+      "description": "Draft values are stored as decimals but exposed as feet and inches properties that auto-convert between formats."
+    },
+    {
+      "behavior": "FleetBoatActivityDateTime Auto-Update",
+      "description": "When FleetBoatID is set, FleetBoatActivityDateTime is automatically set to DateTime.Now."
+    },
+    {
+      "behavior": "Size Category Auto-Set",
+      "description": "When ExternalLength or ExternalWidth changes, SizeCategory is automatically calculated and set."
+    },
+    {
+      "behavior": "Ticket Close/Void Logic",
+      "description": "Complex logic for closing and voiding tickets, including optional preservation of barge state, clearing of location/tier/draft/status fields, and handling of open tickets in other fleets."
+    },
+    {
+      "behavior": "Company-Operated Barge Logic",
+      "description": "Special validation rules apply when EnableCoverTypeSpecialLogic is True and barge is company-operated (CustomerID matches DivisionCode.OperatorID)."
+    },
+    {
+      "behavior": "Conditional Cover Requirements",
+      "description": "Cover Type and Cover Sub-Type requirements are conditional based on commodity requirements and whether barge is company-operated."
+    }
+  ],
+  "notes": [
+    "The Barge object has extensive ticket management functionality including close, void, and ticket event operations.",
+    "Location updates require timestamp and can include tier and berth coordinate updates in a single atomic operation.",
+    "Draft values support both decimal (feet) and feet/inches representations with automatic conversion.",
+    "Many validation rules are conditional based on global settings (e.g., RequireBargeCoverType, EnableCoverTypeSpecialLogic).",
+    "The object supports terminal mode which relaxes certain validation requirements.",
+    "Charter date ranges are validated to prevent overlaps within the collection.",
+    "Berth location must match the barge's current location or berth fields are automatically cleared.",
+    "The object uses deferred loading for child collections (Ticket, Alert, BargeCharters) to optimize performance.",
+    "Several helper methods exist for clearing location, tier, berth, draft, and status fields during ticket operations.",
+    "The object implements field auditing for tracking changes to key properties."
+  ]
+}
